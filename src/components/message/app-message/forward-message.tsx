@@ -1,5 +1,8 @@
 import type { AppMessageProps } from "@/components/message/app-message.tsx";
-import type { AppMessageType } from "@/lib/schema.ts";
+import DefaultMessageWithUser from "@/components/message/default-message-with-user.tsx";
+import User from "@/components/user.tsx";
+import type { AppMessageType, Message } from "@/lib/schema.ts";
+import { cn, decodeUnicodeReferences } from "@/lib/utils.ts";
 import { XMLParser } from "fast-xml-parser";
 
 export interface ForwardMessageEntity {
@@ -31,8 +34,10 @@ interface Record {
       dataitem: {
         datadesc: string;
         sourcename: string;
+        sourceheadurl: string;
         sourcetime: string;
         dataitemsource: {
+          hashusername: string;
           realchatname?: string;
           fromusr?: string;
         };
@@ -46,27 +51,82 @@ type ForwardMessageProps = AppMessageProps<ForwardMessageEntity>;
 
 export default function ForwardMessage({
   message,
+  direction,
+  variant = "default",
+  showPhoto,
+  showUsername,
+  className,
   ...props
 }: ForwardMessageProps) {
-  const xmlParser = new XMLParser();
-
+  const xmlParser = new XMLParser({
+    parseTagValue: false,
+  });
   const records: Record = xmlParser.parse(
-    message.message_entity.msg.appmsg.recorditem,
+    decodeUnicodeReferences(
+      message.message_entity.msg.appmsg.recorditem.replace(/&#x20;/g, " "), // 有些时候标签和属性之间的空格编码过
+    ),
   );
-  console.log(records);
+
+  if (variant === "default")
+    return (
+      <DefaultMessageWithUser
+        message={message as unknown as Message}
+        showPhoto={showPhoto}
+        showUsername={showUsername}
+      >
+        <div
+          className={cn(
+            "py-2.5 px-3 w-fit max-w-[20em] rounded-lg",
+            ["bg-[#95EB69] bubble-tail-r", "bg-white bubble-tail-l"][direction],
+            "leading-normal break-words text-pretty",
+            "space-y-2",
+            className,
+          )}
+          {...props}
+        >
+          <h4 className="font-medium">
+            {decodeUnicodeReferences(message.message_entity.msg.appmsg.title)}
+          </h4>
+          {records && (
+            <div
+              className={cn(
+                "pl-2 pr-2.5 py-1 text-sm leading-normal text-neutral-600 border-l-2 rounded",
+                [
+                  "bg-white/25 border-white/55",
+                  "bg-[rgba(222,222,222,0.3)] border-[rgba(193,193,193,0.6)]",
+                ][direction],
+                className,
+              )}
+            >
+              {(Array.isArray(records.recordinfo.datalist.dataitem)
+                ? records.recordinfo.datalist.dataitem
+                : [records.recordinfo.datalist.dataitem]
+              ).map((i, index) => (
+                <p key={index}>
+                  <User
+                    variant="inline"
+                    user={{
+                      id: i.sourcename,
+                      user_id: i.sourcename,
+                      username: i.sourcename,
+                      photo: { thumb: i.sourceheadurl },
+                      bio: "",
+                    }}
+                  />
+                  : {i.datadesc ? decodeUnicodeReferences(i.datadesc) : null}
+                </p>
+              ))}
+            </div>
+          )}
+        </div>
+      </DefaultMessageWithUser>
+    );
 
   return (
-    <div {...props}>
-      <h4 className="font-medium">{message.message_entity.msg.appmsg.title}</h4>
-      {records && (
-        <div>
-          {records.recordinfo.datalist.dataitem.map((i) => (
-            <p>
-              {i.sourcename}: {i.datadesc}
-            </p>
-          ))}
-        </div>
-      )}
-    </div>
+    <p>
+      {showUsername && <User user={message.from} variant={"inline"} />}
+      {showUsername && ": "}
+      <span>{message.message_entity.msg.appmsg.title}</span>
+    </p>
   );
 }

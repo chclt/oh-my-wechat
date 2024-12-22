@@ -1,17 +1,17 @@
-import Image from "@/components/image.tsx";
+import DefaultMessageWithUser from "@/components/message/default-message-with-user.tsx";
 import type { MessageProp } from "@/components/message/message.tsx";
+import User from "@/components/user.tsx";
 import WechatEmoji, { WechatEmojiTable } from "@/components/wechat-emoji.tsx";
 import type { TextMessage as TextMessageVM } from "@/lib/schema.ts";
 import { cn } from "@/lib/utils.ts";
-import React from "react";
+import type { ReactNode } from "react";
+import Link from "../link";
 
-interface TextMessageProps extends MessageProp<TextMessageVM> {
-  variant: "default" | "referenced";
-}
+type TextMessageProps = MessageProp<TextMessageVM>;
 
 export type TextMessageEntity = string;
 
-const textMessageVariants = {
+export const textMessageVariants = {
   default: "",
   referenced: "text-sm",
 };
@@ -20,97 +20,216 @@ export default function TextMessage({
   message,
   variant = "default",
   direction,
+
+  showPhoto,
   showUsername,
 
+  className,
   ...props
 }: TextMessageProps) {
   if (variant === "default") {
-    const urlRegex = /((?:https?|ftp):\/\/[^\s/$.?#].[^\s]*)/is;
-
-    const paragraphs = message.message_entity.split("\n").map((p) =>
-      p
-        .split(/[\[\]]/)
-        .filter((s) => s.length)
-        .map((s, index) =>
-          WechatEmojiTable["[" + s + "]"] ? (
-            <WechatEmoji emojiName={"[" + s + "]"} />
-          ) : (
-            <React.Fragment key={index}>
-              {s.split(urlRegex).map((t) => {
-                if (urlRegex.test(t)) {
-                  return (
-                    <a
-                      href={t}
-                      target="_blank"
-                      referrerPolicy="no-referrer"
-                      rel="noreferrer"
-                    >
-                      t
-                    </a>
-                  );
-                }
-
-                return <>{t}</>;
-              })}
-            </React.Fragment>
-          ),
-        ),
-    );
-
     return (
-      <div
-        className={cn(
-          "py-2.5 px-3 w-fit max-w-[20em] rounded-lg",
-          ["bg-[#95EB69]", "bg-white"][direction],
-          "leading-normal tracking-[-.022em] break-words text-pretty",
-          textMessageVariants[variant],
-        )}
-        {...props}
+      <DefaultMessageWithUser
+        message={message}
+        showPhoto={showPhoto}
+        showUsername={showUsername}
       >
-        {showUsername && message.from && (
-          <div className={"mb-[0.25em] text-sm text-neutral-400"}>
-            <small className={"[font-size:inherit]"}>
-              {message.from.remark ?? message.from.username}
-            </small>
-          </div>
-        )}
-        <div className="space-y-[1lh]">
-          {paragraphs.map((p, index) => (
-            <p key={`${index}`} className={""}>
-              {p.map((s) => s)}
-            </p>
-          ))}
+        <div
+          className={cn(
+            "py-2.5 px-3 w-fit max-w-[20em] min-h-11 space-y-[1.5em] rounded-lg",
+            ["bg-[#95EB69] bubble-tail-r", "bg-white bubble-tail-l"][direction],
+            "leading-normal break-words text-pretty",
+            "[&_a]:text-blue-500 [&_a]:underline",
+            textMessageVariants[variant],
+            className,
+          )}
+          {...props}
+        >
+          <FormatTextMessageContent text={message.message_entity} />
         </div>
-      </div>
+      </DefaultMessageWithUser>
     );
   }
 
   if (variant === "referenced") {
     return (
-      <div
-        className={cn(
-          "pl-2 pr-2.5 py-1 text-[13px] text-neutral-600 border-l-2 rounded",
-          [
-            "bg-white/25 border-white/55",
-            "bg-[rgba(222,222,222,0.3)] border-[rgba(193,193,193,0.6)]",
-          ][direction],
-        )}
-      >
-        <p className={"align-middle"}>
-          {message.from?.photo?.thumb && (
-            <img
-              src={message.from.photo.thumb}
-              alt=""
-              referrerPolicy="no-referrer"
-              className={"inline mr-1 w-4 h-4 rounded-sm"}
-            />
-          )}
-          <span className={"align-middle"}>
-            {message.from?.remark ?? message.from?.username ?? ""}:{/* TODO */}
-            {message.message_entity as string}
-          </span>
-        </p>
+      <div className={"inline"}>
+        <User user={message.from} variant={"inline"} />
+        <span>: </span>
+        <FormatTextMessageContent
+          text={message.message_entity}
+          className={"inline"}
+        />
       </div>
     );
   }
+
+  return (
+    <p>
+      {showUsername && <User user={message.from} variant={"inline"} />}
+      {showUsername && ": "}
+      <FormatTextMessageContent
+        text={message.message_entity}
+        className={"inline"}
+      />
+    </p>
+  );
+}
+
+interface FormatTextMessageContentProps
+  extends React.HTMLProps<HTMLParagraphElement> {
+  text: string;
+  variant?: "default" | "inline";
+}
+
+export function FormatTextMessageContent({
+  text,
+  variant = "default",
+  className,
+  ...props
+}: FormatTextMessageContentProps) {
+  const paragraphNodes = text.split("\n").map((paragraphString, index) => {
+    // 微信表情
+    let paragraphChildren = Object.entries(WechatEmojiTable).reduce<
+      ReactNode[]
+    >(
+      (paragraphChildren, [emojiKey, value]) => {
+        paragraphChildren.forEach(
+          (segment, segmentIndex, paragraphChildren) => {
+            if (typeof segment === "string") {
+              const nodeChildren = segment
+                .split(emojiKey)
+                .reduce<ReactNode[]>((p, segment, index, segments) => {
+                  p.push(segment);
+                  if (index !== segments.length - 1) {
+                    p.push(<WechatEmoji emojiName={emojiKey} key={index} />);
+                  }
+                  return p;
+                }, []);
+
+              paragraphChildren.splice(segmentIndex, 1, ...nodeChildren);
+            }
+          },
+        );
+
+        return paragraphChildren;
+      },
+      [paragraphString],
+    );
+
+    // Unicode 表情
+    const unicodeEmojiRegex = /(\uD83C[\uDF00-\uDFFF]|\uD83D[\uDC00-\uDE4F])/g;
+    paragraphChildren = paragraphChildren.flatMap((segment) => {
+      if (typeof segment === "string") {
+        return segment.split(unicodeEmojiRegex).map((s) => {
+          if (unicodeEmojiRegex.test(s)) {
+            return (
+              <span className="inline-block mx-[0.166em] scale-[110%]">
+                {s}
+              </span>
+            );
+          }
+          return s;
+        });
+      }
+      return segment;
+    });
+
+    // 在全半角字符之间添加空格，偏移出现在结尾的全角标点
+    const isCJK = (char: string) => {
+      const code = char.charCodeAt(0);
+      return (
+        (code >= 0x3000 && code <= 0x9fff) || (code >= 0xff00 && code <= 0xffef)
+      );
+    };
+
+    const punctuation = [
+      "。",
+      "，",
+      "！",
+      "？",
+      "；",
+      "：",
+      "）",
+      "】",
+      "」",
+      "、",
+      "》",
+    ];
+    paragraphChildren = paragraphChildren.flatMap((segment) => {
+      if (typeof segment === "string") {
+        return [...segment]
+          .map((char, index, string) => {
+            if (index === string.length - 1) {
+              if (punctuation.includes(char)) {
+                return <span className="inline-block -me-[0.4em]">{char}</span>;
+              }
+              return char;
+            }
+
+            const prevChar = index === 0 ? undefined : string[index - 1];
+            const nextChar = string[index + 1];
+
+            if (isCJK(char) && !isCJK(nextChar) && nextChar !== " ") {
+              return <span className="me-[0.166em]">{char}</span>;
+            }
+
+            if (
+              prevChar &&
+              isCJK(char) &&
+              !isCJK(prevChar) &&
+              prevChar !== " "
+            ) {
+              return <span className="ms-[0.166em]">{char}</span>;
+            }
+
+            return char;
+          })
+          .reduce(
+            (acc, cur) => {
+              if (
+                typeof acc[acc.length - 1] === "string" &&
+                typeof cur === "string"
+              ) {
+                acc[acc.length - 1] += cur;
+              } else {
+                acc.push(cur);
+              }
+              return acc;
+            },
+            [] as (string | ReactNode)[],
+          );
+      }
+      return segment;
+    });
+
+    // 链接
+    const urlRegex =
+      /((?:https?|ftp):\/\/[a-zA-Z0-9\-._~:/?#\[\]@!$&'()*+,;=]+)/is;
+    paragraphChildren = paragraphChildren.flatMap((segment) => {
+      if (typeof segment === "string") {
+        return segment.split(urlRegex).map((s) => {
+          if (urlRegex.test(s)) {
+            return (
+              <Link href={s} className="break-all text-blue-500 underline">
+                {s}
+              </Link>
+            );
+          }
+          return s;
+        });
+      }
+      return segment;
+    });
+
+    const Container = variant === "default" ? "p" : "span";
+
+    return (
+      <Container key={index} className={className} {...props}>
+        {...paragraphChildren}
+      </Container>
+    );
+  });
+
+  return <>{...paragraphNodes}</>;
 }

@@ -2,41 +2,65 @@ import AnnouncementMessage, {
   type AnnouncementMessageEntity,
 } from "@/components/message/app-message/announcement-message.tsx";
 import Attach2Message, {
-  type Attach2MessageEntity,
+  type AttachMessage2Entity,
 } from "@/components/message/app-message/attach-2-message.tsx";
 import AttachMessage, {
   type AttachMessageEntity,
 } from "@/components/message/app-message/attach-message.tsx";
-import AudioMessage, {
-  type AudioMessageEntity,
-} from "@/components/message/app-message/audio-message.tsx";
-import ChannelMessage, {
-  type ChannelMessageEntity,
-} from "@/components/message/app-message/channel-message.tsx";
+import ChannelVideoMessage, {
+  type ChannelVideoMessageEntity,
+} from "@/components/message/app-message/channel-video-message.tsx";
+import ForwardMessage2, {
+  type ForwardMessage2Entity,
+} from "@/components/message/app-message/forward-message-2.tsx";
 import ForwardMessage, {
   type ForwardMessageEntity,
 } from "@/components/message/app-message/forward-message.tsx";
+import GameMessage, {
+  type GameMessageEntity,
+} from "@/components/message/app-message/game-message.tsx";
 import LiveMessage, {
   type LiveMessageEntity,
 } from "@/components/message/app-message/live-message.tsx";
+import MiniappMessage2, {
+  type MiniappMessage2Entity,
+} from "@/components/message/app-message/miniapp-message-2.tsx";
 import MiniappMessage, {
   type MiniappMessageEntity,
 } from "@/components/message/app-message/miniapp-message.tsx";
-import MiniappUnknownMessage, {
-  type MiniappUnknownMessageEntity,
-} from "@/components/message/app-message/miniapp-unknown-message.tsx";
+import MusicMessage, {
+  type MusicMessageEntity,
+} from "@/components/message/app-message/music-message.tsx";
+import NoteMessage, {
+  type NoteMessageEntity,
+} from "@/components/message/app-message/note-message.tsx";
 import PatMessage, {
   type PatMessageEntity,
 } from "@/components/message/app-message/pat-message.tsx";
+import RealtimeLocationMessage, {
+  type RealtimeLocationMessageEntity,
+} from "@/components/message/app-message/realtime-location-message.tsx";
 import RedEnvelopeMessage, {
   type RedEnvelopeMessageEntity,
 } from "@/components/message/app-message/red-envelope-message.tsx";
 import ReferMessage, {
   type ReferMessageEntity,
 } from "@/components/message/app-message/refer-message.tsx";
+import RingtoneMessage, {
+  type RingtoneMessageEntity,
+} from "@/components/message/app-message/ringtone-message.tsx";
+import SolitaireMessage, {
+  type SolitaireMessageEntity,
+} from "@/components/message/app-message/solitaire-message.tsx";
 import StickerMessage, {
   type StickerMessageEntity,
 } from "@/components/message/app-message/sticker-message.tsx";
+import StoreMessage, {
+  type StoreMessageEntity,
+} from "@/components/message/app-message/store-message.tsx";
+import StoreProductMessage, {
+  type StoreProductMessageEntity,
+} from "@/components/message/app-message/store-product-message.tsx";
 import TextMessage, {
   type AppTextMessageEntity,
 } from "@/components/message/app-message/text-message.tsx";
@@ -49,19 +73,20 @@ import UrlMessage, {
 import VideoMessage, {
   type VideoMessageEntity,
 } from "@/components/message/app-message/video-message.tsx";
+import VoiceMessage, {
+  type VoiceMessageEntity,
+} from "@/components/message/app-message/voice-message.tsx";
 import type { MessageProp } from "@/components/message/message.tsx";
 import {
   AppMessageType,
   type AppMessage as AppMessageVM,
 } from "@/lib/schema.ts";
 
-export interface AppMessageProps<
+export type AppMessageProps<
   T = {
     type: 0;
   },
-> extends MessageProp<AppMessageVM<T>> {
-  variant: "default" | "referenced";
-}
+> = MessageProp<AppMessageVM<T>>;
 
 export interface AppMessageEntity<
   T = {
@@ -86,7 +111,11 @@ export default function AppMessage({
   if (!message.message_entity.msg?.appmsg) {
     // throw new Error("Invalid app message");
     console.error(message);
-    return <div className="">无法解析：49</div>;
+    return (
+      <div className="" {...props}>
+        无法解析失败：49
+      </div>
+    );
   }
 
   switch (message.message_entity.msg.appmsg.type) {
@@ -98,10 +127,10 @@ export default function AppMessage({
         />
       );
 
-    case AppMessageType.AUDIO:
+    case AppMessageType.VOICE:
       return (
-        <AudioMessage
-          message={message as unknown as AppMessageVM<AudioMessageEntity>}
+        <VoiceMessage
+          message={message as unknown as AppMessageVM<VoiceMessageEntity>}
           {...props}
         />
       );
@@ -128,6 +157,16 @@ export default function AppMessage({
         />
       );
 
+    case AppMessageType.REALTIME_LOCATION:
+      return (
+        <RealtimeLocationMessage
+          message={
+            message as unknown as AppMessageVM<RealtimeLocationMessageEntity>
+          }
+          {...props}
+        />
+      );
+
     case AppMessageType.FORWARD_MESSAGE:
       return (
         <ForwardMessage
@@ -136,12 +175,18 @@ export default function AppMessage({
         />
       );
 
-    case AppMessageType.MINIAPP_UNKNOWN:
+    case AppMessageType.NOTE:
       return (
-        <MiniappUnknownMessage
-          message={
-            message as unknown as AppMessageVM<MiniappUnknownMessageEntity>
-          }
+        <NoteMessage
+          message={message as unknown as AppMessageVM<NoteMessageEntity>}
+          {...props}
+        />
+      );
+
+    case AppMessageType.MINIAPP_2:
+      return (
+        <MiniappMessage2
+          message={message as unknown as AppMessageVM<MiniappMessage2Entity>}
           {...props}
         />
       );
@@ -154,10 +199,28 @@ export default function AppMessage({
         />
       );
 
-    case AppMessageType.CHANNEL:
+    case AppMessageType.FORWARD_MESSAGE_2:
       return (
-        <ChannelMessage
-          message={message as unknown as AppMessageVM<ChannelMessageEntity>}
+        <ForwardMessage2
+          message={message as unknown as AppMessageVM<ForwardMessage2Entity>}
+          {...props}
+        />
+      );
+
+    case AppMessageType.CHANNEL_VIDEO:
+      return (
+        <ChannelVideoMessage
+          message={
+            message as unknown as AppMessageVM<ChannelVideoMessageEntity>
+          }
+          {...props}
+        />
+      );
+
+    case AppMessageType.SOLITAIRE:
+      return (
+        <SolitaireMessage
+          message={message as unknown as AppMessageVM<SolitaireMessageEntity>}
           {...props}
         />
       );
@@ -188,7 +251,25 @@ export default function AppMessage({
     case AppMessageType.ATTACH_2:
       return (
         <Attach2Message
-          message={message as unknown as AppMessageVM<Attach2MessageEntity>}
+          message={message as unknown as AppMessageVM<AttachMessage2Entity>}
+          {...props}
+        />
+      );
+
+    case AppMessageType.MUSIC:
+      return (
+        <MusicMessage
+          message={message as unknown as AppMessageVM<MusicMessageEntity>}
+          {...props}
+        />
+      );
+
+    case AppMessageType.STORE_PRODUCT:
+      return (
+        <StoreProductMessage
+          message={
+            message as unknown as AppMessageVM<StoreProductMessageEntity>
+          }
           {...props}
         />
       );
@@ -199,6 +280,22 @@ export default function AppMessage({
           message={
             message as unknown as AppMessageVM<AnnouncementMessageEntity>
           }
+          {...props}
+        />
+      );
+
+    case AppMessageType.GAME:
+      return (
+        <GameMessage
+          message={message as unknown as AppMessageVM<GameMessageEntity>}
+          {...props}
+        />
+      );
+
+    case AppMessageType.STORE:
+      return (
+        <StoreMessage
+          message={message as unknown as AppMessageVM<StoreMessageEntity>}
           {...props}
         />
       );
@@ -226,10 +323,19 @@ export default function AppMessage({
         />
       );
 
+    case AppMessageType.RINGTONE:
+      return (
+        <RingtoneMessage
+          message={message as unknown as AppMessageVM<RingtoneMessageEntity>}
+          {...props}
+        />
+      );
+
     default:
       return (
-        <div className="">
-          不支持：49/{message.message_entity.msg.appmsg.type as number}
+        <div className="" {...props}>
+          不支持，解析失败：49/
+          {message.message_entity.msg.appmsg.type as number}
         </div>
       );
   }

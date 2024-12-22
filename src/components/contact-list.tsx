@@ -1,5 +1,7 @@
+import Image from "@/components/image.tsx";
 import useQuery from "@/lib/hooks/useQuery.ts";
 import type { User } from "@/lib/schema.ts";
+import { cn } from "@/lib/utils.ts";
 import type React from "react";
 import { useEffect } from "react";
 
@@ -19,50 +21,40 @@ export default function ContactList({
     query("/contacts");
   }, []);
 
-  console.log(result);
-  // console.log(error);
-
   return (
-    <table className={className} {...props}>
-      <thead className={"sticky top-0"}>
-        <tr>
-          <th>headphoto</th>
-          <th>wxid</th>
-          <th>id</th>
-          <th>nickname</th>
-          {/* <th>remark</th> */}
-          {/* <th>type</th>
-          <th>field7</th>
-          <th>field8</th> */}
-        </tr>
-      </thead>
-      {result.map((contact) => (
-        <tr
-          key={contact.id}
+    <ul>
+      {result.map((i) => (
+        <li
+          key={i.id}
+          className={cn("p-2.5 flex gap-4 hover:bg-black/5")}
           onClick={() => {
-            console.log(contact);
-
-            // onClickUser(contact.wxid);
+            console.log(i);
           }}
         >
-          <td>
-            <img
-              src={contact?.photo?.thumb}
-              referrerPolicy="no-referrer"
-              loading="lazy"
-              className={"w-8 h-8"}
-            />
-          </td>
-          <td>{contact.username}</td>
-          <td>{contact.user_id}</td>
-          <td>{contact.remark}</td>
+          {i.photo ? (
+            <div
+              className={cn("shrink-0 w-12 h-12 rounded-lg overflow-hidden")}
+            >
+              <Image
+                width={48}
+                height={48}
+                className={"w-full h-full"}
+                src={i.photo.thumb}
+              />
+            </div>
+          ) : (
+            <div className={"shrink-0 w-12 h-12 rounded-lg bg-neutral-300"} />
+          )}
 
-          {/* <td>{contact.remark}</td>
-          <td>{contact.type.toString(2)}</td>
-          <td>{contact.field7}</td>
-          <td>{contact.field8}</td> */}
-        </tr>
+          <div className="flex flex-col">
+            <div className="flex">
+              <h4 className={"grow font-medium break-all line-clamp-1"}>
+                {i.remark ?? i.username}
+              </h4>
+            </div>
+          </div>
+        </li>
       ))}
-    </table>
+    </ul>
   );
 }

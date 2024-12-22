@@ -1,5 +1,10 @@
 import type { MessageProp } from "@/components/message/message.tsx";
+import User from "@/components/user.tsx";
+import { useApp } from "@/lib/hooks/appProvider.tsx";
 import type { SystemExtendedMessage as SystemExtendedMessageVM } from "@/lib/schema.ts";
+import { cn } from "@/lib/utils.ts";
+import { XMLParser } from "fast-xml-parser";
+import type { ReactNode } from "react";
 
 type SystemExtendedMessageProps = MessageProp<SystemExtendedMessageVM>;
 
@@ -30,8 +35,8 @@ export interface SystemExtendedMessageEntity {
                 {
                   memberlist: {
                     member: {
-                      username: "bob_fu";
-                      nickname: "傅丰元@灵买会";
+                      username: "wxid";
+                      nickname: "nickname";
                     };
                   };
                   "@_name": "username";
@@ -40,8 +45,8 @@ export interface SystemExtendedMessageEntity {
                 {
                   memberlist: {
                     member: {
-                      username: "wxid_dfrzcc5zfugi22";
-                      nickname: "曹中";
+                      username: "wxid";
+                      nickname: "nickname";
                     };
                   };
                   separator: ", ";
@@ -58,16 +63,145 @@ export interface SystemExtendedMessageEntity {
 
 export default function SystemExtendedMessage({
   message,
+  direction,
+  variant = "default",
+  showPhoto,
+  showUsername,
+  className,
   ...props
 }: SystemExtendedMessageProps) {
+  const { chat } = useApp();
+
+  let content: ReactNode[] = [];
+  if (message.message_entity.sysmsg) {
+    switch (message.message_entity.sysmsg["@_type"]) {
+      case "sysmsgtemplate": {
+        const plain =
+          message.message_entity.sysmsg.sysmsgtemplate.content_template
+            .template;
+
+        const linkReg = /(\$\S+?\$)/;
+
+        content = plain.split(linkReg).map((s) => {
+          if (linkReg.test(s)) {
+            const linkKey = s.slice(1, -1);
+
+            let linkList =
+              // @ts-ignore
+              message.message_entity.sysmsg.sysmsgtemplate.content_template
+                .link_list.link;
+            linkList = Array.isArray(linkList) ? linkList : [linkList];
+
+            const linkObj = linkList.find((i: any) => i["@_name"] === linkKey);
+
+            const linkType = linkObj["@_type"];
+
+            switch (linkType) {
+              case "link_profile": {
+                const user = chat
+                  ? chat.members.find(
+                      (member) =>
+                        member.id === linkObj.memberlist.member.username,
+                    )
+                  : undefined;
+
+                return user ? (
+                  <User user={user} showPhoto={true} variant="inline" />
+                ) : (
+                  linkObj.memberlist.member.nickname
+                );
+              }
+              case "link_history":
+                return linkObj.title;
+              case "link_plain":
+                return linkObj.plain;
+              case "link_revoke":
+              case "new_tmpl_type_succeed_contact":
+              case "new_link_succeed_contact": // eg. 在企业微信联系人中，对方工作变更，会告诉你即将自动加另一个联系人，已经添加或者即将添加联系人的时候，都有这个按钮用来不添加联系人
+                return null;
+              default:
+                console.info("不支持的系统消息内容类型：", linkObj);
+                return "???";
+            }
+          }
+
+          return s;
+        });
+      }
+    }
+
+    if (variant === "default")
+      return (
+        <div
+          className={"mx-auto px-14 text-sm text-center text-neutral-600"}
+          {...props}
+        >
+          <p className="text-pretty">
+            <span className="px-2 py-1 box-decoration-clone">
+              {message.message_entity.sysmsg["@_type"] ===
+                "editrevokecontent" &&
+                message.message_entity.sysmsg["editrevokecontent"].text}
+              {message.message_entity.sysmsg["@_type"] === "sysmsgtemplate" &&
+                content}
+            </span>
+          </p>
+        </div>
+      );
+
+    return (
+      <p className={className}>
+        {message.message_entity.sysmsg["@_type"] === "editrevokecontent" &&
+          message.message_entity.sysmsg["editrevokecontent"].text}
+        {message.message_entity.sysmsg["@_type"] === "sysmsgtemplate" &&
+          content}
+      </p>
+    );
+  }
+
+  // 部分系统消息不是XML，如："<a href="weixin://contacts/profile/wxid/"><![CDATA[username]]></a>" stickied a message on top
+  const userLinkReg = /("<a.+<\/a>")/;
   return (
-    <div className="" {...props}>
-      {message.message_entity.sysmsg["@_type"]}:
-      {message.message_entity.sysmsg["@_type"] === "editrevokecontent" &&
-        message.message_entity.sysmsg["editrevokecontent"].text}
-      {message.message_entity.sysmsg["@_type"] === "sysmsgtemplate" &&
-        message.message_entity.sysmsg["sysmsgtemplate"].content_template
-          .template}
+    <div
+      className={cn(
+        variant === "default"
+          ? "mx-auto px-14 text-sm text-center text-neutral-600"
+          : "",
+        className,
+      )}
+      {...props}
+    >
+      <p>
+        {message.raw_message
+          .split(userLinkReg)
+          .filter((s) => s.length)
+          .map((s) => {
+            if (userLinkReg.test(s)) {
+              const xmlParser = new XMLParser({
+                ignoreAttributes: false,
+              });
+
+              const userLink = xmlParser.parse(s);
+
+              const user = chat
+                ? chat.members.find(
+                    (member) =>
+                      member.id ===
+                      userLink.a["@_href"]
+                        .split("/")
+                        .filter((s: string) => s.length)
+                        .pop(),
+                  )
+                : null;
+
+              return user ? (
+                <User user={user} variant={"inline"} />
+              ) : (
+                <span>{userLink["a"]["#text"]}</span>
+              );
+            }
+            return s;
+          })}
+      </p>
     </div>
   );
 }

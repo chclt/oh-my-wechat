@@ -1,5 +1,9 @@
 import type { AppMessageProps } from "@/components/message/app-message.tsx";
+import DefaultMessageWithUser from "@/components/message/default-message-with-user.tsx";
+import { textMessageVariants } from "@/components/message/text-message.tsx";
+import User from "@/components/user.tsx";
 import type { AppMessageType } from "@/lib/schema.ts";
+import { cn } from "@/lib/utils.ts";
 
 export interface AppTextMessageEntity {
   type: AppMessageType.TEXT;
@@ -9,10 +13,46 @@ export interface AppTextMessageEntity {
 
 type TextMessageProps = AppMessageProps<AppTextMessageEntity>;
 
-export default function TextMessage({ message, ...props }: TextMessageProps) {
+export default function TextMessage({
+  message,
+  variant = "default",
+  direction,
+
+  showPhoto,
+  showUsername,
+
+  className,
+  ...props
+}: TextMessageProps) {
+  if (variant === "default") {
+    return (
+      <DefaultMessageWithUser
+        message={message}
+        showPhoto={showPhoto}
+        showUsername={showUsername}
+      >
+        <div
+          className={cn(
+            "py-2.5 px-3 w-fit max-w-[20em] space-y-[1.5em] rounded-lg",
+            ["bg-[#95EB69] bubble-tail-r", "bg-white bubble-tail-l"][direction],
+            "leading-normal break-words text-pretty",
+            "[&_a]:text-blue-500 [&_a]:underline",
+            textMessageVariants[variant],
+            className,
+          )}
+          {...props}
+        >
+          {message.message_entity.msg.appmsg.title}
+        </div>
+      </DefaultMessageWithUser>
+    );
+  }
+
   return (
-    <div {...props}>
-      <p>文本: {message.message_entity.msg.appmsg.title})</p>
-    </div>
+    <p {...props}>
+      {showUsername && <User user={message.from} variant={"inline"} />}
+      {showUsername && ": "}
+      {message.message_entity.msg.appmsg.title}
+    </p>
   );
 }

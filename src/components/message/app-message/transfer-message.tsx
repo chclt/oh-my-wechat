@@ -1,5 +1,8 @@
 import type { AppMessageProps } from "@/components/message/app-message.tsx";
-import type { AppMessageType } from "@/lib/schema.ts";
+import DefaultMessageWithUser from "@/components/message/default-message-with-user.tsx";
+import User from "@/components/user.tsx";
+import { useApp } from "@/lib/hooks/appProvider.tsx";
+import type { AppMessageType, Message } from "@/lib/schema.ts";
 
 export interface TransferMessageEntity {
   type: AppMessageType.TRANSFER;
@@ -74,16 +77,77 @@ type TransferMessageProps = AppMessageProps<TransferMessageEntity>;
 
 export default function TransferMessage({
   message,
+  direction,
+  variant = "default",
+  showPhoto,
+  showUsername,
+  className,
   ...props
 }: TransferMessageProps) {
+  const { chat } = useApp();
+
+  const payerId = message.message_entity.msg.appmsg.wcpayinfo.payer_username;
+  const payer = chat?.members.find((member) => member.id === payerId);
+  if (payer && message.from === undefined) message.from = payer;
+
+  const receiverId =
+    message.message_entity.msg.appmsg.wcpayinfo.receiver_username;
+  const receiver = chat?.members.find((member) => member.id === receiverId);
+
+  if (variant === "default")
+    return (
+      <DefaultMessageWithUser
+        message={message as Message}
+        showPhoto={showPhoto}
+        showUsername={showUsername}
+      >
+        <div
+          className="w-64 py-4 pl-4 pr-6 flex gap-4 items-center bg-white rounded-2xl border border-neutral-200"
+          {...props}
+        >
+          <div className={"shrink-0 size-12 bg-neutral-400 rounded-full"} />
+          <div>
+            <h4 className={"font-medium"}>
+              {message.message_entity.msg.appmsg.wcpayinfo.pay_memo.length >
+              0 ? (
+                message.message_entity.msg.appmsg.wcpayinfo.pay_memo
+              ) : (
+                <>
+                  {message.message_entity.msg.appmsg.wcpayinfo.paysubtype ===
+                    3 && "接收转账"}
+
+                  {message.message_entity.msg.appmsg.wcpayinfo.paysubtype ===
+                    8 && "发起转账"}
+                </>
+              )}
+            </h4>
+            <p className={"text-sm text-neutral-600"}>
+              {message.message_entity.msg.appmsg.wcpayinfo.feedesc}
+              {/*{payer && (*/}
+              {/*  <span>*/}
+              {/*    FROM*/}
+              {/*    {payer.remark ?? payer.username}*/}
+              {/*  </span>*/}
+              {/*)}*/}
+
+              {/*{message.message_entity.msg.appmsg.wcpayinfo.paysubtype === 8 &&*/}
+              {/*  "发起了一笔微信转账"}*/}
+              {/*{message.message_entity.msg.appmsg.wcpayinfo.paysubtype === 3 &&*/}
+              {/*  "接收了微信转账"}*/}
+            </p>
+          </div>
+        </div>
+      </DefaultMessageWithUser>
+    );
   return (
-    <div {...props}>
-      <p>
-        {message.message_entity.msg.appmsg.wcpayinfo.paysubtype === 3 && "收"}
-        {message.message_entity.msg.appmsg.wcpayinfo.paysubtype === 8 && "发"}
-        {message.message_entity.msg.appmsg.title}:{" "}
-        {message.message_entity.msg.appmsg.des}
-      </p>
-    </div>
+    <p>
+      {showUsername && <User user={message.from} variant={"inline"} />}
+      {showUsername && ": "}
+      [转账] {message.from.remark ?? message.from.username}
+      {message.message_entity.msg.appmsg.wcpayinfo.paysubtype === 8 &&
+        "发起转账"}
+      {message.message_entity.msg.appmsg.wcpayinfo.paysubtype === 3 &&
+        "接收转账"}
+    </p>
   );
 }

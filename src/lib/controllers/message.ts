@@ -8,20 +8,22 @@ import type { MicroVideoMessageEntity } from "@/components/message/micro-video-m
 import type { StickerMessageEntity } from "@/components/message/sticker-message.tsx";
 import type { SystemExtendedMessageEntity } from "@/components/message/system-extended-message.tsx";
 import type { SystemMessageEntity } from "@/components/message/system-message.tsx";
+import type { VerityMessageEntity } from "@/components/message/verify-message.tsx";
 import type { VideoMessageEntity } from "@/components/message/video-message.tsx";
 import type { VoiceMessageEntity } from "@/components/message/voice-message.tsx";
 import type { VoipMessageEntity } from "@/components/message/voip-message.tsx";
+import { ChatController } from "@/lib/controllers/chat.ts";
 import { ContactController } from "@/lib/controllers/contact.ts";
 import {
   type AppMessage,
   AppMessageType,
   type Chat,
+  type Chatroom,
   type ChatroomVoipMessage,
   type ContactMessage,
   type ControllerPaginatorResult,
   type ControllerResult,
   type DatabaseMessageRow,
-  type Group,
   type ImageMessage,
   type LocationMessage,
   type Message,
@@ -33,6 +35,7 @@ import {
   type SystemMessage,
   type TextMessage,
   type User,
+  type VerityMessage,
   type VideoMessage,
   type VoiceMessage,
   type VoipMessage,
@@ -49,26 +52,43 @@ export const MessageController = {
       databases,
       parseReplyMessage = true,
     }: {
-      chat: Chat;
+      chat?: Chat;
       databases: WCDatabases;
       parseReplyMessage?: boolean;
-    },
+    }
   ): Promise<Message[]> => {
-    const messageSenderIds: string[] = raw_message_rows.map(
-      (raw_message_row) => {
-        if (chat.type === "chatroom") {
+    const messageSenderIds = raw_message_rows
+      .map((raw_message_row) => {
+        if (chat && chat.type === "chatroom") {
           let senderId = "";
           let rawMessageContent = "";
 
           if (
+            raw_message_row.Type === MessageType.SYSTEM ||
             raw_message_row.Des === MessageDirection.outgoing ||
-            raw_message_row.Message.startsWith("<")
+            raw_message_row.Message.startsWith("<") ||
+            raw_message_row.Message.startsWith('"<')
           ) {
             rawMessageContent = raw_message_row.Message;
+
+            // 有一些消息在内部记录 from，TODO 转账中可能记录在内部的 receiver_username / payer_username，现在是在消息组件里去处理
+            const xmlParser = new XMLParser({ ignoreAttributes: false });
+            const messageXml = xmlParser.parse(raw_message_row.Message);
+
+            if (messageXml?.msg?.fromusername) {
+              senderId = messageXml.msg.fromusername;
+            } else {
+              if (raw_message_row.Type === MessageType.VIDEO) {
+                senderId = (messageXml as VideoMessageEntity).msg.videomsg[
+                  "@_fromusername"
+                ];
+              }
+            }
           } else {
-            [senderId, rawMessageContent] = raw_message_row.Message.split(
-              ":\n",
-              2,
+            const separatorPosition = raw_message_row.Message.indexOf(":\n");
+            senderId = raw_message_row.Message.slice(0, separatorPosition);
+            rawMessageContent = raw_message_row.Message.slice(
+              separatorPosition + 2
             );
           }
 
@@ -77,13 +97,15 @@ export const MessageController = {
           return senderId;
         }
 
-        return raw_message_row.Des === MessageDirection.incoming
-          ? chat.id
-          : "0"; // TODO
-      },
-    );
+        if (chat && chat.type === "private") {
+          return raw_message_row.Des === MessageDirection.incoming
+            ? chat.id
+            : "0"; // TODO
+        }
+      })
+      .filter((i) => i !== undefined);
     const usersArray = await ContactController.in(databases, messageSenderIds);
-    const usersTable: { [key: string]: User | Group } = {};
+    const usersTable: { [key: string]: User | Chatroom } = {};
     usersArray.map((user) => {
       usersTable[user.id] = user;
     });
@@ -98,8 +120,18 @@ export const MessageController = {
         type: raw_message_row.Type,
         date: raw_message_row.CreateTime,
         direction: raw_message_row.Des,
-        from: usersTable[messageSenderIds[index]],
-        chat,
+        from:
+          usersTable[messageSenderIds[index]] ??
+          (messageSenderIds[index].length > 0
+            ? {
+                id: messageSenderIds[index],
+                user_id: messageSenderIds[index],
+                username: messageSenderIds[index],
+                bio: "", // 好像一些群聊成员不会出现在数据库中
+              }
+            : undefined), // 有一些系统消息没有 from
+        ...(chat ? { chat } : {}),
+
         // message_entity,
         // reply_to_message?: Message;
         raw_message: raw_message_row.Message,
@@ -119,7 +151,7 @@ export const MessageController = {
 
         case MessageType.IMAGE: {
           const messageEntity: ImageMessageEntity = xmlParser.parse(
-            raw_message_row.Message,
+            raw_message_row.Message
           );
           return {
             ...message,
@@ -129,7 +161,7 @@ export const MessageController = {
 
         case MessageType.VOICE: {
           const messageEntity: VoiceMessageEntity = xmlParser.parse(
-            raw_message_row.Message,
+            raw_message_row.Message
           );
           return {
             ...message,
@@ -137,9 +169,19 @@ export const MessageController = {
           } as VoiceMessage;
         }
 
+        case MessageType.VERITY: {
+          const messageEntity: VerityMessageEntity = xmlParser.parse(
+            raw_message_row.Message
+          );
+          return {
+            ...message,
+            message_entity: messageEntity,
+          } as VerityMessage;
+        }
+
         case MessageType.CONTACT: {
           const messageEntity: ContactMessageEntity = xmlParser.parse(
-            raw_message_row.Message,
+            raw_message_row.Message
           );
           return {
             ...message,
@@ -149,7 +191,7 @@ export const MessageController = {
 
         case MessageType.VIDEO: {
           const messageEntity: VideoMessageEntity = xmlParser.parse(
-            raw_message_row.Message,
+            raw_message_row.Message
           );
           return {
             ...message,
@@ -159,7 +201,7 @@ export const MessageController = {
 
         case MessageType.STICKER: {
           const messageEntity: StickerMessageEntity = xmlParser.parse(
-            raw_message_row.Message,
+            raw_message_row.Message
           );
           return {
             ...message,
@@ -169,7 +211,7 @@ export const MessageController = {
 
         case MessageType.LOCATION: {
           const messageEntity: LocationMessageEntity = xmlParser.parse(
-            raw_message_row.Message,
+            raw_message_row.Message
           );
 
           return {
@@ -182,14 +224,16 @@ export const MessageController = {
           const messageEntity: AppMessageEntity<{ type: number }> =
             xmlParser.parse(raw_message_row.Message);
 
-          if (messageEntity.msg.appmsg.type === AppMessageType.REFER) {
-            messageIndexesHasReplyMessage.push(index);
+          try {
+            if (messageEntity.msg.appmsg.type === AppMessageType.REFER) {
+              messageIndexesHasReplyMessage.push(index);
 
-            const replyMessageId = (
-              messageEntity as AppMessageEntity<ReferMessageEntity>
-            ).msg.appmsg.refermsg.svrid;
-            replyMessageIds.push(replyMessageId);
-          }
+              const replyMessageId = (
+                messageEntity as AppMessageEntity<ReferMessageEntity>
+              ).msg.appmsg.refermsg.svrid;
+              replyMessageIds.push(replyMessageId);
+            }
+          } catch (error) {}
 
           return {
             ...message,
@@ -199,7 +243,7 @@ export const MessageController = {
 
         case MessageType.VOIP: {
           const messageEntity: VoipMessageEntity = xmlParser.parse(
-            raw_message_row.Message,
+            raw_message_row.Message
           );
 
           return {
@@ -210,7 +254,7 @@ export const MessageController = {
 
         case MessageType.MICROVIDEO: {
           const messageEntity: MicroVideoMessageEntity = xmlParser.parse(
-            raw_message_row.Message,
+            raw_message_row.Message
           );
 
           return {
@@ -220,8 +264,8 @@ export const MessageController = {
         }
 
         case MessageType.GROUP_VOIP: {
-          const messageEntity: ChatroomVoipMessageEntity = xmlParser.parse(
-            raw_message_row.Message,
+          const messageEntity: ChatroomVoipMessageEntity = JSON.parse(
+            raw_message_row.Message
           );
 
           return {
@@ -241,7 +285,7 @@ export const MessageController = {
 
         case MessageType.SYSTEM_EXTENDED: {
           const messageEntity: SystemExtendedMessageEntity = xmlParser.parse(
-            raw_message_row.Message,
+            raw_message_row.Message
           );
 
           return {
@@ -262,7 +306,7 @@ export const MessageController = {
     });
     let replyMessageArray: Message[] = [];
 
-    if (parseReplyMessage && replyMessageIds.length) {
+    if (parseReplyMessage && chat && replyMessageIds.length) {
       replyMessageArray = (
         await MessageController.in(databases, {
           chat,
@@ -275,13 +319,15 @@ export const MessageController = {
         replyMessageTable[message.id] = message;
       });
 
-      messageIndexesHasReplyMessage.forEach((index) => {
-        // @ts-ignore
-        messages[index].reply_to_message =
+      for (const index of messageIndexesHasReplyMessage) {
+        (messages[index] as AppMessage<ReferMessageEntity>).reply_to_message =
           replyMessageTable[
-            messages[index].message_entity.msg.appmsg.refermsg.svrid
+            (
+              messages[index]
+                .message_entity as AppMessageEntity<ReferMessageEntity>
+            ).msg.appmsg.refermsg.svrid
           ];
-      });
+      }
     }
 
     return messages as Message[];
@@ -289,34 +335,142 @@ export const MessageController = {
 
   all: async (
     databases: WCDatabases,
-    { chat, cursor }: { chat: Chat; cursor?: number },
+    {
+      chat,
+      type,
+      type_app, // 有 bug
+      cursor,
+      cursor_condition = ">=",
+      limit = 20,
+    }: {
+      chat: Chat;
+      type?: MessageType | MessageType[];
+      type_app?: AppMessageType | AppMessageType[];
+      cursor?: number;
+      cursor_condition?: ControllerPaginatorResult<unknown>["meta"]["cursor_condition"];
+      limit: number;
+    }
   ): Promise<ControllerPaginatorResult<Message[]>> => {
     const dbs = databases.message;
-    if (!dbs) {
-      throw new Error("message databases are not found");
-    }
-
-    const sessionIdMd5 = CryptoJS.MD5(chat.id).toString();
-    cursor ??= Date.now();
+    if (!dbs) throw new Error("message databases are not found");
 
     const rows = [
       ...dbs.map((database) => {
         try {
+          if (cursor) {
+            if (cursor_condition === "<" || cursor_condition === "<=") {
+              return database.exec(`
+                SELECT 
+                  * 
+                FROM (
+                  SELECT 
+                      rowid, CreateTime, Des, ImgStatus, MesLocalID, Message, CAST(MesSvrID as TEXT) as MesSvrID, Status, TableVer, Type
+                  FROM Chat_${CryptoJS.MD5(chat.id).toString()}
+                  WHERE
+                    ${[
+                      `CreateTime ${cursor_condition} ${cursor}`,
+                      type
+                        ? `Type IN (${
+                            Array.isArray(type) ? type.join(", ") : type
+                          })`
+                        : undefined,
+                      type === MessageType.APP && type_app
+                        ? `(${(Array.isArray(type_app) ? type_app : [type_app])
+                            .map((i) => `Message like '%<type>${i}</type>%'`)
+                            .join(" OR ")})`
+                        : undefined,
+                    ]
+                      .filter((i) => i)
+                      .join(" AND ")}
+                  ORDER BY CreateTime DESC
+                  LIMIT ${limit}
+                ) 
+                ORDER BY CreateTime ASC;
+              `);
+            }
+            return database.exec(`
+              SELECT 
+                  rowid, CreateTime, Des, ImgStatus, MesLocalID, Message, CAST (MesSvrID as TEXT) as MesSvrID, Status, TableVer, Type 
+              FROM 
+                  Chat_${CryptoJS.MD5(chat.id).toString()} 
+              WHERE 
+                  ${[
+                    `CreateTime ${cursor_condition} ${cursor}`,
+                    type
+                      ? `Type IN (${
+                          Array.isArray(type) ? type.join(", ") : type
+                        })`
+                      : undefined,
+                    type === MessageType.APP && type_app
+                      ? `(${(Array.isArray(type_app) ? type_app : [type_app])
+                          .map((i) => `Message like '%<type>${i}</type>%'`)
+                          .join(" OR ")})`
+                      : undefined,
+                  ]
+                    .filter((i) => i)
+                    .join(" AND ")}
+              ORDER BY CreateTime ASC 
+              LIMIT ${limit};
+            `);
+          }
+
+          // 没有游标的时候查询最新的数据但是按时间正序排列
+          // 游标在第一行
           return database.exec(`
             SELECT 
-                rowid, CreateTime, Des, ImgStatus, MesLocalID, Message, CAST (MesSvrID as TEXT) as MesSvrID, Status, TableVer, Type 
-            FROM 
-                Chat_${sessionIdMd5} 
-            WHERE 
-                createTime < ${cursor} 
-            ORDER BY createTime DESC 
-            LIMIT 50;
+              * 
+            FROM (
+              SELECT 
+                  rowid, CreateTime, Des, ImgStatus, MesLocalID, Message, CAST(MesSvrID as TEXT) as MesSvrID, Status, TableVer, Type
+              FROM Chat_${CryptoJS.MD5(chat.id).toString()}
+              ${
+                type
+                  ? `WHERE ${[
+                      `Type IN (${
+                        Array.isArray(type) ? type.join(", ") : type
+                      })`,
+                      type === MessageType.APP && type_app
+                        ? `(${(Array.isArray(type_app) ? type_app : [type_app])
+                            .map((i) => `Message like '%<type>${i}</type>%'`)
+                            .join(" OR ")})`
+                        : undefined,
+                    ]
+                      .filter((i) => i)
+                      .join(" AND ")}`
+                  : ""
+              }
+              ORDER BY CreateTime DESC
+              LIMIT ${limit}
+            ) 
+            ORDER BY CreateTime ASC;
           `);
         } catch (e) {
+          if (e instanceof Error && e.message.startsWith("no such table")) {
+          } else {
+            console.error(e);
+          }
           return [];
         }
       }),
-    ].filter((row) => row.length > 0)[0];
+    ].filter((row, index) => {
+      if (row.length > 0) {
+        console.log(
+          chat.title,
+          `Chat_${CryptoJS.MD5(chat.id).toString()}`,
+          `message_${index + 1}.sqlite`
+        );
+
+        console.log(row);
+      }
+
+      return row.length > 0;
+    })[0];
+
+    if (!rows || rows.length === 0)
+      return {
+        data: [],
+        meta: {},
+      };
 
     const raw_message_rows: DatabaseMessageRow[] = [];
 
@@ -342,7 +496,7 @@ export const MessageController = {
         string,
         number,
         number,
-        number,
+        number
       ];
 
       raw_message_rows.push({
@@ -359,6 +513,9 @@ export const MessageController = {
       });
     }
 
+    cursor = raw_message_rows[0].CreateTime;
+    cursor_condition = ">=";
+
     return {
       data: await MessageController.parseRawMessageRows(raw_message_rows, {
         chat,
@@ -366,6 +523,7 @@ export const MessageController = {
       }),
       meta: {
         cursor,
+        cursor_condition,
         ...(raw_message_rows.length > 0
           ? {
               next_cursor:
@@ -376,16 +534,57 @@ export const MessageController = {
     };
   },
 
-  in: async (
+  _all_from_all: async (
     databases: WCDatabases,
-    { chat, messageIds }: { chat: Chat; messageIds: string[] },
-  ): Promise<ControllerResult<Message[]>> => {
-    const dbs = databases.message;
-    if (!dbs) {
-      throw new Error("message databases are not found");
+    {
+      type,
+      type_app,
+      limit,
+    }: {
+      type?: MessageType | MessageType[];
+      type_app?: AppMessageType | AppMessageType[];
+      limit: number;
+    }
+  ): Promise<ControllerPaginatorResult<Message[]>> => {
+    if (!databases) {
+      throw new Error("databases are not found");
     }
 
-    const sessionIdMd5 = CryptoJS.MD5(chat.id).toString();
+    const chats = await ChatController.all(databases);
+
+    const chatMessagePromiseResults = (
+      await Promise.all(
+        chats.data.map((chat) => {
+          return MessageController.all(databases, {
+            chat,
+            type,
+            type_app,
+            limit,
+          });
+        })
+      )
+    ).flatMap((result) => result.data);
+
+    return {
+      data: chatMessagePromiseResults,
+      meta: {},
+    };
+  },
+
+  in: async (
+    databases: WCDatabases,
+    {
+      chat,
+      messageIds,
+      parseReplyMessage = true,
+    }: {
+      chat: Chat;
+      messageIds: string[];
+      parseReplyMessage?: boolean;
+    }
+  ): Promise<ControllerResult<Message[]>> => {
+    const dbs = databases.message;
+    if (!dbs) throw new Error("message databases are not found");
 
     const rows = [
       ...dbs.map((database) => {
@@ -394,19 +593,104 @@ export const MessageController = {
             SELECT 
                 rowid, CreateTime, Des, ImgStatus, MesLocalID, Message, CAST (MesSvrID as TEXT) as MesSvrID, Status, TableVer, Type 
             FROM 
-                Chat_${sessionIdMd5} 
+                Chat_${CryptoJS.MD5(chat.id).toString()} 
             WHERE 
                 MesSvrID IN (${messageIds.map((id) => `'${id}'`).join(",")});
             ;
           `);
         } catch (e) {
-          console.error(e);
           return [];
         }
       }),
     ].filter((row) => row.length > 0)[0];
 
-    console.log(rows[0].values);
+    const raw_message_rows: DatabaseMessageRow[] = [];
+
+    // TODO
+    if (!rows) {
+      return {
+        data: [],
+      };
+    }
+
+    for (const row of rows[0].values) {
+      const [
+        rowid,
+        CreateTime,
+        Des,
+        ImgStatus,
+        MesLocalID,
+        Message,
+        MesSvrID,
+        Status,
+        TableVer,
+        Type,
+      ] = row as [
+        number,
+        number,
+        MessageDirection,
+        1 | 2,
+        string,
+        string,
+        string,
+        number,
+        number,
+        number
+      ];
+
+      raw_message_rows.push({
+        rowid,
+        CreateTime,
+        Des,
+        ImgStatus,
+        MesLocalID,
+        Message,
+        MesSvrID,
+        Status,
+        TableVer,
+        Type,
+      });
+    }
+
+    return {
+      data: await MessageController.parseRawMessageRows(raw_message_rows, {
+        chat,
+        databases,
+        parseReplyMessage,
+      }),
+    };
+  },
+
+  all_verify: async (
+    databases: WCDatabases
+  ): Promise<ControllerResult<Message[]>> => {
+    const dbs = databases.message;
+    if (!dbs) {
+      throw new Error("message databases are not found");
+    }
+
+    const rows = [
+      ...dbs.map((database) => {
+        try {
+          const tableNames = database.exec(
+            'SELECT name FROM sqlite_master WHERE type = "table" AND name LIKE "Hello_%";'
+          );
+
+          console.log(".........");
+          console.log(tableNames[0].values[0][0]);
+
+          return database.exec(`
+            SELECT 
+                rowid, CreateTime, Des, ImgStatus, MesLocalID, Message, CAST (MesSvrID as TEXT) as MesSvrID, Status, TableVer, Type 
+            FROM 
+                ${tableNames[0].values[0][0]} 
+            ORDER BY CreateTime DESC;
+          `);
+        } catch (e) {
+          return [];
+        }
+      }),
+    ].filter((row) => row.length > 0)[0];
 
     const raw_message_rows: DatabaseMessageRow[] = [];
 
@@ -432,7 +716,7 @@ export const MessageController = {
         string,
         number,
         number,
-        number,
+        number
       ];
 
       raw_message_rows.push({
@@ -451,9 +735,7 @@ export const MessageController = {
 
     return {
       data: await MessageController.parseRawMessageRows(raw_message_rows, {
-        chat,
         databases,
-        parseReplyMessage: false,
       }),
     };
   },

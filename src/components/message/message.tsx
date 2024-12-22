@@ -8,37 +8,53 @@ import StickerMessage from "@/components/message/sticker-message.tsx";
 import SystemExtendedMessage from "@/components/message/system-extended-message.tsx";
 import SystemMessage from "@/components/message/system-message.tsx";
 import TextMessage from "@/components/message/text-message.tsx";
+import VerityMessage from "@/components/message/verify-message.tsx";
 import VideoMessage from "@/components/message/video-message.tsx";
 import VoiceMessage from "@/components/message/voice-message.tsx";
 import VoipMessage from "@/components/message/voip-message.tsx";
+import { useApp } from "@/lib/hooks/appProvider.tsx";
 import {
-  AppMessageType,
-  type MessageDirection,
+  MessageDirection,
   MessageType,
   type Message as MessageVM,
 } from "@/lib/schema.ts";
-import { cn } from "@/lib/utils.ts";
+import { formatDateTime } from "@/lib/utils.ts";
 import { ErrorBoundary } from "react-error-boundary";
 
 export interface MessageProp<T = MessageVM>
   extends React.HTMLAttributes<HTMLDivElement> {
   message: T;
   direction: MessageDirection;
+  variant?: "default" | "referenced" | "abstract";
   showPhoto: boolean;
   showUsername: boolean;
   [key: string]: unknown;
 }
 
-export default function Message({ message, direction, ...props }: MessageProp) {
+export default function Message({
+  message,
+  direction,
+  variant = "default",
+  ...props
+}: MessageProp) {
+  const { user } = useApp();
+
+  if (message.direction === MessageDirection.outgoing && user)
+    message.from = user;
+
   return (
     <ErrorBoundary
+      onError={(e) => {
+        console.error(e);
+      }}
       fallback={
         <div
           onDoubleClick={() => {
             console.log(message);
           }}
+          title={message.raw_message}
         >
-          解析失败的消息: {message.raw_message}
+          解析失败的消息
         </div>
       }
     >
@@ -47,8 +63,9 @@ export default function Message({ message, direction, ...props }: MessageProp) {
           console.log(message);
         }}
         message={message}
-        variant={"default"}
+        variant={variant}
         direction={direction}
+        title={formatDateTime(new Date(message.date * 1000))}
         {...props}
       />
     </ErrorBoundary>
@@ -58,241 +75,142 @@ export default function Message({ message, direction, ...props }: MessageProp) {
 function MessageComponent({
   message,
   direction,
+  variant,
+
   showPhoto = false,
   ...props
 }: MessageProp) {
   switch (message.type) {
     case MessageType.TEXT:
       return (
-        <div
-          className={cn(
-            "flex gap-x-2",
-            ["flex-row-reverse", "flex-row"][direction],
-          )}
-        >
-          {showPhoto && (
-            <div className="shrink-0 w-11 h-11 bg-neutral-400 clothoid-corner-0.375" />
-          )}
-
-          <TextMessage
-            message={message}
-            variant={"default"}
-            direction={direction}
-            showPhoto={showPhoto}
-            {...props}
-          />
-        </div>
+        <TextMessage
+          message={message}
+          direction={direction}
+          variant={variant}
+          showPhoto={showPhoto}
+          {...props}
+        />
       );
 
     case MessageType.IMAGE:
       return (
-        <div
-          className={cn(
-            "flex gap-x-2",
-            ["flex-row-reverse", "flex-row"][direction],
-          )}
-        >
-          {showPhoto && (
-            <div className="shrink-0 w-11 h-11 bg-neutral-400 clothoid-corner-0.375" />
-          )}
-          <ImageMessage
-            message={message}
-            variant={"default"}
-            direction={direction}
-            showPhoto={showPhoto}
-            {...props}
-          />
-        </div>
+        <ImageMessage
+          message={message}
+          direction={direction}
+          variant={variant}
+          showPhoto={showPhoto}
+          {...props}
+        />
       );
 
     case MessageType.VOICE:
       return (
-        <div
-          className={cn(
-            "flex gap-x-2",
-            ["flex-row-reverse", "flex-row"][direction],
-          )}
-        >
-          {showPhoto && (
-            <div className="shrink-0 w-11 h-11 bg-neutral-400 clothoid-corner-0.375" />
-          )}
-          <VoiceMessage
-            message={message}
-            variant={"default"}
-            direction={direction}
-            showPhoto={showPhoto}
-            {...props}
-          />
-        </div>
+        <VoiceMessage
+          message={message}
+          direction={direction}
+          variant={variant}
+          showPhoto={showPhoto}
+          {...props}
+        />
+      );
+
+    case MessageType.VERITY:
+      return (
+        <VerityMessage
+          message={message}
+          direction={direction}
+          variant={variant}
+          showPhoto={showPhoto}
+          {...props}
+        />
       );
 
     case MessageType.CONTACT:
       return (
-        <div
-          className={cn(
-            "flex gap-x-2",
-            ["flex-row-reverse", "flex-row"][direction],
-          )}
-        >
-          {showPhoto && (
-            <div className="shrink-0 w-11 h-11 bg-neutral-400 clothoid-corner-0.375" />
-          )}
-          <ContactMessage
-            message={message}
-            variant={"default"}
-            direction={direction}
-            showPhoto={showPhoto}
-            {...props}
-          />
-        </div>
+        <ContactMessage
+          message={message}
+          direction={direction}
+          variant={variant}
+          showPhoto={showPhoto}
+          {...props}
+        />
       );
 
     case MessageType.VIDEO:
       return (
-        <div
-          className={cn(
-            "flex gap-x-2",
-            ["flex-row-reverse", "flex-row"][direction],
-          )}
-        >
-          {showPhoto && (
-            <div className="shrink-0 w-11 h-11 bg-neutral-400 clothoid-corner-0.375" />
-          )}
-          <VideoMessage
-            message={message}
-            variant={"default"}
-            direction={direction}
-            showPhoto={showPhoto}
-            {...props}
-          />
-        </div>
+        <VideoMessage
+          message={message}
+          direction={direction}
+          variant={variant}
+          showPhoto={showPhoto}
+          {...props}
+        />
       );
 
     case MessageType.MICROVIDEO:
       return (
-        <div
-          className={cn(
-            "flex gap-x-2",
-            ["flex-row-reverse", "flex-row"][direction],
-          )}
-        >
-          {showPhoto && (
-            <div className="shrink-0 w-11 h-11 bg-neutral-400 clothoid-corner-0.375" />
-          )}
-          <MicroVideoMessage
-            message={message}
-            variant={"default"}
-            direction={direction}
-            showPhoto={showPhoto}
-            {...props}
-          />
-        </div>
+        <MicroVideoMessage
+          message={message}
+          direction={direction}
+          variant={variant}
+          showPhoto={showPhoto}
+          {...props}
+        />
       );
 
     case MessageType.STICKER:
       return (
-        <div
-          className={cn(
-            "flex gap-x-2",
-            ["flex-row-reverse", "flex-row"][direction],
-          )}
-        >
-          {showPhoto && (
-            <div className="shrink-0 w-11 h-11 bg-neutral-400 clothoid-corner-0.375" />
-          )}
-          <StickerMessage
-            message={message}
-            variant={"default"}
-            direction={direction}
-            showPhoto={showPhoto}
-            {...props}
-          />
-        </div>
+        <StickerMessage
+          message={message}
+          direction={direction}
+          variant={variant}
+          showPhoto={showPhoto}
+          {...props}
+        />
       );
 
     case MessageType.LOCATION:
       return (
-        <div
-          className={cn(
-            "flex gap-x-2",
-            ["flex-row-reverse", "flex-row"][direction],
-          )}
-        >
-          {showPhoto && (
-            <div className="shrink-0 w-11 h-11 bg-neutral-400 clothoid-corner-0.375" />
-          )}
-          <LocationMessage
-            message={message}
-            variant={"default"}
-            direction={direction}
-            showPhoto={showPhoto}
-            {...props}
-          />
-        </div>
+        <LocationMessage
+          message={message}
+          direction={direction}
+          variant={variant}
+          showPhoto={showPhoto}
+          {...props}
+        />
       );
 
     case MessageType.APP:
       return (
-        <div
-          className={cn(
-            "flex gap-x-2",
-            ["flex-row-reverse", "flex-row"][direction],
-          )}
-        >
-          {showPhoto &&
-            message.message_entity.msg.appmsg.type !== AppMessageType.PAT && (
-              <div className="shrink-0 w-11 h-11 bg-neutral-400 clothoid-corner-0.375" />
-            )}
-          <AppMessage
-            message={message}
-            variant={"default"}
-            direction={direction}
-            showPhoto={showPhoto}
-            {...props}
-          />
-        </div>
+        <AppMessage
+          message={message}
+          direction={direction}
+          variant={variant}
+          showPhoto={showPhoto}
+          {...props}
+        />
       );
 
     case MessageType.VOIP:
       return (
-        <div
-          className={cn(
-            "flex gap-x-2",
-            ["flex-row-reverse", "flex-row"][direction],
-          )}
-        >
-          {showPhoto && (
-            <div className="shrink-0 w-11 h-11 bg-neutral-400 clothoid-corner-0.375" />
-          )}
-          <VoipMessage
-            message={message}
-            variant={"default"}
-            direction={direction}
-            showPhoto={showPhoto}
-            {...props}
-          />
-        </div>
+        <VoipMessage
+          message={message}
+          direction={direction}
+          variant={variant}
+          showPhoto={showPhoto}
+          {...props}
+        />
       );
 
     case MessageType.GROUP_VOIP:
       return (
-        <div
-          className={cn(
-            "flex gap-x-2",
-            ["flex-row-reverse", "flex-row"][direction],
-          )}
-        >
-          {showPhoto && (
-            <div className="shrink-0 w-11 h-11 bg-neutral-400 clothoid-corner-0.375" />
-          )}
-          <ChatroomVoipMessage
-            message={message}
-            variant={"default"}
-            direction={direction}
-            showPhoto={showPhoto}
-            {...props}
-          />
-        </div>
+        <ChatroomVoipMessage
+          message={message}
+          direction={direction}
+          variant={variant}
+          showPhoto={showPhoto}
+          {...props}
+        />
       );
 
     case MessageType.SYSTEM:
@@ -300,6 +218,7 @@ function MessageComponent({
         <SystemMessage
           message={message}
           direction={direction}
+          variant={variant}
           showPhoto={false}
           {...props}
         />
@@ -310,6 +229,7 @@ function MessageComponent({
         <SystemExtendedMessage
           message={message}
           direction={direction}
+          variant={variant}
           showPhoto={false}
           {...props}
         />

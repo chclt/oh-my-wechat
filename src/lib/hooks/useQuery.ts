@@ -1,57 +1,91 @@
-import { ChatController } from "@/lib/controllers/chat";
-import { ContactController } from "@/lib/controllers/contact.ts";
-import { ImageController } from "@/lib/controllers/image.ts";
-import { MessageController } from "@/lib/controllers/message.ts";
-import { useDatabase } from "@/lib/hooks/databaseProvider.tsx";
-import { useState } from "react";
-import { AttachController } from "../controllers/attach";
+import type { WorkerRequest, WorkerRequestQuery } from "@/lib/worker.ts";
 
-enum Controller {
-  Chat = "/chats",
-  Contacts = "/contacts",
-  Messages = "/messages",
-  Images = "/images",
-  Attach = "/attach",
-}
+import { useWorker } from "@/lib/hooks/workerProvider.tsx";
+import { useCallback, useState } from "react";
 
-const controller: {
-  [key: string]: (...args: any[]) => Promise<any>;
-} = {
-  [Controller.Chat]: ChatController.all,
-  [Controller.Contacts]: ContactController.all,
-  [Controller.Messages]: MessageController.all,
-  [Controller.Images]: ImageController.get,
-  [Controller.Attach]: AttachController.get,
-};
+export function useCommand<Request extends WorkerRequest, Response>(
+  initialState: Response,
+): [
+  (type: Request["type"], payload: Request["payload"]) => Promise<Response>,
+  boolean,
+  Response,
+  unknown,
+] {
+  const { worker, pendingQueries } = useWorker();
 
-export default function useQuery<T>(
-  initialState: T,
-): [(endpoint: string, ...args: any[]) => void, boolean, T, unknown] {
-  const { directory, databases } = useDatabase();
   const [isQuerying, setIsQuerying] = useState<boolean>(false);
-  const [result, setResult] = useState<T>(initialState);
+  const [result, setResult] = useState<Response>(initialState);
   const [error, setError] = useState(null);
 
-  const query = async (endpoint: string, ...args: any[]) => {
+  const query = useCallback(
+    async (type: Request["type"], payload: Request["payload"]) => {
+      setIsQuerying(true);
+      const id = crypto.randomUUID();
+
+      return new Promise<Response>((resolve, reject) => {
+        pendingQueries.set(id, (response) => {
+          setIsQuerying(false);
+
+          console.groupCollapsed(`command ${type}`);
+          console.log(payload);
+          console.log(response);
+          console.groupEnd();
+
+          setResult(response);
+          setError(null);
+          resolve(response);
+        });
+
+        worker.postMessage({ id, type, payload } as WorkerRequest<
+          Request["type"],
+          Request["payload"]
+        >);
+      });
+    },
+    [],
+  );
+
+  return [query, isQuerying, result, error];
+}
+
+export default function useQuery<Response>(
+  initialState: Response,
+): [
+  (endpoint: string, ...args: unknown[]) => Promise<Response>,
+  boolean,
+  Response,
+  unknown,
+] {
+  const { worker, pendingQueries } = useWorker();
+
+  const [isQuerying, setIsQuerying] = useState<boolean>(false);
+  const [result, setResult] = useState<Response>(initialState);
+  const [error, setError] = useState(null);
+
+  const query = useCallback(async (endpoint: string, ...args: unknown[]) => {
     setIsQuerying(true);
-    let result = null;
-    switch (endpoint) {
-      case Controller.Chat:
-      case Controller.Contacts:
-      case Controller.Messages:
-        result = await controller[endpoint](databases, ...args);
-        break;
-      case Controller.Images:
-      case Controller.Attach:
-        result = await controller[endpoint](directory, databases, ...args);
-        break;
-      default:
-        break;
-    }
-    setResult(result);
-    setError(null);
-    setIsQuerying(false);
-  };
+    const id = crypto.randomUUID();
+
+    return new Promise<Response>((resolve, reject) => {
+      pendingQueries.set(id, (response) => {
+        setIsQuerying(false);
+        console.groupCollapsed(`query ${endpoint}`);
+        console.log(...args);
+        console.log(response);
+        console.groupEnd();
+
+        setResult(response);
+        setError(null);
+        resolve(response);
+      });
+
+      worker.postMessage({
+        id,
+        type: "query",
+        payload: [endpoint, ...args],
+      } as WorkerRequestQuery);
+    });
+  }, []);
 
   return [query, isQuerying, result, error];
 }

@@ -1,18 +1,21 @@
 import type {
   Chat,
+  Chatroom,
+  ControllerResult,
   DatabaseSessionAbstractRow,
-  Group,
   GroupChat,
   PrivateChat,
   User,
   WCDatabases,
 } from "@/lib/schema.ts";
+import CryptoJS from "crypto-js";
 import { ContactController } from "./contact";
 
-export const ChatController = {
-  all: async (databases: WCDatabases): Promise<Chat[]> => {
-    const db = databases.session;
+import specialBrandId from "@/assets/specialBrandUserNames.csv?raw";
 
+export const ChatController = {
+  all: async (databases: WCDatabases): Promise<ControllerResult<Chat[]>> => {
+    const db = databases.session;
     if (!db) {
       throw new Error("session database is not found");
     }
@@ -30,53 +33,80 @@ export const ChatController = {
         return acc;
       }, [] as DatabaseSessionAbstractRow[]);
 
-    const contactRows: Array<User | Group> = await ContactController.in(
-      databases,
-      dbSessionAbstractRows.map((row) => row.UsrName),
+    const contacts: { [key: string]: User | Chatroom } = {};
+
+    const specialBrandIds = specialBrandId.split("\n").map((i) => i.trim());
+
+    const dbSessionAbstractRowsFiltered = dbSessionAbstractRows.filter(
+      (row) =>
+        !(
+          row.UsrName.startsWith("gh_") ||
+          row.UsrName.endsWith("@openim") || // TODO
+          specialBrandIds.includes(row.UsrName) ||
+          ["chatroom_session_box", "newsapp", "brandsessionholder"].includes(
+            row.UsrName,
+          )
+        ),
     );
 
-    return dbSessionAbstractRows.map((row) => {
-      const chatInfo = contactRows.find((info) => info.id === row.UsrName);
-      return row.UsrName.endsWith("@chatroom")
+    const contactRows: (User | Chatroom)[] = await ContactController.in(
+      databases,
+      dbSessionAbstractRowsFiltered.map((row) => row.UsrName),
+    );
+    for (const contact of contactRows) {
+      contacts[contact.id] = contact;
+    }
+
+    const result: Chat[] = [];
+
+    for (const row of dbSessionAbstractRowsFiltered) {
+      const contactInfo = contacts[row.UsrName];
+      const chat = row.UsrName.endsWith("@chatroom")
         ? ({
             type: "chatroom",
 
             id: row.UsrName,
-            title: chatInfo ? (chatInfo as Group).title : "-",
-            is_pinned: false,
-            is_collapsed: false,
-            ...(chatInfo?.photo ? { photo: chatInfo.photo.thumb } : {}),
-            members: [],
+            title: contactInfo ? (contactInfo as Chatroom).title : "-",
+            // @ts-ignore
+            is_pinned: (contactInfo as Chatroom)._is_pinned,
+            // @ts-ignore
+            is_collapsed: (contactInfo as Chatroom)._is_collapsed,
+            ...(contactInfo?.photo ? { photo: contactInfo.photo.thumb } : {}),
+            members: (contactInfo as Chatroom).members, // TODO 添加自己
 
-            group: {
-              id: row.UsrName,
-              title: chatInfo ? (chatInfo as Group).title : "-",
-              ...(chatInfo?.photo ? { photo: chatInfo.photo.thumb } : {}),
-              members: [],
-            },
+            chatroom: contactInfo as Chatroom,
             raw: {
+              id_md5: CryptoJS.MD5(row.UsrName).toString(),
+
               row,
-              chatInfo,
+              contactInfo,
             },
           } as GroupChat)
         : ({
             type: "private",
 
             id: row.UsrName,
-            title: chatInfo
-              ? (chatInfo.remark ?? (chatInfo as User).username)
+            title: contactInfo
+              ? (contactInfo.remark ?? (contactInfo as User).username)
               : row.UsrName,
-            ...(chatInfo?.photo ? { photo: chatInfo.photo.thumb } : {}),
-            is_pinned: false,
+            ...(contactInfo?.photo ? { photo: contactInfo.photo.thumb } : {}),
+            // @ts-ignore
+            is_pinned: contactInfo ? (contactInfo as User)._is_pinned : false, // todo
             is_collapsed: false,
-            members: [],
-            user: {} as unknown,
+            members: [contactInfo], // TODO 添加自己
+
+            user: contactInfo,
 
             raw: {
+              id_md5: CryptoJS.MD5(row.UsrName).toString(),
               row,
-              chatInfo,
+              contactInfo,
             },
           } as PrivateChat);
-    });
+
+      result.push(chat);
+    }
+
+    return { data: result };
   },
 };

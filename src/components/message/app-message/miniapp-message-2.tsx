@@ -6,10 +6,9 @@ import type {
   AppMessageType,
   AppMessage as AppMessageVM,
 } from "@/lib/schema.ts";
-import { decodeHTMLComponent } from "@/lib/utils.ts";
 
-export interface MiniappUnknownMessageEntity {
-  type: AppMessageType.MINIAPP_UNKNOWN;
+export interface MiniappMessage2Entity {
+  type: AppMessageType.MINIAPP_2;
   title: string;
   des: string;
   url: string;
@@ -47,12 +46,12 @@ export interface MiniappUnknownMessageEntity {
   };
 }
 
-type MiniappUnknownProps = AppMessageProps<MiniappUnknownMessageEntity>;
+type MiniappMessage2Props = AppMessageProps<MiniappMessage2Entity>;
 
-export default function MiniappUnknown({
+export default function MiniappMessage2({
   message,
   ...props
-}: MiniappUnknownProps) {
+}: MiniappMessage2Props) {
   return (
     <MiniappMessage
       message={message as unknown as AppMessageVM<MiniappMessageEntity>}

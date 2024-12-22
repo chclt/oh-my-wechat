@@ -842,10 +842,16 @@ export const WechatEmojiTable: { [key: string]: string } = {
 
 export default function WechatEmoji({ emojiName }: { emojiName: string }) {
   return (
-    <Image
-      className={"inline align-middle mx-[0.25em] w-[1.5em] h-[1.5em]"}
-      src={`src/assets/wxemoji/${WechatEmojiTable[emojiName]}`}
-      alt={emojiName}
-    />
+    <span
+      className={
+        "relative inline-block size-[1.5em] align-top [&_img]:inline [&_img]:absolute [&_img]:inset-0 [&_img]:m-auto [&_img]:size-[1.25em] [&_img]:rounded-[3px]"
+      }
+    >
+      <Image
+        src={`src/assets/wxemoji/${WechatEmojiTable[emojiName]}`}
+        alt={emojiName}
+        draggable={false}
+      />
+    </span>
   );
 }

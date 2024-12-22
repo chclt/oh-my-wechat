@@ -12,7 +12,12 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    exclude: ["@sqlite.org/sqlite-wasm"],
+    exclude: [
+      "@sqlite.org/sqlite-wasm",
+      "@ffmpeg/ffmpeg",
+      "@ffmpeg/util",
+      "silk-wasm",
+    ],
   },
   plugins: [react(), wasm()],
   resolve: {

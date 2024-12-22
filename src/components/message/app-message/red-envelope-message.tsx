@@ -1,4 +1,6 @@
 import type { AppMessageProps } from "@/components/message/app-message.tsx";
+import DefaultMessageWithUser from "@/components/message/default-message-with-user.tsx";
+import User from "@/components/user.tsx";
 import type { AppMessageType } from "@/lib/schema.ts";
 
 export interface RedEnvelopeMessageEntity {
@@ -28,10 +30,41 @@ export interface RedEnvelopeMessageEntity {
 
 type RedEnvelopeProps = AppMessageProps<RedEnvelopeMessageEntity>;
 
-export default function RedEnvelope({ message, ...props }: RedEnvelopeProps) {
+export default function RedEnvelope({
+  message,
+  direction,
+  variant = "default",
+  showPhoto,
+  showUsername,
+  className,
+  ...props
+}: RedEnvelopeProps) {
+  if (variant === "default")
+    return (
+      <DefaultMessageWithUser
+        message={message}
+        showPhoto={showPhoto}
+        showUsername={showUsername}
+      >
+        <div
+          className="w-64 py-4 pl-4 pr-6 flex gap-4 items-center bg-white rounded-2xl border border-neutral-200"
+          {...props}
+        >
+          <div className={"shrink-0 size-12 bg-neutral-400 rounded-full"} />
+          <div>
+            <h4 className={"font-medium"}>
+              {message.message_entity.msg.appmsg.wcpayinfo.sendertitle}
+            </h4>
+          </div>
+        </div>
+      </DefaultMessageWithUser>
+    );
+
   return (
-    <div {...props}>
-      <p>{message.message_entity.msg.appmsg.des}</p>
-    </div>
+    <p>
+      {showUsername && <User user={message.from} variant={"inline"} />}
+      {showUsername && ": "}
+      [红包] {message.message_entity.msg.appmsg.wcpayinfo.sendertitle}
+    </p>
   );
 }

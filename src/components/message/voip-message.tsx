@@ -1,10 +1,8 @@
+import DefaultMessageWithUser from "@/components/message/default-message-with-user.tsx";
 import type { MessageProp } from "@/components/message/message.tsx";
 import type { VoipMessage as VoipMessageVM } from "@/lib/schema.ts";
 
-interface VoipMessageProps extends MessageProp<VoipMessageVM> {
-  variant: "default" | "referenced";
-}
-
+type VoipMessageProps = MessageProp<VoipMessageVM>;
 export interface VoipMessageEntity {
   voipmsg?: {
     "@_type": "VoIPBubbleMsg" | string; // eg. VoIPBubbleMsg
@@ -34,24 +32,73 @@ export interface VoipMessageEntity {
   };
 }
 
-export default function VoipMessage({ message, ...props }: VoipMessageProps) {
+export default function VoipMessage({
+  message,
+  variant = "default",
+  direction,
+
+  showPhoto,
+  showUsername,
+
+  ...props
+}: VoipMessageProps) {
+  if (variant === "default")
+    return (
+      <>
+        {message.message_entity.voipmsg && (
+          <DefaultMessageWithUser
+            message={message}
+            showPhoto={showPhoto}
+            showUsername={showUsername}
+          >
+            <div
+              className="max-w-[20em] py-4 pl-4 pr-6 flex gap-4 items-center bg-white rounded-2xl border border-neutral-200"
+              {...props}
+            >
+              <div className={"shrink-0 size-12 bg-neutral-400 rounded-full"} />
+              <div>
+                <h4 className={"font-medium"}>
+                  {message.from.remark ?? message.from.username}发起了语音通话
+                </h4>
+                <p className={"text-sm text-neutral-600"}>
+                  {message.message_entity.voipmsg["@_type"] ===
+                    "VoIPBubbleMsg" &&
+                    message.message_entity.voipmsg[
+                      message.message_entity.voipmsg["@_type"]
+                    ].msg}
+                </p>
+              </div>
+            </div>
+          </DefaultMessageWithUser>
+        )}
+
+        {message.message_entity.voipinvitemsg && (
+          <DefaultMessageWithUser
+            message={message}
+            showPhoto={showPhoto}
+            showUsername={showUsername}
+          >
+            <div className="" {...props}>
+              <p>通话邀请</p>
+            </div>
+          </DefaultMessageWithUser>
+        )}
+      </>
+    );
+
   return (
-    <>
+    <p>
       {message.message_entity.voipmsg && (
-        <div className="" {...props}>
-          call:{" "}
+        <span>
+          [语音通话]{" "}
           {message.message_entity.voipmsg["@_type"] === "VoIPBubbleMsg" &&
             message.message_entity.voipmsg[
               message.message_entity.voipmsg["@_type"]
             ].msg}
-        </div>
+        </span>
       )}
 
-      {message.message_entity.voipinvitemsg && (
-        <div className="" {...props}>
-          <p>通话邀请</p>
-        </div>
-      )}
-    </>
+      {message.message_entity.voipinvitemsg && <span>通话邀请</span>}
+    </p>
   );
 }

@@ -8,6 +8,7 @@ import type { StickerMessageEntity } from "@/components/message/sticker-message.
 import type { SystemExtendedMessageEntity } from "@/components/message/system-extended-message.tsx";
 import type { SystemMessageEntity } from "@/components/message/system-message.tsx";
 import type { TextMessageEntity } from "@/components/message/text-message.tsx";
+import type { VerityMessageEntity } from "@/components/message/verify-message.tsx";
 import type { VideoMessageEntity } from "@/components/message/video-message.tsx";
 import type { VoiceMessageEntity } from "@/components/message/voice-message.tsx";
 import type { VoipMessageEntity } from "@/components/message/voip-message.tsx";
@@ -94,9 +95,11 @@ export interface User {
     origin?: string;
     thumb: string;
   };
+  background?: string; // 朋友圈背景
+  phone?: string;
 }
 
-export interface Group {
+export interface Chatroom {
   id: `${string}@chatroom`;
   title: string;
   remark?: string;
@@ -112,7 +115,7 @@ interface BasicChat {
   id: string;
   title: string;
   photo?: string;
-  last_message?: DatabaseMessageRow;
+  last_message?: Message;
   is_pinned: boolean;
   is_collapsed: boolean;
   members: User[];
@@ -126,7 +129,7 @@ export interface PrivateChat extends BasicChat {
 
 export interface GroupChat extends BasicChat {
   type: "chatroom";
-  group: Group;
+  chatroom: Chatroom;
 }
 
 export type Chat = PrivateChat | GroupChat;
@@ -139,6 +142,25 @@ export interface PhotpSize {
   file_size?: number;
 }
 
+export interface VideoInfo {
+  src?: string;
+  poster: string;
+  poster_width?: number;
+  poster_height?: number;
+  file_size?: number;
+}
+
+export interface VoiceInfo {
+  src?: string;
+  raw_aud_src: string;
+  transcription?: string;
+  file_size?: number;
+}
+
+export interface FileInfo {
+  src: string;
+}
+
 export interface ControllerResult<T> {
   data: T;
 }
@@ -146,6 +168,7 @@ export interface ControllerResult<T> {
 export interface ControllerPaginatorResult<T> extends ControllerResult<T> {
   meta: {
     cursor?: number;
+    cursor_condition?: "<" | "<=" | ">" | ">=" | "<>";
     next_cursor?: number;
   };
 }
@@ -156,6 +179,7 @@ export enum MessageType {
   TEXT = 1, // 文本消息
   IMAGE = 3, // 图片消息
   VOICE = 34, // 语音消息
+  VERITY = 37, // 验证消息
   CONTACT = 42, // 名片消息（人/公众号）
   VIDEO = 43, // 视频消息
   STICKER = 47, // 表情
@@ -171,23 +195,35 @@ export enum MessageType {
 export enum AppMessageType {
   TEXT = 1,
   IMAGE = 2,
-  AUDIO = 3,
+  VOICE = 3,
   VIDEO = 4,
-  URL = 5, // 小程序通知？
+  URL = 5, // 链接、小程序通知
   ATTACH = 6,
-  STICKER = 8,
+  STICKER = 8, // 表情包
+  REALTIME_LOCATION = 17,
   FORWARD_MESSAGE = 19,
-  MINIAPP = 33,
-  MINIAPP_UNKNOWN = 36,
-  CHANNEL = 51,
-  REFER = 57,
-  PAT = 62, //拍一拍
+  NOTE = 24, // 笔记
+  MINIAPP = 33, // 小程序
+  MINIAPP_2 = 36, // 小程序，不知道区别
+  FORWARD_MESSAGE_2 = 40,
+  CHANNEL = 50, // 频道名片
+  CHANNEL_VIDEO = 51, // 频道视频
+  SOLITAIRE = 53, // 接龙
+  REFER = 57, // 回复消息
+  PAT = 62, // 拍一拍
   LIVE = 63,
-  ATTACH_2 = 74,
-  ANNOUNCEMENT = 87,
-  GAME_SHARE = 101,
-  TRANSFER = 2000,
-  RED_ENVELOPE = 2001,
+  ATTACH_2 = 74, // 文件，不知道区别
+  MUSIC = 76, // 音乐链接
+  STORE_PRODUCT = 82, // 微信小店商品
+  ANNOUNCEMENT = 87, // 群公告
+  TING = 92, // 微信内置音频平台的音频
+  GAME = 101,
+  STORE = 111, // 微信小店
+  RINGTONE = 996, // 系统提示朋友的铃声
+  SCAN_RESULT = 998, // 扫码结果
+  TRANSFER = 2000, // 转账
+  RED_ENVELOPE = 2001, // 红包、AA 收款
+  RED_ENVELOPE_COVER = 2003, // 红包封面
 }
 
 export interface BasicMessage<T extends MessageType, S> {
@@ -206,6 +242,10 @@ export interface BasicMessage<T extends MessageType, S> {
 export type TextMessage = BasicMessage<MessageType.TEXT, TextMessageEntity>;
 export type ImageMessage = BasicMessage<MessageType.IMAGE, ImageMessageEntity>;
 export type VoiceMessage = BasicMessage<MessageType.VOICE, VoiceMessageEntity>;
+export type VerityMessage = BasicMessage<
+  MessageType.VERITY,
+  VerityMessageEntity
+>;
 export type ContactMessage = BasicMessage<
   MessageType.CONTACT,
   ContactMessageEntity
@@ -221,7 +261,7 @@ export type LocationMessage = BasicMessage<
 >;
 export type AppMessage<
   T = {
-    type: 0;
+    type: unknown;
   },
 > = BasicMessage<MessageType.APP, AppMessageEntity<T>>;
 export type VoipMessage = BasicMessage<MessageType.VOIP, VoipMessageEntity>;
@@ -246,6 +286,7 @@ export type Message =
   | TextMessage
   | ImageMessage
   | VoiceMessage
+  | VerityMessage
   | ContactMessage
   | VideoMessage
   | StickerMessage

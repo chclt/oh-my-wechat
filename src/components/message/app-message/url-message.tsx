@@ -1,6 +1,13 @@
+import { ArrowShareRightSolid } from "@/components/central-icon.tsx";
+import Image from "@/components/image.tsx";
+import Link from "@/components/link.tsx";
+import LocalImage from "@/components/local-image.tsx";
 import type { AppMessageProps } from "@/components/message/app-message.tsx";
-import type { AppMessageType } from "@/lib/schema.ts";
-import { cn, decodeHTMLComponent } from "@/lib/utils.ts";
+import DefaultMessageWithUser from "@/components/message/default-message-with-user.tsx";
+import User from "@/components/user.tsx";
+import { useApp } from "@/lib/hooks/appProvider.tsx";
+import type { AppMessageType, Message } from "@/lib/schema.ts";
+import { cn, decodeUnicodeReferences } from "@/lib/utils.ts";
 
 export interface UrlMessageEntity {
   type: AppMessageType.URL;
@@ -80,55 +87,87 @@ export interface UrlMessageEntity {
 
 type UrlMessageProps = AppMessageProps<UrlMessageEntity>;
 
-export default function UrlMessage({ message, ...props }: UrlMessageProps) {
-  return (
-    <div
-      title={message.message_entity.msg.appmsg.title}
-      className={"relative max-w-[30em] flex flex-col rounded-lg bg-white"}
-      {...props}
-    >
-      <a
-        // href={message.message_entity.msg.appmsg.url}
-        target="_blank"
-        referrerPolicy="no-referrer"
-        rel="noreferrer"
+export default function UrlMessage({
+  message,
+  direction,
+  variant = "default",
+  showPhoto,
+  showUsername,
+  ...props
+}: UrlMessageProps) {
+  const { chat } = useApp();
+
+  if (variant === "default")
+    return (
+      <DefaultMessageWithUser
+        message={message as unknown as Message}
+        showPhoto={showPhoto}
+        showUsername={showUsername}
       >
-        <div className="p-3">
-          <h4 className="font-medium line-clamp-3">
-            {decodeHTMLComponent(message.message_entity.msg.appmsg.title)}
-          </h4>
+        <Link href={message.message_entity.msg.appmsg.url}>
           <div
             className={cn(
-              "mt-1 text-neutral-500",
-              message.message_entity.msg.appmsg.thumburl && "min-h-[2lh]",
+              "relative max-w-[20em] flex flex-col rounded-lg bg-white",
             )}
+            {...props}
           >
-            {message.message_entity.msg.appmsg.thumburl && (
-              <img
-                className={"float-end ms-2 h-[2lh] w-auto rounded"}
-                src={message.message_entity.msg.appmsg.thumburl}
-                referrerPolicy="no-referrer"
-                loading="lazy"
-                alt={""}
-              />
-            )}
-            {message.message_entity.msg.appmsg.des && (
-              <p className="line-clamp-5">
-                {decodeHTMLComponent(message.message_entity.msg.appmsg.des)}
-              </p>
-            )}
-          </div>
-        </div>
+            <div className="p-3">
+              <h4 className="font-medium text-pretty line-clamp-3">
+                {decodeUnicodeReferences(
+                  message.message_entity.msg.appmsg.title,
+                )}
+              </h4>
+              <div className={"mt-1 text-pretty line-clamp-5 text-neutral-500"}>
+                {message.message_entity.msg.appmsg.thumburl && (
+                  <Image
+                    className={"float-end ms-2 h-12 w-auto rounded"}
+                    src={message.message_entity.msg.appmsg.thumburl}
+                    alt={""}
+                  />
+                )}
 
-        {message.message_entity.msg.appmsg.sourcedisplayname && (
-          <div className="px-3 py-2.5 text-sm leading-none text-neutral-500 border-t border-neutral-200">
-            <small className="[font-size:inherit]">
-              {message.message_entity.msg.appmsg.sourcedisplayname}
-            </small>
-            <div className="float-end my-auto w-4 h-4 bg-neutral-400 rounded-sm" />
+                {message.message_entity.msg.appmsg.appattach.cdnthumbmd5 && (
+                  <LocalImage
+                    chat={chat!}
+                    message={message}
+                    domain="opendata"
+                    className={"float-end ms-2 h-12 w-auto rounded"}
+                    alt={""}
+                  />
+                )}
+                {message.message_entity.msg.appmsg.des &&
+                  decodeUnicodeReferences(
+                    message.message_entity.msg.appmsg.des,
+                  )}
+              </div>
+            </div>
+
+            <div className="px-3 py-1.5 text-sm leading-normal text-neutral-500 border-t border-neutral-200">
+              {message.message_entity.msg.appmsg.sourcedisplayname ? (
+                <span className={""}>
+                  {message.message_entity.msg.appmsg.sourcedisplayname}
+                </span>
+              ) : (
+                <span>&nbsp;</span>
+              )}
+              <div
+                className={
+                  "float-end mt-[3px] mb-[4px] ms-1 size-3.5 [&_svg]:size-full text-[#D9D9D9]"
+                }
+              >
+                <ArrowShareRightSolid />
+              </div>
+            </div>
           </div>
-        )}
-      </a>
-    </div>
+        </Link>
+      </DefaultMessageWithUser>
+    );
+
+  return (
+    <p>
+      {showUsername && <User user={message.from} variant={"inline"} />}
+      {showUsername && ": "}
+      [链接] {decodeUnicodeReferences(message.message_entity.msg.appmsg.title)}
+    </p>
   );
 }

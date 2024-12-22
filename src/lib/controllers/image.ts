@@ -1,61 +1,70 @@
-import type { ImageMessageEntity } from "@/components/message/image-message.tsx";
-import {
-  type PhotpSize,
-  WCDatabaseNames,
-  type WCDatabases,
-} from "@/lib/schema.ts";
+import type { Chat, Message, PhotpSize, WCDatabases } from "@/lib/schema.ts";
 import CryptoJS from "crypto-js";
-import { getFileFromManifast as getFilesFromManifast } from "../utils";
+import { getFilesFromManifast } from "../utils";
 
 export const ImageController = {
   get: async (
     directory: FileSystemDirectoryHandle,
     databases: WCDatabases,
     {
-      sessionId,
-      messageLocalId,
-      messageEntity,
+      chat,
+      message,
+
+      size = "origin",
+      domain = "image",
     }: {
-      sessionId: string;
-      messageLocalId: string;
-      messageEntity: ImageMessageEntity;
+      chat: Chat;
+      message: Message;
+
+      size: "origin" | "thumb";
+      domain: "image" | "opendata" | "video";
     },
   ): Promise<PhotpSize[]> => {
     const db = databases.manifest;
-
-    if (!db) {
-      throw new Error("manifest database is not found");
-    }
-
-    const sessionIdMd5 = CryptoJS.MD5(sessionId).toString();
+    if (!db) throw new Error("manifest database is not found");
 
     const files = await getFilesFromManifast(
       db,
       directory,
-      `%/Img/${sessionIdMd5}/${messageLocalId}.%`,
+      `%/${
+        { image: "Img", opendata: "OpenData", video: "Video" }[domain]
+      }/${CryptoJS.MD5(chat.id).toString()}/${message.local_id}.%`,
     );
 
     const result: PhotpSize[] = [];
 
     for (const file of files) {
       if (file.filename.endsWith(".pic")) {
-        result.push({
+        const newPhoto: PhotpSize = {
           size: "origin",
           src: URL.createObjectURL(file.file),
-        });
+        };
+        if (size === "origin") result.push(newPhoto);
+        else result.unshift(newPhoto);
       }
 
       if (file.filename.endsWith(".pic_thum")) {
-        result.push({
+        const newPhoto: PhotpSize = {
           size: "thumb",
           src: URL.createObjectURL(file.file),
-          width: Number.parseInt(messageEntity.msg.img["@_cdnthumbwidth"]),
-          height: Number.parseInt(messageEntity.msg.img["@_cdnthumbheight"]),
-        });
+          // width: Number.parseInt(messageEntity.msg.img["@_cdnthumbwidth"]),
+          // height: Number.parseInt(messageEntity.msg.img["@_cdnthumbheight"]),
+        };
+        if (size === "origin") result.push(newPhoto);
+        else result.unshift(newPhoto);
+      }
+
+      if (file.filename.endsWith(".video_thum")) {
+        const newPhoto: PhotpSize = {
+          size: "thumb",
+          src: URL.createObjectURL(file.file),
+          // width: Number.parseInt(messageEntity.msg.img["@_cdnthumbwidth"]),
+          // height: Number.parseInt(messageEntity.msg.img["@_cdnthumbheight"]),
+        };
+        if (size === "origin") result.push(newPhoto);
+        else result.unshift(newPhoto);
       }
     }
-
-    console.log(result);
 
     return result;
   },

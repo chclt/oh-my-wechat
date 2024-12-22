@@ -1,57 +1,35 @@
-import type { ImageMessageEntity } from "@/components/message/image-message.tsx";
-import type { PhotpSize, WCDatabases } from "@/lib/schema.ts";
+import type { Chat, FileInfo, Message, WCDatabases } from "@/lib/schema.ts";
 import CryptoJS from "crypto-js";
-import { getFileFromManifast as getFilesFromManifast } from "../utils";
+import { getFilesFromManifast } from "../utils";
 
 export const AttachController = {
   get: async (
     directory: FileSystemDirectoryHandle,
     databases: WCDatabases,
     {
-      sessionId,
-      messageLocalId,
-      messageEntity,
+      chat,
+      message,
     }: {
-      sessionId: string;
-      messageLocalId: string;
-      messageEntity: ImageMessageEntity;
+      chat: Chat;
+      message: Message;
     },
-  ): Promise<PhotpSize[]> => {
+  ): Promise<FileInfo[]> => {
     const db = databases.manifest;
-
-    if (!db) {
-      throw new Error("manifest database is not found");
-    }
-
-    const sessionIdMd5 = CryptoJS.MD5(sessionId).toString();
+    if (!db) throw new Error("manifest database is not found");
 
     const files = await getFilesFromManifast(
       db,
       directory,
-      `%/OpenData/${sessionIdMd5}/${messageLocalId}.%`,
+      `%/OpenData/${CryptoJS.MD5(chat.id).toString()}/${message.local_id}.%`,
     );
 
-    const result: PhotpSize[] = [];
+    const result = [];
 
     for (const file of files) {
-      if (file.filename.endsWith(".pic")) {
-        result.push({
-          size: "origin",
-          src: URL.createObjectURL(file.file),
-        });
-      }
-
-      if (file.filename.endsWith(".pic_thum")) {
-        result.push({
-          size: "thumb",
-          src: URL.createObjectURL(file.file),
-          width: Number.parseInt(messageEntity.msg.img["@_cdnthumbwidth"]),
-          height: Number.parseInt(messageEntity.msg.img["@_cdnthumbwidth"]),
-        });
-      }
+      result.push({
+        src: URL.createObjectURL(file.file),
+      });
     }
-
-    console.log(result);
 
     return result;
   },

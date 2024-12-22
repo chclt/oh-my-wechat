@@ -1,9 +1,10 @@
+import Image from "@/components/image.tsx";
+import DefaultMessageWithUser from "@/components/message/default-message-with-user.tsx";
 import type { MessageProp } from "@/components/message/message.tsx";
+import User from "@/components/user.tsx";
 import type { ContactMessage as ContactMessageVM } from "@/lib/schema.ts";
 
-interface ContactMessageProps extends MessageProp<ContactMessageVM> {
-  variant: "default" | "referenced";
-}
+type ContactMessageProps = MessageProp<ContactMessageVM>;
 
 export interface ContactMessageEntity {
   msg: {
@@ -37,56 +38,94 @@ export interface ContactMessageEntity {
 
 export default function ContactMessage({
   message,
+  direction,
+  variant = "default",
+  showPhoto,
+  showUsername,
   ...props
 }: ContactMessageProps) {
-  if (message.message_entity.msg["@_brandSubscriptConfigUrl"].length) {
-    const brandSubscriptConfigUrl = JSON.parse(
-      message.message_entity.msg["@_brandSubscriptConfigUrl"],
-    );
-    console.log(brandSubscriptConfigUrl);
-  }
-  return message.message_entity.msg["@_certflag"] === "0" ? (
-    <div
-      className="w-48 flex flex-col bg-white rounded-xl overflow-hidden"
-      {...props}
-    >
-      {message.message_entity.msg["@_bigheadimgurl"] ? (
-        <img
-          src={message.message_entity.msg["@_bigheadimgurl"]}
-          alt=""
-          referrerPolicy="no-referrer"
-          className={"shrink-0 w-full rounded-lg"}
-        />
-      ) : (
-        <div
-          className={"shrink-0 w-full pb-[100%] rounded-lg bg-neutral-300"}
-        />
-      )}
+  // if (message.message_entity.msg["@_brandSubscriptConfigUrl"].length) {
+  //   const brandSubscriptConfigUrl = JSON.parse(
+  //     message.message_entity.msg["@_brandSubscriptConfigUrl"],
+  //   );
+  //   console.log(brandSubscriptConfigUrl);
+  // }
+  if (message.message_entity.msg["@_certflag"] === "0") {
+    if (variant === "default")
+      return (
+        <DefaultMessageWithUser
+          message={message}
+          showPhoto={showPhoto}
+          showUsername={showUsername}
+        >
+          <div
+            className="w-48 flex flex-col bg-white rounded-xl overflow-hidden"
+            {...props}
+          >
+            {message.message_entity.msg["@_bigheadimgurl"] ? (
+              <Image
+                src={message.message_entity.msg["@_bigheadimgurl"]}
+                alt=""
+                className={"shrink-0 w-full rounded-lg"}
+              />
+            ) : (
+              <div
+                className={
+                  "shrink-0 w-full pb-[100%] rounded-lg bg-neutral-300"
+                }
+              />
+            )}
 
-      <h4 className="p-2.5 font-medium">
-        {message.message_entity.msg["@_nickname"]}
-      </h4>
-    </div>
-  ) : (
-    <div
-      className="max-w-80 flex items-center p-2.5 pr-3 rounded-lg bg-white"
-      {...props}
-    >
-      <img
-        src={
-          message.message_entity.msg["@_bigheadimgurl"] ??
-          message.message_entity.msg["@_brandIconUrl"]
-        }
-        alt=""
-        referrerPolicy="no-referrer"
-        className={"shrink-0 w-16 h-16 rounded-lg"}
-      />
-      <div className="ml-4 flex flex-col space-y-1.5">
-        <h4 className="font-medium">
-          {message.message_entity.msg["@_nickname"]}
-        </h4>
-        <small>{message.message_entity.msg["@_certinfo"]}</small>
-      </div>
-    </div>
+            <h4 className="p-2.5 font-medium">
+              {message.message_entity.msg["@_nickname"]}
+            </h4>
+          </div>
+        </DefaultMessageWithUser>
+      );
+
+    return (
+      <p>
+        <User user={message.from} variant="inline" />
+        <span>: </span>
+        <span>[名片] {message.message_entity.msg["@_nickname"]}</span>
+      </p>
+    );
+  }
+
+  if (variant === "default")
+    return (
+      <DefaultMessageWithUser
+        message={message}
+        showPhoto={showPhoto}
+        showUsername={showUsername}
+      >
+        <div
+          className="max-w-80 flex items-center p-2.5 pr-3 rounded-lg bg-white"
+          {...props}
+        >
+          <Image
+            src={
+              message.message_entity.msg["@_bigheadimgurl"] ??
+              message.message_entity.msg["@_brandIconUrl"]
+            }
+            alt=""
+            className={"shrink-0 w-16 h-16 rounded-lg"}
+          />
+          <div className="ml-4 flex flex-col space-y-1.5">
+            <h4 className="font-medium">
+              {message.message_entity.msg["@_nickname"]}
+            </h4>
+            <small>{message.message_entity.msg["@_certinfo"]}</small>
+          </div>
+        </div>
+      </DefaultMessageWithUser>
+    );
+
+  return (
+    <p>
+      {showUsername && <User user={message.from} variant={"inline"} />}
+      {showUsername && ": "}
+      <span>[公众号] {message.message_entity.msg["@_nickname"]}</span>
+    </p>
   );
 }

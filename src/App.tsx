@@ -1,26 +1,12 @@
 import ChatList from "@/components/chat-list.tsx";
 import MessageList from "@/components/message-list.tsx";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable.tsx";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
 import {
   Tabs,
   TabsContent,
@@ -29,24 +15,28 @@ import {
 } from "@/components/ui/tabs.tsx";
 
 import AccountSelectDialog from "@/components/account-select-dialog.tsx";
-import Example from "@/components/example.tsx";
+import MediaViewerDialog from "@/components/media-viewer-dialog.tsx";
+import { ScrollArea } from "@/components/ui/scroll-area.tsx";
 import { useApp } from "@/lib/hooks/appProvider.tsx";
-import { useDatabase } from "@/lib/hooks/databaseProvider";
-import { useState } from "react";
+import { useDatabase } from "@/lib/hooks/databaseProvider.tsx";
 import ContactList from "./components/contact-list";
 import { cn } from "./lib/utils";
 
+import {
+  ChatIconFill,
+  ChatIconOutline,
+  ContactIconFill,
+  ContactIconOutline,
+} from "@/components/icon.tsx";
+
 const App = () => {
-  const { account } = useDatabase();
-
-  const { user, setUser, chat, setChat } = useApp();
-
-  const [wxid, setWxid] = useState<string | null>(null);
-  const [isChatroom, setIsChatroom] = useState<boolean>(false);
+  const { databases } = useDatabase();
+  const { user, chat, setChat, isOpenMediaViewer, setIsOpenMediaViewer } =
+    useApp();
 
   return (
     <>
-      {!account && <AccountSelectDialog open={false} />}
+      {!user && <AccountSelectDialog open={!user} />}
 
       <ResizablePanelGroup
         direction="horizontal"
@@ -59,73 +49,95 @@ const App = () => {
                 <TabsTrigger
                   value="sessions"
                   className={cn(
-                    "w-16 h-[4.5rem] flex flex-col",
-                    "data-[state=active]:shadow-none",
+                    "w-16 h-16 p-0 flex flex-col",
+                    "group data-[state=active]:text-[#03C160] rounded-none after:content-none hover:bg-neutral-100",
                   )}
                 >
-                  <div className="mt-1 w-8 h-8 rounded-full bg-neutral-400" />
+                  <div className="mt-1 w-8 h-8">
+                    <ChatIconOutline
+                      className={"group-data-[state=active]:hidden size-full"}
+                    />
+                    <ChatIconFill
+                      className={
+                        "hidden group-data-[state=active]:block size-full"
+                      }
+                    />
+                  </div>
                   <span className="mt-1 text-xs">消息</span>
                 </TabsTrigger>
                 <TabsTrigger
                   value="contact"
                   className={cn(
-                    "w-16 h-[4.5rem] flex flex-col",
-                    "data-[state=active]:shadow-none",
+                    "w-16 h-16 p-0 flex flex-col",
+                    "group data-[state=active]:text-[#03C160] rounded-none after:content-none hover:bg-neutral-100",
                   )}
                 >
-                  <div className="mt-1 w-8 h-8 rounded-full bg-neutral-400" />
+                  <div className="mt-1 w-8 h-8">
+                    <ContactIconOutline
+                      className={"group-data-[state=active]:hidden size-full"}
+                    />
+                    <ContactIconFill
+                      className={
+                        "hidden group-data-[state=active]:block size-full"
+                      }
+                    />
+                  </div>
                   <span className="mt-1 text-xs">通讯录</span>
                 </TabsTrigger>
               </TabsList>
             </div>
 
-            <TabsContent value="sessions" className="grow overflow-auto m-0">
-              <div>
-                {account && (
-                  <ChatList
-                    onClick={(chat) => {
-                      setChat(chat);
-                      // setWxid(wxid);
-                    }}
-                  />
-                )}
+            <TabsContent value="sessions" className="grow m-0">
+              <div className={"relative w-full h-full"}>
+                <div className={"absolute inset-0"}>
+                  <ScrollArea className={"w-full h-full [&>div>div]:!block"}>
+                    {databases && user && (
+                      <ChatList
+                        onClick={(chat) => {
+                          setChat(chat);
+                        }}
+                      />
+                    )}
+                  </ScrollArea>
+                </div>
               </div>
             </TabsContent>
-            <TabsContent value="contact" className="grow overflow-auto">
-              <div>
-                {account && (
+            <TabsContent value="contact" className="grow">
+              <ScrollArea className={"h-full"}>
+                {databases && user && (
                   <ContactList
                     onClick={() => {
                       // setChat()
                     }}
                   />
                 )}
-              </div>
+              </ScrollArea>
             </TabsContent>
           </Tabs>
         </ResizablePanel>
+
         <ResizableHandle />
+
         <ResizablePanel>
-          {chat ? (
-            <MessageList
-              chat={chat}
-              isChatroom={chat.type === "chatroom"}
-              className="w-full h-full"
-            />
-          ) : (
-            <Example />
+          {databases && user && chat && (
+            <div className="w-full h-full overflow-auto">
+              <MessageList
+                chat={chat}
+                isChatroom={chat.type === "chatroom"}
+                className="w-full h-full"
+              />
+            </div>
           )}
         </ResizablePanel>
       </ResizablePanelGroup>
 
-      <Dialog>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Chat Details</DialogTitle>
-            <DialogDescription>...</DialogDescription>
-          </DialogHeader>
-        </DialogContent>
-      </Dialog>
+      {chat && (
+        <MediaViewerDialog
+          open={isOpenMediaViewer}
+          onOpenChange={setIsOpenMediaViewer}
+          chat={chat}
+        />
+      )}
     </>
   );
 };
