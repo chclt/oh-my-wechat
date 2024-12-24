@@ -1,6 +1,7 @@
 import _global from "@/lib/global.ts";
 import type {
   Chatroom,
+  ControllerResult,
   DatabaseFriendRow,
   User,
   WCDatabases,
@@ -280,10 +281,9 @@ export const ContactController = {
       } as User;
     });
 
-    const allMembers: User[] = (await ContactController.in(
-      databases,
-      Array.from(new Set(allMemberIds)),
-    )) as User[];
+    const allMembers: User[] = (
+      await ContactController.in(databases, Array.from(new Set(allMemberIds)))
+    ).data as User[];
 
     // 加入当前登录的微信账号数据
     if (_global.user && allMemberIds.indexOf(_global.user.id) > -1) {
@@ -311,7 +311,9 @@ export const ContactController = {
     return result;
   },
 
-  all: async (databases: WCDatabases): Promise<(User | Chatroom)[]> => {
+  all: async (
+    databases: WCDatabases,
+  ): Promise<ControllerResult<(User | Chatroom)[]>> => {
     const db = databases.WCDB_Contact;
     if (!db) {
       throw new Error("WCDB_Contact database is not found");
@@ -335,25 +337,27 @@ export const ContactController = {
         return acc;
       }, [] as DatabaseFriendRow[]);
 
-    return await ContactController.parseDatabaseContactRows(
-      databases,
-      dbFriendRows.filter((row) => {
-        if (row.userName.startsWith("gh_")) return false;
-        return true;
-      }),
-    );
+    return {
+      data: await ContactController.parseDatabaseContactRows(
+        databases,
+        dbFriendRows.filter((row) => {
+          if (row.userName.startsWith("gh_")) return false;
+          return true;
+        }),
+      ),
+    };
   },
 
   in: async (
     databases: WCDatabases,
     ids: string[],
-  ): Promise<(User | Chatroom)[]> => {
+  ): Promise<ControllerResult<(User | Chatroom)[]>> => {
     const db = databases.WCDB_Contact;
     if (!db) {
       throw new Error("WCDB_Contact database is not found");
     }
 
-    if (ids.length === 0) return [];
+    if (ids.length === 0) return { data: [] };
 
     const dbFriendRows: DatabaseFriendRow[] = db
       .exec(
@@ -373,12 +377,14 @@ export const ContactController = {
         return acc;
       }, [] as DatabaseFriendRow[]);
 
-    return await ContactController.parseDatabaseContactRows(
-      databases,
-      dbFriendRows.filter((row) => {
-        if (ids.includes(row.userName)) return true;
-        return false;
-      }),
-    );
+    return {
+      data: await ContactController.parseDatabaseContactRows(
+        databases,
+        dbFriendRows.filter((row) => {
+          if (ids.includes(row.userName)) return true;
+          return false;
+        }),
+      ),
+    };
   },
 };

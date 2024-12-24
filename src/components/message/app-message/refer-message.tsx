@@ -42,13 +42,7 @@ export default function ReferMessage({
         showUsername={showUsername}
       >
         <div
-          className={cn(
-            "py-2.5 px-3 w-fit max-w-[20em] rounded-lg",
-            ["bg-[#95EB69] bubble-tail-r", "bg-white bubble-tail-l"][direction],
-            "leading-normal break-words text-pretty",
-            "space-y-2",
-            textMessageVariants[variant],
-          )}
+          className={cn(textMessageVariants({ variant, direction, className }))}
           {...props}
         >
           <FormatTextMessageContent
@@ -57,7 +51,7 @@ export default function ReferMessage({
 
           <div
             className={cn(
-              "pl-1.5 pr-2.5 py-1 text-sm leading-normal text-neutral-600 border-l-2 rounded",
+              "mt-2 pl-1.5 pr-2.5 py-1 text-sm leading-normal text-neutral-600 border-l-2 rounded",
               [
                 "bg-white/25 border-white/55",
                 "bg-[rgba(222,222,222,0.3)] border-[rgba(193,193,193,0.6)]",

@@ -2,8 +2,12 @@ import DefaultMessageWithUser from "@/components/message/default-message-with-us
 import type { MessageProp } from "@/components/message/message.tsx";
 import User from "@/components/user.tsx";
 import WechatEmoji, { WechatEmojiTable } from "@/components/wechat-emoji.tsx";
-import type { TextMessage as TextMessageVM } from "@/lib/schema.ts";
+import {
+  MessageDirection,
+  type TextMessage as TextMessageVM,
+} from "@/lib/schema.ts";
 import { cn } from "@/lib/utils.ts";
+import { cva } from "class-variance-authority";
 import type { ReactNode } from "react";
 import Link from "../link";
 
@@ -11,10 +15,25 @@ type TextMessageProps = MessageProp<TextMessageVM>;
 
 export type TextMessageEntity = string;
 
-export const textMessageVariants = {
-  default: "",
-  referenced: "text-sm",
-};
+export const textMessageVariants = cva(
+  [
+    "py-2.5 px-3 w-fit max-w-[20em] min-h-11 rounded-lg",
+    "leading-normal break-words text-pretty",
+    "[&>p]:min-h-[1.5em] [&_a]:text-blue-500 [&_a]:underline",
+  ],
+  {
+    variants: {
+      variant: {
+        default: [],
+        referenced: [],
+      },
+      direction: {
+        [MessageDirection.outgoing]: ["bg-[#95EB69] bubble-tail-r"],
+        [MessageDirection.incoming]: ["bg-white bubble-tail-l"],
+      },
+    },
+  },
+);
 
 export default function TextMessage({
   message,
@@ -35,14 +54,7 @@ export default function TextMessage({
         showUsername={showUsername}
       >
         <div
-          className={cn(
-            "py-2.5 px-3 w-fit max-w-[20em] min-h-11 space-y-[1.5em] rounded-lg",
-            ["bg-[#95EB69] bubble-tail-r", "bg-white bubble-tail-l"][direction],
-            "leading-normal break-words text-pretty",
-            "[&_a]:text-blue-500 [&_a]:underline",
-            textMessageVariants[variant],
-            className,
-          )}
+          className={cn(textMessageVariants({ variant, direction, className }))}
           {...props}
         >
           <FormatTextMessageContent text={message.message_entity} />

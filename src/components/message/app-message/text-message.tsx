@@ -32,14 +32,7 @@ export default function TextMessage({
         showUsername={showUsername}
       >
         <div
-          className={cn(
-            "py-2.5 px-3 w-fit max-w-[20em] space-y-[1.5em] rounded-lg",
-            ["bg-[#95EB69] bubble-tail-r", "bg-white bubble-tail-l"][direction],
-            "leading-normal break-words text-pretty",
-            "[&_a]:text-blue-500 [&_a]:underline",
-            textMessageVariants[variant],
-            className,
-          )}
+          className={cn(textMessageVariants({ variant, direction, className }))}
           {...props}
         >
           {message.message_entity.msg.appmsg.title}

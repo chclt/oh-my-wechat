@@ -72,12 +72,18 @@ export default function StickerMessage({
           <Image
             {...(message.message_entity.msg.emoji["@_width"]
               ? {
-                  width: message.message_entity.msg.emoji["@_width"],
+                  width:
+                    Number.parseInt(
+                      message.message_entity.msg.emoji["@_width"],
+                    ) / 2,
                 }
               : {})}
             {...(message.message_entity.msg.emoji["@_height"]
               ? {
-                  height: message.message_entity.msg.emoji["@_height"],
+                  height:
+                    Number.parseInt(
+                      message.message_entity.msg.emoji["@_height"],
+                    ) / 2,
                 }
               : {})}
             src={message.message_entity.msg.emoji["@_cdnurl"]}

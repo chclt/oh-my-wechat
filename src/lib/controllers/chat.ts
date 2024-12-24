@@ -49,10 +49,12 @@ export const ChatController = {
         ),
     );
 
-    const contactRows: (User | Chatroom)[] = await ContactController.in(
-      databases,
-      dbSessionAbstractRowsFiltered.map((row) => row.UsrName),
-    );
+    const contactRows: (User | Chatroom)[] = (
+      await ContactController.in(
+        databases,
+        dbSessionAbstractRowsFiltered.map((row) => row.UsrName),
+      )
+    ).data;
     for (const contact of contactRows) {
       contacts[contact.id] = contact;
     }

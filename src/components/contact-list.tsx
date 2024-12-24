@@ -1,6 +1,6 @@
 import Image from "@/components/image.tsx";
 import useQuery from "@/lib/hooks/useQuery.ts";
-import type { User } from "@/lib/schema.ts";
+import type { ControllerResult, User } from "@/lib/schema.ts";
 import { cn } from "@/lib/utils.ts";
 import type React from "react";
 import { useEffect } from "react";
@@ -15,7 +15,11 @@ export default function ContactList({
   className,
   ...props
 }: ContactListProps) {
-  const [query, isQuerying, result, error] = useQuery<User[]>([]);
+  const [query, isQuerying, result, error] = useQuery<ControllerResult<User[]>>(
+    {
+      data: [],
+    },
+  );
 
   useEffect(() => {
     query("/contacts");
@@ -23,7 +27,7 @@ export default function ContactList({
 
   return (
     <ul>
-      {result.map((i) => (
+      {result.data.map((i) => (
         <li
           key={i.id}
           className={cn("p-2.5 flex gap-4 hover:bg-black/5")}

@@ -2,7 +2,6 @@ import Link from "@/components/link.tsx";
 import LocalImage from "@/components/local-image.tsx";
 import type { AppMessageProps } from "@/components/message/app-message.tsx";
 import DefaultMessageWithUser from "@/components/message/default-message-with-user.tsx";
-import User from "@/components/user.tsx";
 import { useApp } from "@/lib/hooks/appProvider.tsx";
 import type { AppMessageType, Message } from "@/lib/schema.ts";
 import { cn, decodeUnicodeReferences } from "@/lib/utils.ts";
@@ -78,7 +77,6 @@ export default function MusicMessage({
               domain="opendata"
               className={"absolute inset-0 w-full h-full object-cover"}
             />
-
             <div
               className={
                 "relative p-4 flex items-center bg-white/20 backdrop-blur"
@@ -116,8 +114,6 @@ export default function MusicMessage({
     );
   return (
     <p>
-      {showUsername && <User user={message.from} variant={"inline"} />}
-      {showUsername && ": "}
       [音乐] {decodeUnicodeReferences(message.message_entity.msg.appmsg.title)}
     </p>
   );

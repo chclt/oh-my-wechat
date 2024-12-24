@@ -55,7 +55,7 @@ export const MessageController = {
       chat?: Chat;
       databases: WCDatabases;
       parseReplyMessage?: boolean;
-    }
+    },
   ): Promise<Message[]> => {
     const messageSenderIds = raw_message_rows
       .map((raw_message_row) => {
@@ -88,7 +88,7 @@ export const MessageController = {
             const separatorPosition = raw_message_row.Message.indexOf(":\n");
             senderId = raw_message_row.Message.slice(0, separatorPosition);
             rawMessageContent = raw_message_row.Message.slice(
-              separatorPosition + 2
+              separatorPosition + 2,
             );
           }
 
@@ -104,7 +104,8 @@ export const MessageController = {
         }
       })
       .filter((i) => i !== undefined);
-    const usersArray = await ContactController.in(databases, messageSenderIds);
+    const usersArray = (await ContactController.in(databases, messageSenderIds))
+      .data;
     const usersTable: { [key: string]: User | Chatroom } = {};
     usersArray.map((user) => {
       usersTable[user.id] = user;
@@ -151,7 +152,7 @@ export const MessageController = {
 
         case MessageType.IMAGE: {
           const messageEntity: ImageMessageEntity = xmlParser.parse(
-            raw_message_row.Message
+            raw_message_row.Message,
           );
           return {
             ...message,
@@ -161,7 +162,7 @@ export const MessageController = {
 
         case MessageType.VOICE: {
           const messageEntity: VoiceMessageEntity = xmlParser.parse(
-            raw_message_row.Message
+            raw_message_row.Message,
           );
           return {
             ...message,
@@ -171,7 +172,7 @@ export const MessageController = {
 
         case MessageType.VERITY: {
           const messageEntity: VerityMessageEntity = xmlParser.parse(
-            raw_message_row.Message
+            raw_message_row.Message,
           );
           return {
             ...message,
@@ -181,7 +182,7 @@ export const MessageController = {
 
         case MessageType.CONTACT: {
           const messageEntity: ContactMessageEntity = xmlParser.parse(
-            raw_message_row.Message
+            raw_message_row.Message,
           );
           return {
             ...message,
@@ -191,7 +192,7 @@ export const MessageController = {
 
         case MessageType.VIDEO: {
           const messageEntity: VideoMessageEntity = xmlParser.parse(
-            raw_message_row.Message
+            raw_message_row.Message,
           );
           return {
             ...message,
@@ -201,7 +202,7 @@ export const MessageController = {
 
         case MessageType.STICKER: {
           const messageEntity: StickerMessageEntity = xmlParser.parse(
-            raw_message_row.Message
+            raw_message_row.Message,
           );
           return {
             ...message,
@@ -211,7 +212,7 @@ export const MessageController = {
 
         case MessageType.LOCATION: {
           const messageEntity: LocationMessageEntity = xmlParser.parse(
-            raw_message_row.Message
+            raw_message_row.Message,
           );
 
           return {
@@ -243,7 +244,7 @@ export const MessageController = {
 
         case MessageType.VOIP: {
           const messageEntity: VoipMessageEntity = xmlParser.parse(
-            raw_message_row.Message
+            raw_message_row.Message,
           );
 
           return {
@@ -254,7 +255,7 @@ export const MessageController = {
 
         case MessageType.MICROVIDEO: {
           const messageEntity: MicroVideoMessageEntity = xmlParser.parse(
-            raw_message_row.Message
+            raw_message_row.Message,
           );
 
           return {
@@ -265,7 +266,7 @@ export const MessageController = {
 
         case MessageType.GROUP_VOIP: {
           const messageEntity: ChatroomVoipMessageEntity = JSON.parse(
-            raw_message_row.Message
+            raw_message_row.Message,
           );
 
           return {
@@ -285,7 +286,7 @@ export const MessageController = {
 
         case MessageType.SYSTEM_EXTENDED: {
           const messageEntity: SystemExtendedMessageEntity = xmlParser.parse(
-            raw_message_row.Message
+            raw_message_row.Message,
           );
 
           return {
@@ -349,7 +350,7 @@ export const MessageController = {
       cursor?: number;
       cursor_condition?: ControllerPaginatorResult<unknown>["meta"]["cursor_condition"];
       limit: number;
-    }
+    },
   ): Promise<ControllerPaginatorResult<Message[]>> => {
     const dbs = databases.message;
     if (!dbs) throw new Error("message databases are not found");
@@ -457,7 +458,7 @@ export const MessageController = {
         console.log(
           chat.title,
           `Chat_${CryptoJS.MD5(chat.id).toString()}`,
-          `message_${index + 1}.sqlite`
+          `message_${index + 1}.sqlite`,
         );
 
         console.log(row);
@@ -496,7 +497,7 @@ export const MessageController = {
         string,
         number,
         number,
-        number
+        number,
       ];
 
       raw_message_rows.push({
@@ -544,7 +545,7 @@ export const MessageController = {
       type?: MessageType | MessageType[];
       type_app?: AppMessageType | AppMessageType[];
       limit: number;
-    }
+    },
   ): Promise<ControllerPaginatorResult<Message[]>> => {
     if (!databases) {
       throw new Error("databases are not found");
@@ -561,7 +562,7 @@ export const MessageController = {
             type_app,
             limit,
           });
-        })
+        }),
       )
     ).flatMap((result) => result.data);
 
@@ -581,7 +582,7 @@ export const MessageController = {
       chat: Chat;
       messageIds: string[];
       parseReplyMessage?: boolean;
-    }
+    },
   ): Promise<ControllerResult<Message[]>> => {
     const dbs = databases.message;
     if (!dbs) throw new Error("message databases are not found");
@@ -635,7 +636,7 @@ export const MessageController = {
         string,
         number,
         number,
-        number
+        number,
       ];
 
       raw_message_rows.push({
@@ -662,7 +663,7 @@ export const MessageController = {
   },
 
   all_verify: async (
-    databases: WCDatabases
+    databases: WCDatabases,
   ): Promise<ControllerResult<Message[]>> => {
     const dbs = databases.message;
     if (!dbs) {
@@ -673,7 +674,7 @@ export const MessageController = {
       ...dbs.map((database) => {
         try {
           const tableNames = database.exec(
-            'SELECT name FROM sqlite_master WHERE type = "table" AND name LIKE "Hello_%";'
+            'SELECT name FROM sqlite_master WHERE type = "table" AND name LIKE "Hello_%";',
           );
 
           console.log(".........");
@@ -716,7 +717,7 @@ export const MessageController = {
         string,
         number,
         number,
-        number
+        number,
       ];
 
       raw_message_rows.push({

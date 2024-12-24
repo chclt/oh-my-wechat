@@ -80,11 +80,6 @@ export interface Contact {
   remarkPinyinInits: string;
 }
 
-// TODO 微信账户
-export interface Account {
-  md5: string;
-}
-
 export interface User {
   id: string; // wxid
   user_id: string;
@@ -186,7 +181,7 @@ export enum MessageType {
   LOCATION = 48, // 位置消息
   APP = 49, // 好多可能，里面还有类型
   VOIP = 50, // 语音/视频通话
-  MICROVIDEO = 62, // 小视频
+  MICROVIDEO = 62, // 也是视频
   GROUP_VOIP = 64, // 群语音/视频通话 TODO: 可能是通知
   SYSTEM = 10000, // 系统消息,应该只是文本
   SYSTEM_EXTENDED = 10002,

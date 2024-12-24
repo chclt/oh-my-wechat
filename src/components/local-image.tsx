@@ -63,7 +63,7 @@ const LocalImage = forwardRef<HTMLImageElement, LocalImageProps>(
         height={result?.[0]?.height}
         alt={alt}
         loading="lazy"
-        className={cn("", className)}
+        className={className}
         {...props}
       />
     );

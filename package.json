@@ -32,7 +32,6 @@
     "dayjs": "^1.11.13",
     "embla-carousel-react": "^8.5.1",
     "fast-xml-parser": "^4.5.0",
-    "lodash-es": "^4.17.21",
     "lucide-react": "^0.459.0",
     "protobufjs": "^7.4.0",
     "react": "^18.3.1",
