@@ -10,6 +10,10 @@ const ffmpegCoreURL =
 const ffmpegWasmURL =
   "https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.wasm";
 
+const ffmpeg = new FFmpeg();
+
+let isFFmpegLoading = false; // 防止重复加载, TODO: 更好应该是写一个事件广播
+
 export const VoiceController = {
   get: async (
     directory: FileSystemDirectoryHandle,
@@ -47,11 +51,21 @@ export const VoiceController = {
           src: await (async () => {
             const silk = await decode(await file.file.arrayBuffer(), 24000);
 
-            const ffmpeg = new FFmpeg();
-            await ffmpeg.load({
-              coreURL: await toBlobURL(ffmpegCoreURL, "text/javascript"),
-              wasmURL: await toBlobURL(ffmpegWasmURL, "application/wasm"),
-            });
+            if (!ffmpeg.loaded) {
+              if (!isFFmpegLoading) {
+                isFFmpegLoading = true;
+                await ffmpeg.load({
+                  coreURL: await toBlobURL(ffmpegCoreURL, "text/javascript"),
+                  wasmURL: await toBlobURL(ffmpegWasmURL, "application/wasm"),
+                });
+              }
+
+              // TODO
+              while (!ffmpeg.loaded) {
+                await new Promise((resolve) => setTimeout(resolve, 200));
+              }
+            }
+
             await ffmpeg.writeFile("input.pcm", silk.data);
             await ffmpeg.exec([
               "-y",

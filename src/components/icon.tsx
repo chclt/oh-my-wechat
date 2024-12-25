@@ -73,3 +73,45 @@ export function ContactIconOutline(props: IconProps) {
     </svg>
   );
 }
+
+export function RedEnvelopeIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}
+    >
+      <rect
+        x="4.79999"
+        y="2.40039"
+        width="14.4"
+        height="19.2"
+        rx="2.4"
+        fill="url(#paint0_linear_470_1628)"
+      />
+      <path
+        fill-rule="evenodd"
+        clip-rule="evenodd"
+        d="M4.80002 8.3629V6.24039C4.80002 4.89626 4.80002 4.2242 5.0616 3.71081C5.2917 3.25922 5.65885 2.89207 6.11044 2.66197C6.62383 2.40039 7.29589 2.40039 8.64002 2.40039H15.36C16.7041 2.40039 17.3762 2.40039 17.8896 2.66197C18.3412 2.89207 18.7083 3.25922 18.9384 3.71081C19.2 4.2242 19.2 4.89626 19.2 6.24039V8.36285C17.441 9.85762 14.8673 10.8004 12 10.8004C9.13275 10.8004 6.55908 9.85764 4.80002 8.3629Z"
+        fill="#FE7E7E"
+      />
+      <circle cx="12" cy="10.8004" r="2.4" fill="#FFDD76" />
+      <defs>
+        <linearGradient
+          id="paint0_linear_470_1628"
+          x1="12"
+          y1="2.40039"
+          x2="12"
+          y2="21.6004"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop stop-color="#FF7676" />
+          <stop offset="1" stop-color="#EC4545" />
+        </linearGradient>
+      </defs>
+    </svg>
+  );
+}

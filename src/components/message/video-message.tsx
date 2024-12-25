@@ -94,13 +94,13 @@ export default function VideoMessage({
               <LocalVideo
                 chat={chat!}
                 message={message}
-                controls={false}
+                controls
                 className={"min-w-32 min-h-32 object-contain bg-white"}
               />
 
               <div
                 className={
-                  "absolute top-0 right-0 bottom-0 left-[5px] flex justify-center items-center"
+                  "hidden absolute top-0 right-0 bottom-0 left-[5px] flex justify-center items-center"
                 }
               >
                 <div className={"size-8 [&_svg]:size-full"}>
@@ -120,7 +120,7 @@ export default function VideoMessage({
               </div>
               <div
                 className={cn(
-                  "absolute bottom-2 text-sm text-white",
+                  "hidden absolute bottom-2 text-sm text-white",
 
                   ["left-4", "left-[calc(5px+1rem)]"][direction],
                 )}

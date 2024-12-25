@@ -52,7 +52,6 @@ export default function Message({
           onDoubleClick={() => {
             console.log(message);
           }}
-          title={message.raw_message}
         >
           解析失败的消息
         </div>

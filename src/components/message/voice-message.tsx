@@ -4,6 +4,7 @@ import type { MessageProp } from "@/components/message/message.tsx";
 import User from "@/components/user.tsx";
 import { useApp } from "@/lib/hooks/appProvider.tsx";
 import type { VoiceMessage as VoiceMessageVM } from "@/lib/schema.ts";
+import { cn } from "@/lib/utils.ts";
 
 type VoiceMessageProps = MessageProp<VoiceMessageVM>;
 
@@ -43,9 +44,8 @@ export default function VoiceMessage({
         showPhoto={showPhoto}
         showUsername={showUsername}
       >
-        <div className="" {...props}>
-          <LocalVoice chat={chat!} message={message} />
-          voice: {message.message_entity.msg.voicemsg["@_voicelength"]}
+        <div className={cn("max-w-[20em]")} {...props}>
+          <LocalVoice chat={chat!} message={message} className={""} />
         </div>
       </DefaultMessageWithUser>
     );

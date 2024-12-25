@@ -43,29 +43,29 @@ const LocalVoice = forwardRef<HTMLAudioElement, LocalVoiceProps>(
     });
 
     return (
-      <div>
-        <audio
-          ref={voiceRef}
-          src={result?.src}
-          controls
-          // width={result?.[0]?.width}
-          // height={result?.[0]?.height}
-          {...props}
-        />
-        {result && (
-          <>
-            {result.raw_aud_src && (
-              <a
-                href={result.raw_aud_src}
-                download={`${chat.title}_${message.local_id}.aud`}
-              >
-                download aud
-              </a>
-            )}
-            {result.transcription && <p>{result.transcription}</p>}
-          </>
-        )}
-      </div>
+      <audio
+        ref={voiceRef}
+        src={result?.src}
+        controls
+        // width={result?.[0]?.width}
+        // height={result?.[0]?.height}
+        {...props}
+      />
+      // <div>
+      //   {result && (
+      //     <>
+      //       {result.raw_aud_src && (
+      //         <a
+      //           href={result.raw_aud_src}
+      //           download={`${chat.title}_${message.local_id}.aud`}
+      //         >
+      //           download aud
+      //         </a>
+      //       )}
+      //       {result.transcription && <p>{result.transcription}</p>}
+      //     </>
+      //   )}
+      // </div>
     );
   },
 );

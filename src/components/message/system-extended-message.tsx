@@ -82,7 +82,7 @@ export default function SystemExtendedMessage({
 
         const linkReg = /(\$\S+?\$)/;
 
-        content = plain.split(linkReg).map((s) => {
+        content = plain.split(linkReg).map((s, index) => {
           if (linkReg.test(s)) {
             const linkKey = s.slice(1, -1);
 
@@ -106,7 +106,12 @@ export default function SystemExtendedMessage({
                   : undefined;
 
                 return user ? (
-                  <User user={user} showPhoto={true} variant="inline" />
+                  <User
+                    key={index}
+                    user={user}
+                    showPhoto={true}
+                    variant="inline"
+                  />
                 ) : (
                   linkObj.memberlist.member.nickname
                 );
@@ -174,7 +179,7 @@ export default function SystemExtendedMessage({
         {message.raw_message
           .split(userLinkReg)
           .filter((s) => s.length)
-          .map((s) => {
+          .map((s, index) => {
             if (userLinkReg.test(s)) {
               const xmlParser = new XMLParser({
                 ignoreAttributes: false,
@@ -194,9 +199,9 @@ export default function SystemExtendedMessage({
                 : null;
 
               return user ? (
-                <User user={user} variant={"inline"} />
+                <User key={index} user={user} variant={"inline"} />
               ) : (
-                <span>{userLink["a"]["#text"]}</span>
+                <span key={index}>{userLink["a"]["#text"]}</span>
               );
             }
             return s;

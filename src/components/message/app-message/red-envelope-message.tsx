@@ -1,3 +1,4 @@
+import { RedEnvelopeIcon } from "@/components/icon.tsx";
 import type { AppMessageProps } from "@/components/message/app-message.tsx";
 import DefaultMessageWithUser from "@/components/message/default-message-with-user.tsx";
 import User from "@/components/user.tsx";
@@ -15,22 +16,29 @@ export interface RedEnvelopeMessageEntity {
     iconurl: string;
     receivertitle: string;
     sendertitle: string;
-    scenetext: [string, string];
-    senderdes: string;
-    receiverdes: string;
+    scenetext: string; // 好像也有可能是数组
+    senderdes: string; // eg. 查看红包
+    receiverdes: string; // eg. 领取红包
     nativeurl: `wxpay://${string}`;
     sceneid: number;
     innertype: number;
     paymsgid: number;
-    locallogoicon: "c2c_hongbao_icon_cn" | string;
+    locallogoicon: string;
     invalidtime: number;
     broaden: "";
+
+    exclusive_recv_username?: string; // 群里发红包指定接收人
+    senderc2cshowsourceurl?: string; // 红包封面裁切
+    receiverc2cshowsourceurl?: string; // 红包封面裁切
+    recshowsourceurl?: string; // 红包封面全尺寸加上红包模板
+    detailshowsourceurl?: string; // 红包封面全尺寸
+    corpname?: string; // 红包封面的作者是哪个品牌
   };
 }
 
-type RedEnvelopeProps = AppMessageProps<RedEnvelopeMessageEntity>;
+type RedEnvelopeMessageProps = AppMessageProps<RedEnvelopeMessageEntity>;
 
-export default function RedEnvelope({
+export default function RedEnvelopeMessage({
   message,
   direction,
   variant = "default",
@@ -38,7 +46,7 @@ export default function RedEnvelope({
   showUsername,
   className,
   ...props
-}: RedEnvelopeProps) {
+}: RedEnvelopeMessageProps) {
   if (variant === "default")
     return (
       <DefaultMessageWithUser
@@ -46,17 +54,46 @@ export default function RedEnvelope({
         showPhoto={showPhoto}
         showUsername={showUsername}
       >
-        <div
-          className="w-64 py-4 pl-4 pr-6 flex gap-4 items-center bg-white rounded-2xl border border-neutral-200"
-          {...props}
-        >
-          <div className={"shrink-0 size-12 bg-neutral-400 rounded-full"} />
-          <div>
-            <h4 className={"font-medium"}>
-              {message.message_entity.msg.appmsg.wcpayinfo.sendertitle}
-            </h4>
+        {message.message_entity.msg.appmsg.wcpayinfo
+          .receiverc2cshowsourceurl ? (
+          <div
+            className="w-64 bg-white overflow-hidden rounded-2xl border border-neutral-200"
+            {...props}
+          >
+            <img
+              src={
+                message.message_entity.msg.appmsg.wcpayinfo
+                  .receiverc2cshowsourceurl
+              }
+              alt={"红包封面"}
+              className={"rounded-2xl"}
+            />
+            <div className={"py-2 pl-2 pr-3 flex gap-1"}>
+              <div className={"size-6 [&_svg]:size-full"}>
+                <RedEnvelopeIcon />
+              </div>
+              <div>
+                <h4 className={"font-medium"}>
+                  {message.message_entity.msg.appmsg.wcpayinfo.sendertitle}
+                </h4>
+              </div>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div
+            className="w-64 py-4 pl-2.5 pr-6 flex gap-2 items-center bg-white rounded-2xl border border-neutral-200"
+            {...props}
+          >
+            <div className={"shrink-0 size-12  [&_svg]:size-full"}>
+              <RedEnvelopeIcon />
+            </div>
+            <div>
+              <h4 className={"font-medium"}>
+                {message.message_entity.msg.appmsg.wcpayinfo.sendertitle}
+              </h4>
+            </div>
+          </div>
+        )}
       </DefaultMessageWithUser>
     );
 
