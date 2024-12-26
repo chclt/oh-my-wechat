@@ -1,7 +1,6 @@
 import LocalVoice from "@/components/local-voice.tsx";
-import DefaultMessageWithUser from "@/components/message/default-message-with-user.tsx";
+import MessageInlineWrapper from "@/components/message/message-inline.tsx";
 import type { MessageProp } from "@/components/message/message.tsx";
-import User from "@/components/user.tsx";
 import { useApp } from "@/lib/hooks/appProvider.tsx";
 import type { VoiceMessage as VoiceMessageVM } from "@/lib/schema.ts";
 import { cn } from "@/lib/utils.ts";
@@ -29,37 +28,26 @@ export interface VoiceMessageEntity {
 
 export default function VoiceMessage({
   message,
-  direction,
   variant = "default",
-  showPhoto,
-  showUsername,
   ...props
 }: VoiceMessageProps) {
   const { chat } = useApp();
 
   if (variant === "default")
     return (
-      <DefaultMessageWithUser
-        message={message}
-        showPhoto={showPhoto}
-        showUsername={showUsername}
-      >
-        <div className={cn("max-w-[20em]")} {...props}>
-          <LocalVoice chat={chat!} message={message} className={""} />
-        </div>
-      </DefaultMessageWithUser>
+      <div className={cn("max-w-[20em]")} {...props}>
+        <LocalVoice chat={chat!} message={message} className={""} />
+      </div>
     );
 
   return (
-    <p>
-      {showUsername && <User user={message.from} variant={"inline"} />}
-      {showUsername && ": "}
+    <MessageInlineWrapper message={message} {...props}>
       [语音]{" "}
       {Math.floor(
         Number.parseInt(message.message_entity.msg.voicemsg["@_voicelength"]) /
           1000,
       )}
       ″
-    </p>
+    </MessageInlineWrapper>
   );
 }

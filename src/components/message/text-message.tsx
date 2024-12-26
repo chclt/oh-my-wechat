@@ -1,4 +1,3 @@
-import DefaultMessageWithUser from "@/components/message/default-message-with-user.tsx";
 import type { MessageProp } from "@/components/message/message.tsx";
 import User from "@/components/user.tsx";
 import WechatEmoji, { WechatEmojiTable } from "@/components/wechat-emoji.tsx";
@@ -10,6 +9,7 @@ import { cn } from "@/lib/utils.ts";
 import { cva } from "class-variance-authority";
 import type { ReactNode } from "react";
 import Link from "../link";
+import MessageInlineWrapper from "./message-inline";
 
 type TextMessageProps = MessageProp<TextMessageVM>;
 
@@ -38,28 +38,23 @@ export const textMessageVariants = cva(
 export default function TextMessage({
   message,
   variant = "default",
-  direction,
-
-  showPhoto,
-  showUsername,
-
   className,
   ...props
 }: TextMessageProps) {
   if (variant === "default") {
     return (
-      <DefaultMessageWithUser
-        message={message}
-        showPhoto={showPhoto}
-        showUsername={showUsername}
+      <div
+        className={cn(
+          textMessageVariants({
+            variant,
+            direction: message.direction,
+            className,
+          }),
+        )}
+        {...props}
       >
-        <div
-          className={cn(textMessageVariants({ variant, direction, className }))}
-          {...props}
-        >
-          <FormatTextMessageContent text={message.message_entity} />
-        </div>
-      </DefaultMessageWithUser>
+        <FormatTextMessageContent text={message.message_entity} />
+      </div>
     );
   }
 
@@ -77,14 +72,12 @@ export default function TextMessage({
   }
 
   return (
-    <p>
-      {showUsername && <User user={message.from} variant={"inline"} />}
-      {showUsername && ": "}
+    <MessageInlineWrapper message={message} className={className} {...props}>
       <FormatTextMessageContent
         text={message.message_entity}
         className={"inline"}
       />
-    </p>
+    </MessageInlineWrapper>
   );
 }
 
@@ -102,10 +95,8 @@ export function FormatTextMessageContent({
 }: FormatTextMessageContentProps) {
   const paragraphNodes = text.split("\n").map((paragraphString, index) => {
     // 微信表情
-    let paragraphChildren = Object.entries(WechatEmojiTable).reduce<
-      ReactNode[]
-    >(
-      (paragraphChildren, [emojiKey, value]) => {
+    let paragraphChildren = Object.keys(WechatEmojiTable).reduce<ReactNode[]>(
+      (paragraphChildren, emojiKey) => {
         paragraphChildren.forEach(
           (segment, segmentIndex, paragraphChildren) => {
             if (typeof segment === "string") {
@@ -114,7 +105,7 @@ export function FormatTextMessageContent({
                 .reduce<ReactNode[]>((p, segment, index, segments) => {
                   p.push(segment);
                   if (index !== segments.length - 1) {
-                    p.push(<WechatEmoji emojiName={emojiKey} key={index} />);
+                    p.push(<WechatEmoji emojiName={emojiKey} />);
                   }
                   return p;
                 }, []);
@@ -218,7 +209,7 @@ export function FormatTextMessageContent({
     // 链接
     const urlRegex =
       /((?:https?|ftp):\/\/[a-zA-Z0-9\-._~:/?#\[\]@!$&'()*+,;=]+)/is;
-    paragraphChildren = paragraphChildren.flatMap((segment) => {
+    paragraphChildren = paragraphChildren.flatMap((segment, segmentIndex) => {
       if (typeof segment === "string") {
         return segment.split(urlRegex).map((s) => {
           if (urlRegex.test(s)) {

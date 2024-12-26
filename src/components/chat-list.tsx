@@ -131,8 +131,6 @@ const ChatItem = forwardRef<HTMLLIElement, ChatItemProps>(
                 variant="abstract"
                 type={chat.type}
                 message={last_message}
-                direction={last_message.direction}
-                showPhoto={chat.type === "chatroom"}
                 showUsername={chat.type === "chatroom"}
                 className={""}
               />

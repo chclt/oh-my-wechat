@@ -1,3 +1,4 @@
+import _global from "@/lib/global.ts";
 import { useApp } from "@/lib/hooks/appProvider.tsx";
 import useQuery from "@/lib/hooks/useQuery.ts";
 import type {
@@ -39,11 +40,12 @@ const LocalVideo = forwardRef<HTMLVideoElement, LocalVideoProps>(
     useEffect(() => {
       return () => {
         if (result?.poster) {
-          console.log("revoke video poster", result.poster);
+          if (_global.enableDebug)
+            console.log("revoke video poster", result.poster);
           URL.revokeObjectURL(result.poster);
         }
         if (result?.src) {
-          console.log("revoke video", result.src);
+          if (_global.enableDebug) console.log("revoke video", result.src);
           URL.revokeObjectURL(result.src);
         }
       };

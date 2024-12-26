@@ -22,8 +22,6 @@ interface AppProviderContext {
     element: Element,
     callback: () => void,
   ) => void;
-
-  enableDebug: boolean;
 }
 
 const AppContext = createContext<AppProviderContext>({
@@ -36,12 +34,9 @@ const AppContext = createContext<AppProviderContext>({
   setIsOpenMediaViewer: () => {},
 
   registerIntersectionObserver: () => {},
-  enableDebug: false,
 });
 
 interface AppProviderProps {
-  enableDebug: boolean;
-
   children: React.ReactNode;
 }
 

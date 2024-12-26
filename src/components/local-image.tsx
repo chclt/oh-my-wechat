@@ -1,3 +1,4 @@
+import _global from "@/lib/global.ts";
 import { useApp } from "@/lib/hooks/appProvider.tsx";
 import useQuery from "@/lib/hooks/useQuery.ts";
 import type { Chat, Message, PhotpSize } from "@/lib/schema.ts";
@@ -49,7 +50,7 @@ const LocalImage = forwardRef<HTMLImageElement, LocalImageProps>(
       return () => {
         if (result.length)
           result.map((photo) => {
-            console.log("revoke image", photo.src);
+            if (_global.enableDebug) console.log("revoke image", photo.src);
             URL.revokeObjectURL(photo.src);
           });
       };

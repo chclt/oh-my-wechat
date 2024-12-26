@@ -1,4 +1,3 @@
-import DefaultMessageWithUser from "@/components/message/default-message-with-user.tsx";
 import type { MessageProp } from "@/components/message/message.tsx";
 import type { VoipMessage as VoipMessageVM } from "@/lib/schema.ts";
 
@@ -35,53 +34,35 @@ export interface VoipMessageEntity {
 export default function VoipMessage({
   message,
   variant = "default",
-  direction,
-
-  showPhoto,
-  showUsername,
-
   ...props
 }: VoipMessageProps) {
   if (variant === "default")
     return (
       <>
         {message.message_entity.voipmsg && (
-          <DefaultMessageWithUser
-            message={message}
-            showPhoto={showPhoto}
-            showUsername={showUsername}
+          <div
+            className="max-w-[20em] py-4 pl-4 pr-6 flex gap-4 items-center bg-white rounded-2xl border border-neutral-200"
+            {...props}
           >
-            <div
-              className="max-w-[20em] py-4 pl-4 pr-6 flex gap-4 items-center bg-white rounded-2xl border border-neutral-200"
-              {...props}
-            >
-              <div className={"shrink-0 size-12 bg-neutral-400 rounded-full"} />
-              <div>
-                <h4 className={"font-medium"}>
-                  {message.from.remark ?? message.from.username}发起了语音通话
-                </h4>
-                <p className={"text-sm text-neutral-600"}>
-                  {message.message_entity.voipmsg["@_type"] ===
-                    "VoIPBubbleMsg" &&
-                    message.message_entity.voipmsg[
-                      message.message_entity.voipmsg["@_type"]
-                    ].msg}
-                </p>
-              </div>
+            <div className={"shrink-0 size-12 bg-neutral-400 rounded-full"} />
+            <div>
+              <h4 className={"font-medium"}>
+                {message.from.remark ?? message.from.username}发起了语音通话
+              </h4>
+              <p className={"text-sm text-neutral-600"}>
+                {message.message_entity.voipmsg["@_type"] === "VoIPBubbleMsg" &&
+                  message.message_entity.voipmsg[
+                    message.message_entity.voipmsg["@_type"]
+                  ].msg}
+              </p>
             </div>
-          </DefaultMessageWithUser>
+          </div>
         )}
 
         {message.message_entity.voipinvitemsg && (
-          <DefaultMessageWithUser
-            message={message}
-            showPhoto={showPhoto}
-            showUsername={showUsername}
-          >
-            <div className="" {...props}>
-              <p>通话邀请</p>
-            </div>
-          </DefaultMessageWithUser>
+          <div className="" {...props}>
+            <p>通话邀请</p>
+          </div>
         )}
       </>
     );

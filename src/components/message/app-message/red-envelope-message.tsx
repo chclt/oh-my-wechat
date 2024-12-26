@@ -1,7 +1,6 @@
 import { RedEnvelopeIcon } from "@/components/icon.tsx";
 import type { AppMessageProps } from "@/components/message/app-message.tsx";
-import DefaultMessageWithUser from "@/components/message/default-message-with-user.tsx";
-import User from "@/components/user.tsx";
+import MessageInlineWrapper from "@/components/message/message-inline.tsx";
 import type { AppMessageType } from "@/lib/schema.ts";
 
 export interface RedEnvelopeMessageEntity {
@@ -40,20 +39,12 @@ type RedEnvelopeMessageProps = AppMessageProps<RedEnvelopeMessageEntity>;
 
 export default function RedEnvelopeMessage({
   message,
-  direction,
   variant = "default",
-  showPhoto,
-  showUsername,
-  className,
   ...props
 }: RedEnvelopeMessageProps) {
   if (variant === "default")
     return (
-      <DefaultMessageWithUser
-        message={message}
-        showPhoto={showPhoto}
-        showUsername={showUsername}
-      >
+      <>
         {message.message_entity.msg.appmsg.wcpayinfo
           .receiverc2cshowsourceurl ? (
           <div
@@ -94,14 +85,12 @@ export default function RedEnvelopeMessage({
             </div>
           </div>
         )}
-      </DefaultMessageWithUser>
+      </>
     );
 
   return (
-    <p>
-      {showUsername && <User user={message.from} variant={"inline"} />}
-      {showUsername && ": "}
+    <MessageInlineWrapper message={message} {...props}>
       [红包] {message.message_entity.msg.appmsg.wcpayinfo.sendertitle}
-    </p>
+    </MessageInlineWrapper>
   );
 }

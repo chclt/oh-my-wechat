@@ -66,11 +66,9 @@ export default function MediaViewerDialog({
   }, [chat]);
 
   useEffect(() => {
-    paginatorCursor.current = result.meta.next_cursor;
     if (result.meta.cursor) {
       setMessageList((old) => ({
-        // @ts-ignore TODO
-        [result.meta.cursor]: result.data,
+        [result.meta.cursor as number]: result.data,
         ...old,
       }));
     }
@@ -110,7 +108,7 @@ export default function MediaViewerDialog({
                     .map(Number)
                     .sort((a, b) => b - a)
                     .flatMap((key) => messageList[key])
-                    .map((message, index, messageArray) => (
+                    .map((message) => (
                       <CarouselItem key={`${message.id}|${message.local_id}`}>
                         {message.type === MessageType.IMAGE && (
                           <ImageMessage

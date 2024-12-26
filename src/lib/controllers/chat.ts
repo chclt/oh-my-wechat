@@ -12,6 +12,7 @@ import CryptoJS from "crypto-js";
 import { ContactController } from "./contact";
 
 import specialBrandId from "@/assets/specialBrandUserNames.csv?raw";
+import _global from "@/lib/global.ts";
 
 export const ChatController = {
   all: async (databases: WCDatabases): Promise<ControllerResult<Chat[]>> => {
@@ -33,8 +34,6 @@ export const ChatController = {
         return acc;
       }, [] as DatabaseSessionAbstractRow[]);
 
-    const contacts: { [key: string]: User | Chatroom } = {};
-
     const specialBrandIds = specialBrandId.split("\n").map((i) => i.trim());
 
     const dbSessionAbstractRowsFiltered = dbSessionAbstractRows.filter(
@@ -50,11 +49,11 @@ export const ChatController = {
     );
 
     const contactRows: (User | Chatroom)[] = (
-      await ContactController.in(
-        databases,
-        dbSessionAbstractRowsFiltered.map((row) => row.UsrName),
-      )
+      await ContactController.in(databases, {
+        ids: dbSessionAbstractRowsFiltered.map((row) => row.UsrName),
+      })
     ).data;
+    const contacts: { [key: string]: User | Chatroom } = {};
     for (const contact of contactRows) {
       contacts[contact.id] = contact;
     }
@@ -74,7 +73,7 @@ export const ChatController = {
             // @ts-ignore
             is_collapsed: (contactInfo as Chatroom)._is_collapsed,
             ...(contactInfo?.photo ? { photo: contactInfo.photo.thumb } : {}),
-            members: (contactInfo as Chatroom).members, // TODO 添加自己
+            members: (contactInfo as Chatroom).members,
 
             chatroom: contactInfo as Chatroom,
             raw: {
@@ -95,7 +94,7 @@ export const ChatController = {
             // @ts-ignore
             is_pinned: contactInfo ? (contactInfo as User)._is_pinned : false, // todo
             is_collapsed: false,
-            members: [contactInfo], // TODO 添加自己
+            members: [_global.user, contactInfo], // TODO 添加自己
 
             user: contactInfo,
 

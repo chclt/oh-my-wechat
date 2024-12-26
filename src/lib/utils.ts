@@ -16,9 +16,9 @@ export function decodeUnicodeReferences(encodedHTMLComponent: string) {
   } catch (error) {
     if ((typeof encodedHTMLComponent as unknown) === "number") {
       // XMLParser 会把数字内容字符串转换为数字，这个时候会报错，但是也不需要转换
-    } else {
-      console.error(error);
+      // 但是遇到了应该把这个字段放到 fast-xml-parser 解析的白名单里
     }
+    console.error(error);
     return encodedHTMLComponent;
   }
 }

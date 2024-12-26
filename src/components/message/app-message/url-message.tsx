@@ -2,10 +2,9 @@ import Image from "@/components/image.tsx";
 import { LinkCard } from "@/components/link-card";
 import LocalImage from "@/components/local-image.tsx";
 import type { AppMessageProps } from "@/components/message/app-message.tsx";
-import DefaultMessageWithUser from "@/components/message/default-message-with-user.tsx";
-import User from "@/components/user.tsx";
+import MessageInlineWrapper from "@/components/message/message-inline.tsx";
 import { useApp } from "@/lib/hooks/appProvider.tsx";
-import type { AppMessageType, Message } from "@/lib/schema.ts";
+import type { AppMessageType } from "@/lib/schema.ts";
 import { decodeUnicodeReferences } from "@/lib/utils.ts";
 
 export interface UrlMessageEntity {
@@ -88,10 +87,7 @@ type UrlMessageProps = AppMessageProps<UrlMessageEntity>;
 
 export default function UrlMessage({
   message,
-  direction,
   variant = "default",
-  showPhoto,
-  showUsername,
   ...props
 }: UrlMessageProps) {
   const { chat } = useApp();
@@ -115,27 +111,19 @@ export default function UrlMessage({
 
   if (variant === "default")
     return (
-      <DefaultMessageWithUser
-        message={message as unknown as Message}
-        showPhoto={showPhoto}
-        showUsername={showUsername}
-      >
-        <LinkCard
-          href={message.message_entity.msg.appmsg.url}
-          heading={heading}
-          abstract={message.message_entity.msg.appmsg.des}
-          preview={preview}
-          from={message.message_entity.msg.appmsg.sourcedisplayname}
-          {...props}
-        />
-      </DefaultMessageWithUser>
+      <LinkCard
+        href={message.message_entity.msg.appmsg.url}
+        heading={heading}
+        abstract={message.message_entity.msg.appmsg.des}
+        preview={preview}
+        from={message.message_entity.msg.appmsg.sourcedisplayname}
+        {...props}
+      />
     );
 
   return (
-    <p>
-      {showUsername && <User user={message.from} variant={"inline"} />}
-      {showUsername && ": "}
+    <MessageInlineWrapper message={message} {...props}>
       [链接] {heading}
-    </p>
+    </MessageInlineWrapper>
   );
 }

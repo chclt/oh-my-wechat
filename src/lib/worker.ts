@@ -54,9 +54,10 @@ type WorkerResponseQuery = WorkerResponse<{ data: unknown }>;
 enum Controller {
   Chat = "/chats",
   Contacts = "/contacts",
-  AllMessages = "/messages/all",
+  ContactsIn = "/contacts/in",
+  MessagesAll = "/messages/all",
   Messages = "/messages",
-  VerifyMessages = "/messages/verify",
+  MessagesVerify = "/messages/verify",
   Images = "/images",
   Videos = "/videos",
   Voices = "/voices",
@@ -70,9 +71,10 @@ const controller: {
 } = {
   [Controller.Chat]: ChatController.all,
   [Controller.Contacts]: ContactController.all,
-  [Controller.AllMessages]: MessageController._all_from_all,
+  [Controller.ContactsIn]: ContactController.in,
+  [Controller.MessagesAll]: MessageController._all_from_all,
   [Controller.Messages]: MessageController.all,
-  [Controller.VerifyMessages]: MessageController.all_verify,
+  [Controller.MessagesVerify]: MessageController.all_verify,
   [Controller.Images]: ImageController.get,
   [Controller.Videos]: VideoController.get,
   [Controller.Voices]: VoiceController.get,
@@ -262,13 +264,14 @@ self.onmessage = async (
     case "query": {
       const [endpoint, ...args] = payload;
 
-      let result;
+      let result: unknown;
       switch (endpoint) {
         case Controller.Chat:
         case Controller.Contacts:
-        case Controller.AllMessages:
+        case Controller.ContactsIn:
+        case Controller.MessagesAll:
         case Controller.Messages:
-        case Controller.VerifyMessages:
+        case Controller.MessagesVerify:
         case Controller.ChatStatistic:
         case Controller.Statistic:
           result = await controller[endpoint](databases, ...args);

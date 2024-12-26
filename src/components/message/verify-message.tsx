@@ -48,10 +48,7 @@ export interface VerityMessageEntity {
 
 export default function VerityMessage({
   message,
-  direction,
   variant = "default",
-  showPhoto,
-  showUsername,
   ...props
 }: VerifyMessageProps) {
   return (

@@ -62,7 +62,6 @@ export default function User({
 
 interface UserPhotoProps extends React.HTMLAttributes<unknown> {
   user: UserVM;
-
   variant: "default" | "inline";
 }
 

@@ -10,8 +10,12 @@ import type { User } from "@/lib/schema.ts";
 const _global: {
   user?: User;
   ChatDatabaseTable: { [key: string]: number };
+
+  enableDebug: boolean;
 } = {
   ChatDatabaseTable: {},
+
+  enableDebug: true,
 };
 
 export default _global;

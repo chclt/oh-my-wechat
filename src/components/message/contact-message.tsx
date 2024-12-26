@@ -1,8 +1,7 @@
 import Image from "@/components/image.tsx";
-import DefaultMessageWithUser from "@/components/message/default-message-with-user.tsx";
 import type { MessageProp } from "@/components/message/message.tsx";
-import User from "@/components/user.tsx";
 import type { ContactMessage as ContactMessageVM } from "@/lib/schema.ts";
+import MessageInlineWrapper from "./message-inline";
 
 type ContactMessageProps = MessageProp<ContactMessageVM>;
 
@@ -38,10 +37,7 @@ export interface ContactMessageEntity {
 
 export default function ContactMessage({
   message,
-  direction,
   variant = "default",
-  showPhoto,
-  showUsername,
   ...props
 }: ContactMessageProps) {
   // if (message.message_entity.msg["@_brandSubscriptConfigUrl"].length) {
@@ -53,79 +49,61 @@ export default function ContactMessage({
   if (message.message_entity.msg["@_certflag"] === "0") {
     if (variant === "default")
       return (
-        <DefaultMessageWithUser
-          message={message}
-          showPhoto={showPhoto}
-          showUsername={showUsername}
+        <div
+          className="w-48 flex flex-col bg-white rounded-xl overflow-hidden"
+          {...props}
         >
-          <div
-            className="w-48 flex flex-col bg-white rounded-xl overflow-hidden"
-            {...props}
-          >
-            {message.message_entity.msg["@_bigheadimgurl"] ? (
-              <Image
-                src={message.message_entity.msg["@_bigheadimgurl"]}
-                alt=""
-                className={"shrink-0 w-full rounded-lg"}
-              />
-            ) : (
-              <div
-                className={
-                  "shrink-0 w-full pb-[100%] rounded-lg bg-neutral-300"
-                }
-              />
-            )}
+          {message.message_entity.msg["@_bigheadimgurl"] ? (
+            <Image
+              src={message.message_entity.msg["@_bigheadimgurl"]}
+              alt=""
+              className={"shrink-0 w-full rounded-lg"}
+            />
+          ) : (
+            <div
+              className={"shrink-0 w-full pb-[100%] rounded-lg bg-neutral-300"}
+            />
+          )}
 
-            <h4 className="p-2.5 font-medium">
-              {message.message_entity.msg["@_nickname"]}
-            </h4>
-          </div>
-        </DefaultMessageWithUser>
+          <h4 className="p-2.5 font-medium">
+            {message.message_entity.msg["@_nickname"]}
+          </h4>
+        </div>
       );
 
     return (
-      <p>
-        <User user={message.from} variant="inline" />
-        <span>: </span>
+      <MessageInlineWrapper message={message} {...props}>
         <span>[名片] {message.message_entity.msg["@_nickname"]}</span>
-      </p>
+      </MessageInlineWrapper>
     );
   }
 
   if (variant === "default")
     return (
-      <DefaultMessageWithUser
-        message={message}
-        showPhoto={showPhoto}
-        showUsername={showUsername}
+      <div
+        className="max-w-80 flex items-center p-2.5 pr-3 rounded-lg bg-white"
+        {...props}
       >
-        <div
-          className="max-w-80 flex items-center p-2.5 pr-3 rounded-lg bg-white"
-          {...props}
-        >
-          <Image
-            src={
-              message.message_entity.msg["@_bigheadimgurl"] ??
-              message.message_entity.msg["@_brandIconUrl"]
-            }
-            alt=""
-            className={"shrink-0 w-16 h-16 rounded-lg"}
-          />
-          <div className="ml-4 flex flex-col space-y-1.5">
-            <h4 className="font-medium">
-              {message.message_entity.msg["@_nickname"]}
-            </h4>
-            <small>{message.message_entity.msg["@_certinfo"]}</small>
-          </div>
+        <Image
+          src={
+            message.message_entity.msg["@_bigheadimgurl"] ??
+            message.message_entity.msg["@_brandIconUrl"]
+          }
+          alt=""
+          className={"shrink-0 w-16 h-16 rounded-lg"}
+        />
+        <div className="ml-4 flex flex-col space-y-1.5">
+          <h4 className="font-medium">
+            {message.message_entity.msg["@_nickname"]}
+          </h4>
+          <small>{message.message_entity.msg["@_certinfo"]}</small>
         </div>
-      </DefaultMessageWithUser>
+      </div>
     );
 
   return (
-    <p>
-      {showUsername && <User user={message.from} variant={"inline"} />}
-      {showUsername && ": "}
+    <MessageInlineWrapper message={message} {...props}>
       <span>[公众号] {message.message_entity.msg["@_nickname"]}</span>
-    </p>
+    </MessageInlineWrapper>
   );
 }

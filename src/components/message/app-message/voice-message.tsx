@@ -2,7 +2,7 @@ import type { AppMessageProps } from "@/components/message/app-message.tsx";
 import UrlMessage, {
   type UrlMessageEntity,
 } from "@/components/message/app-message/url-message.tsx";
-import User from "@/components/user.tsx";
+import MessageInlineWrapper from "@/components/message/message-inline.tsx";
 import type {
   AppMessageType,
   AppMessage as AppMessageVM,
@@ -33,29 +33,21 @@ type VoiceMessageProps = AppMessageProps<VoiceMessageEntity>;
 
 export default function VoiceMessage({
   message,
-  direction,
   variant = "default",
-  showPhoto,
-  showUsername,
   ...props
 }: VoiceMessageProps) {
   if (variant === "default") {
     return (
       <UrlMessage
         message={message as unknown as AppMessageVM<UrlMessageEntity>}
-        direction={direction}
         variant={variant}
-        showPhoto={showPhoto}
-        showUsername={showUsername}
         {...props}
       />
     );
   }
   return (
-    <p {...props}>
-      {showUsername && <User user={message.from} variant={"inline"} />}
-      {showUsername && ": "}
+    <MessageInlineWrapper message={message} {...props}>
       [音频] {decodeUnicodeReferences(message.message_entity.msg.appmsg.title)}
-    </p>
+    </MessageInlineWrapper>
   );
 }

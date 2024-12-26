@@ -1,9 +1,9 @@
 import Link from "@/components/link.tsx";
 import LocalImage from "@/components/local-image.tsx";
 import type { AppMessageProps } from "@/components/message/app-message.tsx";
-import DefaultMessageWithUser from "@/components/message/default-message-with-user.tsx";
+import MessageInlineWrapper from "@/components/message/message-inline.tsx";
 import { useApp } from "@/lib/hooks/appProvider.tsx";
-import type { AppMessageType, Message } from "@/lib/schema.ts";
+import type { AppMessageType } from "@/lib/schema.ts";
 import { cn, decodeUnicodeReferences } from "@/lib/utils.ts";
 
 export interface MusicMessageEntity {
@@ -42,7 +42,7 @@ export interface MusicMessageEntity {
     mvAlbumName: string;
     mvIssueDate: number;
     mvIdentification: string; // e.g.  "{"songId":"1855080368"}"
-    musicDuration: 144863; // 歌曲长度，单位毫秒
+    musicDuration: string; // 歌曲长度，单位毫秒
   };
 }
 
@@ -50,71 +50,60 @@ type MusicMessageProps = AppMessageProps<MusicMessageEntity>;
 
 export default function MusicMessage({
   message,
-  direction,
   variant = "default",
-  showPhoto,
-  showUsername,
   ...props
 }: MusicMessageProps) {
   const { chat } = useApp();
 
   if (variant === "default")
     return (
-      <DefaultMessageWithUser
-        message={message as unknown as Message}
-        showPhoto={showPhoto}
-        showUsername={showUsername}
-      >
-        <Link href={message.message_entity.msg.appmsg.url}>
+      <Link href={message.message_entity.msg.appmsg.url}>
+        <div
+          className={cn("relative w-64 rounded-2xl overflow-hidden bg-white")}
+          {...props}
+        >
+          <LocalImage
+            chat={chat!}
+            message={message}
+            size="origin"
+            domain="opendata"
+            className={"absolute inset-0 w-full h-full object-cover"}
+          />
           <div
-            className={cn("relative w-64 rounded-2xl overflow-hidden bg-white")}
-            {...props}
+            className={
+              "relative p-4 flex items-center bg-white/20 backdrop-blur"
+            }
           >
-            <LocalImage
-              chat={chat!}
-              message={message}
-              size="origin"
-              domain="opendata"
-              className={"absolute inset-0 w-full h-full object-cover"}
-            />
             <div
               className={
-                "relative p-4 flex items-center bg-white/20 backdrop-blur"
+                "relative shrink-0 size-16 before:content-[''] before:absolute before:-inset-8 before:rounded-full before:bg-black"
               }
             >
-              <div
-                className={
-                  "relative shrink-0 size-16 before:content-[''] before:absolute before:-inset-8 before:rounded-full before:bg-black"
-                }
-              >
-                <LocalImage
-                  chat={chat!}
-                  message={message}
-                  size="origin"
-                  domain="opendata"
-                  className={"relative rounded-full"}
-                />
-              </div>
-              <div className={"ml-12 flex flex-col"}>
-                <h4 className="break-words font-medium line-clamp-2">
-                  {decodeUnicodeReferences(
-                    message.message_entity.msg.appmsg.title,
-                  )}
-                </h4>
-                <p className={"line-clamp-1"}>
-                  {decodeUnicodeReferences(
-                    message.message_entity.msg.appmsg.des,
-                  )}
-                </p>
-              </div>
+              <LocalImage
+                chat={chat!}
+                message={message}
+                size="origin"
+                domain="opendata"
+                className={"relative rounded-full"}
+              />
+            </div>
+            <div className={"ml-12 flex flex-col"}>
+              <h4 className="break-words font-medium line-clamp-2">
+                {decodeUnicodeReferences(
+                  message.message_entity.msg.appmsg.title,
+                )}
+              </h4>
+              <p className={"line-clamp-1"}>
+                {decodeUnicodeReferences(message.message_entity.msg.appmsg.des)}
+              </p>
             </div>
           </div>
-        </Link>
-      </DefaultMessageWithUser>
+        </div>
+      </Link>
     );
   return (
-    <p>
+    <MessageInlineWrapper message={message} {...props}>
       [音乐] {decodeUnicodeReferences(message.message_entity.msg.appmsg.title)}
-    </p>
+    </MessageInlineWrapper>
   );
 }

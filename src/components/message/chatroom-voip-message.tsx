@@ -1,4 +1,3 @@
-import DefaultMessageWithUser from "@/components/message/default-message-with-user.tsx";
 import type { MessageProp } from "@/components/message/message.tsx";
 import type { ChatroomVoipMessage as ChatroomVoipMessageVM } from "@/lib/schema.ts";
 
@@ -13,19 +12,12 @@ export interface ChatroomVoipMessageEntity {
 }
 export default function ChatroomVoipMessage({
   message,
-  direction,
   variant = "default",
-  showPhoto,
-  showUsername,
   ...props
 }: ChatroomVoipMessageProps) {
-  if (message.from) {
-    return (
-      <DefaultMessageWithUser
-        message={message}
-        showPhoto={showPhoto}
-        showUsername={showUsername}
-      >
+  if (variant === "default") {
+    if (message.from) {
+      return (
         <div
           className="max-w-[20em] py-4 pl-4 pr-6 flex gap-4 items-center bg-white rounded-2xl border border-neutral-200"
           {...props}
@@ -35,7 +27,18 @@ export default function ChatroomVoipMessage({
             <p>{message.message_entity.msgContent}</p>
           </div>
         </div>
-      </DefaultMessageWithUser>
+      );
+    }
+
+    return (
+      <div
+        className="text-sm text-center text-pretty text-neutral-600"
+        {...props}
+      >
+        <p className="px-2 py-1 box-decoration-clone">
+          {message.message_entity.msgContent}
+        </p>
+      </div>
     );
   }
 

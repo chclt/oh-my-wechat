@@ -63,11 +63,7 @@ export interface SystemExtendedMessageEntity {
 
 export default function SystemExtendedMessage({
   message,
-  direction,
   variant = "default",
-  showPhoto,
-  showUsername,
-  className,
   ...props
 }: SystemExtendedMessageProps) {
   const { chat } = useApp();
@@ -154,7 +150,7 @@ export default function SystemExtendedMessage({
       );
 
     return (
-      <p className={className}>
+      <p>
         {message.message_entity.sysmsg["@_type"] === "editrevokecontent" &&
           message.message_entity.sysmsg["editrevokecontent"].text}
         {message.message_entity.sysmsg["@_type"] === "sysmsgtemplate" &&
@@ -171,7 +167,6 @@ export default function SystemExtendedMessage({
         variant === "default"
           ? "mx-auto px-14 text-sm text-center text-neutral-600"
           : "",
-        className,
       )}
       {...props}
     >

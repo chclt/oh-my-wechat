@@ -66,7 +66,10 @@ export const VoiceController = {
               }
             }
 
-            await ffmpeg.writeFile("input.pcm", silk.data);
+            const ffmpegInputFilename = `${message.chat.id}|${message.local_id}.pcm`;
+            const ffmpegOutputFilename = `${message.chat.id}|${message.local_id}.wav`;
+
+            await ffmpeg.writeFile(ffmpegInputFilename, silk.data);
             await ffmpeg.exec([
               "-y",
               "-f",
@@ -76,10 +79,13 @@ export const VoiceController = {
               "-ac",
               "1",
               "-i",
-              "input.pcm",
-              "output.wav",
+              ffmpegInputFilename,
+              ffmpegOutputFilename,
             ]);
-            const wav = await ffmpeg.readFile("output.wav");
+            const wav = await ffmpeg.readFile(ffmpegOutputFilename);
+
+            ffmpeg.deleteFile(ffmpegInputFilename);
+            ffmpeg.deleteFile(ffmpegOutputFilename);
 
             return URL.createObjectURL(new Blob([wav], { type: "audio/wav" }));
           })(),

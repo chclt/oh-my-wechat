@@ -1,3 +1,4 @@
+import _global from "@/lib/global.ts";
 import { useApp } from "@/lib/hooks/appProvider.tsx";
 import useQuery from "@/lib/hooks/useQuery.ts";
 import type { Chat, VoiceInfo, VoiceMessage } from "@/lib/schema.ts";
@@ -36,7 +37,7 @@ const LocalVoice = forwardRef<HTMLAudioElement, LocalVoiceProps>(
     useEffect(() => {
       return () => {
         if (result?.src) {
-          console.log("revoke audio", result.src);
+          if (_global.enableDebug) console.log("revoke audio", result.src);
           URL.revokeObjectURL(result.src);
         }
       };

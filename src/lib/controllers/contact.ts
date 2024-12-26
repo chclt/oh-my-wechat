@@ -282,7 +282,9 @@ export const ContactController = {
     });
 
     const allMembers: User[] = (
-      await ContactController.in(databases, Array.from(new Set(allMemberIds)))
+      await ContactController.in(databases, {
+        ids: Array.from(new Set(allMemberIds)),
+      })
     ).data as User[];
 
     // 加入当前登录的微信账号数据
@@ -350,7 +352,7 @@ export const ContactController = {
 
   in: async (
     databases: WCDatabases,
-    ids: string[],
+    { ids }: { ids: string[] },
   ): Promise<ControllerResult<(User | Chatroom)[]>> => {
     const db = databases.WCDB_Contact;
     if (!db) {
@@ -378,13 +380,16 @@ export const ContactController = {
       }, [] as DatabaseFriendRow[]);
 
     return {
-      data: await ContactController.parseDatabaseContactRows(
-        databases,
-        dbFriendRows.filter((row) => {
-          if (ids.includes(row.userName)) return true;
-          return false;
-        }),
-      ),
+      data: [
+        ...(ids.indexOf(_global.user!.id) > -1 ? [_global.user as User] : []),
+        ...(await ContactController.parseDatabaseContactRows(
+          databases,
+          dbFriendRows.filter((row) => {
+            if (ids.includes(row.userName)) return true;
+            return false;
+          }),
+        )),
+      ],
     };
   },
 };

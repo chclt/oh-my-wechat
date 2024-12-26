@@ -14,6 +14,7 @@ import type { VoiceMessageEntity } from "@/components/message/voice-message.tsx"
 import type { VoipMessageEntity } from "@/components/message/voip-message.tsx";
 import { ChatController } from "@/lib/controllers/chat.ts";
 import { ContactController } from "@/lib/controllers/contact.ts";
+import _global from "@/lib/global.ts";
 import {
   type AppMessage,
   AppMessageType,
@@ -63,9 +64,11 @@ export const MessageController = {
           let senderId = "";
           let rawMessageContent = "";
 
-          if (
+          if (raw_message_row.Des === MessageDirection.outgoing) {
+            rawMessageContent = raw_message_row.Message;
+            senderId = _global.user!.id;
+          } else if (
             raw_message_row.Type === MessageType.SYSTEM ||
-            raw_message_row.Des === MessageDirection.outgoing ||
             raw_message_row.Message.startsWith("<") ||
             raw_message_row.Message.startsWith('"<')
           ) {
@@ -100,12 +103,13 @@ export const MessageController = {
         if (chat && chat.type === "private") {
           return raw_message_row.Des === MessageDirection.incoming
             ? chat.id
-            : "0"; // TODO
+            : (_global.user?.id ?? "?");
         }
       })
       .filter((i) => i !== undefined);
-    const usersArray = (await ContactController.in(databases, messageSenderIds))
-      .data;
+    const usersArray = (
+      await ContactController.in(databases, { ids: messageSenderIds })
+    ).data;
     const usersTable: { [key: string]: User | Chatroom } = {};
     usersArray.map((user) => {
       usersTable[user.id] = user;
@@ -140,6 +144,12 @@ export const MessageController = {
 
       const xmlParser = new XMLParser({
         ignoreAttributes: false,
+        tagValueProcessor: (_, tagValue, jPath) => {
+          if (jPath === "msg.appmsg.title" || jPath === "msg.appmsg.des") {
+            return undefined; // 不解析
+          }
+          return tagValue; // 走默认的解析
+        },
       });
 
       switch (raw_message_row.Type) {
@@ -342,7 +352,7 @@ export const MessageController = {
       type_app, // 有 bug
       cursor,
       cursor_condition = ">=",
-      limit = 20,
+      limit = 50,
     }: {
       chat: Chat;
       type?: MessageType | MessageType[];
@@ -389,9 +399,11 @@ export const MessageController = {
                 ORDER BY CreateTime ASC;
               `);
             }
-            return database.exec(`
-              SELECT 
-                  rowid, CreateTime, Des, ImgStatus, MesLocalID, Message, CAST (MesSvrID as TEXT) as MesSvrID, Status, TableVer, Type 
+
+            if (cursor_condition === ">=" || cursor_condition === ">") {
+              return database.exec(`
+                SELECT 
+                    rowid, CreateTime, Des, ImgStatus, MesLocalID, Message, CAST (MesSvrID as TEXT) as MesSvrID, Status, TableVer, Type 
               FROM 
                   Chat_${CryptoJS.MD5(chat.id).toString()} 
               WHERE 
@@ -413,6 +425,62 @@ export const MessageController = {
               ORDER BY CreateTime ASC 
               LIMIT ${limit};
             `);
+            }
+
+            return database.exec(
+              `
+                SELECT 
+                  * 
+                FROM (
+                  SELECT 
+                      rowid, CreateTime, Des, ImgStatus, MesLocalID, Message, CAST(MesSvrID as TEXT) as MesSvrID, Status, TableVer, Type
+                  FROM Chat_${CryptoJS.MD5(chat.id).toString()}
+                  WHERE
+                    ${[
+                      `CreateTime < ${cursor}`,
+                      type
+                        ? `Type IN (${
+                            Array.isArray(type) ? type.join(", ") : type
+                          })`
+                        : undefined,
+                      type === MessageType.APP && type_app
+                        ? `(${(Array.isArray(type_app) ? type_app : [type_app])
+                            .map((i) => `Message like '%<type>${i}</type>%'`)
+                            .join(" OR ")})`
+                        : undefined,
+                    ]
+                      .filter((i) => i)
+                      .join(" AND ")}
+                  ORDER BY CreateTime DESC
+                  LIMIT ${limit}
+
+                  UNION ALL
+
+                  SELECT 
+                      rowid, CreateTime, Des, ImgStatus, MesLocalID, Message, CAST(MesSvrID as TEXT) as MesSvrID, Status, TableVer, Type
+                  FROM Chat_${CryptoJS.MD5(chat.id).toString()}
+                  WHERE
+                    ${[
+                      `CreateTime >= ${cursor}`,
+                      type
+                        ? `Type IN (${
+                            Array.isArray(type) ? type.join(", ") : type
+                          })`
+                        : undefined,
+                      type === MessageType.APP && type_app
+                        ? `(${(Array.isArray(type_app) ? type_app : [type_app])
+                            .map((i) => `Message like '%<type>${i}</type>%'`)
+                            .join(" OR ")})`
+                        : undefined,
+                    ]
+                      .filter((i) => i)
+                      .join(" AND ")}
+                  ORDER BY CreateTime ASC
+                  LIMIT ${limit}
+                ) 
+                ORDER BY CreateTime ASC;
+              `,
+            );
           }
 
           // 没有游标的时候查询最新的数据但是按时间正序排列
@@ -455,13 +523,12 @@ export const MessageController = {
       }),
     ].filter((row, index) => {
       if (row.length > 0) {
-        console.log(
-          chat.title,
-          `Chat_${CryptoJS.MD5(chat.id).toString()}`,
-          `message_${index + 1}.sqlite`,
-        );
-
-        console.log(row);
+        if (_global.enableDebug)
+          console.log(
+            chat.title,
+            `Chat_${CryptoJS.MD5(chat.id).toString()}`,
+            `message_${index + 1}.sqlite`,
+          );
       }
 
       return row.length > 0;
@@ -676,9 +743,6 @@ export const MessageController = {
           const tableNames = database.exec(
             'SELECT name FROM sqlite_master WHERE type = "table" AND name LIKE "Hello_%";',
           );
-
-          console.log(".........");
-          console.log(tableNames[0].values[0][0]);
 
           return database.exec(`
             SELECT 

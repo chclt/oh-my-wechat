@@ -164,7 +164,6 @@ export interface ControllerPaginatorResult<T> extends ControllerResult<T> {
   meta: {
     cursor?: number;
     cursor_condition?: "<" | "<=" | ">" | ">=" | "<>";
-    next_cursor?: number;
   };
 }
 

@@ -1,5 +1,6 @@
 import type { WorkerRequest, WorkerRequestQuery } from "@/lib/worker.ts";
 
+import _global from "@/lib/global.ts";
 import { useWorker } from "@/lib/hooks/workerProvider.tsx";
 import { useCallback, useState } from "react";
 
@@ -26,10 +27,12 @@ export function useCommand<Request extends WorkerRequest, Response>(
         pendingQueries.set(id, (response) => {
           setIsQuerying(false);
 
-          console.groupCollapsed(`command ${type}`);
-          console.log(payload);
-          console.log(response);
-          console.groupEnd();
+          if (_global.enableDebug) {
+            console.groupCollapsed(`command ${type}`);
+            console.log(payload);
+            console.log(response);
+            console.groupEnd();
+          }
 
           setResult(response);
           setError(null);
@@ -69,10 +72,13 @@ export default function useQuery<Response>(
     return new Promise<Response>((resolve, reject) => {
       pendingQueries.set(id, (response) => {
         setIsQuerying(false);
-        console.groupCollapsed(`query ${endpoint}`);
-        console.log(...args);
-        console.log(response);
-        console.groupEnd();
+
+        if (_global.enableDebug) {
+          console.groupCollapsed(`query ${endpoint}`);
+          console.log(...args);
+          console.log(response);
+          console.groupEnd();
+        }
 
         setResult(response);
         setError(null);

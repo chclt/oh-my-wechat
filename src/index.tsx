@@ -11,7 +11,7 @@ if (rootEl) {
   const root = ReactDOM.createRoot(rootEl);
   root.render(
     <React.StrictMode>
-      <AppProvider enableDebug={true}>
+      <AppProvider>
         <WorkerProvider>
           <DatabaseProvider>
             <App />

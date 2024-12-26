@@ -28,13 +28,7 @@ export default function ContactList({
   return (
     <ul>
       {result.data.map((i) => (
-        <li
-          key={i.id}
-          className={cn("p-2.5 flex gap-4 hover:bg-black/5")}
-          onClick={() => {
-            console.log(i);
-          }}
-        >
+        <li key={i.id} className={cn("p-2.5 flex gap-4 hover:bg-black/5")}>
           {i.photo ? (
             <div
               className={cn("shrink-0 w-12 h-12 rounded-lg overflow-hidden")}

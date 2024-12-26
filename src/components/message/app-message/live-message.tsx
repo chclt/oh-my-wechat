@@ -1,7 +1,6 @@
 import type { AppMessageProps } from "@/components/message/app-message.tsx";
-import DefaultMessageWithUser from "@/components/message/default-message-with-user.tsx";
-import User from "@/components/user.tsx";
-import type { AppMessageType, Message } from "@/lib/schema.ts";
+import MessageInlineWrapper from "@/components/message/message-inline.tsx";
+import type { AppMessageType } from "@/lib/schema.ts";
 
 export interface LiveMessageEntity {
   type: AppMessageType.LIVE;
@@ -29,31 +28,20 @@ type LiveMessageProps = AppMessageProps<LiveMessageEntity>;
 
 export default function LiveMessage({
   message,
-  direction,
   variant = "default",
-  showPhoto,
-  showUsername,
   ...props
 }: LiveMessageProps) {
   if (variant === "default") {
     return (
-      <DefaultMessageWithUser
-        message={message as unknown as Message}
-        showPhoto={showPhoto}
-        showUsername={showUsername}
-      >
-        <div {...props}>
-          [直播] {message.message_entity.msg.appmsg.finderLive.liveNickname})
-        </div>
-      </DefaultMessageWithUser>
+      <div {...props}>
+        [直播] {message.message_entity.msg.appmsg.finderLive.liveNickname})
+      </div>
     );
   }
 
   return (
-    <p {...props}>
-      {showUsername && <User user={message.from} variant={"inline"} />}
-      {showUsername && ": "}
+    <MessageInlineWrapper message={message} {...props}>
       [直播] {message.message_entity.msg.appmsg.finderLive.liveNickname})
-    </p>
+    </MessageInlineWrapper>
   );
 }

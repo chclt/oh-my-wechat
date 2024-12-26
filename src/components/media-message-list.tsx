@@ -11,7 +11,6 @@ import {
 import type React from "react";
 import { useState } from "react";
 import { useEffect } from "react";
-import { useRef } from "react";
 
 interface MediaMessageListProps extends React.HTMLAttributes<HTMLTableElement> {
   chat: Chat;
@@ -36,20 +35,15 @@ export default function MediaMessageList({
     meta: {},
   });
 
-  const paginatorCursor = useRef<number>();
-
   useEffect(() => {
-    paginatorCursor.current = Date.now();
     setMessageList({});
     query("/messages", {
       chat,
       type: [MessageType.IMAGE, MessageType.VIDEO, MessageType.MICROVIDEO],
-      cursor: paginatorCursor.current,
     });
   }, [chat]);
 
   useEffect(() => {
-    paginatorCursor.current = result.meta.next_cursor;
     if (result.meta.cursor) {
       setMessageList((old) => ({
         // @ts-ignore TODO

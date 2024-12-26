@@ -1,7 +1,6 @@
 import Image from "@/components/image.tsx";
-import DefaultMessageWithUser from "@/components/message/default-message-with-user.tsx";
+import MessageInlineWrapper from "@/components/message/message-inline.tsx";
 import type { MessageProp } from "@/components/message/message.tsx";
-import User from "@/components/user.tsx";
 import type { StickerMessage as StickerMessageVM } from "@/lib/schema.ts";
 
 type StickerMessageProps = MessageProp<StickerMessageVM>;
@@ -55,56 +54,44 @@ export interface StickerMessageEntity {
 
 export default function StickerMessage({
   message,
-  direction,
   variant = "default",
-  showPhoto,
-  showUsername,
   ...props
 }: StickerMessageProps) {
   if (variant === "default")
     return (
-      <DefaultMessageWithUser
-        message={message}
-        showPhoto={showPhoto}
-        showUsername={showUsername}
-      >
-        <div className="" {...props}>
-          <Image
-            {...(message.message_entity.msg.emoji["@_width"]
-              ? {
-                  width:
-                    Number.parseInt(
-                      message.message_entity.msg.emoji["@_width"],
-                    ) / 2,
-                }
-              : {})}
-            {...(message.message_entity.msg.emoji["@_height"]
-              ? {
-                  height:
-                    Number.parseInt(
-                      message.message_entity.msg.emoji["@_height"],
-                    ) / 2,
-                }
-              : {})}
-            src={message.message_entity.msg.emoji["@_cdnurl"]}
-            alt={"表情"}
-            className={"min-w-11 min-h-11 max-w-32 max-h-32"}
-            style={
-              {
-                // width: message.message_entity.msg.emoji["@_width"],
-                // height: message.message_entity.msg.emoji["@_height"],
+      <div className="" {...props}>
+        <Image
+          {...(message.message_entity.msg.emoji["@_width"]
+            ? {
+                width:
+                  Number.parseInt(message.message_entity.msg.emoji["@_width"]) /
+                  2,
               }
+            : {})}
+          {...(message.message_entity.msg.emoji["@_height"]
+            ? {
+                height:
+                  Number.parseInt(
+                    message.message_entity.msg.emoji["@_height"],
+                  ) / 2,
+              }
+            : {})}
+          src={message.message_entity.msg.emoji["@_cdnurl"]}
+          alt={"表情"}
+          className={"min-w-11 min-h-11 max-w-32 max-h-32"}
+          style={
+            {
+              // width: message.message_entity.msg.emoji["@_width"],
+              // height: message.message_entity.msg.emoji["@_height"],
             }
-          />
-        </div>
-      </DefaultMessageWithUser>
+          }
+        />
+      </div>
     );
 
   return (
-    <p>
-      {showUsername && <User user={message.from} variant={"inline"} />}
-      {showUsername && ": "}
+    <MessageInlineWrapper message={message} {...props}>
       [表情]
-    </p>
+    </MessageInlineWrapper>
   );
 }

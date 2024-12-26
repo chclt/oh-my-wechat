@@ -11,10 +11,7 @@ type RingtoneMessageProps = AppMessageProps<RingtoneMessageEntity>;
 
 export default function RingtoneMessage({
   message,
-  direction,
   variant = "default",
-  showPhoto,
-  showUsername,
   ...props
 }: RingtoneMessageProps) {
   if (variant === "default")

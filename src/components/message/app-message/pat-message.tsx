@@ -2,7 +2,13 @@ import type { AppMessageProps } from "@/components/message/app-message.tsx";
 import { FormatTextMessageContent } from "@/components/message/text-message.tsx";
 import User from "@/components/user.tsx";
 import { useApp } from "@/lib/hooks/appProvider.tsx";
-import type { AppMessageType, GroupChat } from "@/lib/schema.ts";
+import useQuery from "@/lib/hooks/useQuery";
+import type {
+  AppMessageType,
+  ControllerResult,
+  User as UserVM,
+} from "@/lib/schema.ts";
+import { useEffect, useRef, useState } from "react";
 
 export interface PatMessageEntity {
   type: AppMessageType.PAT;
@@ -28,13 +34,18 @@ type PatMessageProps = AppMessageProps<PatMessageEntity>;
 
 export default function PatMessage({
   message,
-  direction,
   variant = "default",
-  showPhoto,
-  showUsername,
   ...props
 }: PatMessageProps) {
   const { chat } = useApp();
+
+  // 在用户退群的情况下，chat信息中可能缺少用户信息，需额外查询
+  const queryFlag = useRef(false);
+  const [query, isQuerying, result, error] = useQuery<
+    ControllerResult<UserVM[]>
+  >({ data: [] });
+  const missingUserIds = useRef<string[]>([]);
+  const [missingUser, setMissingUser] = useState<UserVM[]>([]);
 
   const records = (
     Array.isArray(message.message_entity.msg.appmsg.patMsg.records.record)
@@ -49,30 +60,30 @@ export default function PatMessage({
     const segments = record.templete.split(regex).map((s, index) => {
       if (!s) return null;
       if (new RegExp(`^\\\${${record.fromUser}}$`).test(s)) {
-        const user = chat
-          ? (chat as GroupChat)?.members?.find(
-              (member) => member.id === record.fromUser,
-            )
-          : undefined;
+        const user =
+          chat?.members.find((member) => member.id === record.fromUser) ??
+          missingUser.find((user) => user.id === record.fromUser);
 
-        return user ? <User user={user} variant={"inline"} /> : record.fromUser;
+        if (user) {
+          return <User user={user} variant={"inline"} />;
+        }
+        missingUserIds.current.push(record.fromUser);
+        return record.fromUser;
       }
 
       if (new RegExp(`^\\\${${record.fromUser}@textstatusicon}$`).test(s))
         return null; // statusicon
 
       if (new RegExp(`^\\\${${record.pattedUser}}$`).test(s)) {
-        const user = chat
-          ? (chat as GroupChat)?.members?.find(
-              (member) => member.id === record.pattedUser,
-            )
-          : undefined;
+        const user =
+          chat?.members.find((member) => member.id === record.pattedUser) ??
+          missingUser.find((user) => user.id === record.pattedUser);
 
-        return user ? (
-          <User user={user} variant={"inline"} />
-        ) : (
-          record.pattedUser
-        );
+        if (user) {
+          return <User user={user} variant={"inline"} />;
+        }
+        missingUserIds.current.push(record.pattedUser);
+        return record.pattedUser;
       }
 
       if (new RegExp(`^\\\${${record.pattedUser}@textstatusicon}$`).test(s))
@@ -85,6 +96,16 @@ export default function PatMessage({
 
     return segments;
   });
+
+  if (!queryFlag.current) {
+    queryFlag.current = true;
+
+    query("/contacts/in", { ids: missingUserIds.current });
+  }
+
+  useEffect(() => {
+    setMissingUser(result.data);
+  }, [result]);
 
   return (
     <>

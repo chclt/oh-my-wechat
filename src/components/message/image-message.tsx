@@ -1,5 +1,5 @@
 import LocalImage from "@/components/local-image.tsx";
-import DefaultMessageWithUser from "@/components/message/default-message-with-user.tsx";
+import MessageInlineWrapper from "@/components/message/message-inline.tsx";
 import type { MessageProp } from "@/components/message/message.tsx";
 import User from "@/components/user.tsx";
 import { useApp } from "@/lib/hooks/appProvider.tsx";
@@ -63,10 +63,6 @@ export interface ImageMessageEntity {
 export default function ImageMessage({
   variant = "default",
   message,
-  direction,
-  showUsername,
-  showPhoto,
-
   className,
   ...props
 }: ImageMessageProps) {
@@ -75,45 +71,34 @@ export default function ImageMessage({
   switch (variant) {
     case "default":
       return (
-        <DefaultMessageWithUser
-          message={message}
-          showPhoto={showPhoto}
-          showUsername={showUsername}
+        <div
+          className={cn("rounded-lg overflow-hidden ")}
+          onClick={() => {
+            // setIsOpenMediaViewer(true);
+          }}
+          {...props}
         >
-          <div
-            className={cn(
-              "rounded-lg overflow-hidden ",
-              ["mask-bubble-tail-r mr-[-5px]", "mask-bubble-tail-l ml-[-5px]"][
-                direction
-              ],
-              className,
-            )}
-            onClick={() => {
-              // setIsOpenMediaViewer(true);
-            }}
-            {...props}
-          >
-            <LocalImage
-              chat={chat!}
-              message={message}
-              aspect-ratio
-              size="origin"
-              alt={"图片"}
-              className={
-                "max-w-[16em] max-h-[32rem] min-w-32 min-h-16 object-contain bg-white"
-              }
-            />
-          </div>
-        </DefaultMessageWithUser>
+          <LocalImage
+            chat={chat!}
+            message={message}
+            size="origin"
+            alt={"图片"}
+            className={
+              "max-w-[16em] max-h-[32rem] min-w-32 min-h-16 object-contain bg-white"
+            }
+          />
+        </div>
       );
 
     case "referenced":
       return (
         <div>
-          {showUsername && message.from && (
-            <User user={message.from} variant="inline" />
+          {message.from && (
+            <>
+              <User user={message.from} variant="inline" />
+              <span>: </span>
+            </>
           )}
-          <span>: </span>
           <LocalImage
             chat={chat!}
             message={message}
@@ -129,22 +114,23 @@ export default function ImageMessage({
     case "viewer_detail":
     case "viewer_thumb":
       return (
-        <div className={cn("", className)} {...props}>
+        <div className={className} {...props}>
           <LocalImage
             chat={chat!}
             message={message}
             size={variant === "viewer_thumb" ? "thumb" : "origin"}
             alt={""}
-            className={""}
           />
         </div>
       );
 
     default:
       return (
-        <p>
-          {showUsername && <User user={message.from} variant={"inline"} />}
-          {showUsername && ": "}
+        <MessageInlineWrapper
+          message={message}
+          className={className}
+          {...props}
+        >
           <LocalImage
             chat={chat!}
             message={message}
@@ -155,7 +141,7 @@ export default function ImageMessage({
             }
           />
           [图片]
-        </p>
+        </MessageInlineWrapper>
       );
   }
 }

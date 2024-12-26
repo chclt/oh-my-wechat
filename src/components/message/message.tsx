@@ -12,6 +12,7 @@ import VerityMessage from "@/components/message/verify-message.tsx";
 import VideoMessage from "@/components/message/video-message.tsx";
 import VoiceMessage from "@/components/message/voice-message.tsx";
 import VoipMessage from "@/components/message/voip-message.tsx";
+import _global from "@/lib/global.ts";
 import { useApp } from "@/lib/hooks/appProvider.tsx";
 import {
   MessageDirection,
@@ -24,16 +25,14 @@ import { ErrorBoundary } from "react-error-boundary";
 export interface MessageProp<T = MessageVM>
   extends React.HTMLAttributes<HTMLDivElement> {
   message: T;
-  direction: MessageDirection;
   variant?: "default" | "referenced" | "abstract";
-  showPhoto: boolean;
-  showUsername: boolean;
+  showPhoto?: boolean;
+  showUsername?: boolean;
   [key: string]: unknown;
 }
 
 export default function Message({
   message,
-  direction,
   variant = "default",
   ...props
 }: MessageProp) {
@@ -50,7 +49,7 @@ export default function Message({
       fallback={
         <div
           onDoubleClick={() => {
-            console.log(message);
+            if (_global.enableDebug) console.log(message);
           }}
         >
           解析失败的消息
@@ -59,11 +58,10 @@ export default function Message({
     >
       <MessageComponent
         onDoubleClick={() => {
-          console.log(message);
+          if (_global.enableDebug) console.log(message);
         }}
         message={message}
         variant={variant}
-        direction={direction}
         title={formatDateTime(new Date(message.date * 1000))}
         {...props}
       />
@@ -81,160 +79,54 @@ function MessageComponent({
 }: MessageProp) {
   switch (message.type) {
     case MessageType.TEXT:
-      return (
-        <TextMessage
-          message={message}
-          direction={direction}
-          variant={variant}
-          showPhoto={showPhoto}
-          {...props}
-        />
-      );
+      return <TextMessage message={message} variant={variant} {...props} />;
 
     case MessageType.IMAGE:
-      return (
-        <ImageMessage
-          message={message}
-          direction={direction}
-          variant={variant}
-          showPhoto={showPhoto}
-          {...props}
-        />
-      );
+      return <ImageMessage message={message} variant={variant} {...props} />;
 
     case MessageType.VOICE:
-      return (
-        <VoiceMessage
-          message={message}
-          direction={direction}
-          variant={variant}
-          showPhoto={showPhoto}
-          {...props}
-        />
-      );
+      return <VoiceMessage message={message} variant={variant} {...props} />;
 
     case MessageType.VERITY:
-      return (
-        <VerityMessage
-          message={message}
-          direction={direction}
-          variant={variant}
-          showPhoto={showPhoto}
-          {...props}
-        />
-      );
+      return <VerityMessage message={message} variant={variant} {...props} />;
 
     case MessageType.CONTACT:
-      return (
-        <ContactMessage
-          message={message}
-          direction={direction}
-          variant={variant}
-          showPhoto={showPhoto}
-          {...props}
-        />
-      );
+      return <ContactMessage message={message} variant={variant} {...props} />;
 
     case MessageType.VIDEO:
-      return (
-        <VideoMessage
-          message={message}
-          direction={direction}
-          variant={variant}
-          showPhoto={showPhoto}
-          {...props}
-        />
-      );
+      return <VideoMessage message={message} variant={variant} {...props} />;
 
     case MessageType.MICROVIDEO:
       return (
-        <MicroVideoMessage
-          message={message}
-          direction={direction}
-          variant={variant}
-          showPhoto={showPhoto}
-          {...props}
-        />
+        <MicroVideoMessage message={message} variant={variant} {...props} />
       );
 
     case MessageType.STICKER:
-      return (
-        <StickerMessage
-          message={message}
-          direction={direction}
-          variant={variant}
-          showPhoto={showPhoto}
-          {...props}
-        />
-      );
+      return <StickerMessage message={message} variant={variant} {...props} />;
 
     case MessageType.LOCATION:
-      return (
-        <LocationMessage
-          message={message}
-          direction={direction}
-          variant={variant}
-          showPhoto={showPhoto}
-          {...props}
-        />
-      );
+      return <LocationMessage message={message} variant={variant} {...props} />;
 
     case MessageType.APP:
-      return (
-        <AppMessage
-          message={message}
-          direction={direction}
-          variant={variant}
-          showPhoto={showPhoto}
-          {...props}
-        />
-      );
+      return <AppMessage message={message} variant={variant} {...props} />;
 
     case MessageType.VOIP:
-      return (
-        <VoipMessage
-          message={message}
-          direction={direction}
-          variant={variant}
-          showPhoto={showPhoto}
-          {...props}
-        />
-      );
+      return <VoipMessage message={message} variant={variant} {...props} />;
 
     case MessageType.GROUP_VOIP:
       return (
-        <ChatroomVoipMessage
-          message={message}
-          direction={direction}
-          variant={variant}
-          showPhoto={showPhoto}
-          {...props}
-        />
+        <ChatroomVoipMessage message={message} variant={variant} {...props} />
       );
 
     case MessageType.SYSTEM:
-      return (
-        <SystemMessage
-          message={message}
-          direction={direction}
-          variant={variant}
-          showPhoto={false}
-          {...props}
-        />
-      );
+      return <SystemMessage message={message} variant={variant} {...props} />;
 
     case MessageType.SYSTEM_EXTENDED:
       return (
-        <SystemExtendedMessage
-          message={message}
-          direction={direction}
-          variant={variant}
-          showPhoto={false}
-          {...props}
-        />
+        <SystemExtendedMessage message={message} variant={variant} {...props} />
       );
 
     default:
-      return <div>Unknown message type: {(message as MessageVM).type}</div>;
+      return <div>解析失败的消息: {(message as MessageVM).type}</div>;
   }
 }

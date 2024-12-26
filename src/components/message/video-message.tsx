@@ -1,8 +1,7 @@
 import LocalImage from "@/components/local-image.tsx";
 import LocalVideo from "@/components/local-video.tsx";
-import DefaultMessageWithUser from "@/components/message/default-message-with-user.tsx";
+import MessageInlineWrapper from "@/components/message/message-inline.tsx";
 import type { MessageProp } from "@/components/message/message.tsx";
-import User from "@/components/user.tsx";
 import { useApp } from "@/lib/hooks/appProvider.tsx";
 import type { VideoMessage as VideoMessageVM } from "@/lib/schema.ts";
 import { cn } from "@/lib/utils.ts";
@@ -60,10 +59,7 @@ export interface VideoMessageEntity {
 
 export default function VideoMessage({
   message,
-  direction,
   variant = "default",
-  showPhoto,
-  showUsername,
   className,
   ...props
 }: VideoMessageProps) {
@@ -72,76 +68,68 @@ export default function VideoMessage({
   switch (variant) {
     case "default":
       return (
-        <DefaultMessageWithUser
-          message={message}
-          showPhoto={showPhoto}
-          showUsername={showUsername}
+        <div
+          className={cn(
+            "max-w-[20em] min-w-32 min-h-32 rounded-lg overflow-hidden ",
+            ["mask-bubble-tail-r mr-[-5px]", "mask-bubble-tail-l ml-[-5px]"][
+              message.direction
+            ],
+          )}
+          onClick={() => {
+            // setIsOpenMediaViewer(true);
+          }}
+          {...props}
         >
-          <div
-            className={cn(
-              "max-w-[20em] min-w-32 min-h-32 rounded-lg overflow-hidden ",
-              ["mask-bubble-tail-r mr-[-5px]", "mask-bubble-tail-l ml-[-5px]"][
-                direction
-              ],
-              className,
-            )}
-            onClick={() => {
-              // setIsOpenMediaViewer(true);
-            }}
-            {...props}
-          >
-            <div className={"relative"}>
-              <LocalVideo
-                chat={chat!}
-                message={message}
-                controls
-                className={"min-w-32 min-h-32 object-contain bg-white"}
-              />
+          <div className={"relative"}>
+            <LocalVideo
+              chat={chat!}
+              message={message}
+              controls
+              className={"min-w-32 min-h-32 object-contain bg-white"}
+            />
 
-              <div
-                className={
-                  "hidden absolute top-0 right-0 bottom-0 left-[5px] flex justify-center items-center"
-                }
-              >
-                <div className={"size-8 [&_svg]:size-full"}>
-                  <svg
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M19.5 9.40192C21.5 10.5566 21.5 13.4434 19.5 14.5981L10.5 19.7942C8.5 20.9489 6 19.5056 6 17.1962L6 6.80385C6 4.49445 8.5 3.05107 10.5 4.20577L19.5 9.40192Z"
-                      fill="white"
-                    />
-                  </svg>
-                </div>
-              </div>
-              <div
-                className={cn(
-                  "hidden absolute bottom-2 text-sm text-white",
-
-                  ["left-4", "left-[calc(5px+1rem)]"][direction],
-                )}
-              >
-                {(Number.parseInt(
-                  message.message_entity.msg.videomsg["@_playlength"],
-                ) /
-                  60) |
-                  0}
-                :
-                {(
-                  Number.parseInt(
-                    message.message_entity.msg.videomsg["@_playlength"],
-                  ) % 60
-                )
-                  .toString()
-                  .padStart(2, "0")}
+            <div
+              className={
+                "hidden absolute top-0 right-0 bottom-0 left-[5px] flex justify-center items-center"
+              }
+            >
+              <div className={"size-8 [&_svg]:size-full"}>
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M19.5 9.40192C21.5 10.5566 21.5 13.4434 19.5 14.5981L10.5 19.7942C8.5 20.9489 6 19.5056 6 17.1962L6 6.80385C6 4.49445 8.5 3.05107 10.5 4.20577L19.5 9.40192Z"
+                    fill="white"
+                  />
+                </svg>
               </div>
             </div>
+            <div
+              className={cn(
+                "hidden absolute bottom-2 text-sm text-white",
+                ["left-4", "left-[calc(5px+1rem)]"][message.direction],
+              )}
+            >
+              {(Number.parseInt(
+                message.message_entity.msg.videomsg["@_playlength"],
+              ) /
+                60) |
+                0}
+              :
+              {(
+                Number.parseInt(
+                  message.message_entity.msg.videomsg["@_playlength"],
+                ) % 60
+              )
+                .toString()
+                .padStart(2, "0")}
+            </div>
           </div>
-        </DefaultMessageWithUser>
+        </div>
       );
 
     case "viewer_detail":
@@ -167,11 +155,13 @@ export default function VideoMessage({
 
     default:
       return (
-        <p>
-          {showUsername && <User user={message.from} variant={"inline"} />}
-          {showUsername && ": "}
+        <MessageInlineWrapper
+          message={message}
+          className={className}
+          {...props}
+        >
           <span>[视频]</span>
-        </p>
+        </MessageInlineWrapper>
       );
   }
 }

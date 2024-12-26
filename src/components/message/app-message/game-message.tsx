@@ -1,9 +1,8 @@
 import LocalImage from "@/components/local-image.tsx";
 import type { AppMessageProps } from "@/components/message/app-message.tsx";
-import DefaultMessageWithUser from "@/components/message/default-message-with-user.tsx";
-import User from "@/components/user.tsx";
+import MessageInlineWrapper from "@/components/message/message-inline.tsx";
 import { useApp } from "@/lib/hooks/appProvider.tsx";
-import type { AppMessageType, Message } from "@/lib/schema.ts";
+import type { AppMessageType } from "@/lib/schema.ts";
 import { cn } from "@/lib/utils.ts";
 
 export interface GameMessageEntity {
@@ -50,52 +49,41 @@ type GameMessageProps = AppMessageProps<GameMessageEntity>;
 
 export default function GameMessage({
   message,
-  direction,
   variant = "default",
-  showPhoto,
-  showUsername,
   ...props
 }: GameMessageProps) {
   const { chat } = useApp();
 
   if (variant === "default")
     return (
-      <DefaultMessageWithUser
-        message={message as unknown as Message}
-        showPhoto={showPhoto}
-        showUsername={showUsername}
+      <div
+        className={cn(
+          "relative max-w-[20em] flex flex-col rounded-lg bg-white",
+        )}
+        {...props}
       >
-        <div
-          className={cn(
-            "relative max-w-[20em] flex flex-col rounded-lg bg-white",
-          )}
-          {...props}
-        >
-          <div className="p-3">
-            <h4 className="font-medium text-pretty line-clamp-3">
-              {message.message_entity.msg.appmsg.title}
-            </h4>
-            <div className={"mt-1 text-pretty line-clamp-5 text-neutral-500"}>
-              {message.message_entity.msg.appmsg.appattach.cdnthumbmd5 && (
-                <LocalImage
-                  chat={chat!}
-                  message={message}
-                  domain="opendata"
-                  className={"float-end ms-2 h-12 w-auto rounded"}
-                  alt={""}
-                />
-              )}
-            </div>
+        <div className="p-3">
+          <h4 className="font-medium text-pretty line-clamp-3">
+            {message.message_entity.msg.appmsg.title}
+          </h4>
+          <div className={"mt-1 text-pretty line-clamp-5 text-neutral-500"}>
+            {message.message_entity.msg.appmsg.appattach.cdnthumbmd5 && (
+              <LocalImage
+                chat={chat!}
+                message={message}
+                domain="opendata"
+                className={"float-end ms-2 h-12 w-auto rounded"}
+                alt={""}
+              />
+            )}
           </div>
         </div>
-      </DefaultMessageWithUser>
+      </div>
     );
 
   return (
-    <p>
-      {showUsername && <User user={message.from} variant={"inline"} />}
-      {showUsername && ": "}
+    <MessageInlineWrapper message={message} {...props}>
       [游戏] {message.message_entity.msg.appmsg.title}
-    </p>
+    </MessageInlineWrapper>
   );
 }
