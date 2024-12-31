@@ -2,11 +2,7 @@ import Image from "@/components/image.tsx";
 import Message from "@/components/message/message.tsx";
 import { useApp } from "@/lib/hooks/appProvider";
 import useQuery from "@/lib/hooks/useQuery.ts";
-import type {
-  Chat,
-  ControllerResult,
-  Message as MessageVM,
-} from "@/lib/schema.ts";
+import type { Chat, ControllerResult, MessageVM } from "@/lib/schema.ts";
 import { cn, formatDateTime } from "@/lib/utils.ts";
 import type { WorkerResponse } from "@/lib/worker.ts";
 import type React from "react";

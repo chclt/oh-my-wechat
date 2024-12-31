@@ -14,11 +14,7 @@ import VoiceMessage from "@/components/message/voice-message.tsx";
 import VoipMessage from "@/components/message/voip-message.tsx";
 import _global from "@/lib/global.ts";
 import { useApp } from "@/lib/hooks/appProvider.tsx";
-import {
-  MessageDirection,
-  MessageType,
-  type Message as MessageVM,
-} from "@/lib/schema.ts";
+import { MessageDirection, MessageType, type MessageVM } from "@/lib/schema.ts";
 import { formatDateTime } from "@/lib/utils.ts";
 import { ErrorBoundary } from "react-error-boundary";
 

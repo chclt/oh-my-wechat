@@ -1,4 +1,4 @@
-import type { Chat, Message, VoiceInfo, WCDatabases } from "@/lib/schema.ts";
+import type { Chat, MessageVM, VoiceInfo, WCDatabases } from "@/lib/schema.ts";
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { toBlobURL } from "@ffmpeg/util";
 import CryptoJS from "crypto-js";
@@ -25,7 +25,7 @@ export const VoiceController = {
       scope = "all",
     }: {
       chat: Chat;
-      message: Message;
+      message: MessageVM;
 
       scope: "all" | "transcription";
     },

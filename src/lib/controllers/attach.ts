@@ -1,4 +1,4 @@
-import type { Chat, FileInfo, Message, WCDatabases } from "@/lib/schema.ts";
+import type { Chat, FileInfo, MessageVM, WCDatabases } from "@/lib/schema.ts";
 import CryptoJS from "crypto-js";
 import { getFilesFromManifast } from "../utils";
 
@@ -11,7 +11,7 @@ export const AttachController = {
       message,
     }: {
       chat: Chat;
-      message: Message;
+      message: MessageVM;
     },
   ): Promise<FileInfo[]> => {
     const db = databases.manifest;

@@ -1,4 +1,4 @@
-import type { Chat, Message, PhotpSize, WCDatabases } from "@/lib/schema.ts";
+import type { Chat, MessageVM, PhotpSize, WCDatabases } from "@/lib/schema.ts";
 import CryptoJS from "crypto-js";
 import { getFilesFromManifast } from "../utils";
 
@@ -14,7 +14,7 @@ export const ImageController = {
       domain = "image",
     }: {
       chat: Chat;
-      message: Message;
+      message: MessageVM;
 
       size: "origin" | "thumb";
       domain: "image" | "opendata" | "video";

@@ -53,8 +53,7 @@ export default function MusicMessage({
   variant = "default",
   ...props
 }: MusicMessageProps) {
-  const { chat } = useApp();
-
+  const chat = message.chat;
   if (variant === "default")
     return (
       <Link href={message.message_entity.msg.appmsg.url}>

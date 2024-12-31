@@ -7,7 +7,7 @@ import {
   type Chat,
   type ControllerPaginatorResult,
   MessageType,
-  type Message as MessageVM,
+  type MessageVM,
 } from "@/lib/schema.ts";
 import { cn } from "@/lib/utils";
 import type * as ScrollAreaPrimitive from "@radix-ui/react-scroll-area";

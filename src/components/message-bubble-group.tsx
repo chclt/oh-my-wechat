@@ -2,7 +2,7 @@ import User from "@/components/user.tsx";
 import type { User as UserVM } from "@/lib/schema.ts";
 
 import _global from "@/lib/global.ts";
-import type { Message as MessageVM } from "@/lib/schema.ts";
+import type { MessageVM } from "@/lib/schema.ts";
 import { cn } from "@/lib/utils.ts";
 import { ErrorBoundary } from "react-error-boundary";
 import Message from "./message/message.tsx";

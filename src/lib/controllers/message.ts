@@ -27,9 +27,9 @@ import {
   type DatabaseMessageRow,
   type ImageMessage,
   type LocationMessage,
-  type Message,
   MessageDirection,
   MessageType,
+  type MessageVM,
   type MicroVideoMessage,
   type StickerMessage,
   type SystemExtendedMessage,
@@ -57,7 +57,7 @@ export const MessageController = {
       databases: WCDatabases;
       parseReplyMessage?: boolean;
     },
-  ): Promise<Message[]> => {
+  ): Promise<MessageVM[]> => {
     const messageSenderIds = raw_message_rows
       .map((raw_message_row) => {
         if (chat && chat.type === "chatroom") {
@@ -315,7 +315,7 @@ export const MessageController = {
         }
       }
     });
-    let replyMessageArray: Message[] = [];
+    let replyMessageArray: MessageVM[] = [];
 
     if (parseReplyMessage && chat && replyMessageIds.length) {
       replyMessageArray = (
@@ -325,7 +325,7 @@ export const MessageController = {
         })
       ).data;
 
-      const replyMessageTable: { [key: string]: Message } = {};
+      const replyMessageTable: { [key: string]: MessageVM } = {};
       replyMessageArray.map((message) => {
         replyMessageTable[message.id] = message;
       });
@@ -341,7 +341,7 @@ export const MessageController = {
       }
     }
 
-    return messages as Message[];
+    return messages as MessageVM[];
   },
 
   all: async (
@@ -361,7 +361,7 @@ export const MessageController = {
       cursor_condition?: ControllerPaginatorResult<unknown>["meta"]["cursor_condition"];
       limit: number;
     },
-  ): Promise<ControllerPaginatorResult<Message[]>> => {
+  ): Promise<ControllerPaginatorResult<MessageVM[]>> => {
     const dbs = databases.message;
     if (!dbs) throw new Error("message databases are not found");
 
@@ -613,7 +613,7 @@ export const MessageController = {
       type_app?: AppMessageType | AppMessageType[];
       limit: number;
     },
-  ): Promise<ControllerPaginatorResult<Message[]>> => {
+  ): Promise<ControllerPaginatorResult<MessageVM[]>> => {
     if (!databases) {
       throw new Error("databases are not found");
     }
@@ -650,7 +650,7 @@ export const MessageController = {
       messageIds: string[];
       parseReplyMessage?: boolean;
     },
-  ): Promise<ControllerResult<Message[]>> => {
+  ): Promise<ControllerResult<MessageVM[]>> => {
     const dbs = databases.message;
     if (!dbs) throw new Error("message databases are not found");
 
@@ -731,7 +731,7 @@ export const MessageController = {
 
   all_verify: async (
     databases: WCDatabases,
-  ): Promise<ControllerResult<Message[]>> => {
+  ): Promise<ControllerResult<MessageVM[]>> => {
     const dbs = databases.message;
     if (!dbs) {
       throw new Error("message databases are not found");

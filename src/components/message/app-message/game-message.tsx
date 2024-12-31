@@ -52,8 +52,7 @@ export default function GameMessage({
   variant = "default",
   ...props
 }: GameMessageProps) {
-  const { chat } = useApp();
-
+  const chat = message.chat;
   if (variant === "default")
     return (
       <div

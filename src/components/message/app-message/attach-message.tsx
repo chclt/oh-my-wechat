@@ -39,7 +39,7 @@ export default function AttachMessage({
   variant = "default",
   ...props
 }: AttachMessageProps) {
-  const { chat } = useApp();
+  const chat = message.chat;
   const [query, isQuerying, result, error] = useQuery<FileInfo[] | undefined>(
     undefined,
   );

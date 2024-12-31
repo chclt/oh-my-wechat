@@ -17,6 +17,7 @@ import {
 import CryptoJS from "crypto-js";
 import initSqlJs, { type Database } from "sql.js";
 import sqliteUrl from "sql.js/dist/sql-wasm.wasm?url";
+import { Wrapped2024Controller } from "./controllers/wrapped-2024";
 
 export interface WorkerRequest<Type = unknown, Payload = unknown> {
   id: string;
@@ -62,8 +63,9 @@ enum Controller {
   Videos = "/videos",
   Voices = "/voices",
   Attaches = "/attaches",
-  Statistic = "/statistics",
-  ChatStatistic = "/statistics/chat",
+  Statistic = "/statistics/chat",
+  Wrapped2024 = "/wrapped/2024",
+  Wrapped2024_RandomMediaMessage = "/wrapped/messages/media/random",
 }
 
 const controller: {
@@ -79,7 +81,10 @@ const controller: {
   [Controller.Videos]: VideoController.get,
   [Controller.Voices]: VoiceController.get,
   [Controller.Attaches]: AttachController.get,
-  [Controller.ChatStatistic]: StatisticController.get,
+  [Controller.Statistic]: StatisticController.get,
+  [Controller.Wrapped2024]: Wrapped2024Controller.wrapped2024,
+  [Controller.Wrapped2024_RandomMediaMessage]:
+    Wrapped2024Controller.get_random_media_message,
 };
 
 let directory: FileSystemDirectoryHandle | FileList | undefined = undefined;
@@ -216,7 +221,6 @@ async function loadDatabases(account: User) {
     },
   };
 }
-
 async function unloadDatabases() {
   for (const databaseName in databases) {
     if (Array.isArray(databases[databaseName as WCDatabaseNames])) {
@@ -272,8 +276,9 @@ self.onmessage = async (
         case Controller.MessagesAll:
         case Controller.Messages:
         case Controller.MessagesVerify:
-        case Controller.ChatStatistic:
         case Controller.Statistic:
+        case Controller.Wrapped2024:
+        case Controller.Wrapped2024_RandomMediaMessage:
           result = await controller[endpoint](databases, ...args);
           break;
         case Controller.Images:

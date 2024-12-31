@@ -31,8 +31,7 @@ export default function VoiceMessage({
   variant = "default",
   ...props
 }: VoiceMessageProps) {
-  const { chat } = useApp();
-
+  const chat = message.chat;
   if (variant === "default")
     return (
       <div className={cn("max-w-[20em]")} {...props}>

@@ -63,7 +63,9 @@ export default function VideoMessage({
   className,
   ...props
 }: VideoMessageProps) {
-  const { chat, setIsOpenMediaViewer } = useApp();
+  // const { setIsOpenMediaViewer } = useApp();
+
+  const chat = message.chat;
 
   switch (variant) {
     case "default":

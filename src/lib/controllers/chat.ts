@@ -23,13 +23,14 @@ export const ChatController = {
 
     const dbSessionAbstractRows: DatabaseSessionAbstractRow[] = db
       .exec(
-        "SELECT rowid, CreateTime, UsrName FROM SessionAbstract ORDER BY CreateTime Desc",
+        "SELECT rowid, CreateTime, UsrName, ConIntRes1 FROM SessionAbstract ORDER BY CreateTime Desc",
       )[0]
       .values.reduce((acc, cur) => {
         acc.push({
           rowid: cur[0],
           CreateTime: cur[1],
           UsrName: cur[2],
+          ConIntRes1: cur[3],
         } as DatabaseSessionAbstractRow);
         return acc;
       }, [] as DatabaseSessionAbstractRow[]);
@@ -68,6 +69,7 @@ export const ChatController = {
 
             id: row.UsrName,
             title: contactInfo ? (contactInfo as Chatroom).title : "-",
+            is_muted: !!row.ConIntRes1,
             // @ts-ignore
             is_pinned: (contactInfo as Chatroom)._is_pinned,
             // @ts-ignore
@@ -91,6 +93,7 @@ export const ChatController = {
               ? (contactInfo.remark ?? (contactInfo as User).username)
               : row.UsrName,
             ...(contactInfo?.photo ? { photo: contactInfo.photo.thumb } : {}),
+            is_muted: !!row.ConIntRes1,
             // @ts-ignore
             is_pinned: contactInfo ? (contactInfo as User)._is_pinned : false, // todo
             is_collapsed: false,

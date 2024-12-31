@@ -31,8 +31,7 @@ export default function StickerMessage({
   variant = "default",
   ...props
 }: StickerMessageProps) {
-  const { chat } = useApp();
-
+  const chat = message.chat;
   if (variant === "default")
     return (
       <div {...props}>

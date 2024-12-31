@@ -1,11 +1,12 @@
 import type { MessageProp } from "@/components/message/message.tsx";
 import User from "@/components/user.tsx";
-import WechatEmoji, { WechatEmojiTable } from "@/components/wechat-emoji.tsx";
+import WechatEmoji from "@/components/wechat-emoji.tsx";
 import {
   MessageDirection,
   type TextMessage as TextMessageVM,
 } from "@/lib/schema.ts";
 import { cn } from "@/lib/utils.ts";
+import WechatEmojiTable from "@/lib/wechat-emojis.ts";
 import { cva } from "class-variance-authority";
 import type { ReactNode } from "react";
 import Link from "../link";

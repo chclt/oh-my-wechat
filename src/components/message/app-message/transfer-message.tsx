@@ -79,8 +79,7 @@ export default function TransferMessage({
   variant = "default",
   ...props
 }: TransferMessageProps) {
-  const { chat } = useApp();
-
+  const chat = message.chat;
   const payerId = message.message_entity.msg.appmsg.wcpayinfo.payer_username;
   const payer = chat?.members.find((member) => member.id === payerId);
   if (payer && message.from === undefined) message.from = payer;

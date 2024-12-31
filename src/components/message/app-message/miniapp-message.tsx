@@ -56,8 +56,7 @@ export default function MiniappMessage({
   variant = "default",
   ...props
 }: MiniappMessageProps) {
-  const { chat } = useApp();
-
+  const chat = message.chat;
   if (variant === "default")
     return (
       <div

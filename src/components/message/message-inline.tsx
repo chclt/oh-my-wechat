@@ -1,9 +1,9 @@
-import type { Message } from "@/lib/schema.ts";
+import type { MessageVM } from "@/lib/schema.ts";
 import User from "../user";
 
 interface MessageInlineProps
   extends React.HTMLAttributes<HTMLParagraphElement> {
-  message: Message;
+  message: MessageVM;
 
   showUsername?: boolean;
   showPhoto?: boolean;

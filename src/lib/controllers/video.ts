@@ -1,4 +1,4 @@
-import type { Chat, Message, VideoInfo, WCDatabases } from "@/lib/schema.ts";
+import type { Chat, MessageVM, VideoInfo, WCDatabases } from "@/lib/schema.ts";
 import CryptoJS from "crypto-js";
 import { getFilesFromManifast } from "../utils";
 
@@ -11,7 +11,7 @@ export const VideoController = {
       message,
     }: {
       chat: Chat;
-      message: Message;
+      message: MessageVM;
     },
   ): Promise<VideoInfo> => {
     const db = databases.manifest;

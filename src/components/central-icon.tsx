@@ -80,6 +80,27 @@ export function TriangleExclamationLine(props: React.SVGProps<SVGSVGElement>) {
   );
 }
 
+export function ArrowRotateRightLeftLine(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M7.04284 17C8.32397 18.2359 10.0895 19 12 19C15.866 19 19 15.866 19 12C19 11.4477 19.4477 11 20 11C20.5523 11 21 11.4477 21 12C21 16.9706 16.9706 21 12 21C9.72351 21 7.60781 20.1537 5.99988 18.7558V20C5.99988 20.5523 5.55216 21 4.99988 21C4.44759 21 3.99988 20.5523 3.99988 20V16.75C3.99988 15.7835 4.78338 15 5.74988 15H8.74988C9.30216 15 9.74988 15.4477 9.74988 16C9.74988 16.5523 9.30216 17 8.74988 17H7.04284Z"
+        fill="currentColor"
+      />
+      <path
+        d="M5 12C5 12.5523 4.55228 13 4 13C3.44772 13 3 12.5523 3 12C3 7.02944 7.02944 3 12 3C14.282 3 16.4024 3.85036 18.0117 5.25429V4C18.0117 3.44772 18.4594 3 19.0117 3C19.564 3 20.0117 3.44772 20.0117 4V7.25C20.0117 8.2165 19.2282 9 18.2617 9H15.0117C14.4594 9 14.0117 8.55229 14.0117 8C14.0117 7.44771 14.4594 7 15.0117 7H16.9572C15.676 5.76414 13.9105 5 12 5C8.13401 5 5 8.13401 5 12Z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
+
 export function ArrowShareRightSolid(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg

@@ -90,8 +90,7 @@ export default function UrlMessage({
   variant = "default",
   ...props
 }: UrlMessageProps) {
-  const { chat } = useApp();
-
+  const chat = message.chat;
   const heading = decodeUnicodeReferences(
     message.message_entity.msg.appmsg.title,
   );

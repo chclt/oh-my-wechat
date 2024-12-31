@@ -37,8 +37,7 @@ export default function PatMessage({
   variant = "default",
   ...props
 }: PatMessageProps) {
-  const { chat } = useApp();
-
+  const chat = message.chat;
   // 在用户退群的情况下，chat信息中可能缺少用户信息，需额外查询
   const queryFlag = useRef(false);
   const [query, isQuerying, result, error] = useQuery<

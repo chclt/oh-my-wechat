@@ -35,6 +35,7 @@ export type DatabaseRow<T extends object> = T & {
 export type DatabaseSessionAbstractRow = DatabaseRow<{
   CreateTime: number;
   UsrName: string;
+  ConIntRes1: number; // 这一字段应该是代表有没有静音
 }>;
 
 export type DatabaseFriendRow = DatabaseRow<{
@@ -110,7 +111,8 @@ interface BasicChat {
   id: string;
   title: string;
   photo?: string;
-  last_message?: Message;
+  last_message?: MessageVM;
+  is_muted: boolean;
   is_pinned: boolean;
   is_collapsed: boolean;
   members: User[];
@@ -229,7 +231,7 @@ export interface BasicMessage<T extends MessageType, S> {
   direction: MessageDirection;
   chat: Chat; // Chat the message belongs to
   message_entity: S;
-  reply_to_message?: Message;
+  reply_to_message?: MessageVM;
   raw_message: string;
 }
 
@@ -276,7 +278,7 @@ export type SystemExtendedMessage = BasicMessage<
   SystemExtendedMessageEntity
 >;
 
-export type Message =
+export type MessageVM =
   | TextMessage
   | ImageMessage
   | VoiceMessage

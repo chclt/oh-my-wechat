@@ -36,8 +36,7 @@ export default function VideoMessage({
   variant = "default",
   ...props
 }: VideoMessageProps) {
-  const { chat } = useApp();
-
+  const chat = message.chat;
   const heading = decodeUnicodeReferences(
     message.message_entity.msg.appmsg.title,
   );

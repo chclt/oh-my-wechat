@@ -36,7 +36,7 @@ export default function MicroVideoMessage({
   variant = "default",
   ...props
 }: MicroVideoMessageProps) {
-  const { chat } = useApp();
+  const chat = message.chat;
   if (variant === "default")
     return (
       <div className="" {...props}>

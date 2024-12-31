@@ -66,7 +66,9 @@ export default function ImageMessage({
   className,
   ...props
 }: ImageMessageProps) {
-  const { chat, setIsOpenMediaViewer } = useApp();
+  // const { setIsOpenMediaViewer } = useApp();
+
+  const chat = message.chat;
 
   switch (variant) {
     case "default":

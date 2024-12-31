@@ -66,8 +66,7 @@ export default function SystemExtendedMessage({
   variant = "default",
   ...props
 }: SystemExtendedMessageProps) {
-  const { chat } = useApp();
-
+  const chat = message.chat;
   let content: ReactNode[] = [];
   if (message.message_entity.sysmsg) {
     switch (message.message_entity.sysmsg["@_type"]) {

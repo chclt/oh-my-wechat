@@ -14,6 +14,23 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs.tsx";
 
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
+
 import AccountSelectDialog from "@/components/account-select-dialog.tsx";
 import MediaViewerDialog from "@/components/media-viewer-dialog.tsx";
 import { ScrollArea } from "@/components/ui/scroll-area.tsx";
@@ -28,6 +45,8 @@ import {
   ContactIconFill,
   ContactIconOutline,
 } from "@/components/icon.tsx";
+import Wrapped2024 from "@/components/statistic/wrapped-2024/wrapped-2024.tsx";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
 const App = () => {
   const { databases } = useDatabase();
@@ -128,6 +147,15 @@ const App = () => {
               />
             </div>
           )}
+
+          {databases && user && !chat && (
+            <div className="w-full h-full overflow-auto">
+              <Wrapped2024
+                startTime={new Date("2024/1/1")}
+                endTime={new Date("2025/1/1")}
+              />
+            </div>
+          )}
         </ResizablePanel>
       </ResizablePanelGroup>
 
@@ -137,6 +165,25 @@ const App = () => {
           onOpenChange={setIsOpenMediaViewer}
           chat={chat}
         />
+      )}
+
+      {databases && user && (
+        <Dialog>
+          <DialogContent
+            className={"p-0 bg-transparent border-none shadow-none "}
+          >
+            <VisuallyHidden>
+              <DialogHeader>
+                <DialogTitle>Are you absolutely sure?</DialogTitle>
+                <DialogDescription>
+                  This action cannot be undone. This will permanently delete
+                  your account and remove your data from our servers.
+                </DialogDescription>
+              </DialogHeader>
+            </VisuallyHidden>
+            <article className={"pb-[133.333333%] bg-red-400"}></article>
+          </DialogContent>
+        </Dialog>
       )}
     </>
   );

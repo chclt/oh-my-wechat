@@ -6,7 +6,7 @@ import {
   type ControllerPaginatorResult,
   type ImageMessage as ImageMessageVM,
   MessageType,
-  type Message as MessageVM,
+  type MessageVM,
 } from "@/lib/schema.ts";
 import type React from "react";
 import { useState } from "react";
