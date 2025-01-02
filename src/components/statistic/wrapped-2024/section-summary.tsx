@@ -5,12 +5,12 @@ import type { Chat, User as UserVM } from "@/lib/schema.ts";
 import WechatEmojiTable from "@/lib/wechat-emojis.ts";
 import type React from "react";
 
-import message_background from "@/assets/images/wrapped-2024/widget-message-background.png";
-import music_background from "@/assets/images/wrapped-2024/widget-music-background.png";
-import widget_friends_background from "@/assets/images/wrapped-2024/widget-new-friends-background.png";
-import voice_background from "@/assets/images/wrapped-2024/widget-voice-background.png";
+import message_background from "../../../../public/images/wrapped-2024/widget-message-background.png";
+import music_background from "../../../../public/images/wrapped-2024/widget-music-background.png";
+import widget_friends_background from "../../../../public/images/wrapped-2024/widget-new-friends-background.png";
+import voice_background from "../../../../public/images/wrapped-2024/widget-voice-background.png";
 
-import footer_logo from "@/assets/images/wrapped-2024/footer-logo.svg";
+import footer_logo from "../../../../public/images/wrapped-2024/footer-logo.svg";
 
 export default function SectionSummary({
   data,
@@ -35,7 +35,7 @@ export default function SectionSummary({
   )[0];
   const mostUsedWxemojiKey = mostUsedWxemoji ? mostUsedWxemoji.key : undefined;
   const mostUsedWxemojiSrc = mostUsedWxemojiKey
-    ? `src/assets/wxemoji/${WechatEmojiTable[mostUsedWxemojiKey]}`
+    ? `/wxemoji/${WechatEmojiTable[mostUsedWxemojiKey]}`
     : undefined;
 
   let voiceDurationDisplay = `${Math.round(

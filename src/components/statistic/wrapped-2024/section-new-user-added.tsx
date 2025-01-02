@@ -6,7 +6,7 @@ import type { User as UserVM } from "@/lib/schema.ts";
 import { format } from "date-fns";
 import type React from "react";
 
-import footer_logo from "@/assets/images/wrapped-2024/footer-logo.svg";
+import footer_logo from "../../../../public/images/wrapped-2024/footer-logo.svg";
 
 export default function SectionNewUserAdded({
   data,

@@ -4,7 +4,7 @@ import { useApp } from "@/lib/hooks/appProvider.tsx";
 import WechatEmojiTable from "@/lib/wechat-emojis.ts";
 import type React from "react";
 
-import footer_logo from "@/assets/images/wrapped-2024/footer-logo.svg";
+import footer_logo from "../../../../public/images/wrapped-2024/footer-logo.svg";
 
 export default function SectionMostUsedWxemoji({
   data,
@@ -20,7 +20,7 @@ export default function SectionMostUsedWxemoji({
   )[0];
   const mostUsedWxemojiKey = mostUsedWxemoji ? mostUsedWxemoji.key : undefined;
   const mostUsedWxemojiSrc = mostUsedWxemojiKey
-    ? `src/assets/wxemoji/${WechatEmojiTable[mostUsedWxemojiKey]}`
+    ? `/wxemoji/${WechatEmojiTable[mostUsedWxemojiKey]}`
     : undefined;
 
   return (

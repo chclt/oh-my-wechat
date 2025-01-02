@@ -16,7 +16,6 @@ import type { ChatStatistics } from "@/lib/controllers/statistic.ts";
 import type { ControllerResult } from "@/lib/schema.ts";
 import Fade from "embla-carousel-fade";
 
-import cover_logo from "@/assets/images/wrapped-2024/cover-logo.svg";
 import { ChevronRightSmallLine } from "@/components/central-icon.tsx";
 import Image from "@/components/image.tsx";
 import SectionMessageCountDescription from "@/components/statistic/wrapped-2024/section-message-count-description.tsx";
@@ -30,6 +29,7 @@ import SectionSentMessageWordCount from "@/components/statistic/wrapped-2024/sec
 import SectionSummary from "@/components/statistic/wrapped-2024/section-summary.tsx";
 import type { Wrapped2024Statistics } from "@/lib/controllers/wrapped-2024.ts";
 import { LoaderIcon } from "lucide-react";
+import cover_logo from "../../../../public/images/wrapped-2024/cover-logo.svg";
 
 interface ReportProps extends React.HTMLAttributes<HTMLDivElement> {
   startTime: Date;

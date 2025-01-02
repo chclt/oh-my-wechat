@@ -7,8 +7,8 @@ import useQuery from "@/lib/hooks/useQuery.ts";
 import type { ControllerResult, MessageVM } from "@/lib/schema.ts";
 import React, { useEffect } from "react";
 
-import footer_logo from "@/assets/images/wrapped-2024/footer-logo.svg";
 import { format } from "date-fns";
+import footer_logo from "../../../../public/images/wrapped-2024/footer-logo.svg";
 
 export default function SectionSentMediaMessages({
   data,

@@ -1,4 +1,3 @@
-import logo from "@/assets/images/logo.svg";
 import {
   ChevronRightSmallLine,
   FolderOpenLine,
@@ -26,6 +25,7 @@ import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Github, GithubIcon, LoaderIcon, LucideGithub, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import * as React from "react";
+import logo from "../../public/images/logo.svg";
 
 export default function AccountSelectDialog(props: DialogProps) {
   const { loadDirectory, loadDatabases, accountList } = useDatabase();

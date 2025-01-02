@@ -9,7 +9,7 @@ export default function WechatEmoji({ emojiName }: { emojiName: string }) {
       }
     >
       <Image
-        src={`src/assets/wxemoji/${WechatEmojiTable[emojiName]}`}
+        src={`/wxemoji/${WechatEmojiTable[emojiName]}`}
         alt={emojiName}
         draggable={false}
       />
