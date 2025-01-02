@@ -1,10 +1,13 @@
 import { ArrowRotateRightLeftLine } from "@/components/central-icon.tsx";
+import Image from "@/components/image.tsx";
 import Message from "@/components/message/message.tsx";
 import User from "@/components/user.tsx";
 import { useApp } from "@/lib/hooks/appProvider.tsx";
 import useQuery from "@/lib/hooks/useQuery.ts";
 import type { ControllerResult, MessageVM } from "@/lib/schema.ts";
 import React, { useEffect } from "react";
+
+import footer_logo from "@/assets/images/wrapped-2024/footer-logo.svg";
 
 export default function SectionSentMediaMessages({
   data,
@@ -38,7 +41,14 @@ export default function SectionSentMediaMessages({
   }, []);
 
   return (
-    <section className="group p-8 h-[812px] flex flex-col gap-4 overflow-hidden">
+    <section
+      className="group p-8 h-[812px] flex flex-col gap-4 overflow-hidden"
+      style={{
+        background:
+          "radial-gradient(66.67% 50% at 0% 100%, rgba(164, 253, 176, 0.5) 0%, rgba(255, 255, 255, 0) 100%), " +
+          "#FAFAFA",
+      }}
+    >
       <div className={"h-40 -translate-y-0.5"}>
         <h2 className={"text-[2rem] font-medium text-black/90"}>发送图片</h2>
         <p className={"text-[28px] text-black/55"}>
@@ -47,60 +57,22 @@ export default function SectionSentMediaMessages({
           张图片和视频，还记得当时的心情吗
         </p>
       </div>
-      <div className={"-mr-8  grow overflow-hidden"}>
-        <div className={"h-full grid grid-rows-3 gap-4"}>
-          <div className={"flex gap-4"}>
+      <div className={"grow overflow-hidden drop-shadow-lg"}>
+        <div className={"size-full"}>
+          <div className={"h-full w-full"}>
             {result.data
-              .filter((_, index) => index < 7)
+              .filter((_, index) => index < 1)
               .map((message) => (
                 <div
                   key={`${message.chat.id}/${message.id}`}
-                  className={"shrink-0 p-2 h-full bg-white shadow-lg"}
+                  className={"h-full w-full"}
                 >
                   <Message
                     message={message}
                     // @ts-ignore
                     variant={"viewer_detail"}
                     className={
-                      "h-full [&_img]:h-full [&_img]:w-auto [&_video]:h-full [&_video]:w-auto"
-                    }
-                  />
-                </div>
-              ))}
-          </div>
-          <div className={"flex gap-4 overflow-hidden"}>
-            {result.data
-              .filter((_, index) => index >= 7 && index < 14)
-              .map((message) => (
-                <div
-                  key={`${message.chat.id}/${message.id}`}
-                  className={"shrink-0 p-2 h-full bg-white shadow-lg"}
-                >
-                  <Message
-                    message={message}
-                    // @ts-ignore
-                    variant={"viewer_detail"}
-                    className={
-                      "h-full [&_img]:h-full [&_img]:w-auto [&_video]:h-full [&_video]:w-auto"
-                    }
-                  />
-                </div>
-              ))}
-          </div>
-          <div className={"flex gap-4 overflow-hidden"}>
-            {result.data
-              .filter((_, index) => index >= 14 && index < 21)
-              .map((message) => (
-                <div
-                  key={`${message.chat.id}/${message.id}`}
-                  className={"shrink-0 p-2 h-full bg-white shadow-lg"}
-                >
-                  <Message
-                    message={message}
-                    // @ts-ignore
-                    variant={"viewer_detail"}
-                    className={
-                      "h-full [&_img]:h-full [&_img]:w-auto [&_video]:h-full [&_video]:w-auto"
+                      "h-full w-full flex justify-center items-center p-4 [&_img]:max-h-full [&_img]:max-w-full [&_img]:aspect-auto [&_img]:shadow-[0_0_0_8px_white] [&_video]:max-h-full [&_video]:max-w-full [&_video]:aspect-auto [&_video]:shadow-[0_0_0_8px_white]"
                     }
                   />
                 </div>
@@ -121,9 +93,15 @@ export default function SectionSentMediaMessages({
           <ArrowRotateRightLeftLine
             className={isQuerying ? "animate-spin" : ""}
           />
-          换一组
+          换一张
         </button>
-        <User.Photo user={user!} variant={"default"} />
+        <div className={"flex gap-2"}>
+          <Image
+            src={footer_logo}
+            alt={"访问ohmywechat.com，查看微信报告2024"}
+          />
+          <User.Photo user={user!} variant={"default"} />
+        </div>
       </div>
     </section>
   );

@@ -1,10 +1,9 @@
-import {
-  DailyMessageCountChart,
-  type DailyMessageCountChartProps,
-} from "@/components/statistic/wrapped-2024/daily-message-count-chart.tsx";
+import Image from "@/components/image.tsx";
 import User from "@/components/user.tsx";
 import { useApp } from "@/lib/hooks/appProvider.tsx";
 import type React from "react";
+
+import footer_logo from "@/assets/images/wrapped-2024/footer-logo.svg";
 
 export default function SectionSentMessageWordCount({
   data,
@@ -17,7 +16,14 @@ export default function SectionSentMessageWordCount({
   const { user } = useApp();
 
   return (
-    <section className="p-8 h-[812px] flex flex-col gap-4">
+    <section
+      className="p-8 h-[812px] flex flex-col gap-4"
+      style={{
+        background:
+          "radial-gradient(66.67% 50% at 0% 100%, rgba(164, 253, 176, 0.5) 0%, rgba(255, 255, 255, 0) 100%), " +
+          "#FAFAFA",
+      }}
+    >
       <div className={"h-40 -translate-y-0.5"}>
         <h2 className={"text-[2rem] font-medium text-black/90"}>发送文字</h2>
       </div>
@@ -26,7 +32,7 @@ export default function SectionSentMessageWordCount({
           <p className={"p-[2.875rem] text-[2rem] font-medium text-black/90"}>
             过去一年
             <br />
-            你合计发送了 {data.sent_message_word_count}字
+            你一共发送了 {data.sent_message_word_count} 字
             <br />
             {/*约等于写了*/}
             {/*{data.sent_message_word_count_description}*/}
@@ -35,7 +41,13 @@ export default function SectionSentMessageWordCount({
         </div>
       </div>
       <div className={"h-11 flex justify-end"}>
-        <User.Photo user={user!} variant={"default"} />
+        <div className={"flex gap-2"}>
+          <Image
+            src={footer_logo}
+            alt={"访问ohmywechat.com，查看微信报告2024"}
+          />
+          <User.Photo user={user!} variant={"default"} />
+        </div>
       </div>
     </section>
   );

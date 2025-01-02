@@ -183,8 +183,8 @@ export const Wrapped2024Controller = {
     }
 
     statistics.sent_message_word_count_description = "约等于";
-    statistics.sent_message_count_description = `能量 ${(((statistics.sent_message_word_count! + (statistics.sent_message_count! - statistics.sent_text_message_count!)) * 5 * 2) / 1000 / 4) | 0} 卡`;
-    statistics.message_count_description = `需要滑动 ${
+    statistics.sent_message_count_description = `${(((statistics.sent_message_word_count! + (statistics.sent_message_count! - statistics.sent_text_message_count!)) * 5 * 2) / 1000 / 4) | 0}`;
+    statistics.message_count_description = `${
       Math.round(
         // 文本
         (((((((statistics.message_word_count! /
@@ -258,7 +258,7 @@ export const Wrapped2024Controller = {
   get_random_media_message: async (
     databases: WCDatabases,
     {
-      limit = 20,
+      limit = 2,
       startTime,
       endTime,
     }: {

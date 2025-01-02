@@ -5,7 +5,7 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart.tsx";
 import type React from "react";
-import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
+import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
 
 export interface DailyMessageCountChartProps
   extends React.HTMLAttributes<HTMLDivElement> {
@@ -17,11 +17,11 @@ export interface DailyMessageCountChartProps
 }
 
 const chartConfig = {
-  sent: {
+  sent_message_count: {
     label: "发送消息",
     color: "#26DC22",
   },
-  received: {
+  received_message_count: {
     label: "接受消息",
     color: "#FFB75C",
   },
@@ -46,20 +46,24 @@ export function DailyMessageCountChart({
           <linearGradient id="fillReceived" x1="0" y1="0" x2="0" y2="1">
             <stop
               offset="5%"
-              stopColor="var(--color-received)"
+              stopColor="var(--color-received_message_count)"
               stopOpacity={0.8}
             />
             <stop
               offset="95%"
-              stopColor="var(--color-received)"
+              stopColor="var(--color-received_message_count)"
               stopOpacity={0.1}
             />
           </linearGradient>
           <linearGradient id="fillSent" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="var(--color-sent)" stopOpacity={0.8} />
+            <stop
+              offset="5%"
+              stopColor="var(--color-sent_message_count)"
+              stopOpacity={0.8}
+            />
             <stop
               offset="95%"
-              stopColor="var(--color-sent)"
+              stopColor="var(--color-sent_message_count)"
               stopOpacity={0.1}
             />
           </linearGradient>
@@ -70,7 +74,7 @@ export function DailyMessageCountChart({
           type="bump"
           fill="url(#fillSent)"
           fillOpacity={0.4}
-          stroke="var(--color-sent)"
+          stroke="var(--color-sent_message_count)"
           strokeWidth={6}
           strokeLinecap="round"
           stackId="a"
@@ -80,7 +84,7 @@ export function DailyMessageCountChart({
           type="bump"
           fill="url(#fillReceived)"
           fillOpacity={0.4}
-          stroke="var(--color-received)"
+          stroke="var(--color-received_message_count)"
           strokeWidth={6}
           strokeLinecap="round"
           stackId="a"

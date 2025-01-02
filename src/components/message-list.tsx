@@ -115,7 +115,7 @@ export default function MessageList({
         className,
       )}
     >
-      <div className="z-20 sticky top-0 mb-4 w-full h-[4.5rem] px-4 flex items-center bg-white/80 backdrop-blur">
+      <div className="z-20 sticky top-0 mb-4 w-full h-[4.5rem] px-6 flex items-center bg-white/80 backdrop-blur">
         <h2 className={"font-medium text-lg"}>{chat.title}</h2>
       </div>
 

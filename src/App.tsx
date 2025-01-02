@@ -24,12 +24,13 @@ import {
 } from "@/components/ui/dialog";
 
 import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 import AccountSelectDialog from "@/components/account-select-dialog.tsx";
 import MediaViewerDialog from "@/components/media-viewer-dialog.tsx";
@@ -40,12 +41,18 @@ import ContactList from "./components/contact-list";
 import { cn } from "./lib/utils";
 
 import {
+  CelebrateSolid,
+  ChevronRightSmallLine,
+} from "@/components/central-icon.tsx";
+import {
   ChatIconFill,
   ChatIconOutline,
   ContactIconFill,
   ContactIconOutline,
 } from "@/components/icon.tsx";
+import Wrapped2024Trigger from "@/components/statistic/wrapped-2024/wrapped-2024-trigger.tsx";
 import Wrapped2024 from "@/components/statistic/wrapped-2024/wrapped-2024.tsx";
+import { Button } from "@/components/ui/button.tsx";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
 const App = () => {
@@ -83,25 +90,6 @@ const App = () => {
                     />
                   </div>
                   <span className="mt-1 text-xs">消息</span>
-                </TabsTrigger>
-                <TabsTrigger
-                  value="contact"
-                  className={cn(
-                    "w-16 h-16 p-0 flex flex-col",
-                    "group data-[state=active]:text-[#03C160] rounded-none after:content-none hover:bg-neutral-100",
-                  )}
-                >
-                  <div className="mt-1 w-8 h-8">
-                    <ContactIconOutline
-                      className={"group-data-[state=active]:hidden size-full"}
-                    />
-                    <ContactIconFill
-                      className={
-                        "hidden group-data-[state=active]:block size-full"
-                      }
-                    />
-                  </div>
-                  <span className="mt-1 text-xs">通讯录</span>
                 </TabsTrigger>
               </TabsList>
             </div>
@@ -149,11 +137,8 @@ const App = () => {
           )}
 
           {databases && user && !chat && (
-            <div className="w-full h-full overflow-auto">
-              <Wrapped2024
-                startTime={new Date("2024/1/1")}
-                endTime={new Date("2025/1/1")}
-              />
+            <div className="w-full h-full flex justify-center items-center">
+              <Wrapped2024Trigger />
             </div>
           )}
         </ResizablePanel>
@@ -165,25 +150,6 @@ const App = () => {
           onOpenChange={setIsOpenMediaViewer}
           chat={chat}
         />
-      )}
-
-      {databases && user && (
-        <Dialog>
-          <DialogContent
-            className={"p-0 bg-transparent border-none shadow-none "}
-          >
-            <VisuallyHidden>
-              <DialogHeader>
-                <DialogTitle>Are you absolutely sure?</DialogTitle>
-                <DialogDescription>
-                  This action cannot be undone. This will permanently delete
-                  your account and remove your data from our servers.
-                </DialogDescription>
-              </DialogHeader>
-            </VisuallyHidden>
-            <article className={"pb-[133.333333%] bg-red-400"}></article>
-          </DialogContent>
-        </Dialog>
       )}
     </>
   );

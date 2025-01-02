@@ -2,8 +2,10 @@ import Image from "@/components/image.tsx";
 import { ScrollArea } from "@/components/ui/scroll-area.tsx";
 import User from "@/components/user.tsx";
 import { useApp } from "@/lib/hooks/appProvider.tsx";
-import type { Chat, User as UserVM } from "@/lib/schema.ts";
+import type { Chat } from "@/lib/schema.ts";
 import type React from "react";
+
+import footer_logo from "@/assets/images/wrapped-2024/footer-logo.svg";
 
 export default function SectionMostMessageChat({
   data,
@@ -20,10 +22,19 @@ export default function SectionMostMessageChat({
 }) {
   const { user } = useApp();
 
-  const messageCountMax = data.chat_message_count[0].message_count;
+  const messageCountMax = data.chat_message_count.length
+    ? data.chat_message_count[0].message_count
+    : 0;
 
   return (
-    <section className="p-8 h-[812px] flex flex-col gap-4">
+    <section
+      className="p-8 h-[812px] flex flex-col gap-4"
+      style={{
+        background:
+          "radial-gradient(66.67% 50% at 0% 100%, rgba(164, 253, 176, 0.5) 0%, rgba(255, 255, 255, 0) 100%), " +
+          "#FAFAFA",
+      }}
+    >
       <div className={"h-40 -translate-y-0.5"}>
         <h2 className={"text-[2rem] font-medium text-black/90"}>最多联系</h2>
         <p className={"text-[28px] text-black/55"}>
@@ -92,7 +103,13 @@ export default function SectionMostMessageChat({
         </ScrollArea>
       </div>
       <div className={"h-11 flex justify-end"}>
-        <User.Photo user={user!} variant={"default"} />
+        <div className={"flex gap-2"}>
+          <Image
+            src={footer_logo}
+            alt={"访问ohmywechat.com，查看微信报告2024"}
+          />
+          <User.Photo user={user!} variant={"default"} />
+        </div>
       </div>
     </section>
   );

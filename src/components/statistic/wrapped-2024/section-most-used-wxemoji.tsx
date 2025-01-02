@@ -4,6 +4,8 @@ import { useApp } from "@/lib/hooks/appProvider.tsx";
 import WechatEmojiTable from "@/lib/wechat-emojis.ts";
 import type React from "react";
 
+import footer_logo from "@/assets/images/wrapped-2024/footer-logo.svg";
+
 export default function SectionMostUsedWxemoji({
   data,
 }: {
@@ -22,7 +24,14 @@ export default function SectionMostUsedWxemoji({
     : undefined;
 
   return (
-    <section className="p-8 h-[812px] flex flex-col gap-4">
+    <section
+      className="p-8 h-[812px] flex flex-col gap-4"
+      style={{
+        background:
+          "radial-gradient(66.67% 50% at 0% 100%, rgba(164, 253, 176, 0.5) 0%, rgba(255, 255, 255, 0) 100%), " +
+          "#FAFAFA",
+      }}
+    >
       <div className={"h-40 -translate-y-0.5"}>
         <h2 className={"text-[2rem] font-medium text-black/90"}>发送表情</h2>
         <p className={"text-[28px] text-black/55"}>
@@ -34,28 +43,40 @@ export default function SectionMostUsedWxemoji({
           <div
             className={"w-full p-[2.875rem] flex flex-col items-center gap-8"}
           >
-            <div className={"mt-4 relative size-24 [&_img]:size-full"}>
-              <Image
-                src={mostUsedWxemojiSrc}
-                alt={mostUsedWxemojiKey}
-                className={"absolute z-0 inset-0 blur-xl opacity-50"}
-                aria-hidden
-              />
-              <Image
-                src={mostUsedWxemojiSrc}
-                alt={mostUsedWxemojiKey}
-                className={"relative"}
-              />
-            </div>
+            {mostUsedWxemoji && (
+              <div className={"mt-4 relative size-24 [&_img]:size-full"}>
+                <Image
+                  src={mostUsedWxemojiSrc}
+                  alt={mostUsedWxemojiKey}
+                  className={"absolute z-0 inset-0 blur-xl opacity-50"}
+                  aria-hidden
+                />
+                <Image
+                  src={mostUsedWxemojiSrc}
+                  alt={mostUsedWxemojiKey}
+                  className={"relative"}
+                />
+              </div>
+            )}
 
-            <p className={"text-[2rem] text-center font-medium text-black/90"}>
-              累计使用 {mostUsedWxemoji.count} 次
-            </p>
+            {mostUsedWxemoji && (
+              <p
+                className={"text-[2rem] text-center font-medium text-black/90"}
+              >
+                累计使用 {mostUsedWxemoji.count} 次
+              </p>
+            )}
           </div>
         </div>
       </div>
       <div className={"h-11 flex justify-end"}>
-        <User.Photo user={user!} variant={"default"} />
+        <div className={"flex gap-2"}>
+          <Image
+            src={footer_logo}
+            alt={"访问ohmywechat.com，查看微信报告2024"}
+          />
+          <User.Photo user={user!} variant={"default"} />
+        </div>{" "}
       </div>
     </section>
   );

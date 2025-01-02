@@ -5,6 +5,13 @@ import type { Chat, User as UserVM } from "@/lib/schema.ts";
 import WechatEmojiTable from "@/lib/wechat-emojis.ts";
 import type React from "react";
 
+import message_background from "@/assets/images/wrapped-2024/widget-message-background.png";
+import music_background from "@/assets/images/wrapped-2024/widget-music-background.png";
+import widget_friends_background from "@/assets/images/wrapped-2024/widget-new-friends-background.png";
+import voice_background from "@/assets/images/wrapped-2024/widget-voice-background.png";
+
+import footer_logo from "@/assets/images/wrapped-2024/footer-logo.svg";
+
 export default function SectionSummary({
   data,
 }: {
@@ -31,21 +38,46 @@ export default function SectionSummary({
     ? `src/assets/wxemoji/${WechatEmojiTable[mostUsedWxemojiKey]}`
     : undefined;
 
+  let voiceDurationDisplay = `${Math.round(
+    data.sent_voice_message_total_duration,
+  )}秒`;
+  if (data.sent_voice_message_total_duration > 10000) {
+    const m = (data.sent_voice_message_total_duration / 60) | 0;
+    const s = Math.round(data.sent_voice_message_total_duration % 60);
+    voiceDurationDisplay = `${m} 分 ${s} 秒`;
+  }
+
   return (
-    <section className="p-8 h-[812px] flex flex-col gap-4">
-      <div className={"grow grid grid-cols-12 grid-rows-4 gap-4"}>
+    <section
+      className="p-8 h-[812px] flex flex-col gap-4"
+      style={{
+        background:
+          "radial-gradient(66.67% 50% at 0% 100%, rgba(164, 253, 176, 0.5) 0%, rgba(255, 255, 255, 0) 100%), " +
+          "#FAFAFA",
+      }}
+    >
+      <div
+        className={"grow grid grid-cols-12 grid-rows-4 gap-4"}
+        style={{
+          filter: "drop-shadow(0px 0px 0.5px rgba(0, 0, 0, 0.15))",
+        }}
+      >
         <div
           className={
-            "col-span-6 p-4 flex flex-col justify-center items-center bg-white/95 rounded-3xl"
+            "col-span-6 p-4 flex flex-col justify-center items-center bg-white/95 rounded-3xl overflow-hidden clothoid-corner-6"
           }
         >
-          <div className={"size-12 [&_svg]:size-full"}>
+          <div className={"relative size-12 [&_svg]:size-full"}>
             <svg
               width="48"
               height="48"
               viewBox="0 0 48 48"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
+              className={"z-10 relative"}
+              style={{
+                filter: "drop-shadow(0px 0px 32px rgba(11, 184, 95, 1))",
+              }}
             >
               <path
                 d="M24 39.6024C35.0457 39.6024 44 31.9913 44 22.6024C44 13.2136 35.0457 5.60242 24 5.60242C12.9543 5.60242 4 13.2136 4 22.6024C4 26.4369 5.49354 29.9748 8.01311 32.8189C9.20497 34.1642 9.8009 34.8369 10.0325 35.2913C10.2862 35.7892 10.359 36.0226 10.4332 36.5765C10.501 37.0819 10.425 37.7097 10.273 38.9653L10.2571 39.0974C10.126 40.1804 10.0605 40.7219 10.25 41.0625C10.4154 41.3597 10.699 41.5727 11.0304 41.6487C11.4104 41.7358 11.9121 41.522 12.9157 41.0945L16.1451 39.7186C16.8629 39.4127 17.2218 39.2598 17.55 39.1814C17.8912 39.0999 18.0885 39.0757 18.4393 39.0722C18.7767 39.0688 19.2793 39.1491 20.2845 39.3096C21.4885 39.5019 22.7304 39.6024 24 39.6024Z"
@@ -66,19 +98,42 @@ export default function SectionSummary({
                 </linearGradient>
               </defs>
             </svg>
+            <div
+              className={
+                "z-0 absolute top-3 right-0 bottom-0 left-0 grid place-content-center pointer-events-none"
+              }
+            >
+              <div
+                style={{
+                  width: 197,
+                  height: 180,
+                  background: ` center / cover no-repeat url(${message_background})`,
+                }}
+              />
+            </div>
           </div>
 
-          <span className={"-mt-2 text-[2.5rem] font-bold"}>
+          <span
+            className={
+              "-mt-1 text-[2.5rem] font-bold text-transparent bg-clip-text bg-gradient-to-b from-[#262626] to-black"
+            }
+          >
             {data.sent_message_count}
           </span>
-          <h4 className={"-mt-1 text-sm font-medium"}>发送消息数量</h4>
+          <h4
+            className={
+              "-mt-1 text-sm font-medium text-transparent bg-clip-text bg-gradient-to-b from-[#262626] to-black"
+            }
+          >
+            发送消息数量
+          </h4>
         </div>
         <div
           className={
-            "col-span-6 p-4 flex flex-col justify-center items-center bg-white/95 rounded-3xl"
+            "col-span-6 p-4 flex flex-col justify-center items-center bg-white/95 rounded-3xl overflow-hidden clothoid-corner-6"
           }
         >
-          <div className={"size-12 [&_svg]:size-full"}>
+          <div className={"relative size-12 [&_svg]:size-full"}>
             <svg
               width="48"
               height="49"
@@ -106,16 +161,28 @@ export default function SectionSummary({
                 </linearGradient>
               </defs>
             </svg>
+
+            <Image src={""} />
           </div>
 
-          <span className={"-mt-2 text-[2.5rem] font-bold"}>
+          <span
+            className={
+              "-mt-1 text-[2.5rem] font-bold text-transparent bg-clip-text bg-gradient-to-b from-[#262626] to-black"
+            }
+          >
             {data.sent_message_word_count}
           </span>
-          <h4 className={"-mt-1 text-sm font-medium"}>发送消息字数</h4>
+          <h4
+            className={
+              "-mt-1 text-sm font-medium text-transparent bg-clip-text bg-gradient-to-b from-[#262626] to-black"
+            }
+          >
+            发送消息字数
+          </h4>
         </div>
         <div
           className={
-            "col-span-4 p-4 flex flex-col justify-center items-center bg-white/95 rounded-3xl"
+            "col-span-4 p-4 flex flex-col justify-center items-center bg-white/95 rounded-3xl overflow-hidden clothoid-corner-6"
           }
         >
           <div className={"size-12 [&_svg]:size-full"}>
@@ -125,6 +192,9 @@ export default function SectionSummary({
               viewBox="0 0 48 49"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
+              style={{
+                filter: "drop-shadow(0px 0px 32px rgba(91, 12, 200, 0.75))",
+              }}
             >
               <path
                 d="M26.8649 32.9012C28.132 32.5616 28.8291 31.0538 28.4216 29.5331C28.0142 28.0127 26.6567 27.0552 25.3896 27.3947C24.1225 27.7343 23.4253 29.2423 23.8329 30.7627C24.2402 32.2834 25.5978 33.2407 26.8649 32.9012Z"
@@ -178,15 +248,25 @@ export default function SectionSummary({
             </svg>
           </div>
 
-          <span className={"-mt-2 text-[2.5rem] font-bold"}>
+          <span
+            className={
+              "-mt-1 text-[2.5rem] font-bold text-transparent bg-clip-text bg-gradient-to-b from-[#262626] to-black"
+            }
+          >
             {data.sent_image_message_count + data.sent_video_message_count}
           </span>
-          <h4 className={"-mt-1 text-sm font-medium"}>发送图片/视频</h4>
+          <h4
+            className={
+              "-mt-1 text-sm font-medium text-transparent bg-clip-text bg-gradient-to-b from-[#262626] to-black"
+            }
+          >
+            发送图片/视频
+          </h4>
         </div>
 
         <div
           className={
-            "col-span-4 p-4 flex flex-col justify-center items-center bg-white/95 rounded-3xl"
+            "col-span-4 p-4 flex flex-col justify-center items-center bg-white/95 rounded-3xl overflow-hidden clothoid-corner-6"
           }
         >
           <div className={"size-12 [&_svg]:size-full"}>
@@ -196,6 +276,9 @@ export default function SectionSummary({
               viewBox="0 0 48 49"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
+              style={{
+                filter: "drop-shadow(0px 0px 32px rgba(255, 225, 110, 1))",
+              }}
             >
               <path
                 d="M4 23.7C4 16.9794 4 13.6191 5.30792 11.0521C6.4584 8.79417 8.29417 6.9584 10.5521 5.80792C13.1191 4.5 16.4794 4.5 23.2 4.5H29C31.7879 4.5 33.1819 4.5 34.3411 4.73058C39.1014 5.67746 42.8225 9.39863 43.7694 14.1589C44 15.3181 44 16.7121 44 19.5V19.5C44 24.1466 44 26.4698 43.6157 28.4018C42.0376 36.3356 35.8356 42.5376 27.9018 44.1157C25.9698 44.5 23.6466 44.5 19 44.5V44.5C16.2121 44.5 14.8181 44.5 13.6589 44.2694C8.89863 43.3225 5.17746 39.6014 4.23058 34.8411C4 33.6819 4 32.2879 4 29.5V23.7Z"
@@ -284,51 +367,76 @@ export default function SectionSummary({
             </svg>
           </div>
 
-          <span className={"-mt-2 text-[2.5rem] font-bold"}>
+          <span
+            className={
+              "-mt-1 text-[2.5rem] font-bold text-transparent bg-clip-text bg-gradient-to-b from-[#262626] to-black"
+            }
+          >
             {data.sent_sticker_message_count}
           </span>
-          <h4 className={"-mt-1 text-sm font-medium"}>表情包使用次数</h4>
+          <h4
+            className={
+              "-mt-1 text-sm font-medium text-transparent bg-clip-text bg-gradient-to-b from-[#262626] to-black"
+            }
+          >
+            表情包使用次数
+          </h4>
         </div>
 
         <div
           className={
-            "col-span-4 p-4 flex flex-col justify-center items-center bg-white/95 rounded-3xl"
+            "col-span-4 p-4 flex flex-col justify-center items-center bg-white/95 rounded-3xl overflow-hidden clothoid-corner-6"
           }
         >
           <div className={"size-12 p-1"}>
-            <div className={"relative size-full [&_img]:size-full"}>
-              <Image
-                src={mostUsedWxemojiSrc}
-                alt={mostUsedWxemojiKey}
-                className={"absolute z-0 inset-0 blur-xl opacity-50"}
-                aria-hidden
-              />
-              <Image
-                src={mostUsedWxemojiSrc}
-                alt={mostUsedWxemojiKey}
-                className={"relative"}
-              />
-            </div>
+            {mostUsedWxemoji && (
+              <div className={"relative size-full [&_img]:size-full"}>
+                <Image
+                  src={mostUsedWxemojiSrc}
+                  alt={mostUsedWxemojiKey}
+                  className={"absolute z-0 inset-0 blur-lg opacity-90"}
+                  aria-hidden
+                />
+                <Image
+                  src={mostUsedWxemojiSrc}
+                  alt={mostUsedWxemojiKey}
+                  className={"relative"}
+                />
+              </div>
+            )}
           </div>
 
-          <span className={"-mt-2 text-[2.5rem] font-bold"}>
-            {mostUsedWxemoji.count}
+          <span
+            className={
+              "-mt-1 text-[2.5rem] font-bold text-transparent bg-clip-text bg-gradient-to-b from-[#262626] to-black"
+            }
+          >
+            {mostUsedWxemoji?.count}
           </span>
-          <h4 className={"-mt-1 text-sm font-medium"}>最多使用的微信表情</h4>
+          <h4
+            className={
+              "-mt-1 text-sm font-medium text-transparent bg-clip-text bg-gradient-to-b from-[#262626] to-black"
+            }
+          >
+            最多使用的微信表情
+          </h4>
         </div>
 
         <div
           className={
-            "col-span-4 p-4 flex flex-col justify-center items-center bg-white/95 rounded-3xl"
+            "col-span-7 p-4 flex flex-col justify-center items-center bg-white/95 rounded-3xl overflow-hidden clothoid-corner-6"
           }
         >
-          <div className={"size-12 [&_svg]:size-full"}>
+          <div className={"relative size-12 [&_svg]:size-full"}>
             <svg
               width="48"
               height="49"
               viewBox="0 0 48 49"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
+              style={{
+                filter: "drop-shadow(0px 0px 32px rgba(70, 138, 255, 1))",
+              }}
             >
               <path
                 d="M15.6667 15.3973C15.6667 10.7949 19.3976 7.06396 24 7.06396C28.6024 7.06396 32.3333 10.7949 32.3333 15.3973V22.8973C32.3333 27.4997 28.6024 31.2306 24 31.2306C19.3976 31.2306 15.6667 27.4997 15.6667 22.8973V15.3973Z"
@@ -363,26 +471,53 @@ export default function SectionSummary({
                 </linearGradient>
               </defs>
             </svg>
+
+            <div
+              className={
+                "z-0 absolute -top-1 right-0 bottom-0 left-0 grid place-content-center pointer-events-none"
+              }
+            >
+              <div
+                style={{
+                  width: 132,
+                  height: 170,
+                  background: ` center / cover no-repeat url(${voice_background})`,
+                }}
+              />
+            </div>
           </div>
 
-          <span className={"-mt-2 text-[2.5rem] font-bold"}>
-            {Math.round(data.sent_voice_message_total_duration)}秒
+          <span
+            className={
+              "-mt-1 text-[2.5rem] font-bold text-transparent bg-clip-text bg-gradient-to-b from-[#262626] to-black"
+            }
+          >
+            {voiceDurationDisplay}
           </span>
-          <h4 className={"-mt-1 text-sm font-medium"}>发送语音总时长</h4>
+          <h4
+            className={
+              "-mt-1 text-sm font-medium text-transparent bg-clip-text bg-gradient-to-b from-[#262626] to-black"
+            }
+          >
+            发送语音总时长
+          </h4>
         </div>
 
         <div
           className={
-            "col-span-4 p-4 flex flex-col justify-center items-center bg-white/95 rounded-3xl"
+            "col-span-5 p-4 flex flex-col justify-center items-center bg-white/95 rounded-3xl overflow-hidden clothoid-corner-6"
           }
         >
-          <div className={"size-12 [&_svg]:size-full"}>
+          <div className={"relative size-12 [&_svg]:size-full"}>
             <svg
               width="48"
               height="49"
               viewBox="0 0 48 49"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
+              style={{
+                filter: "drop-shadow(0px 0px 32px rgba(235, 55, 55, 1))",
+              }}
             >
               <path
                 d="M41.9225 5.32006C41.7437 5.17835 41.5346 5.0799 41.3115 5.03241C41.0883 4.98492 40.8572 4.98968 40.6363 5.04631L16.6363 11.0463C16.3121 11.1273 16.0242 11.3143 15.8184 11.5776C15.6125 11.8408 15.5005 12.1653 15.5 12.4994V33.1432C14.2486 32.307 12.7536 31.9131 11.2526 32.024C9.75157 32.1349 8.33071 32.7443 7.21576 33.7554C6.10082 34.7664 5.35575 36.121 5.09897 37.6041C4.84219 39.0871 5.08842 40.6134 5.79854 41.9404C6.50866 43.2674 7.64192 44.3191 9.01824 44.9282C10.3946 45.5373 11.935 45.669 13.3947 45.3022C14.8544 44.9355 16.1497 44.0914 17.0747 42.9042C17.9997 41.7169 18.5014 40.2545 18.5 38.7494V21.1713L39.5 15.9213V27.1432C38.2486 26.307 36.7536 25.9131 35.2526 26.024C33.7516 26.1349 32.3307 26.7443 31.2158 27.7554C30.1008 28.7664 29.3558 30.121 29.099 31.6041C28.8422 33.0871 29.0884 34.6134 29.7985 35.9404C30.5087 37.2674 31.6419 38.3191 33.0182 38.9282C34.3946 39.5373 35.935 39.669 37.3947 39.3022C38.8544 38.9355 40.1497 38.0914 41.0747 36.9042C41.9997 35.7169 42.5014 34.2545 42.5 32.7494V6.49944C42.4995 6.27193 42.4472 6.04752 42.3472 5.8432C42.2471 5.63887 42.1019 5.45998 41.9225 5.32006Z"
@@ -406,16 +541,41 @@ export default function SectionSummary({
                 </linearGradient>
               </defs>
             </svg>
+
+            <div
+              className={
+                "z-0 absolute top-3 right-0 bottom-0 left-0 grid place-content-center pointer-events-none"
+              }
+            >
+              <div
+                style={{
+                  width: 120,
+                  height: 120,
+                  background: ` center / cover no-repeat url(${music_background})`,
+                }}
+              />
+            </div>
           </div>
 
-          <span className={"-mt-2 text-[2.5rem] font-bold"}>
+          <span
+            className={
+              "-mt-1 text-[2.5rem] font-bold text-transparent bg-clip-text bg-gradient-to-b from-[#262626] to-black"
+            }
+          >
             {data.sent_music_message_count}
           </span>
-          <h4 className={"-mt-1 text-sm font-medium"}>分享音乐</h4>
+          <h4
+            className={
+              "-mt-1 text-sm font-medium text-transparent bg-clip-text bg-gradient-to-b from-[#262626] to-black"
+            }
+          >
+            分享音乐
+          </h4>
         </div>
+
         <div
           className={
-            "col-span-4 p-4 flex flex-col justify-center items-center bg-white/95 rounded-3xl"
+            "col-span-5 p-4 flex flex-col justify-center items-center bg-white/95 rounded-3xl overflow-hidden clothoid-corner-6"
           }
         >
           <div className={"size-12 [&_svg]:size-full"}>
@@ -445,18 +605,34 @@ export default function SectionSummary({
               </defs>
             </svg>
           </div>
-          <span className={"-mt-2 text-[2.5rem] font-bold"}>
+          <span
+            className={
+              "-mt-1 text-[2.5rem] font-bold text-transparent bg-clip-text bg-gradient-to-b from-[#262626] to-black"
+            }
+          >
             {data.chat_message_count.length}
           </span>
-          <h4 className={"-mt-1 text-sm font-medium"}>联系过的人和群组</h4>
+          <h4
+            className={
+              "-mt-1 text-sm font-medium text-transparent bg-clip-text bg-gradient-to-b from-[#262626] to-black"
+            }
+          >
+            联系过的人和群组
+          </h4>
         </div>
 
         <div
           className={
-            "col-span-5 p-4 flex flex-col justify-center items-center bg-white/95 rounded-3xl"
+            "col-span-7 p-4 relative flex flex-col justify-center items-center bg-white/95 rounded-3xl overflow-hidden clothoid-corner-6"
           }
         >
-          <div className={"size-12 [&_svg]:size-full"}>
+          <div
+            className={"absolute z-0 inset-0"}
+            style={{
+              background: ` center / cover no-repeat url(${widget_friends_background})`,
+            }}
+          />
+          <div className={"relative z-10 size-12 [&_svg]:size-full"}>
             <svg
               width="48"
               height="49"
@@ -483,22 +659,30 @@ export default function SectionSummary({
               </defs>
             </svg>
           </div>
-          <span className={"-mt-2 text-[2.5rem] font-bold"}>
+          <span
+            className={
+              "-mt-1 text-[2.5rem] font-bold text-transparent bg-clip-text bg-gradient-to-b from-[#262626] to-black"
+            }
+          >
             {data.user_dates_contact_added.length}
           </span>
-          <h4 className={"-mt-1 text-sm font-medium"}>新朋友</h4>
-        </div>
-
-        <div
-          className={
-            "col-span-7 p-4 flex flex-col justify-center items-center bg-white/95 rounded-3xl"
-          }
-        >
-          计算
+          <h4
+            className={
+              "-mt-1 text-sm font-medium text-transparent bg-clip-text bg-gradient-to-b from-[#262626] to-black"
+            }
+          >
+            新朋友
+          </h4>
         </div>
       </div>
       <div className={"h-11 flex justify-end"}>
-        <User.Photo user={user!} variant={"default"} />
+        <div className={"flex gap-2"}>
+          <Image
+            src={footer_logo}
+            alt={"访问ohmywechat.com，查看微信报告2024"}
+          />
+          <User.Photo user={user!} variant={"default"} />
+        </div>
       </div>
     </section>
   );
