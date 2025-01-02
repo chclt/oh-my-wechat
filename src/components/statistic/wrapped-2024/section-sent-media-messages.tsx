@@ -8,6 +8,7 @@ import type { ControllerResult, MessageVM } from "@/lib/schema.ts";
 import React, { useEffect } from "react";
 
 import footer_logo from "@/assets/images/wrapped-2024/footer-logo.svg";
+import { format } from "date-fns";
 
 export default function SectionSentMediaMessages({
   data,
@@ -65,7 +66,7 @@ export default function SectionSentMediaMessages({
               .map((message) => (
                 <div
                   key={`${message.chat.id}/${message.id}`}
-                  className={"h-full w-full"}
+                  className={"h-full w-full pb-8"}
                 >
                   <Message
                     message={message}
@@ -75,6 +76,15 @@ export default function SectionSentMediaMessages({
                       "h-full w-full flex justify-center items-center p-4 [&_img]:max-h-full [&_img]:max-w-full [&_img]:aspect-auto [&_img]:shadow-[0_0_0_8px_white] [&_video]:max-h-full [&_video]:max-w-full [&_video]:aspect-auto [&_video]:shadow-[0_0_0_8px_white]"
                     }
                   />
+                  <p className={"mt-2 text-sm text-black/90"}>
+                    <span>
+                      {format(new Date(message.date * 1000), "MM月dd日")}
+                    </span>
+                    <span className={"mx-1"}>发送给</span>
+                    {message.chat.type === "private" ? (
+                      <User user={message.chat.user} variant="inline" />
+                    ) : null}
+                  </p>
                 </div>
               ))}
           </div>
