@@ -64,35 +64,40 @@ export const MessageController = {
           let senderId = "";
           let rawMessageContent = "";
 
-          if (raw_message_row.Des === MessageDirection.outgoing) {
-            rawMessageContent = raw_message_row.Message;
-            senderId = _global.user!.id;
-          } else if (
-            raw_message_row.Type === MessageType.SYSTEM ||
-            raw_message_row.Message.startsWith("<") ||
-            raw_message_row.Message.startsWith('"<')
-          ) {
-            rawMessageContent = raw_message_row.Message;
+          try {
+            if (raw_message_row.Des === MessageDirection.outgoing) {
+              rawMessageContent = raw_message_row.Message;
+              senderId = _global.user!.id;
+            } else if (
+              raw_message_row.Type === MessageType.SYSTEM ||
+              raw_message_row.Message.startsWith("<") ||
+              raw_message_row.Message.startsWith('"<')
+            ) {
+              rawMessageContent = raw_message_row.Message;
 
-            // 有一些消息在内部记录 from，TODO 转账中可能记录在内部的 receiver_username / payer_username，现在是在消息组件里去处理
-            const xmlParser = new XMLParser({ ignoreAttributes: false });
-            const messageXml = xmlParser.parse(raw_message_row.Message);
+              // 有一些消息在内部记录 from，TODO 转账中可能记录在内部的 receiver_username / payer_username，现在是在消息组件里去处理
+              const xmlParser = new XMLParser({ ignoreAttributes: false });
+              const messageXml = xmlParser.parse(raw_message_row.Message);
 
-            if (messageXml?.msg?.fromusername) {
-              senderId = messageXml.msg.fromusername;
-            } else {
-              if (raw_message_row.Type === MessageType.VIDEO) {
-                senderId = (messageXml as VideoMessageEntity).msg.videomsg[
-                  "@_fromusername"
-                ];
+              if (messageXml?.msg?.fromusername) {
+                senderId = messageXml.msg.fromusername;
+              } else {
+                if (raw_message_row.Type === MessageType.VIDEO) {
+                  senderId = (messageXml as VideoMessageEntity).msg.videomsg[
+                    "@_fromusername"
+                  ];
+                }
               }
+            } else {
+              const separatorPosition = raw_message_row.Message.indexOf(":\n");
+              senderId = raw_message_row.Message.slice(0, separatorPosition);
+              rawMessageContent = raw_message_row.Message.slice(
+                separatorPosition + 2,
+              );
             }
-          } else {
-            const separatorPosition = raw_message_row.Message.indexOf(":\n");
-            senderId = raw_message_row.Message.slice(0, separatorPosition);
-            rawMessageContent = raw_message_row.Message.slice(
-              separatorPosition + 2,
-            );
+          } catch (e) {
+            console.log(raw_message_row);
+            throw e;
           }
 
           raw_message_row.Message = rawMessageContent;
