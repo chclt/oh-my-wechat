@@ -60,11 +60,11 @@ export const MessageController = {
   ): Promise<MessageVM[]> => {
     const messageSenderIds = raw_message_rows
       .map((raw_message_row) => {
-        if (chat && chat.type === "chatroom") {
-          let senderId = "";
-          let rawMessageContent = "";
+        try {
+          if (chat && chat.type === "chatroom") {
+            let senderId = "";
+            let rawMessageContent = "";
 
-          try {
             if (raw_message_row.Des === MessageDirection.outgoing) {
               rawMessageContent = raw_message_row.Message;
               senderId = _global.user!.id;
@@ -95,20 +95,28 @@ export const MessageController = {
                 separatorPosition + 2,
               );
             }
-          } catch (e) {
-            console.log(raw_message_row);
-            throw e;
+
+            raw_message_row.Message = rawMessageContent;
+
+            return senderId;
           }
 
-          raw_message_row.Message = rawMessageContent;
+          if (chat && chat.type === "private") {
+            return raw_message_row.Des === MessageDirection.incoming
+              ? chat.id
+              : (_global.user?.id ?? "?");
+          }
+        } catch (e) {
+          console.error("解析错误的消息", raw_message_row);
 
-          return senderId;
-        }
+          // @ts-ignore
+          if (!typeof raw_message_row.Message === "string") {
+            // Message 字段可能是个二进制，具体情况还未知
+            console.log("消息格式错误");
+            raw_message_row.Message = `解析失败的消息：${raw_message_row.Type}`;
+          }
 
-        if (chat && chat.type === "private") {
-          return raw_message_row.Des === MessageDirection.incoming
-            ? chat.id
-            : (_global.user?.id ?? "?");
+          return chat?.id ?? "";
         }
       })
       .filter((i) => i !== undefined);
