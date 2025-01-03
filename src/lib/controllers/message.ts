@@ -60,63 +60,67 @@ export const MessageController = {
   ): Promise<MessageVM[]> => {
     const messageSenderIds = raw_message_rows
       .map((raw_message_row) => {
-        try {
-          if (chat && chat.type === "chatroom") {
-            let senderId = "";
-            let rawMessageContent = "";
+        if (typeof (raw_message_row.Message as unknown) !== "string") {
+          // Message 字段可能是个二进制，具体情况还未知
+          console.log("消息格式错误");
+          raw_message_row.Message = `解析失败的消息：${new TextDecoder(
+            "utf-8",
+          ).decode(
+            new Uint8Array(
+              Object.values(
+                raw_message_row.Message as unknown as Record<string, number>,
+              ),
+            ),
+          )}
+            `;
+          raw_message_row.Type = 1;
+          return chat?.id ?? undefined;
+        }
 
-            if (raw_message_row.Des === MessageDirection.outgoing) {
-              rawMessageContent = raw_message_row.Message;
-              senderId = _global.user!.id;
-            } else if (
-              raw_message_row.Type === MessageType.SYSTEM ||
-              raw_message_row.Message.startsWith("<") ||
-              raw_message_row.Message.startsWith('"<')
-            ) {
-              rawMessageContent = raw_message_row.Message;
+        if (chat && chat.type === "chatroom") {
+          let senderId = "";
+          let rawMessageContent = "";
 
-              // 有一些消息在内部记录 from，TODO 转账中可能记录在内部的 receiver_username / payer_username，现在是在消息组件里去处理
-              const xmlParser = new XMLParser({ ignoreAttributes: false });
-              const messageXml = xmlParser.parse(raw_message_row.Message);
+          if (raw_message_row.Des === MessageDirection.outgoing) {
+            rawMessageContent = raw_message_row.Message;
+            senderId = _global.user!.id;
+          } else if (
+            raw_message_row.Type === MessageType.SYSTEM ||
+            raw_message_row.Message.startsWith("<") ||
+            raw_message_row.Message.startsWith('"<')
+          ) {
+            rawMessageContent = raw_message_row.Message;
 
-              if (messageXml?.msg?.fromusername) {
-                senderId = messageXml.msg.fromusername;
-              } else {
-                if (raw_message_row.Type === MessageType.VIDEO) {
-                  senderId = (messageXml as VideoMessageEntity).msg.videomsg[
-                    "@_fromusername"
-                  ];
-                }
-              }
+            // 有一些消息在内部记录 from，TODO 转账中可能记录在内部的 receiver_username / payer_username，现在是在消息组件里去处理
+            const xmlParser = new XMLParser({ ignoreAttributes: false });
+            const messageXml = xmlParser.parse(raw_message_row.Message);
+
+            if (messageXml?.msg?.fromusername) {
+              senderId = messageXml.msg.fromusername;
             } else {
-              const separatorPosition = raw_message_row.Message.indexOf(":\n");
-              senderId = raw_message_row.Message.slice(0, separatorPosition);
-              rawMessageContent = raw_message_row.Message.slice(
-                separatorPosition + 2,
-              );
+              if (raw_message_row.Type === MessageType.VIDEO) {
+                senderId = (messageXml as VideoMessageEntity).msg.videomsg[
+                  "@_fromusername"
+                ];
+              }
             }
-
-            raw_message_row.Message = rawMessageContent;
-
-            return senderId;
+          } else {
+            const separatorPosition = raw_message_row.Message.indexOf(":\n");
+            senderId = raw_message_row.Message.slice(0, separatorPosition);
+            rawMessageContent = raw_message_row.Message.slice(
+              separatorPosition + 2,
+            );
           }
 
-          if (chat && chat.type === "private") {
-            return raw_message_row.Des === MessageDirection.incoming
-              ? chat.id
-              : (_global.user?.id ?? "?");
-          }
-        } catch (e) {
-          console.error("解析错误的消息", raw_message_row);
+          raw_message_row.Message = rawMessageContent;
 
-          // @ts-ignore
-          if (!typeof raw_message_row.Message === "string") {
-            // Message 字段可能是个二进制，具体情况还未知
-            console.log("消息格式错误");
-            raw_message_row.Message = `解析失败的消息：${raw_message_row.Type}`;
-          }
+          return senderId;
+        }
 
-          return chat?.id ?? "";
+        if (chat && chat.type === "private") {
+          return raw_message_row.Des === MessageDirection.incoming
+            ? chat.id
+            : (_global.user?.id ?? "?");
         }
       })
       .filter((i) => i !== undefined);

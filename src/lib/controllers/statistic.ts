@@ -554,10 +554,17 @@ export const StatisticController = {
         )
           continue;
 
-        const length = countStringLength(
-          (message as AppMessage<ReferMessageEntity>).message_entity.msg.appmsg
-            .title,
-        );
+        let length = 0;
+
+        try {
+          length = countStringLength(
+            (message as AppMessage<ReferMessageEntity>).message_entity.msg
+              .appmsg.title,
+          );
+        } catch (e) {
+          continue;
+        }
+
         if (message.direction === MessageDirection.outgoing) {
           sent_word_count += length;
         } else {
