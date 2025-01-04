@@ -123,6 +123,8 @@ function MessageComponent({
       );
 
     default:
-      return <div>解析失败的消息: {(message as MessageVM).type}</div>;
+      return (
+        <div {...props}>解析失败的消息: {(message as MessageVM).type}</div>
+      );
   }
 }
