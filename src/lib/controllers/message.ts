@@ -60,6 +60,23 @@ export const MessageController = {
   ): Promise<MessageVM[]> => {
     const messageSenderIds = raw_message_rows
       .map((raw_message_row) => {
+        if (typeof (raw_message_row.Message as unknown) !== "string") {
+          // Message 字段可能是个二进制，具体情况还未知
+          console.log("消息格式错误");
+          raw_message_row.Message = `解析失败的消息：${new TextDecoder(
+            "utf-8",
+          ).decode(
+            new Uint8Array(
+              Object.values(
+                raw_message_row.Message as unknown as Record<string, number>,
+              ),
+            ),
+          )}
+            `;
+          raw_message_row.Type = 1;
+          return chat?.id ?? undefined;
+        }
+
         if (chat && chat.type === "chatroom") {
           let senderId = "";
           let rawMessageContent = "";
