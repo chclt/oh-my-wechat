@@ -12,6 +12,7 @@ import type { VerityMessageEntity } from "@/components/message/verify-message.ts
 import type { VideoMessageEntity } from "@/components/message/video-message.tsx";
 import type { VoiceMessageEntity } from "@/components/message/voice-message.tsx";
 import type { VoipMessageEntity } from "@/components/message/voip-message.tsx";
+import type { WeComContactMessageEntity } from "@/components/message/wecom-contact-message.tsx";
 import type { Database } from "sql.js";
 
 export interface WCDatabases {
@@ -184,6 +185,7 @@ export enum MessageType {
   VOIP = 50, // 语音/视频通话
   MICROVIDEO = 62, // 也是视频
   GROUP_VOIP = 64, // 群语音/视频通话 TODO: 可能是通知
+  WECOM_CONTACT = 66, // 企业微信名片
   SYSTEM = 10000, // 系统消息,应该只是文本
   SYSTEM_EXTENDED = 10002,
 }
@@ -195,7 +197,8 @@ export enum AppMessageType {
   VIDEO = 4,
   URL = 5, // 链接、小程序通知
   ATTACH = 6,
-  STICKER = 8, // 表情包
+  STICKER = 8, // 表情贴纸
+  STICKER_SET = 15, // 表情贴纸包
   REALTIME_LOCATION = 17,
   FORWARD_MESSAGE = 19,
   NOTE = 24, // 笔记
@@ -269,6 +272,10 @@ export type ChatroomVoipMessage = BasicMessage<
   MessageType.GROUP_VOIP,
   ChatroomVoipMessageEntity
 >;
+export type WeComContactMessage = BasicMessage<
+  MessageType.WECOM_CONTACT,
+  WeComContactMessageEntity
+>;
 export type SystemMessage = BasicMessage<
   MessageType.SYSTEM,
   SystemMessageEntity
@@ -291,5 +298,6 @@ export type MessageVM =
   | VoipMessage
   | MicroVideoMessage
   | ChatroomVoipMessage
+  | WeComContactMessage
   | SystemMessage
   | SystemExtendedMessage;

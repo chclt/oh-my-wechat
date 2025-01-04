@@ -12,6 +12,7 @@ import type { VerityMessageEntity } from "@/components/message/verify-message.ts
 import type { VideoMessageEntity } from "@/components/message/video-message.tsx";
 import type { VoiceMessageEntity } from "@/components/message/voice-message.tsx";
 import type { VoipMessageEntity } from "@/components/message/voip-message.tsx";
+import type { WeComContactMessageEntity } from "@/components/message/wecom-contact-message.tsx";
 import { ChatController } from "@/lib/controllers/chat.ts";
 import { ContactController } from "@/lib/controllers/contact.ts";
 import _global from "@/lib/global.ts";
@@ -41,6 +42,7 @@ import {
   type VoiceMessage,
   type VoipMessage,
   type WCDatabases,
+  type WeComContactMessage,
 } from "@/lib/schema.ts";
 import CryptoJS from "crypto-js";
 import { XMLParser } from "fast-xml-parser";
@@ -300,6 +302,17 @@ export const MessageController = {
             ...message,
             message_entity: messageEntity,
           } as ChatroomVoipMessage;
+        }
+
+        case MessageType.WECOM_CONTACT: {
+          const messageEntity: WeComContactMessageEntity = xmlParser.parse(
+            raw_message_row.Message,
+          );
+
+          return {
+            ...message,
+            message_entity: messageEntity,
+          } as WeComContactMessage;
         }
 
         case MessageType.SYSTEM: {

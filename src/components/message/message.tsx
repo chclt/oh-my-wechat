@@ -12,6 +12,7 @@ import VerityMessage from "@/components/message/verify-message.tsx";
 import VideoMessage from "@/components/message/video-message.tsx";
 import VoiceMessage from "@/components/message/voice-message.tsx";
 import VoipMessage from "@/components/message/voip-message.tsx";
+import WeComContactMessage from "@/components/message/wecom-contact-message.tsx";
 import _global from "@/lib/global.ts";
 import { useApp } from "@/lib/hooks/appProvider.tsx";
 import { MessageDirection, MessageType, type MessageVM } from "@/lib/schema.ts";
@@ -65,14 +66,7 @@ export default function Message({
   );
 }
 
-function MessageComponent({
-  message,
-  direction,
-  variant,
-
-  showPhoto = false,
-  ...props
-}: MessageProp) {
+function MessageComponent({ message, variant, ...props }: MessageProp) {
   switch (message.type) {
     case MessageType.TEXT:
       return <TextMessage message={message} variant={variant} {...props} />;
@@ -112,6 +106,11 @@ function MessageComponent({
     case MessageType.GROUP_VOIP:
       return (
         <ChatroomVoipMessage message={message} variant={variant} {...props} />
+      );
+
+    case MessageType.WECOM_CONTACT:
+      return (
+        <WeComContactMessage message={message} variant={variant} {...props} />
       );
 
     case MessageType.SYSTEM:

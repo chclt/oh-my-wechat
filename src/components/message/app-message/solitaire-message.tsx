@@ -1,5 +1,10 @@
+import { TripleCircleIcon } from "@/components/icon.tsx";
 import type { AppMessageProps } from "@/components/message/app-message.tsx";
 import MessageInlineWrapper from "@/components/message/message-inline.tsx";
+import {
+  FormatTextMessageContent,
+  textMessageVariants,
+} from "@/components/message/text-message.tsx";
 import type { AppMessageType } from "@/lib/schema.ts";
 import { cn } from "@/lib/utils.ts";
 
@@ -23,16 +28,25 @@ export default function SolitaireMessage({
     return (
       <div
         className={cn(
-          "py-2.5 px-3 w-fit max-w-[20em] space-y-[1.5em] rounded-lg",
-          ["bg-[#95EB69] bubble-tail-r", "bg-white bubble-tail-l"][
-            message.direction
-          ],
-          "leading-normal break-words text-pretty",
-          "[&_a]:text-blue-500 [&_a]:underline",
+          textMessageVariants({
+            variant,
+            direction: message.direction,
+          }),
         )}
         {...props}
       >
-        {message.message_entity.msg.appmsg.title}
+        <span
+          className={
+            "mt-0.5 mb-2 h-4 flex items-center gap-1 text-[13px] text-black/55 [&_svg]:size-4"
+          }
+        >
+          <TripleCircleIcon />
+          接龙
+        </span>
+
+        <FormatTextMessageContent
+          text={message.message_entity.msg.appmsg.title}
+        />
       </div>
     );
 

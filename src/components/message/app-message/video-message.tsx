@@ -2,7 +2,6 @@ import { LinkCard } from "@/components/link-card.tsx";
 import LocalImage from "@/components/local-image.tsx";
 import type { AppMessageProps } from "@/components/message/app-message.tsx";
 import MessageInlineWrapper from "@/components/message/message-inline.tsx";
-import { useApp } from "@/lib/hooks/appProvider.tsx";
 import type { AppMessageType } from "@/lib/schema.ts";
 import { decodeUnicodeReferences } from "@/lib/utils.ts";
 
@@ -56,7 +55,10 @@ export default function VideoMessage({
         heading={heading}
         abstract={message.message_entity.msg.appmsg.des}
         preview={preview}
-        from={message.message_entity.msg.appinfo?.appname}
+        from={
+          message.message_entity.msg.appinfo?.appname ??
+          message.message_entity.msg?.appinfo?.appname
+        }
         {...props}
       />
     );

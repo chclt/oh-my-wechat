@@ -55,6 +55,9 @@ import SolitaireMessage, {
 import StickerMessage, {
   type StickerMessageEntity,
 } from "@/components/message/app-message/sticker-message.tsx";
+import StickerSetMessage, {
+  type StickerSetMessageEntity,
+} from "@/components/message/app-message/sticker-set-message.tsx";
 import StoreMessage, {
   type StoreMessageEntity,
 } from "@/components/message/app-message/store-message.tsx";
@@ -153,6 +156,14 @@ export default function AppMessage({
       return (
         <StickerMessage
           message={message as unknown as AppMessageVM<StickerMessageEntity>}
+          {...props}
+        />
+      );
+
+    case AppMessageType.STICKER_SET:
+      return (
+        <StickerSetMessage
+          message={message as unknown as AppMessageVM<StickerSetMessageEntity>}
           {...props}
         />
       );

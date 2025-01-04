@@ -116,6 +116,32 @@ export function RedEnvelopeIcon(props: React.SVGProps<SVGSVGElement>) {
   );
 }
 
+export function TripleCircleIcon(props: IconProps) {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 16 16"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}
+    >
+      <path
+        d="M7.95511 4.20859C5.89666 4.23248 4.23248 5.89666 4.20859 7.95511C2.67137 7.69734 1.5 6.36046 1.5 4.75C1.5 2.95507 2.95507 1.5 4.75 1.5C6.36046 1.5 7.69734 2.67137 7.95511 4.20859Z"
+        fill="currentColor"
+      />
+      <path
+        d="M11.2051 7.45859C9.14666 7.48248 7.48248 9.14666 7.45859 11.2051C5.92137 10.9473 4.75 9.61046 4.75 8C4.75 6.20507 6.20507 4.75 8 4.75C9.61046 4.75 10.9473 5.92137 11.2051 7.45859Z"
+        fill="currentColor"
+      />
+      <path
+        d="M14.5 11.25C14.5 13.0449 13.0449 14.5 11.25 14.5C9.45507 14.5 8 13.0449 8 11.25C8 9.45507 9.45507 8 11.25 8C13.0449 8 14.5 9.45507 14.5 11.25Z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
+
 export function LocationIcon(props: IconProps) {
   return (
     <svg

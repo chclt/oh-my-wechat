@@ -1,6 +1,7 @@
 import Image from "@/components/image.tsx";
 import type { MessageProp } from "@/components/message/message.tsx";
 import type { ContactMessage as ContactMessageVM } from "@/lib/schema.ts";
+import type * as React from "react";
 import MessageInlineWrapper from "./message-inline";
 
 type ContactMessageProps = MessageProp<ContactMessageVM>;
@@ -40,13 +41,8 @@ export default function ContactMessage({
   variant = "default",
   ...props
 }: ContactMessageProps) {
-  // if (message.message_entity.msg["@_brandSubscriptConfigUrl"].length) {
-  //   const brandSubscriptConfigUrl = JSON.parse(
-  //     message.message_entity.msg["@_brandSubscriptConfigUrl"],
-  //   );
-  //   console.log(brandSubscriptConfigUrl);
-  // }
   if (message.message_entity.msg["@_certflag"] === "0") {
+    // 个人名片
     if (variant === "default")
       return (
         <div
@@ -65,7 +61,7 @@ export default function ContactMessage({
             />
           )}
 
-          <h4 className="p-2.5 font-medium">
+          <h4 className="py-2.5 px-3 font-medium">
             {message.message_entity.msg["@_nickname"]}
           </h4>
         </div>
@@ -80,30 +76,39 @@ export default function ContactMessage({
 
   if (variant === "default")
     return (
-      <div
-        className="max-w-80 flex items-center p-2.5 pr-3 rounded-lg bg-white"
-        {...props}
-      >
-        <Image
-          src={
-            message.message_entity.msg["@_bigheadimgurl"] ??
-            message.message_entity.msg["@_brandIconUrl"]
+      <div className="max-w-80 w-fit  rounded-lg bg-white" {...props}>
+        <div className={"flex items-center p-2.5 pr-4"}>
+          <Image
+            src={
+              message.message_entity.msg["@_bigheadimgurl"] ??
+              message.message_entity.msg["@_brandIconUrl"]
+            }
+            alt=""
+            className={"shrink-0 size-12 rounded-full"}
+          />
+          <div className="ml-4 flex flex-col space-y-0.5">
+            <h4 className="font-medium">
+              {message.message_entity.msg["@_nickname"]}
+            </h4>
+            <p className={"text-sm line-clamp-1"}>
+              {message.message_entity.msg["@_certinfo"]}
+            </p>
+          </div>
+        </div>
+
+        <div
+          className={
+            "px-3 py-1.5 text-sm leading-normal text-neutral-500 border-t border-neutral-200"
           }
-          alt=""
-          className={"shrink-0 w-16 h-16 rounded-lg"}
-        />
-        <div className="ml-4 flex flex-col space-y-1.5">
-          <h4 className="font-medium">
-            {message.message_entity.msg["@_nickname"]}
-          </h4>
-          <small>{message.message_entity.msg["@_certinfo"]}</small>
+        >
+          公众号名片
         </div>
       </div>
     );
 
   return (
     <MessageInlineWrapper message={message} {...props}>
-      <span>[公众号] {message.message_entity.msg["@_nickname"]}</span>
+      <span>[公众号名片] {message.message_entity.msg["@_nickname"]}</span>
     </MessageInlineWrapper>
   );
 }

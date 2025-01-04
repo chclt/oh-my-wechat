@@ -1,5 +1,10 @@
+import { MegaphoneSolid } from "@/components/central-icon.tsx";
 import type { AppMessageProps } from "@/components/message/app-message.tsx";
 import MessageInlineWrapper from "@/components/message/message-inline.tsx";
+import {
+  FormatTextMessageContent,
+  textMessageVariants,
+} from "@/components/message/text-message.tsx";
 import type { AppMessageType } from "@/lib/schema.ts";
 import { cn } from "@/lib/utils.ts";
 
@@ -22,19 +27,24 @@ export default function AnnouncementMessage({
     return (
       <div
         className={cn(
-          "py-2.5 px-3 w-fit max-w-[20em] space-y-[1.5em] rounded-lg",
-          ["bg-[#95EB69] bubble-tail-r", "bg-white bubble-tail-l"][
-            message.direction
-          ],
-          "leading-normal break-words text-pretty",
-          "[&_a]:text-blue-500 [&_a]:underline",
+          textMessageVariants({
+            variant,
+            direction: message.direction,
+          }),
         )}
         {...props}
       >
-        <p>
-          公告：
-          {message.message_entity.msg.appmsg.textannouncement}
-        </p>
+        <span
+          className={
+            "mt-0.5 mb-2 h-4 flex items-center gap-1 text-[13px] text-black/55 [&_svg]:size-4"
+          }
+        >
+          <MegaphoneSolid className={"text-[#FFCA0C]"} />
+          公告
+        </span>
+        <FormatTextMessageContent
+          text={message.message_entity.msg.appmsg.textannouncement}
+        />
       </div>
     );
 

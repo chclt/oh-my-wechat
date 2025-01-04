@@ -68,7 +68,9 @@ export const ChatController = {
             type: "chatroom",
 
             id: row.UsrName,
-            title: contactInfo ? (contactInfo as Chatroom).title : "-",
+            title: contactInfo
+              ? (contactInfo.remark ?? (contactInfo as Chatroom).title)
+              : "-",
             is_muted: !!row.ConIntRes1,
             // @ts-ignore
             is_pinned: (contactInfo as Chatroom)._is_pinned,
