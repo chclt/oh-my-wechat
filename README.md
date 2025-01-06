@@ -4,6 +4,8 @@
 
 以及，刚刚糊完（不是）做完的微信年度数据报告
 
+![Oh My WeChat Components](https://github.com/user-attachments/assets/e46e4db9-5cd3-4a5a-952e-320044b8630e)
+
 ![WeChat Wrapped 2024](https://github.com/user-attachments/assets/191963f6-e3f7-48e4-85c4-25c723451b8d)
 
 
