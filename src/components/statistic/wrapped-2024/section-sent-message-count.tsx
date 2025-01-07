@@ -5,7 +5,7 @@ import { useApp } from "@/lib/hooks/appProvider.tsx";
 import { differenceInMonths, format } from "date-fns";
 import React from "react";
 
-import footer_logo from "../../../../public/images/wrapped-2024/footer-logo.svg";
+import footer_logo from "/images/wrapped-2024/footer-logo.svg?url";
 
 export default function SectionSentMessageCount({
   data,

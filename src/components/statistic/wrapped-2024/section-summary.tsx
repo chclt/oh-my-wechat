@@ -5,12 +5,12 @@ import type { Chat, User as UserVM } from "@/lib/schema.ts";
 import WechatEmojiTable from "@/lib/wechat-emojis.ts";
 import type React from "react";
 
-import message_background from "../../../../public/images/wrapped-2024/widget-message-background.png";
-import music_background from "../../../../public/images/wrapped-2024/widget-music-background.png";
-import widget_friends_background from "../../../../public/images/wrapped-2024/widget-new-friends-background.png";
-import voice_background from "../../../../public/images/wrapped-2024/widget-voice-background.png";
+import message_background from "/images/wrapped-2024/widget-message-background.png?url";
+import music_background from "/images/wrapped-2024/widget-music-background.png?url";
+import widget_friends_background from "/images/wrapped-2024/widget-new-friends-background.png?url";
+import voice_background from "/images/wrapped-2024/widget-voice-background.png?url";
 
-import footer_logo from "../../../../public/images/wrapped-2024/footer-logo.svg";
+import footer_logo from "/images/wrapped-2024/footer-logo.svg?url";
 
 export default function SectionSummary({
   data,

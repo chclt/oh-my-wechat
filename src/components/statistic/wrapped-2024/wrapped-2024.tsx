@@ -29,7 +29,7 @@ import SectionSentMessageWordCount from "@/components/statistic/wrapped-2024/sec
 import SectionSummary from "@/components/statistic/wrapped-2024/section-summary.tsx";
 import type { Wrapped2024Statistics } from "@/lib/controllers/wrapped-2024.ts";
 import { LoaderIcon } from "lucide-react";
-import cover_logo from "../../../../public/images/wrapped-2024/cover-logo.svg";
+import cover_logo from "/images/wrapped-2024/cover-logo.svg?url";
 
 interface ReportProps extends React.HTMLAttributes<HTMLDivElement> {
   startTime: Date;

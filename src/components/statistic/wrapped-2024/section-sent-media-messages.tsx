@@ -8,7 +8,7 @@ import type { ControllerResult, MessageVM } from "@/lib/schema.ts";
 import React, { useEffect } from "react";
 
 import { format } from "date-fns";
-import footer_logo from "../../../../public/images/wrapped-2024/footer-logo.svg";
+import footer_logo from "/images/wrapped-2024/footer-logo.svg?url";
 
 export default function SectionSentMediaMessages({
   data,

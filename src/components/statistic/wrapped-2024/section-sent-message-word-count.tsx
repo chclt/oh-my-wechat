@@ -3,7 +3,7 @@ import User from "@/components/user.tsx";
 import { useApp } from "@/lib/hooks/appProvider.tsx";
 import type React from "react";
 
-import footer_logo from "../../../../public/images/wrapped-2024/footer-logo.svg";
+import footer_logo from "/images/wrapped-2024/footer-logo.svg?url";
 
 export default function SectionSentMessageWordCount({
   data,
