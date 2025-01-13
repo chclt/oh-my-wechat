@@ -1,62 +1,38 @@
 import Image from "@/components/image.tsx";
 import LocalImage from "@/components/local-image.tsx";
-import type { AppMessageProps } from "@/components/message/app-message.tsx";
-import MessageInlineWrapper from "@/components/message/message-inline.tsx";
-import { CardTitle } from "@/components/ui/card";
-import type { AppMessageType } from "@/lib/schema.ts";
-import { cn, decodeUnicodeReferences } from "@/lib/utils";
+import type { MessageVM, RecordType } from "@/lib/schema.ts";
+import { cn } from "@/lib/utils.ts";
 
-export interface MiniappMessageEntity {
-  type: AppMessageType.MINIAPP;
-  title: string;
-  des: string;
-  url: string;
-  appattach: {
-    cdnthumburl: string;
-    cdnthumbmd5: string;
-    cdnthumblength: number;
-    cdnthumbwidth: number;
-    cdnthumbheight: number;
-    cdnthumbaeskey: string;
-    aeskey: string;
-    encryver: number;
-    filekey: string;
-  };
-  sourceusername: string;
-  sourcedisplayname: string;
-  md5: string;
-  recorditem: string;
-  uploadpercent: number;
-  weappinfo: {
-    username: string;
-    appid: string;
-    type: number;
-    version: number;
-    weappiconurl: string;
-    pagepath: string;
-    shareId: string;
-    pkginfo: {
-      type: number;
-      md5: string;
-    };
-    appservicetype: number;
-    brandofficialflag: number;
-    showRelievedBuyFlag: number;
-    subType: number;
-    isprivatemessage: number;
-  };
-  "@_appid": string;
-  "@_sdkver": string;
+import { CardTitle } from "@/components/ui/card.tsx";
+import type { RecordVM } from "./record";
+
+interface MiniAppRecordProps extends React.HTMLAttributes<HTMLDivElement> {
+  message: MessageVM;
+  record: MiniAppRecordEntity;
+  variant: "default" | string;
 }
 
-type MiniappMessageProps = AppMessageProps<MiniappMessageEntity>;
+export interface MiniAppRecordEntity extends RecordVM {
+  "@_datatype": RecordType.MINIAPP;
+  datatitle: string;
+  appbranditem: {
+    iconurl: string;
+    type: number;
+    sourcedisplayname: string;
+    username: string;
+    pagepath: string; // 小程序路径
+  };
+}
 
-export default function MiniappMessage({
+export default function MiniAppRecord({
   message,
+  record,
   variant = "default",
+  className,
   ...props
-}: MiniappMessageProps) {
+}: MiniAppRecordProps) {
   const { chat } = message;
+
   if (variant === "default")
     return (
       <div
@@ -70,25 +46,27 @@ export default function MiniappMessage({
             }
           >
             <Image
-              src={message.message_entity.msg.appmsg.weappinfo.weappiconurl}
-              alt=""
+              src={record.appbranditem.iconurl}
+              alt={record.appbranditem.sourcedisplayname}
               className={"w-6 h-6 rounded-full"}
             />
-            <h4>{message.message_entity.msg.appmsg.sourcedisplayname}</h4>
+            <h4>{record.appbranditem.sourcedisplayname}</h4>
           </div>
 
-          {message.message_entity.msg.appmsg.title.length > 0 && (
+          {record.datatitle.length > 0 && (
             <CardTitle className="line-clamp-3 leading-normal font-medium text-pretty">
-              {decodeUnicodeReferences(message.message_entity.msg.appmsg.title)}
+              {record.datatitle}
             </CardTitle>
           )}
         </div>
 
         <LocalImage
+          domain="opendata"
           chat={chat}
           message={message}
+          record={record}
           size="origin"
-          domain="opendata"
+          alt={"图片"}
           className={"w-full"}
         />
 
@@ -111,9 +89,5 @@ export default function MiniappMessage({
       </div>
     );
 
-  return (
-    <MessageInlineWrapper message={message} {...props}>
-      [小程序] {message.message_entity.msg.appmsg.sourcedisplayname}
-    </MessageInlineWrapper>
-  );
+  return <p className="inline">[小程序] {record.datatitle}</p>;
 }

@@ -7,6 +7,9 @@ import Attach2Message, {
 import AttachMessage, {
   type AttachMessageEntity,
 } from "@/components/message/app-message/attach-message.tsx";
+import ChannelMessage, {
+  type ChannelMessageEntity,
+} from "@/components/message/app-message/channel-message.tsx";
 import ChannelVideoMessage, {
   type ChannelVideoMessageEntity,
 } from "@/components/message/app-message/channel-video-message.tsx";
@@ -49,6 +52,9 @@ import ReferMessage, {
 import RingtoneMessage, {
   type RingtoneMessageEntity,
 } from "@/components/message/app-message/ringtone-message.tsx";
+import ScanResultMessage, {
+  type ScanResultMessageEntity,
+} from "@/components/message/app-message/scan-result-message.tsx";
 import SolitaireMessage, {
   type SolitaireMessageEntity,
 } from "@/components/message/app-message/solitaire-message.tsx";
@@ -67,6 +73,9 @@ import StoreProductMessage, {
 import TextMessage, {
   type AppTextMessageEntity,
 } from "@/components/message/app-message/text-message.tsx";
+import TingMessage, {
+  type TingMessageEntity,
+} from "@/components/message/app-message/ting-message.tsx";
 import TransferMessage, {
   type TransferMessageEntity,
 } from "@/components/message/app-message/transfer-message.tsx";
@@ -218,6 +227,14 @@ export default function AppMessage({
         />
       );
 
+    case AppMessageType.CHANNEL:
+      return (
+        <ChannelMessage
+          message={message as unknown as AppMessageVM<ChannelMessageEntity>}
+          {...props}
+        />
+      );
+
     case AppMessageType.CHANNEL_VIDEO:
       return (
         <ChannelVideoMessage
@@ -295,6 +312,14 @@ export default function AppMessage({
         />
       );
 
+    case AppMessageType.TING:
+      return (
+        <TingMessage
+          message={message as unknown as AppMessageVM<TingMessageEntity>}
+          {...props}
+        />
+      );
+
     case AppMessageType.GAME:
       return (
         <GameMessage
@@ -330,6 +355,14 @@ export default function AppMessage({
       return (
         <UrlMessage
           message={message as unknown as AppMessageVM<UrlMessageEntity>}
+          {...props}
+        />
+      );
+
+    case AppMessageType.SCAN_RESULT:
+      return (
+        <ScanResultMessage
+          message={message as unknown as AppMessageVM<ScanResultMessageEntity>}
           {...props}
         />
       );

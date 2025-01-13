@@ -1,7 +1,6 @@
 import {
   BubbleQuestionSolid,
   ChevronRightSmallLine,
-  FolderOpenLine,
   GithubSolid,
   TriangleExclamationLine,
 } from "@/components/central-icon.tsx";
@@ -10,7 +9,6 @@ import Link from "@/components/link.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogDescription,
   DialogTitle,
@@ -211,7 +209,7 @@ export default function AccountSelectDialog(props: DialogProps) {
             <Link
               href="https://github.com/chclt/oh-my-wechat?tab=readme-ov-file#%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E"
               className={
-                "h-9 py-2 pl-2 pr-3 inline-flex items-center gap-1.5 [&_svg]:size-6 hover:underline"
+                "h-9 py-2 pl-2 pr-3 inline-flex items-center gap-1.5 [&_svg]:shrink-0 [&_svg]:size-6 hover:underline"
               }
             >
               <BubbleQuestionSolid />
@@ -221,7 +219,7 @@ export default function AccountSelectDialog(props: DialogProps) {
             <Link
               href="https://github.com/chclt/oh-my-wechat/"
               className={
-                "h-9 py-2 pl-2 pr-3 inline-flex items-center gap-1.5 [&_svg]:size-6 hover:underline"
+                "h-9 py-2 pl-2 pr-3 inline-flex items-center gap-1.5 [&_svg]:shrink-0 [&_svg]:size-6 hover:underline"
               }
             >
               <GithubSolid />

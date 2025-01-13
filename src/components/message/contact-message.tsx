@@ -1,8 +1,14 @@
 import Image from "@/components/image.tsx";
+import MessageInlineWrapper from "@/components/message/message-inline.tsx";
 import type { MessageProp } from "@/components/message/message.tsx";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardTitle,
+} from "@/components/ui/card.tsx";
 import type { ContactMessage as ContactMessageVM } from "@/lib/schema.ts";
 import type * as React from "react";
-import MessageInlineWrapper from "./message-inline";
 
 type ContactMessageProps = MessageProp<ContactMessageVM>;
 
@@ -76,34 +82,27 @@ export default function ContactMessage({
 
   if (variant === "default")
     return (
-      <div className="max-w-80 w-fit  rounded-lg bg-white" {...props}>
-        <div className={"flex items-center p-2.5 pr-4"}>
+      <Card className="max-w-[20em] w-fit" {...props}>
+        <CardContent className={"flex items-center p-2.5 pr-4"}>
           <Image
             src={
               message.message_entity.msg["@_bigheadimgurl"] ??
               message.message_entity.msg["@_brandIconUrl"]
             }
-            alt=""
+            alt={message.message_entity.msg["@_nickname"]}
             className={"shrink-0 size-12 rounded-full"}
           />
           <div className="ml-4 flex flex-col space-y-0.5">
-            <h4 className="font-medium">
+            <CardTitle className="line-clamp-1">
               {message.message_entity.msg["@_nickname"]}
-            </h4>
-            <p className={"text-sm line-clamp-1"}>
+            </CardTitle>
+            <p className={"text-sm line-clamp-1 text-muted-foreground"}>
               {message.message_entity.msg["@_certinfo"]}
             </p>
           </div>
-        </div>
-
-        <div
-          className={
-            "px-3 py-1.5 text-sm leading-normal text-neutral-500 border-t border-neutral-200"
-          }
-        >
-          公众号名片
-        </div>
-      </div>
+        </CardContent>
+        <CardFooter>公众号名片</CardFooter>
+      </Card>
     );
 
   return (

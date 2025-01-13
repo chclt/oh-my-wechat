@@ -197,6 +197,26 @@ export const ContactController = {
               .decode(row.dbContactChatRoom)
           : undefined;
 
+      const specialUser = [
+        {
+          id: "brandsessionholder",
+          username: "订阅号消息",
+        },
+        {
+          id: "notification_messages",
+          username: "服务消息",
+        },
+        {
+          id: "brandsessionholder_weapp",
+          username: "小程序客服消息",
+        },
+        {
+          id: "opencustomerservicemsg",
+          username: "小程序客服消息",
+        },
+        { id: "chatroom_session_box", username: "折叠的群聊" },
+      ];
+
       if (row.userName.endsWith("@chatroom")) {
         let memberIds: string[] = [];
 
@@ -350,6 +370,7 @@ export const ContactController = {
     };
   },
 
+  // 考虑到批量获取联系人可能很多，如果用 IN 查询，可能会导致 SQL 语句过长
   in: async (
     databases: WCDatabases,
     { ids }: { ids: string[] },

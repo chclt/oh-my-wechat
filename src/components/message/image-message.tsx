@@ -74,14 +74,14 @@ export default function ImageMessage({
     case "default":
       return (
         <div
-          className={cn("rounded-lg overflow-hidden ")}
+          className={cn("rounded-lg overflow-hidden")}
           onClick={() => {
             // setIsOpenMediaViewer(true);
           }}
           {...props}
         >
           <LocalImage
-            chat={chat!}
+            chat={chat}
             message={message}
             size="origin"
             alt={"图片"}
@@ -102,7 +102,7 @@ export default function ImageMessage({
             </>
           )}
           <LocalImage
-            chat={chat!}
+            chat={chat}
             message={message}
             size="origin"
             alt={""}
@@ -118,7 +118,7 @@ export default function ImageMessage({
       return (
         <div className={className} {...props}>
           <LocalImage
-            chat={chat!}
+            chat={chat}
             message={message}
             size={variant === "viewer_thumb" ? "thumb" : "origin"}
             alt={""}
@@ -134,7 +134,7 @@ export default function ImageMessage({
           {...props}
         >
           <LocalImage
-            chat={chat!}
+            chat={chat}
             message={message}
             size="thumb"
             alt={""}

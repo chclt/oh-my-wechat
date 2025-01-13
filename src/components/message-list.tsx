@@ -1,5 +1,13 @@
 import { MessageBubbleGroup } from "@/components/message-bubble-group.tsx";
 import Message from "@/components/message/message.tsx";
+import { Calendar } from "@/components/ui/calendar.tsx";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area.tsx";
 import useQuery from "@/lib/hooks/useQuery.ts";
 import {
@@ -11,6 +19,7 @@ import {
 } from "@/lib/schema.ts";
 import { cn } from "@/lib/utils";
 import type * as ScrollAreaPrimitive from "@radix-ui/react-scroll-area";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { differenceInMinutes, format, isSameDay } from "date-fns";
 import React, { useCallback, useEffect, useRef } from "react";
 import { useState } from "react";
@@ -92,6 +101,18 @@ export default function MessageList({
             });
           });
         });
+      } else if (
+        Math.abs(target.scrollTop - target.scrollHeight + target.clientHeight) <
+        1
+      ) {
+        query("/messages", {
+          chat,
+          cursor:
+            messageList[Math.max(...Object.keys(messageList).map(Number))].at(
+              -1,
+            )!.date,
+          cursor_condition: ">",
+        });
       }
     },
     [chat, messageList, query],
@@ -106,21 +127,36 @@ export default function MessageList({
     };
   }, [scrollRef, onScroll]);
 
-  return (
-    <ScrollArea
-      setScrollRef={setScrollRef}
-      className={cn(
-        "relative overflow-auto contain-strict bg-neutral-100",
-        "[&_[data-orientation]]:z-50",
-        className,
-      )}
-    >
-      <div className="z-20 sticky top-0 mb-4 w-full h-[4.5rem] px-6 flex items-center bg-white/80 backdrop-blur">
-        <h2 className={"font-medium text-lg"}>{chat.title}</h2>
-      </div>
+  const [isOpenCalendar, setIsOpenCalendar] = useState(false);
+  const [calendarMonth, setCalendarMonth] = useState<Date | undefined>();
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>();
+  const onSelectDate = (date: Date | undefined) => {
+    if (!date) return;
+    setMessageList({});
+    query("/messages", {
+      chat,
+      cursor: date.getTime() / 1000,
+      cursor_condition: "<>",
+    });
+    setIsOpenCalendar(false);
+  };
 
-      <div className={"mx-auto max-w-screen-md p-4 flex flex-col gap-6"}>
-        {/*
+  return (
+    <>
+      <ScrollArea
+        setScrollRef={setScrollRef}
+        className={cn(
+          "relative overflow-auto contain-strict bg-neutral-100",
+          "[&_[data-orientation]]:z-50",
+          className,
+        )}
+      >
+        <div className="z-20 sticky top-0 mb-4 w-full h-[4.5rem] px-6 flex items-center bg-white/80 backdrop-blur">
+          <h2 className={"font-medium text-lg"}>{chat.title}</h2>
+        </div>
+
+        <div className={"mx-auto max-w-screen-md p-4 flex flex-col gap-6"}>
+          {/*
         <Button
           variant="outline"
           onClick={() => {
@@ -138,125 +174,135 @@ export default function MessageList({
         </Button>
         */}
 
-        {Object.keys(messageList)
-          .map(Number)
-          .sort((a, b) => a - b)
-          .flatMap((key) => messageList[key])
-          .reduce(
-            (messagesGroupByTimeAndUser, message, index, messageArray) => {
-              const prevMessage = messageArray[index - 1];
+          {Object.keys(messageList)
+            .map(Number)
+            .sort((a, b) => a - b)
+            .flatMap((key) => messageList[key])
+            .reduce(
+              (messagesGroupByTimeAndUser, message, index, messageArray) => {
+                const prevMessage = messageArray[index - 1];
 
-              let anchor: Array<unknown> = messagesGroupByTimeAndUser; // 把消息插入到哪个位置
+                let anchor: Array<unknown> = messagesGroupByTimeAndUser; // 把消息插入到哪个位置
 
-              const date = new Date(message.date * 1000);
-              const prevDate = prevMessage
-                ? new Date(prevMessage.date * 1000)
-                : undefined;
+                const date = new Date(message.date * 1000);
+                const prevDate = prevMessage
+                  ? new Date(prevMessage.date * 1000)
+                  : undefined;
 
-              const isSameDate = prevDate && isSameDay(date, prevDate);
-              const timeDiff = prevDate
-                ? differenceInMinutes(date, prevDate)
-                : undefined;
+                const isSameDate = prevDate && isSameDay(date, prevDate);
+                const timeDiff = prevDate
+                  ? differenceInMinutes(date, prevDate)
+                  : undefined;
 
-              if (!isSameDate || (timeDiff && timeDiff > 15)) {
-                anchor.push([]);
-              }
-
-              anchor = anchor[anchor.length - 1] as Array<unknown>;
-
-              const user = message.from;
-              const prevUser = prevMessage?.from;
-              const isSameUser = user && prevUser && user.id === prevUser.id;
-
-              const isMessageGroupable = (message: MessageVM) => {
-                if (message.type === MessageType.APP) {
-                  return ![
-                    AppMessageType.PAT,
-                    AppMessageType.RINGTONE,
-                  ].includes(message.message_entity.msg.appmsg.type as number);
+                if (!isSameDate || (timeDiff && timeDiff > 15)) {
+                  anchor.push([]);
                 }
 
-                return ![
-                  MessageType.SYSTEM,
-                  MessageType.SYSTEM_EXTENDED,
-                ].includes(message.type);
-              };
+                anchor = anchor[anchor.length - 1] as Array<unknown>;
 
-              const isGroupable = isMessageGroupable(message);
-              const isPrevGroupable =
-                prevMessage && isMessageGroupable(prevMessage);
+                const user = message.from;
+                const prevUser = prevMessage?.from;
+                const isSameUser = user && prevUser && user.id === prevUser.id;
 
-              if (isSameUser && isPrevGroupable && isGroupable) {
-                if (anchor.length > 0) {
-                  anchor = anchor[anchor.length - 1] as Array<unknown>;
-                } else {
+                const isMessageGroupable = (message: MessageVM) => {
+                  if (message.type === MessageType.APP) {
+                    return ![
+                      AppMessageType.PAT,
+                      AppMessageType.RINGTONE,
+                    ].includes(
+                      message.message_entity.msg.appmsg.type as number,
+                    );
+                  }
+
+                  return ![
+                    MessageType.SYSTEM,
+                    MessageType.SYSTEM_EXTENDED,
+                  ].includes(message.type);
+                };
+
+                const isGroupable = isMessageGroupable(message);
+                const isPrevGroupable =
+                  prevMessage && isMessageGroupable(prevMessage);
+
+                if (isSameUser && isPrevGroupable && isGroupable) {
+                  if (anchor.length > 0) {
+                    anchor = anchor[anchor.length - 1] as Array<unknown>;
+                  } else {
+                    anchor.push([]);
+                    anchor = anchor[anchor.length - 1] as Array<unknown>;
+                  }
+                } else if (user && isGroupable) {
                   anchor.push([]);
                   anchor = anchor[anchor.length - 1] as Array<unknown>;
                 }
-              } else if (user && isGroupable) {
-                anchor.push([]);
-                anchor = anchor[anchor.length - 1] as Array<unknown>;
-              }
 
-              anchor.push(message);
+                anchor.push(message);
 
-              return messagesGroupByTimeAndUser;
-            },
-            [] as (MessageVM | MessageVM[])[][],
-          )
-          .map((messagesGroupByTime) => {
-            const firstElement = messagesGroupByTime[0];
-            const isMessageGroup = Array.isArray(firstElement);
-            const firstMessage = isMessageGroup
-              ? firstElement[0]
-              : firstElement;
+                return messagesGroupByTimeAndUser;
+              },
+              [] as (MessageVM | MessageVM[])[][],
+            )
+            .map((messagesGroupByTime) => {
+              const firstElement = messagesGroupByTime[0];
+              const isMessageGroup = Array.isArray(firstElement);
+              const firstMessage = isMessageGroup
+                ? firstElement[0]
+                : firstElement;
 
-            return (
-              <div
-                key={`${chat.id}/time:${new Date(firstMessage.date * 1000).getTime()}`}
-                className="space-y-4"
-              >
-                <div className={"text-center text-sm text-neutral-600"}>
-                  <span>
-                    {format(
-                      new Date(firstMessage.date * 1000),
-                      "yyyy/MM/dd HH:mm",
-                    )}
-                  </span>
-                </div>
-
-                {messagesGroupByTime.map((messagesGroupByUser, groupIndex) => {
-                  const isMessageGroup = Array.isArray(messagesGroupByUser);
-                  const firstMessage = isMessageGroup
-                    ? messagesGroupByUser[0]
-                    : messagesGroupByUser;
-
-                  const lastMessage = isMessageGroup
-                    ? messagesGroupByUser[messagesGroupByUser.length - 1]
-                    : messagesGroupByUser;
-
-                  return (
-                    <React.Fragment
-                      key={`${chat.id}/(${groupIndex})${firstMessage.id}-${lastMessage.id}`}
+              return (
+                <div
+                  key={`${chat.id}/time:${new Date(firstMessage.date * 1000).getTime()}`}
+                  className="space-y-4"
+                >
+                  <div className={"text-center text-sm text-neutral-600"}>
+                    <span
+                      onClick={() => {
+                        setCalendarMonth(new Date(firstMessage.date * 1000));
+                        setSelectedDate(new Date(firstMessage.date * 1000));
+                        setIsOpenCalendar(true);
+                      }}
                     >
-                      {isMessageGroup ? (
-                        <MessageBubbleGroup
-                          user={firstMessage.from}
-                          messages={messagesGroupByUser}
-                          showPhoto={true}
-                          showUsername={isChatroom}
-                        />
-                      ) : (
-                        <Message message={messagesGroupByUser} />
+                      {format(
+                        new Date(firstMessage.date * 1000),
+                        "yyyy/MM/dd HH:mm",
                       )}
-                    </React.Fragment>
-                  );
-                })}
-              </div>
-            );
-          })}
+                    </span>
+                  </div>
 
-        {/*
+                  {messagesGroupByTime.map(
+                    (messagesGroupByUser, groupIndex) => {
+                      const isMessageGroup = Array.isArray(messagesGroupByUser);
+                      const firstMessage = isMessageGroup
+                        ? messagesGroupByUser[0]
+                        : messagesGroupByUser;
+
+                      const lastMessage = isMessageGroup
+                        ? messagesGroupByUser[messagesGroupByUser.length - 1]
+                        : messagesGroupByUser;
+
+                      return (
+                        <React.Fragment
+                          key={`${chat.id}/(${groupIndex})${firstMessage.id}-${lastMessage.id}`}
+                        >
+                          {isMessageGroup ? (
+                            <MessageBubbleGroup
+                              user={firstMessage.from}
+                              messages={messagesGroupByUser}
+                              showPhoto={true}
+                              showUsername={isChatroom}
+                            />
+                          ) : (
+                            <Message message={messagesGroupByUser} />
+                          )}
+                        </React.Fragment>
+                      );
+                    },
+                  )}
+                </div>
+              );
+            })}
+
+          {/*
         <Button
           variant="outline"
           onClick={() => {
@@ -274,7 +320,34 @@ export default function MessageList({
           next
         </Button>
         */}
-      </div>
-    </ScrollArea>
+        </div>
+      </ScrollArea>
+
+      <Dialog
+        open={isOpenCalendar}
+        onOpenChange={(open) => {
+          setIsOpenCalendar(open);
+        }}
+      >
+        <DialogContent className={"place-content-center w-fit"}>
+          <VisuallyHidden>
+            <DialogHeader>
+              <DialogTitle>Select a date</DialogTitle>
+              <DialogDescription>
+                Select a date to view messages from that day.
+              </DialogDescription>
+            </DialogHeader>
+          </VisuallyHidden>
+
+          <Calendar
+            mode="single"
+            month={calendarMonth}
+            onMonthChange={setCalendarMonth}
+            selected={selectedDate}
+            onSelect={onSelectDate}
+          />
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

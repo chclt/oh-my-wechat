@@ -1,23 +1,25 @@
+import type { RecordVM } from "@/components/record/record.tsx";
 import _global from "@/lib/global.ts";
 import { useApp } from "@/lib/hooks/appProvider.tsx";
 import useQuery from "@/lib/hooks/useQuery.ts";
 import type { Chat, MessageVM, PhotpSize } from "@/lib/schema.ts";
-import { cn } from "@/lib/utils.ts";
 import type React from "react";
 import { forwardRef, useEffect, useRef } from "react";
 
-interface LocalImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
+type LocalImageProps = React.ImgHTMLAttributes<HTMLImageElement> & {
   chat: Chat;
   message: MessageVM;
+  record?: RecordVM;
   size?: "origin" | "thumb"; // 期望的尺寸，可能因为没有指定尺寸而使用另一尺寸
   domain?: "image" | "opendata" | "video"; // 图片资源默认从 Img 文件夹获取，如果消息里有 appattach 字段，图片在 OpenData 文件夹，如果是视频，缩略图会和视频一样在 Video 文件夹
-}
+};
 
 const LocalImage = forwardRef<HTMLImageElement, LocalImageProps>(
   (
     {
       chat,
       message,
+      record,
       size = "origin",
       domain = "image",
       alt,
@@ -39,6 +41,7 @@ const LocalImage = forwardRef<HTMLImageElement, LocalImageProps>(
           query("/images", {
             chat,
             message,
+            record,
             size,
             domain,
           });

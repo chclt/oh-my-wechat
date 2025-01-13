@@ -1,5 +1,5 @@
 import User from "@/components/user.tsx";
-import type { User as UserVM } from "@/lib/schema.ts";
+import { MessageDirection, type User as UserVM } from "@/lib/schema.ts";
 
 import _global from "@/lib/global.ts";
 import type { MessageVM } from "@/lib/schema.ts";
@@ -9,7 +9,7 @@ import Message from "./message/message.tsx";
 
 interface BubbleGroupProps extends React.HTMLAttributes<HTMLDivElement> {
   user: UserVM;
-  messages: MessageVM[];
+  messages?: MessageVM[];
 
   showPhoto?: boolean;
   showUsername?: boolean;
@@ -17,15 +17,21 @@ interface BubbleGroupProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export function MessageBubbleGroup({
   user,
-  messages,
+  messages = [],
   showPhoto = true,
   showUsername = false,
 
   className,
+  children,
   ...props
 }: BubbleGroupProps) {
+  const messageDirection = messages[0]?.direction ?? MessageDirection.incoming;
+
   return (
     <ErrorBoundary
+      onError={(error) => {
+        console.error(error);
+      }}
       fallback={
         <div
           onDoubleClick={() => {
@@ -39,7 +45,8 @@ export function MessageBubbleGroup({
       <div
         className={cn(
           "flex gap-x-3",
-          ["flex-row-reverse ms-14", "flex-row me-14"][messages[0].direction],
+          ["flex-row-reverse ms-14", "flex-row me-14"][messageDirection],
+          className,
         )}
       >
         {showPhoto && (
@@ -52,7 +59,7 @@ export function MessageBubbleGroup({
         <div
           className={cn(
             "flex flex-col",
-            ["items-end", "items-start"][messages[0].direction],
+            ["items-end", "items-start"][messageDirection],
           )}
         >
           {showUsername && (
@@ -67,7 +74,7 @@ export function MessageBubbleGroup({
           <div
             className={cn(
               "flex flex-col gap-2",
-              ["items-end", "items-start"][messages[0].direction],
+              ["items-end", "items-start"][messageDirection],
               "[&>*:nth-child(n+2).bubble-tail-l]:bubble-tail-none [&>*:nth-child(n+2).bubble-tail-r]:bubble-tail-none",
               className,
             )}
@@ -76,6 +83,7 @@ export function MessageBubbleGroup({
             {messages.map((message, index) => (
               <Message key={`(${index})${message.id}`} message={message} />
             ))}
+            {children}
           </div>
         </div>
       </div>

@@ -4,6 +4,7 @@ import type { ChatroomVoipMessageEntity } from "@/components/message/chatroom-vo
 import type { ContactMessageEntity } from "@/components/message/contact-message.tsx";
 import type { ImageMessageEntity } from "@/components/message/image-message.tsx";
 import type { LocationMessageEntity } from "@/components/message/location-message.tsx";
+import type { MailMessageEntity } from "@/components/message/mail-message.tsx";
 import type { MicroVideoMessageEntity } from "@/components/message/micro-video-message.tsx";
 import type { StickerMessageEntity } from "@/components/message/sticker-message.tsx";
 import type { SystemExtendedMessageEntity } from "@/components/message/system-extended-message.tsx";
@@ -28,6 +29,7 @@ import {
   type DatabaseMessageRow,
   type ImageMessage,
   type LocationMessage,
+  type MailMessage,
   MessageDirection,
   MessageType,
   type MessageVM,
@@ -62,9 +64,15 @@ export const MessageController = {
   ): Promise<MessageVM[]> => {
     const messageSenderIds = raw_message_rows
       .map((raw_message_row) => {
-        if (typeof (raw_message_row.Message as unknown) !== "string") {
+        if ((raw_message_row.Message as unknown) === null) {
+          raw_message_row.Message = "";
+          raw_message_row.Type = 1;
+          return chat?.id ?? undefined;
+        }
+
+        if (typeof (raw_message_row.Message as unknown) === "object") {
           // Message 字段可能是个二进制，具体情况还未知
-          console.log("消息格式错误");
+          console.log("消息格式错误", raw_message_row);
           raw_message_row.Message = `解析失败的消息：${new TextDecoder(
             "utf-8",
           ).decode(
@@ -197,6 +205,16 @@ export const MessageController = {
             ...message,
             message_entity: messageEntity,
           } as VoiceMessage;
+        }
+
+        case MessageType.MAIL: {
+          const messageEntity: MailMessageEntity = xmlParser.parse(
+            raw_message_row.Message,
+          );
+          return {
+            ...message,
+            message_entity: messageEntity,
+          } as MailMessage;
         }
 
         case MessageType.VERITY: {
@@ -459,14 +477,12 @@ export const MessageController = {
 
             return database.exec(
               `
-                SELECT 
-                  * 
-                FROM (
-                  SELECT 
+                SELECT * FROM (
+                  SELECT * FROM (
+                    SELECT 
                       rowid, CreateTime, Des, ImgStatus, MesLocalID, Message, CAST(MesSvrID as TEXT) as MesSvrID, Status, TableVer, Type
-                  FROM Chat_${CryptoJS.MD5(chat.id).toString()}
-                  WHERE
-                    ${[
+                    FROM Chat_${CryptoJS.MD5(chat.id).toString()}
+                    WHERE ${[
                       `CreateTime < ${cursor}`,
                       type
                         ? `Type IN (${
@@ -481,16 +497,17 @@ export const MessageController = {
                     ]
                       .filter((i) => i)
                       .join(" AND ")}
-                  ORDER BY CreateTime DESC
-                  LIMIT ${limit}
+                    ORDER BY CreateTime DESC
+                    LIMIT ${limit}
+                  )
 
                   UNION ALL
 
-                  SELECT 
+                  SELECT * FROM (
+                    SELECT 
                       rowid, CreateTime, Des, ImgStatus, MesLocalID, Message, CAST(MesSvrID as TEXT) as MesSvrID, Status, TableVer, Type
-                  FROM Chat_${CryptoJS.MD5(chat.id).toString()}
-                  WHERE
-                    ${[
+                    FROM Chat_${CryptoJS.MD5(chat.id).toString()}
+                    WHERE ${[
                       `CreateTime >= ${cursor}`,
                       type
                         ? `Type IN (${
@@ -505,8 +522,9 @@ export const MessageController = {
                     ]
                       .filter((i) => i)
                       .join(" AND ")}
-                  ORDER BY CreateTime ASC
-                  LIMIT ${limit}
+                    ORDER BY CreateTime ASC
+                    LIMIT ${limit}
+                  )
                 ) 
                 ORDER BY CreateTime ASC;
               `,

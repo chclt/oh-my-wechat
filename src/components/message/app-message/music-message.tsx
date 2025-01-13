@@ -2,7 +2,6 @@ import Link from "@/components/link.tsx";
 import LocalImage from "@/components/local-image.tsx";
 import type { AppMessageProps } from "@/components/message/app-message.tsx";
 import MessageInlineWrapper from "@/components/message/message-inline.tsx";
-import { useApp } from "@/lib/hooks/appProvider.tsx";
 import type { AppMessageType } from "@/lib/schema.ts";
 import { cn, decodeUnicodeReferences } from "@/lib/utils.ts";
 
@@ -53,16 +52,18 @@ export default function MusicMessage({
   variant = "default",
   ...props
 }: MusicMessageProps) {
-  const chat = message.chat;
+  const { chat } = message;
   if (variant === "default")
     return (
       <Link href={message.message_entity.msg.appmsg.url}>
         <div
-          className={cn("relative w-64 rounded-2xl overflow-hidden bg-white")}
+          className={cn(
+            "relative max-w-[20em] rounded-2xl overflow-hidden bg-white",
+          )}
           {...props}
         >
           <LocalImage
-            chat={chat!}
+            chat={chat}
             message={message}
             size="origin"
             domain="opendata"
@@ -70,7 +71,7 @@ export default function MusicMessage({
           />
           <div
             className={
-              "relative p-4 flex items-center bg-white/20 backdrop-blur"
+              "relative p-4 flex items-center bg-white/60 backdrop-blur-xl"
             }
           >
             <div
@@ -79,20 +80,24 @@ export default function MusicMessage({
               }
             >
               <LocalImage
-                chat={chat!}
+                chat={chat}
                 message={message}
                 size="origin"
                 domain="opendata"
                 className={"relative rounded-full"}
               />
             </div>
-            <div className={"ml-12 flex flex-col"}>
+            <div className={"ml-12 mr-6 flex flex-col"}>
               <h4 className="break-words font-medium line-clamp-2">
                 {decodeUnicodeReferences(
                   message.message_entity.msg.appmsg.title,
                 )}
               </h4>
-              <p className={"line-clamp-1"}>
+              <p
+                className={
+                  "mt-1 text-sm text-secondary-foreground line-clamp-1 break-all"
+                }
+              >
                 {decodeUnicodeReferences(message.message_entity.msg.appmsg.des)}
               </p>
             </div>

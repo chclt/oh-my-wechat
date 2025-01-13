@@ -89,7 +89,7 @@ export default function UrlMessage({
   variant = "default",
   ...props
 }: UrlMessageProps) {
-  const chat = message.chat;
+  const { chat } = message;
   const heading = decodeUnicodeReferences(
     message.message_entity.msg.appmsg.title,
   );
@@ -100,7 +100,7 @@ export default function UrlMessage({
     ) : undefined) ??
     (message.message_entity.msg.appmsg.appattach.cdnthumbmd5 ? (
       <LocalImage
-        chat={chat!}
+        chat={chat}
         message={message}
         domain="opendata"
         alt={heading}
@@ -115,6 +115,7 @@ export default function UrlMessage({
         abstract={message.message_entity.msg.appmsg.des}
         preview={preview}
         from={
+          // 偶尔 sourcedisplayname 是一个空字符串，会被 ?? 判定为有效，目前发现这种情况在“服务消息”里出现，但是服务消息本来就应该是另一个 UI，所以暂时先不处理了
           message.message_entity.msg.appmsg.sourcedisplayname ??
           message.message_entity.msg?.appinfo?.appname
         }

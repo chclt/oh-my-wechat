@@ -93,8 +93,8 @@ export function RedEnvelopeIcon(props: React.SVGProps<SVGSVGElement>) {
         fill="url(#paint0_linear_470_1628)"
       />
       <path
-        fill-rule="evenodd"
-        clip-rule="evenodd"
+        fillRule="evenodd"
+        clipRule="evenodd"
         d="M4.80002 8.3629V6.24039C4.80002 4.89626 4.80002 4.2242 5.0616 3.71081C5.2917 3.25922 5.65885 2.89207 6.11044 2.66197C6.62383 2.40039 7.29589 2.40039 8.64002 2.40039H15.36C16.7041 2.40039 17.3762 2.40039 17.8896 2.66197C18.3412 2.89207 18.7083 3.25922 18.9384 3.71081C19.2 4.2242 19.2 4.89626 19.2 6.24039V8.36285C17.441 9.85762 14.8673 10.8004 12 10.8004C9.13275 10.8004 6.55908 9.85764 4.80002 8.3629Z"
         fill="#FE7E7E"
       />
@@ -108,8 +108,8 @@ export function RedEnvelopeIcon(props: React.SVGProps<SVGSVGElement>) {
           y2="21.6004"
           gradientUnits="userSpaceOnUse"
         >
-          <stop stop-color="#FF7676" />
-          <stop offset="1" stop-color="#EC4545" />
+          <stop stopColor="#FF7676" />
+          <stop offset="1" stopColor="#EC4545" />
         </linearGradient>
       </defs>
     </svg>
@@ -145,28 +145,28 @@ export function TripleCircleIcon(props: IconProps) {
 export function LocationIcon(props: IconProps) {
   return (
     <svg
-      width="32"
-      height="32"
-      viewBox="0 0 32 32"
+      width="40"
+      height="40"
+      viewBox="0 0 40 40"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       {...props}
     >
-      <g filter="url(#filter0_d_353_265)">
+      <g filter="url(#filter0_d_664_303)">
         <path
-          d="M9.98953 20.5104C6.67008 17.191 6.67008 11.809 9.98953 8.48959V8.48959C13.309 5.17014 18.6909 5.17014 22.0103 8.48959V8.48959C25.3298 11.809 25.3298 17.191 22.0103 20.5104L17.7172 24.8036C17.4356 25.0851 17.2949 25.2259 17.1573 25.3235C16.4641 25.8153 15.5358 25.8153 14.8426 25.3235C14.705 25.2259 14.5642 25.0851 14.2827 24.8036L9.98953 20.5104Z"
+          d="M13.0711 24.0711C9.16583 20.1658 9.16583 13.8342 13.0711 9.92893C16.9763 6.02369 23.308 6.02369 27.2132 9.92893C31.1184 13.8342 31.1184 20.1658 27.2132 24.0711L22.3178 28.9664C21.6078 29.6765 21.2528 30.0315 20.8513 30.1837C20.3944 30.357 19.8899 30.357 19.4329 30.1837C19.0315 30.0315 18.6765 29.6765 17.9664 28.9664L13.0711 24.0711Z"
           fill="#39A9FF"
         />
       </g>
       <defs>
         <filter
-          id="filter0_d_353_265"
-          x="5.5"
-          y="6"
-          width="21"
-          height="25.6924"
+          id="filter0_d_664_303"
+          x="7.14209"
+          y="7"
+          width="26"
+          height="30.3137"
           filterUnits="userSpaceOnUse"
-          color-interpolation-filters="sRGB"
+          colorInterpolationFilters="sRGB"
         >
           <feFlood floodOpacity="0" result="BackgroundImageFix" />
           <feColorMatrix
@@ -176,10 +176,10 @@ export function LocationIcon(props: IconProps) {
             result="hardAlpha"
           />
           <feMorphology
-            radius="2"
+            radius="1"
             operator="erode"
             in="SourceAlpha"
-            result="effect1_dropShadow_353_265"
+            result="effect1_dropShadow_664_303"
           />
           <feOffset dy="4" />
           <feGaussianBlur stdDeviation="2" />
@@ -191,12 +191,12 @@ export function LocationIcon(props: IconProps) {
           <feBlend
             mode="normal"
             in2="BackgroundImageFix"
-            result="effect1_dropShadow_353_265"
+            result="effect1_dropShadow_664_303"
           />
           <feBlend
             mode="normal"
             in="SourceGraphic"
-            in2="effect1_dropShadow_353_265"
+            in2="effect1_dropShadow_664_303"
             result="shape"
           />
         </filter>

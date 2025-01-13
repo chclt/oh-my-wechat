@@ -1,3 +1,4 @@
+import type { RecordVM } from "@/components/record/record";
 import type { Chat, MessageVM, PhotpSize, WCDatabases } from "@/lib/schema.ts";
 import CryptoJS from "crypto-js";
 import { getFilesFromManifast } from "../utils";
@@ -9,12 +10,14 @@ export const ImageController = {
     {
       chat,
       message,
+      record,
 
       size = "origin",
       domain = "image",
     }: {
       chat: Chat;
       message: MessageVM;
+      record?: RecordVM;
 
       size: "origin" | "thumb";
       domain: "image" | "opendata" | "video";
@@ -26,9 +29,11 @@ export const ImageController = {
     const files = await getFilesFromManifast(
       db,
       directory,
-      `%/${
-        { image: "Img", opendata: "OpenData", video: "Video" }[domain]
-      }/${CryptoJS.MD5(chat.id).toString()}/${message.local_id}.%`,
+      record
+        ? `%/OpenData/${CryptoJS.MD5(chat.id).toString()}/${message.local_id}/${record["@_dataid"]}.%`
+        : `%/${
+            { image: "Img", opendata: "OpenData", video: "Video" }[domain]
+          }/${CryptoJS.MD5(chat.id).toString()}/${message.local_id}.%`,
     );
 
     const result: PhotpSize[] = [];
@@ -43,7 +48,10 @@ export const ImageController = {
         else result.unshift(newPhoto);
       }
 
-      if (file.filename.endsWith(".pic_thum")) {
+      if (
+        file.filename.endsWith(".pic_thum") ||
+        file.filename.endsWith(".record_thum")
+      ) {
         const newPhoto: PhotpSize = {
           size: "thumb",
           src: URL.createObjectURL(file.file),

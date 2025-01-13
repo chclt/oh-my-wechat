@@ -1,6 +1,7 @@
 import type { MessageProp } from "@/components/message/message.tsx";
 import type { LocationMessage as LocationMessageVM } from "@/lib/schema.ts";
 import { cn } from "@/lib/utils.ts";
+import { cva } from "class-variance-authority";
 import { LocationIcon } from "../icon";
 import MessageInlineWrapper from "./message-inline";
 
@@ -29,6 +30,10 @@ export interface LocationMessageEntity {
   };
 }
 
+export const locationMessageVariants = cva(
+  "max-w-[20em] py-3 ps-3 pe-[1.375rem] flex items-center gap-3 bg-white rounded-2xl [&_svg]:shrink-0 text-pretty",
+);
+
 export default function LocationMessage({
   message,
   variant = "default",
@@ -36,27 +41,13 @@ export default function LocationMessage({
 }: LocationMessageProps) {
   if (variant === "default")
     return (
-      <div
-        className={
-          "relative w-72 flex flex-col items-stretch bg-white rounded-2xl border border-neutral-200"
-        }
-        {...props}
-      >
-        <div
-          className={"h-20 flex justify-center items-center [&_svg]:size-12"}
-        >
-          <LocationIcon />
-        </div>
-        <div
-          className={cn(
-            "relative py-2.5 px-3 flex flex-col",
-            "after:content-[''] after:absolute after:top-0 after:left-0 after:right-0 after:border-t after:border-neutral-200",
-          )}
-        >
+      <div className={cn(locationMessageVariants())} {...props}>
+        <LocationIcon />
+        <div>
           <h4 className={"font-medium"}>
             {message.message_entity.msg.location["@_poiname"]}
           </h4>
-          <p className={"text-sm"}>
+          <p className={"text-sm text-muted-foreground"}>
             {message.message_entity.msg.location["@_label"]}
           </p>
         </div>

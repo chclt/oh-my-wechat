@@ -3,6 +3,7 @@ import ChatroomVoipMessage from "@/components/message/chatroom-voip-message.tsx"
 import ContactMessage from "@/components/message/contact-message.tsx";
 import ImageMessage from "@/components/message/image-message.tsx";
 import LocationMessage from "@/components/message/location-message.tsx";
+import MailMessage from "@/components/message/mail-message.tsx";
 import MicroVideoMessage from "@/components/message/micro-video-message.tsx";
 import StickerMessage from "@/components/message/sticker-message.tsx";
 import SystemExtendedMessage from "@/components/message/system-extended-message.tsx";
@@ -59,7 +60,6 @@ export default function Message({
         }}
         message={message}
         variant={variant}
-        title={formatDateTime(new Date(message.date * 1000))}
         {...props}
       />
     </ErrorBoundary>
@@ -76,6 +76,9 @@ function MessageComponent({ message, variant, ...props }: MessageProp) {
 
     case MessageType.VOICE:
       return <VoiceMessage message={message} variant={variant} {...props} />;
+
+    case MessageType.MAIL:
+      return <MailMessage message={message} variant={variant} {...props} />;
 
     case MessageType.VERITY:
       return <VerityMessage message={message} variant={variant} {...props} />;

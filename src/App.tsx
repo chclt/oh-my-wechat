@@ -14,24 +14,6 @@ import {
   TabsTrigger,
 } from "@/components/ui/tabs.tsx";
 
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-
 import AccountSelectDialog from "@/components/account-select-dialog.tsx";
 import MediaViewerDialog from "@/components/media-viewer-dialog.tsx";
 import { ScrollArea } from "@/components/ui/scroll-area.tsx";
@@ -41,19 +23,12 @@ import ContactList from "./components/contact-list";
 import { cn } from "./lib/utils";
 
 import {
-  CelebrateSolid,
-  ChevronRightSmallLine,
-} from "@/components/central-icon.tsx";
-import {
   ChatIconFill,
   ChatIconOutline,
   ContactIconFill,
   ContactIconOutline,
 } from "@/components/icon.tsx";
 import Wrapped2024Trigger from "@/components/statistic/wrapped-2024/wrapped-2024-trigger.tsx";
-import Wrapped2024 from "@/components/statistic/wrapped-2024/wrapped-2024.tsx";
-import { Button } from "@/components/ui/button.tsx";
-import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
 const App = () => {
   const { databases } = useDatabase();
@@ -68,7 +43,12 @@ const App = () => {
         direction="horizontal"
         className="min-h-screen max-h-screen items-stretch"
       >
-        <ResizablePanel defaultSize={25} minSize={10} className="flex">
+        <ResizablePanel
+          defaultSize={25}
+          minSize={10}
+          maxSize={80}
+          className="flex"
+        >
           <Tabs defaultValue="sessions" className="w-full flex">
             <div className={"flex flex-col justify-between border-r"}>
               <TabsList className="h-auto p-0 flex flex-col bg-transparent">
@@ -91,6 +71,28 @@ const App = () => {
                   </div>
                   <span className="mt-1 text-xs">消息</span>
                 </TabsTrigger>
+
+                {/*
+               <TabsTrigger
+                  value="contact"
+                  className={cn(
+                    "w-16 h-16 p-0 flex flex-col",
+                    "group data-[state=active]:text-[#03C160] rounded-none after:content-none hover:bg-neutral-100",
+                  )}
+                >
+                  <div className="mt-1 w-8 h-8">
+                    <ContactIconOutline
+                      className={"group-data-[state=active]:hidden size-full"}
+                    />
+                    <ContactIconFill
+                      className={
+                        "hidden group-data-[state=active]:block size-full"
+                      }
+                    />
+                  </div>
+                  <span className="mt-1 text-xs">通讯录</span>
+                </TabsTrigger>
+                */}
               </TabsList>
             </div>
 

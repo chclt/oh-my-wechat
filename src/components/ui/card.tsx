@@ -6,14 +6,7 @@ const Card = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn(
-      "rounded-xl border bg-card text-card-foreground shadow",
-      className,
-    )}
-    {...props}
-  />
+  <div ref={ref} className={cn("rounded-lg bg-card", className)} {...props} />
 ));
 Card.displayName = "Card";
 
@@ -35,29 +28,17 @@ const CardTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("font-semibold leading-none tracking-tight", className)}
+    className={cn("font-medium text-pretty line-clamp-3", className)}
     {...props}
   />
 ));
 CardTitle.displayName = "CardTitle";
 
-const CardDescription = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn("text-sm text-muted-foreground", className)}
-    {...props}
-  />
-));
-CardDescription.displayName = "CardDescription";
-
 const CardContent = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn("p-6 pt-0", className)} {...props} />
+  <div ref={ref} className={cn("p-3", className)} {...props} />
 ));
 CardContent.displayName = "CardContent";
 
@@ -67,17 +48,28 @@ const CardFooter = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("flex items-center p-6 pt-0", className)}
+    className={cn(
+      "px-3 py-1.5 min-h-[em] text-sm leading-normal text-muted-foreground border-t",
+      className,
+    )}
     {...props}
   />
 ));
 CardFooter.displayName = "CardFooter";
 
-export {
-  Card,
-  CardHeader,
-  CardFooter,
-  CardTitle,
-  CardDescription,
-  CardContent,
-};
+const CardIndicator = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn(
+      "float-end mt-[3px] mb-[4px] ms-1 size-3.5 [&_svg]:size-full text-muted-foreground/55",
+      className,
+    )}
+    {...props}
+  />
+));
+CardIndicator.displayName = "CardIndicator";
+
+export { Card, CardHeader, CardFooter, CardTitle, CardContent, CardIndicator };

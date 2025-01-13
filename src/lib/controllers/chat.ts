@@ -15,26 +15,10 @@ import specialBrandId from "@/assets/specialBrandUserNames.csv?raw";
 import _global from "@/lib/global.ts";
 
 export const ChatController = {
-  all: async (databases: WCDatabases): Promise<ControllerResult<Chat[]>> => {
-    const db = databases.session;
-    if (!db) {
-      throw new Error("session database is not found");
-    }
-
-    const dbSessionAbstractRows: DatabaseSessionAbstractRow[] = db
-      .exec(
-        "SELECT rowid, CreateTime, UsrName, ConIntRes1 FROM SessionAbstract ORDER BY CreateTime Desc",
-      )[0]
-      .values.reduce((acc, cur) => {
-        acc.push({
-          rowid: cur[0],
-          CreateTime: cur[1],
-          UsrName: cur[2],
-          ConIntRes1: cur[3],
-        } as DatabaseSessionAbstractRow);
-        return acc;
-      }, [] as DatabaseSessionAbstractRow[]);
-
+  parseDatabaseChatRows: async (
+    databases: WCDatabases,
+    dbSessionAbstractRows: DatabaseSessionAbstractRow[],
+  ): Promise<Chat[]> => {
     const specialBrandIds = specialBrandId.split("\n").map((i) => i.trim());
 
     const dbSessionAbstractRowsFiltered = dbSessionAbstractRows.filter(
@@ -43,9 +27,14 @@ export const ChatController = {
           row.UsrName.startsWith("gh_") ||
           row.UsrName.endsWith("@openim") || // TODO
           specialBrandIds.includes(row.UsrName) ||
-          ["chatroom_session_box", "newsapp", "brandsessionholder"].includes(
-            row.UsrName,
-          )
+          [
+            "chatroom_session_box",
+            "newsapp",
+            "brandsessionholder",
+            "notification_messages",
+            "brandsessionholder_weapp",
+            "opencustomerservicemsg",
+          ].includes(row.UsrName)
         ),
     );
 
@@ -113,6 +102,71 @@ export const ChatController = {
       result.push(chat);
     }
 
-    return { data: result };
+    return result;
+  },
+
+  all: async (databases: WCDatabases): Promise<ControllerResult<Chat[]>> => {
+    const db = databases.session;
+    if (!db) {
+      throw new Error("session database is not found");
+    }
+
+    const dbSessionAbstractRows: DatabaseSessionAbstractRow[] = db
+      .exec(
+        "SELECT rowid, CreateTime, UsrName, ConIntRes1 FROM SessionAbstract ORDER BY CreateTime Desc",
+      )[0]
+      .values.reduce((acc, cur) => {
+        acc.push({
+          rowid: cur[0],
+          CreateTime: cur[1],
+          UsrName: cur[2],
+          ConIntRes1: cur[3],
+        } as DatabaseSessionAbstractRow);
+        return acc;
+      }, [] as DatabaseSessionAbstractRow[]);
+
+    return {
+      data: await ChatController.parseDatabaseChatRows(
+        databases,
+        dbSessionAbstractRows,
+      ),
+    };
+  },
+
+  in: async (
+    databases: WCDatabases,
+    {
+      ids,
+    }: {
+      ids: string[];
+    },
+  ): Promise<ControllerResult<Chat[]>> => {
+    const db = databases.session;
+    if (!db) {
+      throw new Error("session database is not found");
+    }
+
+    if (ids.length === 0) return { data: [] };
+
+    const dbSessionAbstractRows: DatabaseSessionAbstractRow[] = db
+      .exec(
+        `SELECT rowid, CreateTime, UsrName, ConIntRes1 FROM SessionAbstract WHERE UsrName IN (${ids.map((id) => `'${id}'`).join(",")}) ORDER BY CreateTime Desc`,
+      )[0]
+      .values.reduce((acc, cur) => {
+        acc.push({
+          rowid: cur[0],
+          CreateTime: cur[1],
+          UsrName: cur[2],
+          ConIntRes1: cur[3],
+        } as DatabaseSessionAbstractRow);
+        return acc;
+      }, [] as DatabaseSessionAbstractRow[]);
+
+    return {
+      data: await ChatController.parseDatabaseChatRows(
+        databases,
+        dbSessionAbstractRows,
+      ),
+    };
   },
 };

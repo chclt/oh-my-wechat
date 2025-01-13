@@ -53,7 +53,8 @@ export type WorkerRequestQuery = WorkerRequest<"query", [string, ...unknown[]]>;
 type WorkerResponseQuery = WorkerResponse<{ data: unknown }>;
 
 enum Controller {
-  Chat = "/chats",
+  Chats = "/chats",
+  ChatsIn = "/chats/in",
   Contacts = "/contacts",
   ContactsIn = "/contacts/in",
   MessagesAll = "/messages/all",
@@ -71,7 +72,8 @@ enum Controller {
 const controller: {
   [key: string]: (...args: any[]) => Promise<unknown>;
 } = {
-  [Controller.Chat]: ChatController.all,
+  [Controller.Chats]: ChatController.all,
+  [Controller.ChatsIn]: ChatController.in,
   [Controller.Contacts]: ContactController.all,
   [Controller.ContactsIn]: ContactController.in,
   [Controller.MessagesAll]: MessageController._all_from_all,
@@ -270,7 +272,8 @@ self.onmessage = async (
 
       let result: unknown;
       switch (endpoint) {
-        case Controller.Chat:
+        case Controller.Chats:
+        case Controller.ChatsIn:
         case Controller.Contacts:
         case Controller.ContactsIn:
         case Controller.MessagesAll:

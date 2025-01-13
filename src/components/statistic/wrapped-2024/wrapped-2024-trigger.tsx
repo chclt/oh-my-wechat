@@ -5,13 +5,6 @@ import {
 import Wrapped2024 from "@/components/statistic/wrapped-2024/wrapped-2024.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card.tsx";
-import {
   Dialog,
   DialogClose,
   DialogContent,
@@ -28,25 +21,27 @@ export default function Wrapped2024Trigger() {
   const [isOpen, setIsOpen] = useState(false);
   return (
     <Dialog open={isOpen} onOpenChange={(open) => setIsOpen(open)}>
-      <Card
+      <div
         className={
-          "relative w-[320px] border-border/50 rounded-3xl shadow-none"
+          "relative w-[320px] border-border/50 rounded-3xl shadow-none border bg-card text-card-foreground"
         }
         style={{
           background:
             "radial-gradient(66.67% 50% at 0% 100%, rgba(164, 253, 176, 0.5) 0%, rgba(255, 255, 255, 0) 100%)",
         }}
       >
-        <CardHeader className={"flex flex-col items-start"}>
-          <CardTitle
-            className={"flex flex-col items-start gap-2 text-black/90"}
+        <div className={"flex flex-col items-start space-y-1.5 p-6"}>
+          <div
+            className={
+              "font-semibold leading-none tracking-tight flex flex-col items-start gap-2 text-black/90"
+            }
           >
             <CelebrateSolid className={"size-6"} />
             2024 微信年度报告现已上线
-          </CardTitle>
-          <CardDescription>回顾你的 2024</CardDescription>
-        </CardHeader>
-        <CardContent className={"h-16"}>
+          </div>
+          <div className={"text-sm text-muted-foreground"}>回顾你的 2024</div>
+        </div>
+        <div className={"h-16 p-6 pt-0"}>
           <DialogTrigger
             onClick={() => {
               setIsOpen(true);
@@ -68,8 +63,8 @@ export default function Wrapped2024Trigger() {
               </div>
             </Button>
           </DialogTrigger>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       <DialogContent
         className={
