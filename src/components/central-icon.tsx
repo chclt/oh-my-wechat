@@ -8,6 +8,7 @@ export function FolderOpenLine(props: React.SVGProps<SVGSVGElement>) {
       xmlns="http://www.w3.org/2000/svg"
       {...props}
     >
+      <title>Folder Open</title>
       <path
         fillRule="evenodd"
         clipRule="evenodd"
@@ -28,6 +29,7 @@ export function ChevronRightSmallLine(props: React.SVGProps<SVGSVGElement>) {
       xmlns="http://www.w3.org/2000/svg"
       {...props}
     >
+      <title>Chevron Right Small</title>
       <path
         fillRule="evenodd"
         clipRule="evenodd"
@@ -49,6 +51,7 @@ export function CircleQuestionmarkLine(props: React.SVGProps<SVGSVGElement>) {
       xmlns="http://www.w3.org/2000/svg"
       {...props}
     >
+      <title>Circle Questionmark</title>
       <path
         d="M12 16V16.01M12 13C12 11.3608 14 11.9319 14 10C14 8.89543 13.1046 8 12 8C11.2597 8 10.6134 8.4022 10.2676 9M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z"
         stroke="currentColor"
@@ -70,6 +73,7 @@ export function TriangleExclamationLine(props: React.SVGProps<SVGSVGElement>) {
       xmlns="http://www.w3.org/2000/svg"
       {...props}
     >
+      <title>Triangle Exclamation</title>
       <path
         d="M12 9.01917V12.0134M12 15H12.01M10.2765 3.99036L3.27481 15.998C2.49885 17.3288 3.45836 19 4.99836 19H19.0016C20.5416 19 21.5011 17.3288 20.7252 15.998L13.7235 3.99035C12.9536 2.66988 11.0464 2.66988 10.2765 3.99036ZM12.25 15C12.25 15.1381 12.1381 15.25 12 15.25C11.8619 15.25 11.75 15.1381 11.75 15C11.75 14.8619 11.8619 14.75 12 14.75C12.1381 14.75 12.25 14.8619 12.25 15Z"
         stroke="currentColor"
@@ -88,7 +92,9 @@ export function ArrowRotateRightLeftLine(props: React.SVGProps<SVGSVGElement>) {
       viewBox="0 0 24 24"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
+      {...props}
     >
+      <title>Arrow Rotate Right Left</title>
       <path
         d="M7.04284 17C8.32397 18.2359 10.0895 19 12 19C15.866 19 19 15.866 19 12C19 11.4477 19.4477 11 20 11C20.5523 11 21 11.4477 21 12C21 16.9706 16.9706 21 12 21C9.72351 21 7.60781 20.1537 5.99988 18.7558V20C5.99988 20.5523 5.55216 21 4.99988 21C4.44759 21 3.99988 20.5523 3.99988 20V16.75C3.99988 15.7835 4.78338 15 5.74988 15H8.74988C9.30216 15 9.74988 15.4477 9.74988 16C9.74988 16.5523 9.30216 17 8.74988 17H7.04284Z"
         fill="currentColor"
@@ -111,6 +117,7 @@ export function ArrowShareRightSolid(props: React.SVGProps<SVGSVGElement>) {
       xmlns="http://www.w3.org/2000/svg"
       {...props}
     >
+      <title>Arrow Share Right</title>
       <path
         d="M5.91885 2.37185C5.91885 1.60366 6.83795 1.20832 7.3956 1.73665L11.2254 5.3648C11.5897 5.70995 11.5897 6.2901 11.2254 6.63525L7.3956 10.2634C6.83795 10.7917 5.91885 10.3964 5.91885 9.6282V8.25385C4.20987 8.28085 3.2561 8.45025 2.66273 8.72025C2.06448 8.9925 1.79598 9.3824 1.45953 10.0386C1.18054 10.5829 0.414285 10.3303 0.419953 9.7811C0.441261 7.7155 0.76968 6.1578 1.75961 5.1375C2.67468 4.19431 4.05393 3.81247 5.91885 3.75719V2.37185Z"
         fill="currentColor"
@@ -129,6 +136,7 @@ export function FileBendSolid(props: React.SVGProps<SVGSVGElement>) {
       xmlns="http://www.w3.org/2000/svg"
       {...props}
     >
+      <title>File Bend</title>
       <path
         d="M12 2H7C5.34315 2 4 3.34315 4 5V19C4 20.6569 5.34315 22 7 22H17C18.6569 22 20 20.6569 20 19V10H15C13.3431 10 12 8.65685 12 7V2Z"
         fill="currentColor"
@@ -151,6 +159,7 @@ export function CelebrateSolid(props: React.SVGProps<SVGSVGElement>) {
       xmlns="http://www.w3.org/2000/svg"
       {...props}
     >
+      <title>Celebrate</title>
       <path
         d="M13.8155 1.01449C14.361 0.921252 14.8787 1.28782 14.9719 1.83322L14.9722 1.83465L14.9725 1.83647L14.9733 1.84126C15.0133 2.08719 15.0368 2.33613 15.0514 2.58474C15.076 3.00655 15.0791 3.59664 14.9695 4.18819C14.8416 4.87914 14.521 5.50092 14.2669 5.91765C14.1353 6.13338 14.0108 6.31145 13.918 6.43714C13.866 6.50754 13.8127 6.57698 13.7572 6.64466L13.7534 6.64931L13.7519 6.65109L13.7507 6.65251C13.3956 7.07682 12.7637 7.13291 12.3393 6.77779C11.9157 6.42325 11.8591 5.79288 12.2123 5.36858L12.2147 5.36567C12.3393 5.21002 12.4522 5.04469 12.5559 4.87451C12.7548 4.54834 12.9352 4.16825 12.9991 3.82333C13.0677 3.4531 13.0707 3.04133 13.0509 2.70171C13.0405 2.52474 13.0239 2.34781 12.997 2.17255L12.9966 2.17005L12.9964 2.16892C12.9043 1.62422 13.2707 1.10761 13.8155 1.01449Z"
         fill="currentColor"
@@ -189,6 +198,7 @@ export function GithubSolid(props: React.SVGProps<SVGSVGElement>) {
       xmlns="http://www.w3.org/2000/svg"
       {...props}
     >
+      <title>Github</title>
       <path
         d="M12 1.95068C17.525 1.95068 22 6.42568 22 11.9507C21.9995 14.0459 21.3419 16.0883 20.1198 17.7902C18.8977 19.4922 17.1727 20.768 15.1875 21.4382C14.6875 21.5382 14.5 21.2257 14.5 20.9632C14.5 20.6257 14.5125 19.5507 14.5125 18.2132C14.5125 17.2757 14.2 16.6757 13.8375 16.3632C16.0625 16.1132 18.4 15.2632 18.4 11.4257C18.4 10.3257 18.0125 9.43818 17.375 8.73818C17.475 8.48818 17.825 7.46318 17.275 6.08818C17.275 6.08818 16.4375 5.81318 14.525 7.11318C13.725 6.88818 12.875 6.77568 12.025 6.77568C11.175 6.77568 10.325 6.88818 9.525 7.11318C7.6125 5.82568 6.775 6.08818 6.775 6.08818C6.225 7.46318 6.575 8.48818 6.675 8.73818C6.0375 9.43818 5.65 10.3382 5.65 11.4257C5.65 15.2507 7.975 16.1132 10.2 16.3632C9.9125 16.6132 9.65 17.0507 9.5625 17.7007C8.9875 17.9632 7.55 18.3882 6.65 16.8757C6.4625 16.5757 5.9 15.8382 5.1125 15.8507C4.275 15.8632 4.775 16.3257 5.125 16.5132C5.55 16.7507 6.0375 17.6382 6.15 17.9257C6.35 18.4882 7 19.5632 9.5125 19.1007C9.5125 19.9382 9.525 20.7257 9.525 20.9632C9.525 21.2257 9.3375 21.5257 8.8375 21.4382C6.8458 20.7752 5.11342 19.502 3.88611 17.799C2.65881 16.096 1.9989 14.0498 2 11.9507C2 6.42568 6.475 1.95068 12 1.95068Z"
         fill="currentColor"
@@ -207,6 +217,7 @@ export function MegaphoneSolid(props: React.SVGProps<SVGSVGElement>) {
       xmlns="http://www.w3.org/2000/svg"
       {...props}
     >
+      <title>Megaphone</title>
       <path
         fillRule="evenodd"
         clipRule="evenodd"
@@ -227,6 +238,7 @@ export function BubbleQuestionSolid(props: React.SVGProps<SVGSVGElement>) {
       xmlns="http://www.w3.org/2000/svg"
       {...props}
     >
+      <title>Bubble Question</title>
       <path
         fillRule="evenodd"
         clipRule="evenodd"

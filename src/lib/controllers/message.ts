@@ -151,7 +151,13 @@ export const MessageController = {
         local_id: raw_message_row.MesLocalID,
         type: raw_message_row.Type,
         date: raw_message_row.CreateTime,
-        direction: raw_message_row.Des,
+        direction:
+          // 有些消息比如通话记录的发消息的人，但是记录消息方向不是想要的，可能因为这算系统消息
+          (messageSenderIds[index]
+            ? messageSenderIds[index] === _global.user?.id
+              ? MessageDirection.outgoing
+              : MessageDirection.incoming
+            : undefined) ?? raw_message_row.Des,
         from:
           usersTable[messageSenderIds[index]] ??
           (messageSenderIds[index].length > 0
@@ -159,7 +165,7 @@ export const MessageController = {
                 id: messageSenderIds[index],
                 user_id: messageSenderIds[index],
                 username: messageSenderIds[index],
-                bio: "", // 好像一些群聊成员不会出现在数据库中
+                // 好像一些群聊成员不会出现在数据库中
               }
             : undefined), // 有一些系统消息没有 from
         ...(chat ? { chat } : {}),
