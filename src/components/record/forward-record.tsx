@@ -122,6 +122,7 @@ export default function ForwardMessageRecord({
                         user_id: record.sourcename,
                         username: record.sourcename,
                         photo: { thumb: record.sourceheadurl },
+                        is_openim: false,
                       }}
                       className={"[&>img]:top-0"}
                     >

@@ -75,6 +75,11 @@ export function ContactItem({
           <h4 className={"grow font-medium break-all line-clamp-1"}>
             {/* @ts-ignore */}
             {contact.remark ?? contact.username ?? contact.title}
+            {contact.is_openim && (
+              <span className="ms-1 text-sm font-normal text-orange-400">
+                @企业微信
+              </span>
+            )}
           </h4>
         </div>
       </div>

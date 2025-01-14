@@ -144,6 +144,16 @@ const dbContactProtos = {
       id: 6,
     },
   },
+  dbContactOpenIM: {
+    openIMContactInfo: {
+      type: "string", // json
+      id: 1,
+    },
+    openIMContactId: {
+      type: "string",
+      id: 2,
+    },
+  },
 };
 const dbContactProtobufRoot = protobuf.Root.fromJSON({
   nested: {
@@ -161,6 +171,9 @@ const dbContactProtobufRoot = protobuf.Root.fromJSON({
     },
     Chatroom: {
       fields: dbContactProtos.dbContactChatRoom,
+    },
+    OpenIM: {
+      fields: dbContactProtos.dbContactOpenIM,
     },
   },
 });
@@ -196,6 +209,19 @@ export const ContactController = {
               .lookupType("Chatroom")
               .decode(row.dbContactChatRoom)
           : undefined;
+      // @ts-ignore
+      const openIMObj: { [key: string]: unknown } | undefined =
+        row.dbContactOpenIM
+          ? dbContactProtobufRoot
+              .lookupType("OpenIM")
+              .decode(row.dbContactOpenIM)
+          : undefined;
+
+      if (openIMObj?.openIMContactInfo) {
+        openIMObj.openIMContactInfo = JSON.parse(
+          openIMObj.openIMContactInfo as string,
+        );
+      }
 
       const specialUser = [
         {
@@ -242,6 +268,7 @@ export const ContactController = {
                 },
               }
             : {}),
+          is_openim: !!openIMObj,
 
           _is_pinned: !!((row.type >> 11) & 1),
           _is_collapsed: !!((row.type >> 28) & 1),
@@ -254,6 +281,7 @@ export const ContactController = {
             ...profileObj,
             ...socialObj,
             ...chatroomObj,
+            ...openIMObj,
           },
         } as Omit<Chatroom, "members"> & {
           _is_pinned: boolean;
@@ -288,6 +316,7 @@ export const ContactController = {
               phone: socialObj.phone,
             }
           : {}),
+        is_openim: !!openIMObj,
 
         _is_pinned: !!((row.type >> 11) & 1),
 
@@ -297,6 +326,7 @@ export const ContactController = {
           ...headImageObj,
           ...profileObj,
           ...socialObj,
+          ...openIMObj,
         },
       } as User;
     });
@@ -343,7 +373,11 @@ export const ContactController = {
 
     const dbFriendRows: DatabaseFriendRow[] = db
       .exec(
-        "SELECT rowid, userName, dbContactRemark, dbContactChatRoom, dbContactHeadImage, dbContactProfile, dbContactSocial, type FROM Friend WHERE (type & 1) != 0",
+        `
+          SELECT rowid, userName, dbContactRemark, dbContactChatRoom, dbContactHeadImage, dbContactProfile, dbContactSocial, dbContactOpenIM, type FROM Friend WHERE (type & 1) != 0
+          UNION  ALL
+          SELECT rowid, userName, dbContactRemark, dbContactChatRoom, dbContactHeadImage, dbContactProfile, dbContactSocial, dbContactOpenIM, type FROM OpenIMContact WHERE (type & 1) != 0
+        `,
       )[0]
       .values.reduce((acc, cur) => {
         acc.push({
@@ -354,7 +388,8 @@ export const ContactController = {
           dbContactHeadImage: cur[4],
           dbContactProfile: cur[5],
           dbContactSocial: cur[6],
-          type: cur[7],
+          dbContactOpenIM: cur[7],
+          type: cur[8],
         } as DatabaseFriendRow);
         return acc;
       }, [] as DatabaseFriendRow[]);
@@ -384,7 +419,11 @@ export const ContactController = {
 
     const dbFriendRows: DatabaseFriendRow[] = db
       .exec(
-        "SELECT rowid, userName, dbContactRemark, dbContactChatRoom, dbContactHeadImage, dbContactProfile, dbContactSocial, type FROM Friend",
+        `
+          SELECT rowid, userName, dbContactRemark, dbContactChatRoom, dbContactHeadImage, dbContactProfile, dbContactSocial, dbContactOpenIM, type FROM Friend
+          UNION ALL
+          SELECT rowid, userName, dbContactRemark, dbContactChatRoom, dbContactHeadImage, dbContactProfile, dbContactSocial, dbContactOpenIM, type FROM OpenIMContact
+        `,
       )[0]
       .values.reduce((acc, cur) => {
         acc.push({
@@ -395,7 +434,8 @@ export const ContactController = {
           dbContactHeadImage: cur[4],
           dbContactProfile: cur[5],
           dbContactSocial: cur[6],
-          type: cur[7],
+          dbContactOpenIM: cur[7],
+          type: cur[8],
         } as DatabaseFriendRow);
         return acc;
       }, [] as DatabaseFriendRow[]);
