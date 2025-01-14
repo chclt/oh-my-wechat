@@ -1,5 +1,9 @@
+import { CallIncoming, CallOutgoing } from "@/components/icon.tsx";
 import type { MessageProp } from "@/components/message/message.tsx";
-import type { VoipMessage as VoipMessageVM } from "@/lib/schema.ts";
+import {
+  MessageDirection,
+  type VoipMessage as VoipMessageVM,
+} from "@/lib/schema.ts";
 
 type VoipMessageProps = MessageProp<VoipMessageVM>;
 export interface VoipMessageEntity {
@@ -41,12 +45,16 @@ export default function VoipMessage({
       <>
         {message.message_entity.voipmsg && (
           <div
-            className="max-w-[20em] py-4 pl-4 pr-6 flex gap-4 items-center bg-white rounded-2xl border border-neutral-200"
+            className="max-w-[20em] py-4 pl-4 pr-6 flex gap-2.5 items-center bg-white rounded-2xl border border-neutral-200 [&_svg]:size-10 [&_svg]:shrink-0"
             {...props}
           >
-            <div className={"shrink-0 size-12 bg-neutral-400 rounded-full"} />
+            {message.direction === MessageDirection.outgoing ? (
+              <CallOutgoing />
+            ) : (
+              <CallIncoming />
+            )}
             <div>
-              <h4 className={"font-medium"}>
+              <h4 className={"font-medium text-pretty"}>
                 {message.from.remark ?? message.from.username}发起了语音通话
               </h4>
               <p className={"text-sm text-neutral-600"}>

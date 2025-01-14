@@ -1,5 +1,9 @@
+import { CallIncoming, CallOutgoing } from "@/components/icon.tsx";
 import type { MessageProp } from "@/components/message/message.tsx";
-import type { ChatroomVoipMessage as ChatroomVoipMessageVM } from "@/lib/schema.ts";
+import {
+  type ChatroomVoipMessage as ChatroomVoipMessageVM,
+  MessageDirection,
+} from "@/lib/schema.ts";
 
 type ChatroomVoipMessageProps = MessageProp<ChatroomVoipMessageVM>;
 
@@ -19,11 +23,15 @@ export default function ChatroomVoipMessage({
     if (message.from) {
       return (
         <div
-          className="max-w-[20em] py-4 pl-4 pr-6 flex gap-4 items-center bg-white rounded-2xl border border-neutral-200"
+          className="max-w-[20em] py-4 pl-4 pr-6 flex gap-2.5 items-center bg-white rounded-2xl border border-neutral-200 [&_svg]:size-10 [&_svg]:shrink-0"
           {...props}
         >
-          <div className={"shrink-0 size-12 bg-neutral-400 rounded-full"} />
-          <div>
+          {message.direction === MessageDirection.outgoing ? (
+            <CallOutgoing />
+          ) : (
+            <CallIncoming />
+          )}
+          <div className={"font-medium text-pretty"}>
             <p>{message.message_entity.msgContent}</p>
           </div>
         </div>
