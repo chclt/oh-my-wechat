@@ -136,12 +136,12 @@ export default function ChatDetails({ chat, ...props }: ChatDetailsProps) {
         )}
         <TabsContent value="statistics">
           <div className={"p-4 space-y-2"}>
-            {Object.keys(result.data).map((key) => (
+            {/* {Object.keys(result.data).map((key) => (
               <div key={key}>
                 <h4 className={"font-semibold"}>{key}</h4>
                 <p>{result.data[key]}</p>
               </div>
-            ))}
+            ))} */}
           </div>
         </TabsContent>
         <TabsContent value="medias">

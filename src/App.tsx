@@ -22,6 +22,7 @@ import { useDatabase } from "@/lib/hooks/databaseProvider.tsx";
 import ContactList from "./components/contact-list";
 import { cn } from "./lib/utils";
 
+import ChatDetails from "@/components/chat-details.tsx";
 import {
   ChatIconFill,
   ChatIconOutline,
@@ -71,9 +72,8 @@ const App = () => {
                   </div>
                   <span className="mt-1 text-xs">消息</span>
                 </TabsTrigger>
-
                 {/*
-               <TabsTrigger
+                <TabsTrigger
                   value="contact"
                   className={cn(
                     "w-16 h-16 p-0 flex flex-col",
@@ -144,6 +144,18 @@ const App = () => {
             </div>
           )}
         </ResizablePanel>
+
+        {/*
+        <ResizableHandle />
+
+        <ResizablePanel>
+          {databases && user && chat && (
+            <div className="w-full h-full overflow-auto">
+              <ChatDetails chat={chat} />
+            </div>
+          )}
+        </ResizablePanel>
+        */}
       </ResizablePanelGroup>
 
       {chat && (

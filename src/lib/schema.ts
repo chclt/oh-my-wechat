@@ -48,7 +48,7 @@ export type DatabaseFriendRow = DatabaseRow<{
   // dbContactEncryptSecret BLOB,
   dbContactHeadImage: Uint8Array;
   // dbContactLocal BLOB,
-  // dbContactOpenIM BLOB,
+  dbContactOpenIM: Uint8Array;
   // dbContactOther BLOB,
   dbContactProfile: Uint8Array;
   dbContactRemark: Uint8Array;
@@ -95,6 +95,7 @@ export interface User {
   };
   background?: string; // 朋友圈背景
   phone?: string;
+  is_openim: boolean;
 }
 
 export interface Chatroom {
@@ -107,6 +108,7 @@ export interface Chatroom {
   };
 
   members: User[];
+  is_openim: boolean;
 }
 
 interface BasicChat {

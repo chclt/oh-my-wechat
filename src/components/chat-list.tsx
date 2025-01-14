@@ -108,6 +108,13 @@ const ChatItem = forwardRef<HTMLLIElement, ChatItemProps>(
           <div className="flex gap-2">
             <h4 className={"grow font-medium break-all line-clamp-1"}>
               {chat.title}
+              {(chat.type === "private"
+                ? chat.user.is_openim
+                : chat.chatroom.is_openim) && (
+                <span className="ms-1 text-sm font-normal text-orange-400">
+                  @企业微信
+                </span>
+              )}
             </h4>
             {last_message && (
               <small className={"ms-2 text-xs text-neutral-400"}>
