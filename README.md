@@ -7,7 +7,7 @@
 
 ![Oh My WeChat Components](https://github.com/user-attachments/assets/e46e4db9-5cd3-4a5a-952e-320044b8630e)
 
-![WeChat Wrapped 2024](https://github.com/user-attachments/assets/191963f6-e3f7-48e4-85c4-25c723451b8d)
+![WeChat Wrapped 2024](https://github.com/user-attachments/assets/76b31eca-c671-43a9-8aa4-cb77e396e41c)
 
 
 ## 注意
