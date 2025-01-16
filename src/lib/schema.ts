@@ -21,6 +21,7 @@ export interface WCDatabases {
   session?: Database;
   message?: Database[];
   WCDB_Contact?: Database;
+  BrandMsg?: Database;
 }
 
 export type WCDatabaseNames = keyof WCDatabases;
@@ -98,6 +99,16 @@ export interface User {
   is_openim: boolean;
 }
 
+export interface OfficialAccount {
+  id: `gh_${string}` | string;
+  username: string;
+  bio: string;
+  photo?: {
+    origin?: string;
+    thumb: string;
+  };
+}
+
 export interface Chatroom {
   id: `${string}@chatroom`;
   title: string;
@@ -133,7 +144,17 @@ export interface GroupChat extends BasicChat {
   chatroom: Chatroom;
 }
 
-export type Chat = PrivateChat | GroupChat;
+export interface OfficialAccountChat extends BasicChat {
+  type: "official_account";
+  official_account: OfficialAccount;
+}
+
+export interface ChatFolder extends BasicChat {
+  type: "folder";
+  chats: Chat[];
+}
+
+export type Chat = PrivateChat | GroupChat | OfficialAccountChat;
 
 export interface PhotpSize {
   src: string;

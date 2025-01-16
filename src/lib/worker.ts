@@ -213,6 +213,16 @@ async function loadDatabases(account: User) {
     );
   }
 
+  databaseFileBuffer = await (
+    await getFilesFromManifast(
+      databases.manifest,
+      directory,
+      `Documents/${accountIdMd5}/Brand/BrandMsg.db`,
+    )
+  )[0].file.arrayBuffer();
+
+  databases.BrandMsg = new SQL.Database(new Uint8Array(databaseFileBuffer));
+
   _global.user = account;
 
   return {

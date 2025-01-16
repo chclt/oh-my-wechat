@@ -3,10 +3,20 @@ import type {
   Chatroom,
   ControllerResult,
   DatabaseFriendRow,
+  OfficialAccount,
   User,
   WCDatabases,
 } from "@/lib/schema.ts";
 import protobuf from "protobufjs";
+
+import chatroom_session_box from "/images/chatroom_session_box.svg?url";
+import brandsessionholder from "/images/brandsessionholder.svg?url";
+import brandsessionholder_weapp from "/images/brandsessionholder_weapp.svg?url";
+import notification_messages from "/images/notification_messages.svg?url";
+import opencustomerservicemsg from "/images/opencustomerservicemsg.svg?url";
+
+import specialBrandId from "@/assets/specialBrandUserNames.csv?raw";
+export const specialBrandIds = specialBrandId.split("\n").map((i) => i.trim());
 
 const dbContactProtos = {
   dbContactRemark: {
@@ -223,25 +233,77 @@ export const ContactController = {
         );
       }
 
-      const specialUser = [
+      const specialChats = [
         {
           id: "brandsessionholder",
           username: "订阅号消息",
+          photo: {
+            thumb: brandsessionholder,
+          },
         },
         {
           id: "notification_messages",
           username: "服务消息",
+          photo: {
+            thumb: notification_messages,
+          },
         },
         {
           id: "brandsessionholder_weapp",
           username: "小程序客服消息",
+          photo: {
+            thumb: brandsessionholder_weapp,
+          },
         },
         {
           id: "opencustomerservicemsg",
           username: "小程序客服消息",
+          photo: {
+            thumb: opencustomerservicemsg,
+          },
         },
-        { id: "chatroom_session_box", username: "折叠的群聊" },
+        {
+          id: "chatroom_session_box",
+          username: "折叠的群聊",
+          photo: {
+            thumb: chatroom_session_box,
+          },
+        },
       ];
+
+      if (specialChats.find((i) => i.id === row.userName)) {
+        headImageObj.headImageThumb = specialChats.find(
+          (i) => i.id === row.userName,
+        )?.photo?.thumb;
+      }
+
+      if (
+        row.userName.startsWith("gh_") ||
+        specialBrandIds.includes(row.userName)
+      ) {
+        return {
+          id: row.userName,
+          username: remarkObj.nickname,
+          bio: profileObj.profileBio,
+          ...(headImageObj.headImageThumb
+            ? {
+                photo: {
+                  thumb: headImageObj.headImageThumb,
+                },
+              }
+            : {}),
+
+          _is_pinned: !!((row.type >> 11) & 1),
+          raw: {
+            ...row,
+            ...remarkObj,
+            ...headImageObj,
+            ...profileObj,
+            ...socialObj,
+            ...openIMObj,
+          },
+        } as OfficialAccount;
+      }
 
       if (row.userName.endsWith("@chatroom")) {
         let memberIds: string[] = [];

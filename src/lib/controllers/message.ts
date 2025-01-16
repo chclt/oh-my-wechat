@@ -127,7 +127,10 @@ export const MessageController = {
           return senderId;
         }
 
-        if (chat && chat.type === "private") {
+        if (
+          chat &&
+          (chat.type === "private" || chat.type === "official_account")
+        ) {
           return raw_message_row.Des === MessageDirection.incoming
             ? chat.id
             : (_global.user?.id ?? "?");
@@ -416,7 +419,12 @@ export const MessageController = {
       limit: number;
     },
   ): Promise<ControllerPaginatorResult<MessageVM[]>> => {
-    const dbs = databases.message;
+    const dbs =
+      chat.type === "official_account"
+        ? databases.BrandMsg
+          ? [databases.BrandMsg]
+          : undefined
+        : databases.message;
     if (!dbs) throw new Error("message databases are not found");
 
     const rows = [
@@ -581,7 +589,9 @@ export const MessageController = {
           console.log(
             chat.title,
             `Chat_${CryptoJS.MD5(chat.id).toString()}`,
-            `message_${index + 1}.sqlite`,
+            chat.type === "official_account"
+              ? "BrandMsg.db"
+              : `message_${index + 1}.sqlite`,
           );
       }
 

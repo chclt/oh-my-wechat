@@ -4,14 +4,14 @@ import type {
   ControllerResult,
   DatabaseSessionAbstractRow,
   GroupChat,
+  OfficialAccount,
+  OfficialAccountChat,
   PrivateChat,
   User,
   WCDatabases,
 } from "@/lib/schema.ts";
 import CryptoJS from "crypto-js";
-import { ContactController } from "./contact";
-
-import specialBrandId from "@/assets/specialBrandUserNames.csv?raw";
+import { ContactController, specialBrandIds } from "./contact";
 import _global from "@/lib/global.ts";
 
 export const ChatController = {
@@ -19,21 +19,19 @@ export const ChatController = {
     databases: WCDatabases,
     dbSessionAbstractRows: DatabaseSessionAbstractRow[],
   ): Promise<Chat[]> => {
-    const specialBrandIds = specialBrandId.split("\n").map((i) => i.trim());
-
     const dbSessionAbstractRowsFiltered = dbSessionAbstractRows.filter(
       (row) =>
         !(
-          row.UsrName.startsWith("gh_") ||
           row.UsrName.endsWith("@openim") || // TODO
-          specialBrandIds.includes(row.UsrName) ||
+          // row.UsrName.startsWith("gh_") ||
+          // specialBrandIds.includes(row.UsrName) ||
           [
-            "chatroom_session_box",
-            "newsapp",
+            // "chatroom_session_box",
+            // "newsapp",
             "brandsessionholder",
-            "notification_messages",
+            // "notification_messages",
             "brandsessionholder_weapp",
-            "opencustomerservicemsg",
+            // "opencustomerservicemsg",
           ].includes(row.UsrName)
         ),
     );
@@ -52,52 +50,75 @@ export const ChatController = {
 
     for (const row of dbSessionAbstractRowsFiltered) {
       const contactInfo = contacts[row.UsrName];
-      const chat = row.UsrName.endsWith("@chatroom")
-        ? ({
-            type: "chatroom",
+      const chat =
+        row.UsrName.startsWith("gh_") || specialBrandIds.includes(row.UsrName)
+          ? ({
+              type: "official_account",
+              id: row.UsrName,
+              title: contactInfo
+                ? (contactInfo.remark ??
+                  (contactInfo as OfficialAccount).username)
+                : row.UsrName,
 
-            id: row.UsrName,
-            title: contactInfo
-              ? (contactInfo.remark ?? (contactInfo as Chatroom).title)
-              : "-",
-            is_muted: !!row.ConIntRes1,
-            // @ts-ignore
-            is_pinned: (contactInfo as Chatroom)._is_pinned,
-            // @ts-ignore
-            is_collapsed: (contactInfo as Chatroom)._is_collapsed,
-            ...(contactInfo?.photo ? { photo: contactInfo.photo.thumb } : {}),
-            members: (contactInfo as Chatroom).members,
+              ...(contactInfo?.photo ? { photo: contactInfo.photo.thumb } : {}),
+              official_account: contactInfo as OfficialAccount,
 
-            chatroom: contactInfo as Chatroom,
-            raw: {
-              id_md5: CryptoJS.MD5(row.UsrName).toString(),
+              is_muted: !!row.ConIntRes1,
+              // @ts-ignore
+              is_pinned: (contactInfo as OfficialAccount)._is_pinned,
+            } as OfficialAccountChat)
+          : row.UsrName.endsWith("@chatroom")
+            ? ({
+                type: "chatroom",
 
-              row,
-              contactInfo,
-            },
-          } as GroupChat)
-        : ({
-            type: "private",
+                id: row.UsrName,
+                title: contactInfo
+                  ? (contactInfo.remark ?? (contactInfo as Chatroom).title)
+                  : "-",
+                is_muted: !!row.ConIntRes1,
+                // @ts-ignore
+                is_pinned: (contactInfo as Chatroom)._is_pinned,
+                // @ts-ignore
+                is_collapsed: (contactInfo as Chatroom)._is_collapsed,
+                ...(contactInfo?.photo
+                  ? { photo: contactInfo.photo.thumb }
+                  : {}),
+                members: (contactInfo as Chatroom).members,
 
-            id: row.UsrName,
-            title: contactInfo
-              ? (contactInfo.remark ?? (contactInfo as User).username)
-              : row.UsrName,
-            ...(contactInfo?.photo ? { photo: contactInfo.photo.thumb } : {}),
-            is_muted: !!row.ConIntRes1,
-            // @ts-ignore
-            is_pinned: contactInfo ? (contactInfo as User)._is_pinned : false, // todo
-            is_collapsed: false,
-            members: [_global.user, contactInfo], // TODO 添加自己
+                chatroom: contactInfo as Chatroom,
+                raw: {
+                  id_md5: CryptoJS.MD5(row.UsrName).toString(),
 
-            user: contactInfo,
+                  row,
+                  contactInfo,
+                },
+              } as GroupChat)
+            : ({
+                type: "private",
 
-            raw: {
-              id_md5: CryptoJS.MD5(row.UsrName).toString(),
-              row,
-              contactInfo,
-            },
-          } as PrivateChat);
+                id: row.UsrName,
+                title: contactInfo
+                  ? (contactInfo.remark ?? (contactInfo as User).username)
+                  : row.UsrName,
+                ...(contactInfo?.photo
+                  ? { photo: contactInfo.photo.thumb }
+                  : {}),
+                is_muted: !!row.ConIntRes1,
+                // @ts-ignore
+                is_pinned: contactInfo
+                  ? (contactInfo as User)._is_pinned
+                  : false, // todo
+                is_collapsed: false,
+                members: [_global.user, contactInfo], // TODO 添加自己
+
+                user: contactInfo,
+
+                raw: {
+                  id_md5: CryptoJS.MD5(row.UsrName).toString(),
+                  row,
+                  contactInfo,
+                },
+              } as PrivateChat);
 
       result.push(chat);
     }

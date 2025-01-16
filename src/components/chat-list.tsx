@@ -87,7 +87,10 @@ const ChatItem = forwardRef<HTMLLIElement, ChatItemProps>(
         {chat.photo ? (
           <div
             className={cn(
-              "shrink-0 w-12 h-12 clothoid-corner-2",
+              "shrink-0 w-12 h-12",
+              chat.type === "official_account"
+                ? "rounded-full overflow-hidden"
+                : "clothoid-corner-2",
               chat.type === "chatroom"
                 ? "relative after:content-[''] after:absolute after:inset-0 after:rounded-lg after:border-2 after:border-[#DDDFE0]"
                 : "",
@@ -108,13 +111,14 @@ const ChatItem = forwardRef<HTMLLIElement, ChatItemProps>(
           <div className="flex gap-2">
             <h4 className={"grow font-medium break-all line-clamp-1"}>
               {chat.title}
-              {(chat.type === "private"
-                ? chat.user.is_openim
-                : chat.chatroom.is_openim) && (
-                <span className="ms-1 text-sm font-normal text-orange-400">
-                  @企业微信
-                </span>
-              )}
+              {chat.type !== "official_account" &&
+                (chat.type === "private"
+                  ? chat.user.is_openim
+                  : chat.chatroom.is_openim) && (
+                  <span className="ms-1 text-sm font-normal text-orange-400">
+                    @企业微信
+                  </span>
+                )}
             </h4>
             {last_message && (
               <small className={"ms-2 text-xs text-neutral-400"}>
