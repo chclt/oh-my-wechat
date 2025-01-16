@@ -2,6 +2,9 @@
  * 合并转发的消息内容、笔记中的内容，都是一个 Record 资源
  */
 
+import LiveRecord, {
+  type LiveRecordEntity,
+} from "@/components/record/live-record.tsx";
 import _global from "@/lib/global";
 import { type MessageVM, RecordType } from "@/lib/schema";
 import { decodeUnicodeReferences } from "@/lib/utils";
@@ -156,6 +159,15 @@ function RecordComponent({
         <ChannelVideoRecord
           message={message}
           record={record as unknown as ChannelVideoRecordEntity}
+          variant={variant}
+          {...props}
+        />
+      );
+    case RecordType.LIVE:
+      return (
+        <LiveRecord
+          message={message}
+          record={record as unknown as LiveRecordEntity}
           variant={variant}
           {...props}
         />

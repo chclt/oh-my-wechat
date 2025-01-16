@@ -215,6 +215,7 @@ export enum AppMessageType {
   REFER = 57, // 回复消息
   PAT = 62, // 拍一拍
   LIVE = 63,
+  LINK_2 = 68, // 另一个链接，微信里面和 5 的区别应该是这是一个用Webview呈现的链接
   ATTACH_2 = 74, // 文件，不知道区别
   MUSIC = 76, // 音乐链接
   STORE_PRODUCT = 82, // 微信小店商品
@@ -242,6 +243,7 @@ export enum RecordType {
   MINIAPP = 19,
   NOTE = 21,
   CHANNEL_VIDEO = 22,
+  LIVE = 23,
   CHANNEL = 26,
   MUSIC = 29,
   TING = 32,

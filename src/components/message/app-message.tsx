@@ -22,6 +22,9 @@ import ForwardMessage, {
 import GameMessage, {
   type GameMessageEntity,
 } from "@/components/message/app-message/game-message.tsx";
+import LinkMessage2, {
+  type LinkMessage2Entity,
+} from "@/components/message/app-message/link-message-2.tsx";
 import LiveMessage, {
   type LiveMessageEntity,
 } from "@/components/message/app-message/live-message.tsx";
@@ -272,6 +275,14 @@ export default function AppMessage({
       return (
         <LiveMessage
           message={message as unknown as AppMessageVM<LiveMessageEntity>}
+          {...props}
+        />
+      );
+
+    case AppMessageType.LINK_2:
+      return (
+        <LinkMessage2
+          message={message as unknown as AppMessageVM<LinkMessage2Entity>}
           {...props}
         />
       );

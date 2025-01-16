@@ -1,54 +1,71 @@
 import Image from "@/components/image.tsx";
-import type { AppMessageProps } from "@/components/message/app-message.tsx";
-import MessageInlineWrapper from "@/components/message/message-inline.tsx";
-import type { AppMessageType } from "@/lib/schema.ts";
+import type { MessageVM, RecordType } from "@/lib/schema.ts";
+import type { RecordVM } from "./record";
 
-export interface LiveMessageEntity {
-  type: AppMessageType.LIVE;
-  title: string;
+interface LiveRecordProps extends React.HTMLAttributes<HTMLDivElement> {
+  message: MessageVM;
+  record: LiveRecordEntity;
+  variant: "default" | string;
+}
+
+export interface LiveRecordEntity extends RecordVM {
+  "@_datatype": RecordType.LIVE;
+  datatitle: string;
+  datadesc: string;
   finderLive: {
-    finderLiveID: string;
+    liveFlagValue: string;
+    headUrl: string;
+    authIconUrl: string;
+    chargeFlag: string;
+    cellWidth: string;
+    bizUsername: string;
+    cellHeight: string;
+    nickname: string;
     finderUsername: string;
     finderObjectID: string;
     finderNonceID: string;
-    nickname: string;
-    headUrl: string;
-    liveNickname: string;
-    liveUsername: string;
-    liveFlag: number;
+    extFlag: string;
+    liveSourceTypeStr: string;
+    authIconTypeStr: string;
+    authIconType: string;
+    finderLiveStatus: string;
+    bizNickname: string;
     media: {
       coverUrl: string;
-      height: number;
-      width: number;
+      width: string;
+      height: string;
     };
-    chatroomId: string;
+    bindType: string;
+    liveStatus: string;
+    desc: string;
+    liveFlag: string;
+    replayStatus: string;
+    spamLiveExtFlagString: string;
+    finderLiveID: string;
   };
 }
 
-type LiveMessageProps = AppMessageProps<LiveMessageEntity>;
-
-export default function LiveMessage({
+export default function LiveRecord({
   message,
+  record,
   variant = "default",
+  className,
   ...props
-}: LiveMessageProps) {
+}: LiveRecordProps) {
   if (variant === "default")
     return (
       <div
         className="relative w-48 min-h-16 rounded-lg overflow-hidden bg-neutral-400"
         {...props}
       >
-        <Image
-          src={message.message_entity.msg.appmsg.finderLive.media.coverUrl}
-          alt=""
-        />
+        <Image src={record.finderLive.media.coverUrl} alt="" />
         <div className="absolute right-0 left-0 bottom-0 p-2 flex items-center text-sm text-white">
           <Image
-            src={message.message_entity.msg.appmsg.finderLive.headUrl}
+            src={record.finderLive.headUrl}
             className="mr-1 shrink-0 size-4 rounded-full bg-neutral-500"
           />
-          <h4>{message.message_entity.msg.appmsg.finderLive.nickname}</h4>
-          {/*<p>{message.message_entity.msg.appmsg.finderFeed.desc}</p>*/}
+          <h4>{record.finderLive.nickname}</h4>
+          {/*<p>{record.finderFeed.desc}</p>*/}
         </div>
 
         <div className="absolute right-2 bottom-2 size-4 p-0.5 [&_svg]:size-full rounded-full backdrop-blur">
@@ -70,10 +87,5 @@ export default function LiveMessage({
         </div>
       </div>
     );
-
-  return (
-    <MessageInlineWrapper message={message} {...props}>
-      [直播] {message.message_entity.msg.appmsg.finderLive.liveNickname})
-    </MessageInlineWrapper>
-  );
+  return <p>[直播] {record.datatitle}</p>;
 }
