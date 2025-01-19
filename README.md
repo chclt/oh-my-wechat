@@ -1,13 +1,33 @@
-# OhMyWeChat
+# OhMyWeChat：微信备份 & 数据报告
 
 这是一个为微信设计的备份阅读器，总体上还原了微信，但经过了无数的重新设计，看起来焕然一新~  
 以及，刚刚糊完（不是）做完的微信年度数据报告
 
 [关注我的 Telegram 频道](https://t.me/chclt_hi) | [关注我的 Twitter](https://twitter.com/realChclt)
 
-![Oh My WeChat Components](https://github.com/user-attachments/assets/e46e4db9-5cd3-4a5a-952e-320044b8630e)
+## 特性
+- （几乎）完整的消息类型支持
 
-![WeChat Wrapped 2024](https://github.com/user-attachments/assets/76b31eca-c671-43a9-8aa4-cb77e396e41c)
+    - [x] 文本、微信表情、图片、视频、语音、回复消息
+    - [ ] 表情包（可用但仍有问题）
+    - [x] 合并转发
+    - [ ] 收藏笔记（未完成）
+    - [x] 位置、实时位置共享
+    - [x] 红包、转账、AA 收款（可用但仍有问题）
+    - [x] 分享链接、分享音乐等
+    - [x] 通话记录
+    - [x] 微信名片、公众号名片、视频号名片、微信小店名片等
+    - [x] 群接龙、群公告
+    - [x] 拍一拍、系统消息
+    - [x] 等等近 50 种消息类型……
+  
+- 熟悉但焕然一新的 UI 界面
+
+  ![Oh My WeChat Components](https://github.com/user-attachments/assets/e46e4db9-5cd3-4a5a-952e-320044b8630e)
+
+- 2024 微信年度数据报告
+
+  ![WeChat Wrapped 2024](https://github.com/user-attachments/assets/76b31eca-c671-43a9-8aa4-cb77e396e41c)
 
 
 ## 注意
