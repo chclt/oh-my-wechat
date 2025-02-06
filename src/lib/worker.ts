@@ -149,6 +149,7 @@ async function loadDirectory(
 
   for (const row of mmsettingFiles) {
     if (/mmsetting\.archive\.[^.]+$/.test(row.filename)) {
+      console.log("调试数据", new Uint8Array(await row.file.arrayBuffer()));
       accounts.push(
         parseUserFromMmsetting(new Uint8Array(await row.file.arrayBuffer())),
       );
