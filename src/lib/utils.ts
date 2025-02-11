@@ -102,10 +102,21 @@ export async function getFileFromDirectory(
 }
 
 export function parseUserFromMmsetting(buffer: Uint8Array): User {
+  const dataKeys: string[] = [
+    "headimgurl",
+    "headhdimgurl",
+    "63",
+    "86",
+    "87",
+    "88",
+    "89",
+    "91",
+  ];
+
   let position = 8; // Skip the first 8 bytes
   const result: Partial<User> = {};
 
-  while (position < buffer.length) {
+  while (position < buffer.length && dataKeys.length > 0) {
     let keyLength = 0;
     let shift = 0;
     let byte = buffer[position++];
@@ -143,6 +154,7 @@ export function parseUserFromMmsetting(buffer: Uint8Array): User {
         result.photo.thumb = new TextDecoder("utf-8").decode(
           valueBuffer.slice(2),
         );
+      dataKeys.splice(dataKeys.indexOf("headimgurl"), 1);
     } else if (key === "headhdimgurl") {
       if (!result.photo)
         result.photo = {
@@ -153,18 +165,25 @@ export function parseUserFromMmsetting(buffer: Uint8Array): User {
         result.photo.origin = new TextDecoder("utf-8").decode(
           valueBuffer.slice(2),
         );
+      dataKeys.splice(dataKeys.indexOf("headhdimgurl"), 1);
     } else if (key === "63") {
       result.background = new TextDecoder("utf-8").decode(valueBuffer.slice(1));
+      dataKeys.splice(dataKeys.indexOf("63"), 1);
     } else if (key === "86") {
       result.id = new TextDecoder("utf-8").decode(valueBuffer.slice(1));
+      dataKeys.splice(dataKeys.indexOf("86"), 1);
     } else if (key === "87") {
       result.user_id = new TextDecoder("utf-8").decode(valueBuffer.slice(1));
+      dataKeys.splice(dataKeys.indexOf("87"), 1);
     } else if (key === "88") {
       result.username = new TextDecoder("utf-8").decode(valueBuffer.slice(1));
+      dataKeys.splice(dataKeys.indexOf("88"), 1);
     } else if (key === "89") {
       result.bio = new TextDecoder("utf-8").decode(valueBuffer.slice(1));
+      dataKeys.splice(dataKeys.indexOf("89"), 1);
     } else if (key === "91") {
       result.phone = new TextDecoder("utf-8").decode(valueBuffer.slice(1));
+      dataKeys.splice(dataKeys.indexOf("91"), 1);
     }
   }
 
