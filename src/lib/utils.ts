@@ -102,21 +102,21 @@ export async function getFileFromDirectory(
 }
 
 export function parseUserFromMmsetting(buffer: Uint8Array): User {
-  const dataKeys: string[] = [
-    "headimgurl",
-    "headhdimgurl",
-    "63",
-    "86",
-    "87",
-    "88",
-    "89",
-    "91",
-  ];
+  const dataKeys: Record<string, keyof User> = {
+    headimgurl: "photo",
+    headhdimgurl: "photo",
+    "63": "background",
+    "86": "id",
+    "87": "user_id",
+    "88": "username",
+    "89": "bio",
+    "91": "phone",
+  };
 
   let position = 8; // Skip the first 8 bytes
   const result: Partial<User> = {};
 
-  while (position < buffer.length && dataKeys.length > 0) {
+  while (position < buffer.length && Object.keys(dataKeys).length > 0) {
     let keyLength = 0;
     let shift = 0;
     let byte = buffer[position++];
@@ -141,49 +141,33 @@ export function parseUserFromMmsetting(buffer: Uint8Array): User {
       byte = buffer[position++];
     }
     valueLength |= (byte & 0x7f) << shift;
-    const valueBuffer = buffer.slice(position, position + valueLength);
+    const value = buffer.slice(position, position + valueLength);
 
     position += valueLength;
 
-    if (key === "headimgurl") {
-      if (!result.photo)
-        result.photo = {
-          thumb: new TextDecoder("utf-8").decode(valueBuffer.slice(2)),
-        };
-      else
-        result.photo.thumb = new TextDecoder("utf-8").decode(
-          valueBuffer.slice(2),
-        );
-      dataKeys.splice(dataKeys.indexOf("headimgurl"), 1);
-    } else if (key === "headhdimgurl") {
-      if (!result.photo)
-        result.photo = {
-          thumb: new TextDecoder("utf-8").decode(valueBuffer.slice(2)),
-          origin: new TextDecoder("utf-8").decode(valueBuffer.slice(2)),
-        };
-      else
-        result.photo.origin = new TextDecoder("utf-8").decode(
-          valueBuffer.slice(2),
-        );
-      dataKeys.splice(dataKeys.indexOf("headhdimgurl"), 1);
-    } else if (key === "63") {
-      result.background = new TextDecoder("utf-8").decode(valueBuffer.slice(1));
-      dataKeys.splice(dataKeys.indexOf("63"), 1);
-    } else if (key === "86") {
-      result.id = new TextDecoder("utf-8").decode(valueBuffer.slice(1));
-      dataKeys.splice(dataKeys.indexOf("86"), 1);
-    } else if (key === "87") {
-      result.user_id = new TextDecoder("utf-8").decode(valueBuffer.slice(1));
-      dataKeys.splice(dataKeys.indexOf("87"), 1);
-    } else if (key === "88") {
-      result.username = new TextDecoder("utf-8").decode(valueBuffer.slice(1));
-      dataKeys.splice(dataKeys.indexOf("88"), 1);
-    } else if (key === "89") {
-      result.bio = new TextDecoder("utf-8").decode(valueBuffer.slice(1));
-      dataKeys.splice(dataKeys.indexOf("89"), 1);
-    } else if (key === "91") {
-      result.phone = new TextDecoder("utf-8").decode(valueBuffer.slice(1));
-      dataKeys.splice(dataKeys.indexOf("91"), 1);
+    if (dataKeys[key]) {
+      if (key === "headimgurl") {
+        if (!result.photo)
+          result.photo = {
+            thumb: new TextDecoder("utf-8").decode(value.slice(2)),
+          };
+        else
+          result.photo.thumb = new TextDecoder("utf-8").decode(value.slice(2));
+        delete dataKeys["headimgurl"];
+      } else if (key === "headhdimgurl") {
+        if (!result.photo)
+          result.photo = {
+            thumb: new TextDecoder("utf-8").decode(value.slice(2)),
+            origin: new TextDecoder("utf-8").decode(value.slice(2)),
+          };
+        else
+          result.photo.origin = new TextDecoder("utf-8").decode(value.slice(2));
+        delete dataKeys["headhdimgurl"];
+      } else {
+        // @ts-ignore
+        result[dataKeys[key]] = new TextDecoder("utf-8").decode(value.slice(1));
+        delete dataKeys[key];
+      }
     }
   }
 
