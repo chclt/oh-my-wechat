@@ -127,6 +127,7 @@ async function loadDirectory(
 
   databases.manifest = manifestDatabase;
 
+  console.log(1);
   const localInfoBuffer = (
     await getFilesFromManifast(
       manifestDatabase,
@@ -139,6 +140,7 @@ async function loadDirectory(
     new Uint8Array(await localInfoBuffer.arrayBuffer()),
   ).id;
 
+  console.log(2);
   const mmsettingFiles = await getFilesFromManifast(
     manifestDatabase,
     directory,
@@ -180,6 +182,7 @@ async function loadDatabases(account: User) {
 
   let databaseFileBuffer: ArrayBuffer;
 
+  console.log(3);
   databaseFileBuffer = await (
     await getFilesFromManifast(
       databases.manifest,
@@ -189,6 +192,7 @@ async function loadDatabases(account: User) {
   )[0].file.arrayBuffer();
   databases.session = new SQL.Database(new Uint8Array(databaseFileBuffer));
 
+  console.log(4);
   databaseFileBuffer = await (
     await getFilesFromManifast(
       databases.manifest,
@@ -199,6 +203,7 @@ async function loadDatabases(account: User) {
 
   databases.WCDB_Contact = new SQL.Database(new Uint8Array(databaseFileBuffer));
 
+  console.log(5);
   for (const fileItem of await await getFilesFromManifast(
     databases.manifest,
     directory,
