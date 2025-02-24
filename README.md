@@ -4,8 +4,6 @@
 
 以及，年度数据报告。
 
-OhMyWeChat 仍处于测试阶段，欢迎关注，也感谢宽容~
-
 [关注我的 Telegram 频道](https://t.me/chclt_hi) | [关注我的 Twitter](https://twitter.com/realChclt)
 
 [注意事项](#注意) | [使用说明](#使用说明)
@@ -13,7 +11,8 @@ OhMyWeChat 仍处于测试阶段，欢迎关注，也感谢宽容~
 ## 已知问题
 
 - [ ] 微信在新版本（大约从 8.0.55 开始）对数据进行了压缩，导致新版本的微信用户会看到很多消息解析失败，正在解决这个问题...
-- [ ] 部分用户会在打开文件夹后没有反应，同时控制台会报出一个 RangeError 错误，正在解决这个问题...
+- [x] ~~部分用户会在打开文件夹后没有反应，同时控制台会报出一个 RangeError 错误。~~（应该是解决了，请试试）
+- [ ] OhMyWeChat 仍处于测试阶段，欢迎关注，也感谢宽容，欢迎随时[通过 Telegram 联系我](https://t.me/realchclt)，帮助我调试、改进，我们一起把这个项目变得更好~
 
 ## 特性
 
@@ -33,6 +32,8 @@ OhMyWeChat 仍处于测试阶段，欢迎关注，也感谢宽容~
     - [x] 等等近 50 种消息类型……
   
 - 熟悉但焕然一新的 UI 界面
+
+  ![Oh My WeChat Preview](https://github.com/user-attachments/assets/6b3dac37-44eb-4013-8c2d-4311a73daa52)
 
   ![Oh My WeChat Components](https://github.com/user-attachments/assets/e46e4db9-5cd3-4a5a-952e-320044b8630e)
 
