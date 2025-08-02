@@ -1,4 +1,4 @@
-import _global from "@/lib/global.ts";
+import { _store } from "../worker";
 import type {
   Chatroom,
   ControllerResult,
@@ -341,8 +341,8 @@ export namespace ContactController {
     ).data as User[];
 
     // 加入当前登录的微信账号数据
-    if (_global.user && allMemberIds.indexOf(_global.user.id) > -1) {
-      allMembers.push(_global.user);
+    if (_store.account && allMemberIds.indexOf(_store.account.id) > -1) {
+      allMembers.push(_store.account);
     }
 
     const allMembersTable: { [key: string]: User } = {};
@@ -451,7 +451,9 @@ export namespace ContactController {
 
     return {
       data: [
-        // ...(ids.indexOf(_global.user!.id) > -1 ? [_global.user as User] : []),
+        ...(ids.indexOf(_store.account.id) > -1
+          ? [_store.account as User]
+          : []),
         ...(await parseDatabaseContactRows(
           databases,
           dbFriendRows.filter((row) => {

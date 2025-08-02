@@ -45,30 +45,65 @@ export default class IosBackupAdapter implements DataAdapterClassType {
   }
 
   async getAccountList() {
-    return await this._workerAdapter.getAccountList();
+    const data = await this._workerAdapter.getAccountList();
+
+    console.groupCollapsed("getAccountList");
+    console.log(data);
+    console.groupEnd();
+    return data;
   }
 
   async getChatList(input?: { userIds?: string[] }) {
-    return await this._workerAdapter.getChatList(input);
+    const data = await this._workerAdapter.getChatList(input);
+
+    console.groupCollapsed("getChatList");
+    console.log(data);
+    console.groupEnd();
+    return data;
   }
 
   async getMessageList(input: MessageController.AllInput[0]) {
-    return await this._workerAdapter.getMessageList(input);
+    const data = await this._workerAdapter.getMessageList(input);
+
+    console.groupCollapsed("getMessageList");
+    console.log(data);
+    console.groupEnd();
+    return data;
   }
 
   async getImage(input: ImageController.GetInput[0]) {
-    return await this._workerAdapter.getImage(input);
+    const data = await this._workerAdapter.getImage(input);
+
+    console.groupCollapsed("getImage");
+    console.log(data);
+    console.groupEnd();
+    return data;
   }
 
   async getVideo(input: VideoController.GetInput[0]) {
-    return await this._workerAdapter.getVideo(input);
+    const data = await this._workerAdapter.getVideo(input);
+
+    console.groupCollapsed("getVideo");
+    console.log(data);
+    console.groupEnd();
+    return data;
   }
 
   async getVoice(input: VoiceController.GetInput[0]) {
-    return await this._workerAdapter.getVoice(input);
+    const data = await this._workerAdapter.getVoice(input);
+
+    console.groupCollapsed("getVoice");
+    console.log(data);
+    console.groupEnd();
+    return data;
   }
 
   async getAttache(input: AttachController.GetInput[0]) {
-    return await this._workerAdapter.getAttache(input);
+    const data = await this._workerAdapter.getAttache(input);
+
+    console.groupCollapsed("getAttache");
+    console.log(data);
+    console.groupEnd();
+    return data;
   }
 }
