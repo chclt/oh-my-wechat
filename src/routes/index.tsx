@@ -27,7 +27,7 @@ import { useEffect, useState } from "react";
 import * as React from "react";
 import logo from "/images/logo.svg?url";
 import dataClient from "@/lib/adapter";
-import IosBackupAdapter from "@/lib/adapters/ios-backup";
+import IosBackupAdapter from "@/adapters/ios-backup";
 import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { AccountListSuspenseQueryOptions } from "@/lib/fetchers/account";
 import queryClient from "@/lib/query-client";

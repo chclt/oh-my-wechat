@@ -16,8 +16,6 @@ import {
 import { Label } from "@/components/ui/label.tsx";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group.tsx";
 import { useApp } from "@/lib/hooks/appProvider.tsx";
-import { useDatabase } from "@/lib/hooks/databaseProvider.tsx";
-import type { User } from "@/lib/schema.ts";
 import { cn } from "@/lib/utils.ts";
 import type { DialogProps } from "@radix-ui/react-dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
@@ -26,7 +24,7 @@ import { useEffect, useState } from "react";
 import * as React from "react";
 import logo from "/images/logo.svg?url";
 import dataClient from "@/lib/adapter";
-import IosBackupAdapter from "@/lib/adapters/ios-backup";
+import IosBackupAdapter from "@/adapters/ios-backup";
 import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { AccountListSuspenseQueryOptions } from "@/lib/fetchers/account";
 import queryClient from "@/lib/query-client";
