@@ -1,13 +1,7 @@
 import type { AppMessageProps } from "@/components/message/app-message.tsx";
 import { FormatTextMessageContent } from "@/components/message/text-message.tsx";
 import User from "@/components/user.tsx";
-import { useApp } from "@/lib/hooks/appProvider.tsx";
-import useQuery from "@/lib/hooks/useQuery";
-import type {
-  AppMessageType,
-  ControllerResult,
-  User as UserVM,
-} from "@/lib/schema.ts";
+import type { AppMessageType, User as UserVM } from "@/lib/schema.ts";
 import { useEffect, useRef, useState } from "react";
 
 export interface PatMessageEntity {
@@ -40,9 +34,15 @@ export default function PatMessage({
   const chat = message.chat;
   // 在用户退群的情况下，chat信息中可能缺少用户信息，需额外查询
   const queryFlag = useRef(false);
-  const [query, isQuerying, result, error] = useQuery<
-    ControllerResult<UserVM[]>
-  >({ data: [] });
+
+  // const [query, isQuerying, result, error] = useQuery<
+  //   ControllerResult<UserVM[]>
+  // >({ data: [] });
+
+  const result = {
+    data: [],
+  };
+
   const missingUserIds = useRef<string[]>([]);
   const [missingUser, setMissingUser] = useState<UserVM[]>([]);
 
@@ -99,7 +99,8 @@ export default function PatMessage({
   if (!queryFlag.current) {
     queryFlag.current = true;
 
-    query("/contacts/in", { ids: missingUserIds.current });
+    //TODO
+    // query("/contacts/in", { ids: missingUserIds.current });
   }
 
   useEffect(() => {

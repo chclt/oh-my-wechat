@@ -1,6 +1,10 @@
-import { MessageBubbleGroup } from "@/components/message-bubble-group.tsx";
-import Message from "@/components/message/message.tsx";
-import { Calendar } from "@/components/ui/calendar.tsx";
+import MessageList from "@/components/message-list";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { cn } from "@/lib/utils";
+import { createFileRoute } from "@tanstack/react-router";
+import { useInfiniteQuery, useSuspenseQuery } from "@tanstack/react-query";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { MessageListInfiniteQueryOptions } from "@/lib/fetchers/message";
 import {
   Dialog,
   DialogContent,
@@ -8,35 +12,21 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ScrollArea } from "@/components/ui/scroll-area.tsx";
-import { MessageListInfiniteQueryOptions } from "@/lib/fetchers/message";
-import {
-  AppMessageType,
-  type Chat,
-  type ControllerPaginatorResult,
-  MessageType,
-  type MessageVM,
-} from "@/lib/schema.ts";
-import { cn } from "@/lib/utils";
-//  import { Route } from "@/routes/$accountId/chat/$chatId";
-import type * as ScrollAreaPrimitive from "@radix-ui/react-scroll-area";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
-import { useInfiniteQuery, useSuspenseQuery } from "@tanstack/react-query";
-import { differenceInMinutes, format, isSameDay } from "date-fns";
-import React, { useCallback, useEffect, useRef } from "react";
-import { useState } from "react";
+import { Calendar } from "@/components/ui/calendar";
+import { ChatSuspenseQueryOptions } from "@/lib/fetchers/chat";
 
-interface MessageListProps extends React.HTMLAttributes<HTMLTableElement> {
-  chat: Chat;
-  isChatroom: boolean;
-}
+export const Route = createFileRoute("/$accountId/chat/$chatId")({
+  component: RouteComponent,
+});
 
-export default function MessageList({
-  chat,
-  isChatroom,
-  className,
-  ...props
-}: MessageListProps) {
+function RouteComponent() {
+  const { accountId, chatId } = Route.useParams();
+
+  const { data: chat } = useSuspenseQuery(
+    ChatSuspenseQueryOptions(accountId, chatId),
+  );
+
   // const [messageList, setMessageList] = useState<{
   //   [key: number]: MessageVM[];
   // }>({});
@@ -159,7 +149,7 @@ export default function MessageList({
         className={cn(
           "relative overflow-auto contain-strict bg-neutral-100",
           "[&_[data-orientation]]:z-50",
-          className,
+          "w-full h-full [&>div>div]:!block",
         )}
       >
         <div className="z-20 sticky top-0 mb-4 w-full h-[4.5rem] px-6 flex items-center bg-white/80 backdrop-blur">
@@ -189,7 +179,6 @@ export default function MessageList({
             .flatMap((pageData) => pageData.data)
             .reduce(
               (messagesGroupByTimeAndUser, message, index, messageArray) => {
-                debugger;
                 const prevMessage = messageArray[index - 1];
 
                 let anchor: Array<unknown> = messagesGroupByTimeAndUser; // 把消息插入到哪个位置

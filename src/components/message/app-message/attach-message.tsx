@@ -2,11 +2,12 @@ import { FileBendSolid } from "@/components/central-icon.tsx";
 import FileTypeIcon from "@/components/filetype-icon.tsx";
 import type { AppMessageProps } from "@/components/message/app-message.tsx";
 import MessageInlineWrapper from "@/components/message/message-inline.tsx";
+import { AttacheSuspenseQueryOptions } from "@/lib/fetchers";
 import _global from "@/lib/global.ts";
 import { useApp } from "@/lib/hooks/appProvider.tsx";
-import useQuery from "@/lib/hooks/useQuery.ts";
 import type { AppMessageType, FileInfo } from "@/lib/schema.ts";
 import { cn, decodeUnicodeReferences } from "@/lib/utils.ts";
+import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 
 export interface AttachMessageEntity {
@@ -40,26 +41,29 @@ export default function AttachMessage({
   ...props
 }: AttachMessageProps) {
   const chat = message.chat;
-  const [query, isQuerying, result, error] = useQuery<FileInfo[] | undefined>(
-    undefined,
-  );
+
+  const { data } = useQuery({
+    ...AttacheSuspenseQueryOptions({
+      chat,
+      message,
+    }),
+  });
 
   useEffect(() => {
-    if (result && result.length) {
+    if (data && data.length) {
       const downlaodLink = document.createElement("a");
-      downlaodLink.href = result[0].src;
+      downlaodLink.href = data[0].src;
       downlaodLink.download = decodeUnicodeReferences(
         message.message_entity.msg.appmsg.title,
       );
       downlaodLink.click();
     }
-  }, [result]);
+  }, [data]);
 
   useEffect(() => {
     return () => {
-      if (result?.length)
-        result.map((file) => {
-          if (_global.enableDebug) console.log("revoke attach", file.src);
+      if (data?.length)
+        data.map((file) => {
           URL.revokeObjectURL(file.src);
         });
     };
@@ -74,7 +78,9 @@ export default function AttachMessage({
         )}
         {...props}
         onClick={() => {
-          query("/attaches", { chat, message });
+          console.log(data);
+          // TODO
+          // query("/attaches", { chat, message });
         }}
       >
         <div>

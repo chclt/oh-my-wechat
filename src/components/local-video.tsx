@@ -1,6 +1,6 @@
 import _global from "@/lib/global.ts";
 import { useApp } from "@/lib/hooks/appProvider.tsx";
-import useQuery from "@/lib/hooks/useQuery.ts";
+import { useQuery } from "@tanstack/react-query";
 import type {
   Chat,
   MicroVideoMessage,
@@ -9,6 +9,8 @@ import type {
 } from "@/lib/schema.ts";
 import type React from "react";
 import { forwardRef, useEffect, useRef } from "react";
+import { VideoSuspenseQueryOptions } from "@/lib/fetchers";
+import { useInViewport } from "@mantine/hooks";
 
 interface LocalVideoProps extends React.VideoHTMLAttributes<HTMLVideoElement> {
   chat: Chat;
@@ -17,36 +19,26 @@ interface LocalVideoProps extends React.VideoHTMLAttributes<HTMLVideoElement> {
 
 const LocalVideo = forwardRef<HTMLVideoElement, LocalVideoProps>(
   ({ chat, message, ...props }, ref) => {
-    const { registerIntersectionObserver } = useApp();
+    const { ref: videoRef, inViewport } = useInViewport();
 
-    const internalRef = useRef<HTMLVideoElement>(null);
-    const videoRef = (ref as React.RefObject<HTMLVideoElement>) || internalRef;
-
-    const [query, isQuerying, result, error] = useQuery<VideoInfo | undefined>(
-      undefined,
-    );
-
-    useEffect(() => {
-      if (videoRef.current) {
-        registerIntersectionObserver(videoRef.current, () => {
-          query("/videos", {
-            chat,
-            message,
-          });
-        });
-      }
-    }, [videoRef]);
+    const { data } = useQuery({
+      ...VideoSuspenseQueryOptions({
+        chat,
+        message,
+      }),
+      enabled: inViewport,
+    });
 
     useEffect(() => {
       return () => {
-        if (result?.poster) {
+        if (data?.poster) {
           if (_global.enableDebug)
-            console.log("revoke video poster", result.poster);
-          URL.revokeObjectURL(result.poster);
+            console.log("revoke video poster", data.poster);
+          URL.revokeObjectURL(data.poster);
         }
-        if (result?.src) {
-          if (_global.enableDebug) console.log("revoke video", result.src);
-          URL.revokeObjectURL(result.src);
+        if (data?.src) {
+          if (_global.enableDebug) console.log("revoke video", data.src);
+          URL.revokeObjectURL(data.src);
         }
       };
     });
@@ -54,8 +46,8 @@ const LocalVideo = forwardRef<HTMLVideoElement, LocalVideoProps>(
     return (
       <video
         ref={videoRef}
-        src={result?.src}
-        poster={result?.poster}
+        src={data?.src}
+        poster={data?.poster}
         controls
         // width={result?.[0]?.width}
         // height={result?.[0]?.height}

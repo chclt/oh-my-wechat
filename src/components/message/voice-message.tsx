@@ -1,7 +1,6 @@
 import LocalVoice from "@/components/local-voice.tsx";
 import MessageInlineWrapper from "@/components/message/message-inline.tsx";
 import type { MessageProp } from "@/components/message/message.tsx";
-import { useApp } from "@/lib/hooks/appProvider.tsx";
 import type { VoiceMessage as VoiceMessageVM } from "@/lib/schema.ts";
 import { cn } from "@/lib/utils.ts";
 

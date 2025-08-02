@@ -25,6 +25,7 @@ import { StatisticController } from "./controllers/statistic";
 import { Wrapped2024Controller } from "./controllers/wrapped-2024";
 
 import * as Comlink from "comlink";
+import { D } from "node_modules/@tanstack/react-query-devtools/build/modern/ReactQueryDevtools-DO8QvfQP";
 
 interface AdapterWorkerStore {
   directory: FileSystemDirectoryHandle | FileList | undefined;
@@ -69,19 +70,19 @@ export interface AdapterWorkerType {
 
   getVerifyMessageList: () => MessageController.allVerifyOutput;
 
-  getImages: (
+  getImage: (
     controllerInput: ImageController.GetInput[0],
   ) => ImageController.GetOutput;
 
-  getVideos: (
+  getVideo: (
     controllerInput: VideoController.GetInput[0],
   ) => VideoController.GetOutput;
 
-  getVoices: (
+  getVoice: (
     controllerInput: VoiceController.GetInput[0],
   ) => VoiceController.GetOutput;
 
-  getAttaches: (
+  getAttache: (
     controllerInput: AttachController.GetInput[0],
   ) => AttachController.GetOutput;
 
@@ -108,8 +109,6 @@ const _store: AdapterWorkerStore = {
 };
 
 const adapterWorker: AdapterWorkerType = {
-  accountList: [],
-
   loadDirectory: async (directory) => {
     console.log("loadDirectory", directory);
 
@@ -287,28 +286,28 @@ const adapterWorker: AdapterWorkerType = {
     return await MessageController.allVerify({ databases: _store.databases });
   },
 
-  getImages: async (controllerInput) => {
+  getImage: async (controllerInput) => {
     return await ImageController.get(controllerInput, {
       directory: _store.directory,
       databases: _store.databases,
     });
   },
 
-  getVideos: async (controllerInput) => {
+  getVideo: async (controllerInput) => {
     return await VideoController.get(controllerInput, {
       directory: _store.directory,
       databases: _store.databases,
     });
   },
 
-  getVoices: async (controllerInput) => {
+  getVoice: async (controllerInput) => {
     return await VoiceController.get(controllerInput, {
       directory: _store.directory,
       databases: _store.databases,
     });
   },
 
-  getAttaches: async (controllerInput) => {
+  getAttache: async (controllerInput) => {
     return await AttachController.get(controllerInput, {
       directory: _store.directory,
       databases: _store.databases,
