@@ -14,8 +14,8 @@ import type { VideoMessageEntity } from "@/components/message/video-message.tsx"
 import type { VoiceMessageEntity } from "@/components/message/voice-message.tsx";
 import type { VoipMessageEntity } from "@/components/message/voip-message.tsx";
 import type { WeComContactMessageEntity } from "@/components/message/wecom-contact-message.tsx";
-import { ChatController } from "@/lib/controllers/chat.ts";
-import { ContactController } from "@/lib/controllers/contact.ts";
+import { ChatController } from "./chat.ts";
+import { ContactController } from "./contact.ts";
 import _global from "@/lib/global.ts";
 import {
   type AppMessage,
@@ -49,8 +49,8 @@ import {
 import CryptoJS from "crypto-js";
 import { XMLParser } from "fast-xml-parser";
 
-export const MessageController = {
-  parseRawMessageRows: async (
+export namespace MessageController {
+  async function parseRawMessageRows(
     raw_message_rows: DatabaseMessageRow[],
     {
       chat,
@@ -61,7 +61,7 @@ export const MessageController = {
       databases: WCDatabases;
       parseReplyMessage?: boolean;
     },
-  ): Promise<MessageVM[]> => {
+  ): Promise<MessageVM[]> {
     const messageSenderIds = raw_message_rows
       .map((raw_message_row) => {
         if ((raw_message_row.Message as unknown) === null) {
@@ -135,7 +135,7 @@ export const MessageController = {
       })
       .filter((i) => i !== undefined);
     const usersArray = (
-      await ContactController.in(databases, { ids: messageSenderIds })
+      await ContactController.findAll({ ids: messageSenderIds }, { databases })
     ).data;
     const usersTable: { [key: string]: User | Chatroom } = {};
     usersArray.map((user) => {
@@ -373,10 +373,13 @@ export const MessageController = {
 
     if (parseReplyMessage && chat && replyMessageIds.length) {
       replyMessageArray = (
-        await MessageController.in(databases, {
-          chat,
-          messageIds: replyMessageIds,
-        })
+        await MessageController.find(
+          {
+            chat,
+            messageIds: replyMessageIds,
+          },
+          { databases },
+        )
       ).data;
 
       const replyMessageTable: { [key: string]: MessageVM } = {};
@@ -396,26 +399,30 @@ export const MessageController = {
     }
 
     return messages as MessageVM[];
-  },
+  }
 
-  all: async (
-    databases: WCDatabases,
+  export type AllInput = [
     {
-      chat,
-      type,
-      type_app, // 有 bug
-      cursor,
-      cursor_condition = ">=",
-      limit = 50,
-    }: {
       chat: Chat;
       type?: MessageType | MessageType[];
-      type_app?: AppMessageType | AppMessageType[];
+      type_app?: AppMessageType | AppMessageType[]; // 有 bug
       cursor?: number;
       cursor_condition?: ControllerPaginatorResult<unknown>["meta"]["cursor_condition"];
       limit: number;
     },
-  ): Promise<ControllerPaginatorResult<MessageVM[]>> => {
+    {
+      databases: WCDatabases;
+    },
+  ];
+
+  export type AllOutput = Promise<ControllerPaginatorResult<MessageVM[]>>;
+
+  export async function all(...inputs: AllInput): AllOutput {
+    const [
+      { chat, type, type_app, cursor, cursor_condition = ">=", limit = 50 },
+      { databases },
+    ] = inputs;
+
     const dbs = databases.message;
     if (!dbs) throw new Error("message databases are not found");
 
@@ -654,20 +661,28 @@ export const MessageController = {
           : {}),
       },
     };
-  },
+  }
 
-  _all_from_all: async (
-    databases: WCDatabases,
+  export type AllFromAllInput = [
     {
-      type,
-      type_app,
-      limit,
-    }: {
       type?: MessageType | MessageType[];
       type_app?: AppMessageType | AppMessageType[];
       limit: number;
     },
-  ): Promise<ControllerPaginatorResult<MessageVM[]>> => {
+    {
+      databases: WCDatabases;
+    },
+  ];
+
+  export type AllFromAllOutput = Promise<
+    ControllerPaginatorResult<MessageVM[]>
+  >;
+
+  export async function allFromAll(
+    ...inputs: AllFromAllInput
+  ): AllFromAllOutput {
+    const [{ type, type_app, limit }, { databases }] = inputs;
+
     if (!databases) {
       throw new Error("databases are not found");
     }
@@ -691,20 +706,25 @@ export const MessageController = {
       data: chatMessagePromiseResults,
       meta: {},
     };
-  },
+  }
 
-  in: async (
-    databases: WCDatabases,
+  export type findInput = [
     {
-      chat,
-      messageIds,
-      parseReplyMessage = true,
-    }: {
       chat: Chat;
       messageIds: string[];
       parseReplyMessage?: boolean;
     },
-  ): Promise<ControllerResult<MessageVM[]>> => {
+    {
+      databases: WCDatabases;
+    },
+  ];
+
+  export type findOutput = Promise<ControllerResult<MessageVM[]>>;
+
+  export async function find(...inputs: findInput): findOutput {
+    const [{ chat, messageIds, parseReplyMessage = true }, { databases }] =
+      inputs;
+
     const dbs = databases.message;
     if (!dbs) throw new Error("message databases are not found");
 
@@ -781,11 +801,19 @@ export const MessageController = {
         parseReplyMessage,
       }),
     };
-  },
+  }
 
-  all_verify: async (
-    databases: WCDatabases,
-  ): Promise<ControllerResult<MessageVM[]>> => {
+  export type allVerifyInput = [
+    {
+      databases: WCDatabases;
+    },
+  ];
+
+  export type allVerifyOutput = Promise<ControllerResult<MessageVM[]>>;
+
+  export async function allVerify(...inputs: allVerifyInput): allVerifyOutput {
+    const [{ databases }] = inputs;
+
     const dbs = databases.message;
     if (!dbs) {
       throw new Error("message databases are not found");
@@ -857,5 +885,5 @@ export const MessageController = {
         databases,
       }),
     };
-  },
-};
+  }
+}

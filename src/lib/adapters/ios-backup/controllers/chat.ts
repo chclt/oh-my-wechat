@@ -14,11 +14,11 @@ import { ContactController } from "./contact";
 import specialBrandId from "@/assets/specialBrandUserNames.csv?raw";
 import _global from "@/lib/global.ts";
 
-export const ChatController = {
-  parseDatabaseChatRows: async (
+export namespace ChatController {
+  async function parseDatabaseChatRows(
     databases: WCDatabases,
     dbSessionAbstractRows: DatabaseSessionAbstractRow[],
-  ): Promise<Chat[]> => {
+  ): Promise<Chat[]> {
     const specialBrandIds = specialBrandId.split("\n").map((i) => i.trim());
 
     const dbSessionAbstractRowsFiltered = dbSessionAbstractRows.filter(
@@ -39,9 +39,12 @@ export const ChatController = {
     );
 
     const contactRows: (User | Chatroom)[] = (
-      await ContactController.in(databases, {
-        ids: dbSessionAbstractRowsFiltered.map((row) => row.UsrName),
-      })
+      await ContactController.findAll(
+        {
+          ids: dbSessionAbstractRowsFiltered.map((row) => row.UsrName),
+        },
+        { databases },
+      )
     ).data;
     const contacts: { [key: string]: User | Chatroom } = {};
     for (const contact of contactRows) {
@@ -103,9 +106,14 @@ export const ChatController = {
     }
 
     return result;
-  },
+  }
 
-  all: async (databases: WCDatabases): Promise<ControllerResult<Chat[]>> => {
+  export type AllInput = [{ databases: WCDatabases }];
+  export type AllOutput = Promise<ControllerResult<Chat[]>>;
+
+  export async function all(...inputs: AllInput): AllOutput {
+    const [{ databases }] = inputs;
+
     const db = databases.session;
     if (!db) {
       throw new Error("session database is not found");
@@ -126,21 +134,16 @@ export const ChatController = {
       }, [] as DatabaseSessionAbstractRow[]);
 
     return {
-      data: await ChatController.parseDatabaseChatRows(
-        databases,
-        dbSessionAbstractRows,
-      ),
+      data: await parseDatabaseChatRows(databases, dbSessionAbstractRows),
     };
-  },
+  }
 
-  in: async (
-    databases: WCDatabases,
-    {
-      ids,
-    }: {
-      ids: string[];
-    },
-  ): Promise<ControllerResult<Chat[]>> => {
+  export type FindInput = [{ ids: string[] }, { databases: WCDatabases }];
+  export type FindOutput = Promise<ControllerResult<Chat[]>>;
+
+  export async function find(...inputs: FindInput): FindOutput {
+    const [{ ids }, { databases }] = inputs;
+
     const db = databases.session;
     if (!db) {
       throw new Error("session database is not found");
@@ -163,10 +166,7 @@ export const ChatController = {
       }, [] as DatabaseSessionAbstractRow[]);
 
     return {
-      data: await ChatController.parseDatabaseChatRows(
-        databases,
-        dbSessionAbstractRows,
-      ),
+      data: await parseDatabaseChatRows(databases, dbSessionAbstractRows),
     };
-  },
-};
+  }
+}

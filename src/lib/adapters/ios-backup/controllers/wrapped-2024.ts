@@ -1,5 +1,5 @@
-import { ChatController } from "@/lib/controllers/chat.ts";
-import { MessageController } from "@/lib/controllers/message.ts";
+import { ChatController } from "./chat";
+import { MessageController } from "./message";
 import CryptoJS from "crypto-js";
 import { getUnixTime } from "date-fns";
 import {
@@ -9,7 +9,7 @@ import {
   MessageType,
   type User,
   type WCDatabases,
-} from "../schema";
+} from "@/lib/schema";
 import { type ChatStatistics, StatisticController } from "./statistic";
 
 export interface Wrapped2024Statistics extends ChatStatistics {
@@ -33,18 +33,24 @@ export interface Wrapped2024Statistics extends ChatStatistics {
  * 这里有很多很糟糕的ts代码。。。
  */
 
-export const Wrapped2024Controller = {
-  wrapped2024: async (
-    databases: WCDatabases,
+export namespace Wrapped2024Controller {
+  export type Wrapped2024Input = [
     {
-      startTime,
-      endTime,
-    }: {
       startTime: Date;
       endTime: Date;
     },
-  ): Promise<ControllerResult<Wrapped2024Statistics>> => {
-    const chats = (await ChatController.all(databases)).data.filter(
+    { databases: WCDatabases },
+  ];
+  export type Wrapped2024Output = Promise<
+    ControllerResult<Wrapped2024Statistics>
+  >;
+
+  export async function wrapped2024(
+    ...inputs: Wrapped2024Input
+  ): Wrapped2024Output {
+    const [{ startTime, endTime }, { databases }] = inputs;
+
+    const chats = (await ChatController.all({ databases })).data.filter(
       (chat) =>
         chat.type === "private" || (chat.type === "chatroom" && !chat.is_muted),
     );
@@ -52,11 +58,14 @@ export const Wrapped2024Controller = {
     const allStatistics = [];
 
     for (const chat of chats) {
-      const chatStatistics = await StatisticController.get(databases, {
-        chat,
-        startTime,
-        endTime,
-      });
+      const chatStatistics = await StatisticController.get(
+        {
+          chat,
+          startTime,
+          endTime,
+        },
+        { databases },
+      );
 
       allStatistics.push({
         chat,
@@ -253,20 +262,22 @@ export const Wrapped2024Controller = {
     return {
       data: statistics,
     };
-  },
+  }
 
-  get_random_media_message: async (
-    databases: WCDatabases,
+  export type GetRandomMediaMessageInput = [
     {
-      limit = 2,
-      startTime,
-      endTime,
-    }: {
       limit?: number;
       startTime: Date;
       endTime: Date;
     },
-  ) => {
+    { databases: WCDatabases },
+  ];
+  export type GetRandomMediaMessageOutput = Promise<ControllerResult<any[]>>;
+
+  export async function get_random_media_message(
+    ...inputs: GetRandomMediaMessageInput
+  ): GetRandomMediaMessageOutput {
+    const [{ limit = 2, startTime, endTime }, { databases }] = inputs;
     const dbs = databases.message;
     if (!dbs) throw new Error("message databases are not found");
 
@@ -278,7 +289,7 @@ export const Wrapped2024Controller = {
     const retry_count = 0;
     const randomChatIndexes: string[] = [];
 
-    const chats = (await ChatController.all(databases)).data.filter(
+    const chats = (await ChatController.all({ databases })).data.filter(
       (chat) =>
         chat.type === "private" || (chat.type === "chatroom" && !chat.is_muted),
     );
@@ -346,13 +357,16 @@ export const Wrapped2024Controller = {
       ].filter((row) => row.length > 0)[0];
 
       const message = (
-        await MessageController.in(databases, {
-          chat,
-          messageIds: databaseQueryResult[0].values.map(
-            (row) => row[0] as string,
-          ),
-          parseReplyMessage: false,
-        })
+        await MessageController.find(
+          {
+            chat,
+            messageIds: databaseQueryResult[0].values.map(
+              (row) => row[0] as string,
+            ),
+            parseReplyMessage: false,
+          },
+          { databases },
+        )
       ).data[0];
 
       result.push(message);
@@ -361,5 +375,5 @@ export const Wrapped2024Controller = {
     return {
       data: result,
     };
-  },
-};
+  }
+}

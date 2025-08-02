@@ -168,8 +168,7 @@ export interface ControllerResult<T> {
 
 export interface ControllerPaginatorResult<T> extends ControllerResult<T> {
   meta: {
-    cursor?: number;
-    cursor_condition?: "<" | "<=" | ">" | ">=" | "<>";
+    cursor?: `${"<" | "<=" | ">" | ">=" | "<>"}:${number}`;
   };
 }
 

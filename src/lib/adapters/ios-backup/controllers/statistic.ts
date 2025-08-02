@@ -89,19 +89,16 @@ export interface ChatStatistics {
   }[];
 }
 
-export const StatisticController = {
-  get: async (
-    databases: WCDatabases,
-    {
-      chat,
-      startTime,
-      endTime,
-    }: {
-      chat: Chat;
-      startTime: Date;
-      endTime: Date;
-    },
-  ): Promise<ControllerResult<ChatStatistics>> => {
+export namespace StatisticController {
+  export type GetInput = [
+    { chat: Chat; startTime?: Date; endTime?: Date },
+    { databases: WCDatabases },
+  ];
+  export type GetOutput = Promise<ControllerResult<ChatStatistics>>;
+
+  export async function get(...inputs: GetInput): GetOutput {
+    const [{ chat, startTime, endTime }, { databases }] = inputs;
+
     const dbs = databases.message;
     if (!dbs) throw new Error("message databases is not found");
 
@@ -613,5 +610,5 @@ export const StatisticController = {
     return {
       data: statistics,
     };
-  },
-};
+  }
+}

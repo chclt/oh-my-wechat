@@ -25,21 +25,49 @@ import { LoaderIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import * as React from "react";
 import logo from "/images/logo.svg?url";
+import dataClient from "@/lib/adapter";
+import IosBackupAdapter from "@/lib/adapters/ios-backup";
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import { AccountListSuspenseQueryOptions } from "@/lib/fetchers/account";
+import queryClient from "@/lib/query-client";
 
 export default function AccountSelectDialog(props: DialogProps) {
-  const { loadDirectory, loadDatabases, accountList } = useDatabase();
-  const [isLoadingDirectory, setIsLoadingDirectory] = useState(false);
-  const { setUser } = useApp();
-  const [accountSelected, setAccountSelected] = useState<User>(accountList[0]);
+  // const { loadDirectory, loadDatabases } = useDatabase();
 
-  const isFSAEnabled = "showOpenFilePicker" in window;
+  const [adapterInited, setAdapterInited] = useState(false);
+
+  const initAdapter = async (
+    directoryHandle: FileSystemDirectoryHandle | FileList,
+  ) => {
+    dataClient.adapter = new IosBackupAdapter({
+      directory: directoryHandle,
+    });
+
+    await dataClient.adapter._loadDirectory();
+
+    setAdapterInited(true);
+    queryClient.invalidateQueries({
+      queryKey: AccountListSuspenseQueryOptions().queryKey,
+    });
+  };
+
+  const { data: accountList } = useQuery({
+    ...AccountListSuspenseQueryOptions(),
+    initialData: [],
+    enabled: adapterInited,
+  });
 
   useEffect(() => {
-    if (accountList.length === 1) {
-      loadDatabases(accountList[0]);
-      setUser(accountList[0]);
+    if (accountList.length > 0) {
+      setSelectedAccountId(accountList[0].id);
     }
   }, [accountList]);
+
+  const [isLoadingDirectory, setIsLoadingDirectory] = useState(false);
+  const { setUser } = useApp();
+  const [selectedAccountId, setSelectedAccountId] = useState<string>();
+
+  const isFSAEnabled = "showOpenFilePicker" in window;
 
   return (
     <Dialog {...props}>
@@ -76,15 +104,17 @@ export default function AccountSelectDialog(props: DialogProps) {
                         (await directoryHandle.requestPermission()) ===
                         "granted"
                       ) {
-                        loadDirectory(directoryHandle);
+                        initAdapter(directoryHandle);
                       }
                     }
                   }}
                 >
-                  打开 iTunes 备份
+                  选择 iTunes 备份
                   <ChevronRightSmallLine />
                 </Button>
               )}
+
+              {/* TODO */}
               {!isFSAEnabled && !accountList.length && (
                 <label className={"relative"}>
                   <input
@@ -110,7 +140,7 @@ export default function AccountSelectDialog(props: DialogProps) {
                       "h-12 py-3 pl-6 pr-3.5 inline-flex gap-1 text-base text-foreground [&_svg]:size-6 rounded-xl border-foreground shadow-none",
                     )}
                   >
-                    选择 iTunes 备份
+                    打开 iTunes 备份
                     {isLoadingDirectory ? (
                       <LoaderIcon className={"animate-spin"} />
                     ) : (
@@ -133,12 +163,7 @@ export default function AccountSelectDialog(props: DialogProps) {
 
                 <RadioGroup
                   className={"flex flex-wrap gap-4"}
-                  onValueChange={(accountId) => {
-                    const account = accountList.find(
-                      (account) => account.id === accountId,
-                    );
-                    if (account) setAccountSelected(account);
-                  }}
+                  onValueChange={setSelectedAccountId}
                 >
                   {accountList.map((account) => (
                     <div
@@ -181,11 +206,15 @@ export default function AccountSelectDialog(props: DialogProps) {
                   className={
                     "self-end w-fit h-auto py-1.5 pl-[1.125rem] pr-1.5 flex items-center gap-1 [&_svg]:size-6 text-base rounded-xl shadow-none"
                   }
-                  disabled={!accountSelected}
-                  onClick={() => {
-                    if (accountSelected) {
-                      loadDatabases(accountSelected);
-                      setUser(accountSelected);
+                  disabled={!selectedAccountId}
+                  onClick={async () => {
+                    if (selectedAccountId) {
+                      const account = accountList.find(
+                        (account) => account.id === selectedAccountId,
+                      );
+                      if (account) {
+                        await dataClient.adapter._loadDatabases(account);
+                      }
                     }
                   }}
                 >

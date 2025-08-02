@@ -3,26 +3,25 @@ import type { Chat, MessageVM, PhotpSize, WCDatabases } from "@/lib/schema.ts";
 import CryptoJS from "crypto-js";
 import { getFilesFromManifast } from "../utils";
 
-export const ImageController = {
-  get: async (
-    directory: FileSystemDirectoryHandle,
-    databases: WCDatabases,
+export namespace ImageController {
+  export type GetInput = [
     {
-      chat,
-      message,
-      record,
-
-      size = "origin",
-      domain = "image",
-    }: {
       chat: Chat;
       message: MessageVM;
       record?: RecordVM;
-
-      size: "origin" | "thumb";
-      domain: "image" | "opendata" | "video";
+      size?: "origin" | "thumb";
+      domain?: "image" | "opendata" | "video";
     },
-  ): Promise<PhotpSize[]> => {
+    { directory: FileSystemDirectoryHandle | FileList; databases: WCDatabases },
+  ];
+  export type GetOutput = Promise<PhotpSize[]>;
+
+  export async function get(...inputs: GetInput): GetOutput {
+    const [
+      { chat, message, record, size = "origin", domain = "image" },
+      { directory, databases },
+    ] = inputs;
+
     const db = databases.manifest;
     if (!db) throw new Error("manifest database is not found");
 
@@ -75,5 +74,5 @@ export const ImageController = {
     }
 
     return result;
-  },
-};
+  }
+}

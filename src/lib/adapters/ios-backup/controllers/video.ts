@@ -2,18 +2,19 @@ import type { Chat, MessageVM, VideoInfo, WCDatabases } from "@/lib/schema.ts";
 import CryptoJS from "crypto-js";
 import { getFilesFromManifast } from "../utils";
 
-export const VideoController = {
-  get: async (
-    directory: FileSystemDirectoryHandle,
-    databases: WCDatabases,
+export namespace VideoController {
+  export type GetInput = [
     {
-      chat,
-      message,
-    }: {
       chat: Chat;
       message: MessageVM;
     },
-  ): Promise<VideoInfo> => {
+    { directory: FileSystemDirectoryHandle | FileList; databases: WCDatabases },
+  ];
+  export type GetOutput = Promise<VideoInfo>;
+
+  export async function get(...inputs: GetInput): GetOutput {
+    const [{ chat, message }, { directory, databases }] = inputs;
+
     const db = databases.manifest;
     if (!db) throw new Error("manifest database is not found");
 
@@ -51,5 +52,5 @@ export const VideoController = {
     }
 
     return result;
-  },
-};
+  }
+}

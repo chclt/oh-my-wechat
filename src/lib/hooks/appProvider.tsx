@@ -1,4 +1,3 @@
-import _global from "@/lib/global.ts";
 import type { Chat, User } from "@/lib/schema.ts";
 import {
   createContext,
@@ -43,13 +42,13 @@ interface AppProviderProps {
 export const AppProvider = ({ children, ...props }: AppProviderProps) => {
   // const [userList, setUserList] = useState<User[]>();
   const [user, setUser] = useState<User>();
-  useEffect(() => {
-    if (user) {
-      _global.user = user;
-    } else {
-      delete _global.user;
-    }
-  }, [user]);
+  // useEffect(() => {
+  //   if (user) {
+  //     _global.user = user;
+  //   } else {
+  //     delete _global.user;
+  //   }
+  // }, [user]);
 
   const [chat, setChat] = useState<Chat>();
 
