@@ -1,12 +1,17 @@
 import Image from "@/components/image.tsx";
 import Message from "@/components/message/message.tsx";
+import {
+  ChatListSuspenseQueryOptions,
+  MessageListInfiniteQueryOptions,
+} from "@/lib/fetchers/chat";
 import { useApp } from "@/lib/hooks/appProvider";
-import useQuery from "@/lib/hooks/useQuery.ts";
+import useQuery from "@/lib/hooks/useQuery";
 import type { Chat, ControllerResult, MessageVM } from "@/lib/schema.ts";
 import { cn, formatDateTime } from "@/lib/utils.ts";
 import type { WorkerResponse } from "@/lib/worker.ts";
+import { useInfiniteQuery, useSuspenseQuery } from "@tanstack/react-query";
 import type React from "react";
-import { forwardRef, useEffect, useRef } from "react";
+import { forwardRef, useEffect, useRef, useState } from "react";
 
 interface ChatListProps
   extends Omit<React.HTMLAttributes<HTMLLIElement>, "onClick"> {
@@ -14,20 +19,19 @@ interface ChatListProps
 }
 
 export default function ChatList({ onClick, ...props }: ChatListProps) {
-  const [query, isQuerying, result, error] = useQuery<
-    WorkerResponse<ControllerResult<Chat[]>>["payload"]
-  >({
-    success: true,
-    data: [],
-  });
+  const { user } = useApp();
+
+  const { data, isLoading, error } = useSuspenseQuery(
+    ChatListSuspenseQueryOptions(user.id),
+  );
 
   useEffect(() => {
-    query("/chats");
+    // query("/chats");
   }, []);
 
   return (
     <ul>
-      {result.data
+      {data
         .sort((i) => (i.is_pinned ? -1 : 1))
         .map((chat) => (
           <ChatItem
@@ -53,25 +57,26 @@ const ChatItem = forwardRef<HTMLLIElement, ChatItemProps>(
     const internalRef = useRef<HTMLLIElement>(null);
     const itemRef = (ref as React.RefObject<HTMLLIElement>) || internalRef;
 
-    const [query, isQuerying, result, error] = useQuery<
-      WorkerResponse<ControllerResult<MessageVM[]>>["payload"]
-    >({
-      success: true,
-      data: [],
+    const [isChatInView, setIsChatInView] = useState(false);
+
+    const { data } = useInfiniteQuery({
+      ...MessageListInfiniteQueryOptions({
+        chat,
+        limit: 1,
+      }),
+      enabled: isChatInView,
     });
 
     useEffect(() => {
       if (itemRef.current) {
         registerIntersectionObserver(itemRef.current, () => {
-          query("/messages", {
-            chat: chat,
-            limit: 1,
-          });
+          setIsChatInView(true);
         });
       }
     }, [itemRef]);
 
-    const last_message = result.data.length > 0 ? result.data[0] : undefined;
+    const last_message =
+      data.pages[0]?.data.length > 0 ? data.pages[0]?.data[0] : undefined;
 
     return (
       <li

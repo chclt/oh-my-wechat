@@ -178,11 +178,11 @@ const dbContactProtobufRoot = protobuf.Root.fromJSON({
   },
 });
 
-export const ContactController = {
-  parseDatabaseContactRows: async (
+export namespace ContactController {
+  async function parseDatabaseContactRows(
     databases: WCDatabases,
     raw_contact_rows: DatabaseFriendRow[],
-  ): Promise<(User | Chatroom)[]> => {
+  ): Promise<(User | Chatroom)[]> {
     const allMemberIds: string[] = [];
 
     const resultWithoutMembers = raw_contact_rows.map((row) => {
@@ -332,9 +332,12 @@ export const ContactController = {
     });
 
     const allMembers: User[] = (
-      await ContactController.in(databases, {
-        ids: Array.from(new Set(allMemberIds)),
-      })
+      await ContactController.findAll(
+        {
+          ids: Array.from(new Set(allMemberIds)),
+        },
+        { databases },
+      )
     ).data as User[];
 
     // 加入当前登录的微信账号数据
@@ -361,11 +364,14 @@ export const ContactController = {
     });
 
     return result;
-  },
+  }
 
-  all: async (
-    databases: WCDatabases,
-  ): Promise<ControllerResult<(User | Chatroom)[]>> => {
+  export type AllInput = [{ databases: WCDatabases }];
+  export type AllOutput = Promise<ControllerResult<(User | Chatroom)[]>>;
+
+  export async function all(...inputs: AllInput): AllOutput {
+    const [{ databases }] = inputs;
+
     const db = databases.WCDB_Contact;
     if (!db) {
       throw new Error("WCDB_Contact database is not found");
@@ -395,7 +401,7 @@ export const ContactController = {
       }, [] as DatabaseFriendRow[]);
 
     return {
-      data: await ContactController.parseDatabaseContactRows(
+      data: await parseDatabaseContactRows(
         databases,
         dbFriendRows.filter((row) => {
           if (row.userName.startsWith("gh_")) return false;
@@ -403,13 +409,16 @@ export const ContactController = {
         }),
       ),
     };
-  },
+  }
 
-  // 考虑到批量获取联系人可能很多，如果用 IN 查询，可能会导致 SQL 语句过长
-  in: async (
-    databases: WCDatabases,
-    { ids }: { ids: string[] },
-  ): Promise<ControllerResult<(User | Chatroom)[]>> => {
+  export type FindAllInput = [{ ids: string[] }, { databases: WCDatabases }];
+  export type FinfAllOutput = Promise<ControllerResult<(User | Chatroom)[]>>;
+
+  export async function findAll(...inputs: FindAllInput): FinfAllOutput {
+    const [{ ids }, { databases }] = inputs;
+
+    // 考虑到批量获取联系人可能很多，如果用 IN 查询，可能会导致 SQL 语句过长
+
     const db = databases.WCDB_Contact;
     if (!db) {
       throw new Error("WCDB_Contact database is not found");
@@ -442,8 +451,8 @@ export const ContactController = {
 
     return {
       data: [
-        ...(ids.indexOf(_global.user!.id) > -1 ? [_global.user as User] : []),
-        ...(await ContactController.parseDatabaseContactRows(
+        // ...(ids.indexOf(_global.user!.id) > -1 ? [_global.user as User] : []),
+        ...(await parseDatabaseContactRows(
           databases,
           dbFriendRows.filter((row) => {
             if (ids.includes(row.userName)) return true;
@@ -452,5 +461,5 @@ export const ContactController = {
         )),
       ],
     };
-  },
-};
+  }
+}

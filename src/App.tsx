@@ -32,7 +32,6 @@ import {
 import Wrapped2024Trigger from "@/components/statistic/wrapped-2024/wrapped-2024-trigger.tsx";
 
 const App = () => {
-  const { databases } = useDatabase();
   const { user, chat, setChat, isOpenMediaViewer, setIsOpenMediaViewer } =
     useApp();
 
@@ -99,20 +98,20 @@ const App = () => {
             <TabsContent value="sessions" className="grow m-0">
               <div className={"relative w-full h-full"}>
                 <div className={"absolute inset-0"}>
-                  <ScrollArea className={"w-full h-full [&>div>div]:!block"}>
-                    {databases && user && (
+                  {/* <ScrollArea className={"w-full h-full [&>div>div]:!block"}>
+                    {user && (
                       <ChatList
                         onClick={(chat) => {
                           setChat(chat);
                         }}
                       />
                     )}
-                  </ScrollArea>
+                  </ScrollArea> */}
                 </div>
               </div>
             </TabsContent>
             <TabsContent value="contact" className="grow">
-              <ScrollArea className={"h-full"}>
+              {/* <ScrollArea className={"h-full"}>
                 {databases && user && (
                   <ContactList
                     onClick={() => {
@@ -120,13 +119,13 @@ const App = () => {
                     }}
                   />
                 )}
-              </ScrollArea>
+              </ScrollArea> */}
             </TabsContent>
           </Tabs>
         </ResizablePanel>
 
         <ResizableHandle />
-
+        {/* 
         <ResizablePanel>
           {databases && user && chat && (
             <div className="w-full h-full overflow-auto">
@@ -143,7 +142,7 @@ const App = () => {
               <Wrapped2024Trigger />
             </div>
           )}
-        </ResizablePanel>
+        </ResizablePanel> */}
 
         {/*
         <ResizableHandle />
@@ -158,13 +157,13 @@ const App = () => {
         */}
       </ResizablePanelGroup>
 
-      {chat && (
+      {/* {chat && (
         <MediaViewerDialog
           open={isOpenMediaViewer}
           onOpenChange={setIsOpenMediaViewer}
           chat={chat}
         />
-      )}
+      )} */}
     </>
   );
 };

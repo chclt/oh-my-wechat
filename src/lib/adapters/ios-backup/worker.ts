@@ -1,0 +1,338 @@
+import initSqlJs, { type Database } from "sql.js";
+import sqliteUrl from "sql.js/dist/sql-wasm.wasm?url";
+import CryptoJS from "crypto-js";
+import type {
+  ControllerResult,
+  User,
+  WCDatabaseNames,
+  WCDatabases,
+} from "@/lib/schema";
+import {
+  getFileFromDirectory,
+  getFilesFromManifast,
+  parseLocalInfo,
+  parseUserFromMmsetting,
+} from "./utils";
+
+import { ChatController } from "./controllers/chat";
+import { ContactController } from "./controllers/contact";
+import { MessageController } from "./controllers/message";
+import { ImageController } from "./controllers/image";
+import { VideoController } from "./controllers/video";
+import { VoiceController } from "./controllers/voice";
+import { AttachController } from "./controllers/attach";
+import { StatisticController } from "./controllers/statistic";
+import { Wrapped2024Controller } from "./controllers/wrapped-2024";
+
+import * as Comlink from "comlink";
+
+interface AdapterWorkerStore {
+  directory: FileSystemDirectoryHandle | FileList | undefined;
+  databases: WCDatabases;
+  wcdbDicts: {
+    1?: { url: string; data: Uint8Array };
+    2?: { url: string; data: Uint8Array };
+    3?: { url: string; data: Uint8Array };
+    4?: { url: string; data: Uint8Array };
+    5?: { url: string; data: Uint8Array };
+  };
+  accountList: User[];
+  user: User | undefined;
+}
+
+export interface AdapterWorkerType {
+  loadDirectory: (
+    directory: FileSystemDirectoryHandle | FileList,
+  ) => Promise<void>;
+
+  loadAccount: (account: User) => Promise<void>;
+
+  unloadDatabases: () => void;
+
+  getAccountList: () => Promise<ControllerResult<User[]>>;
+
+  getAccount: (accountId: string) => Promise<User>;
+
+  getChatList: (input?: { userIds?: string[] }) => ChatController.AllOutput;
+
+  getContactList: (input?: {
+    userIds?: string[];
+  }) => ContactController.AllOutput;
+
+  getMessageList: (
+    controllerInput: MessageController.AllInput[0],
+  ) => MessageController.AllOutput;
+
+  getAllMessageList: (
+    controllerInput: MessageController.AllFromAllInput[0],
+  ) => MessageController.AllFromAllOutput;
+
+  getVerifyMessageList: () => MessageController.allVerifyOutput;
+
+  getImages: (
+    controllerInput: ImageController.GetInput[0],
+  ) => ImageController.GetOutput;
+
+  getVideos: (
+    controllerInput: VideoController.GetInput[0],
+  ) => VideoController.GetOutput;
+
+  getVoices: (
+    controllerInput: VoiceController.GetInput[0],
+  ) => VoiceController.GetOutput;
+
+  getAttaches: (
+    controllerInput: AttachController.GetInput[0],
+  ) => AttachController.GetOutput;
+
+  getStatistic: (
+    controllerInput: StatisticController.GetInput[0],
+  ) => StatisticController.GetOutput;
+
+  getWrapped2024: (
+    controllerInput: Wrapped2024Controller.Wrapped2024Input[0],
+  ) => Wrapped2024Controller.Wrapped2024Output;
+
+  getWrapped2024RandomMediaMessage: (
+    controllerInput: Wrapped2024Controller.GetRandomMediaMessageInput[0],
+  ) => Wrapped2024Controller.GetRandomMediaMessageOutput;
+}
+
+const _store: AdapterWorkerStore = {
+  directory: undefined,
+  databases: {},
+  wcdbDicts: {},
+
+  accountList: [],
+  user: undefined,
+};
+
+const adapterWorker: AdapterWorkerType = {
+  accountList: [],
+
+  loadDirectory: async (directory) => {
+    console.log("loadDirectory", directory);
+
+    _store.directory = directory;
+
+    const SQL = await initSqlJs({ locateFile: () => sqliteUrl });
+
+    const manifestDatabaseFile = await getFileFromDirectory(
+      _store.directory,
+      "Manifest.db",
+    );
+    if (!manifestDatabaseFile) throw new Error("Manifest.db not found");
+    const manifestDatabaseFileBuffer = await manifestDatabaseFile.arrayBuffer();
+    const manifestDatabase = new SQL.Database(
+      new Uint8Array(manifestDatabaseFileBuffer),
+    );
+
+    _store.databases.manifest = manifestDatabase;
+
+    const localInfoBuffer = (
+      await getFilesFromManifast(
+        manifestDatabase,
+        _store.directory,
+        "Documents/LocalInfo.data",
+      )
+    )[0].file;
+
+    const loginedUserId = parseLocalInfo(
+      new Uint8Array(await localInfoBuffer.arrayBuffer()),
+    ).id;
+
+    const mmsettingFiles = await getFilesFromManifast(
+      manifestDatabase,
+      _store.directory,
+      "Documents/MMappedKV/mmsetting.archive.%",
+    );
+
+    const accounts: User[] = [];
+
+    for (const row of mmsettingFiles) {
+      if (/mmsetting\.archive\.[^.]+$/.test(row.filename)) {
+        accounts.push(
+          parseUserFromMmsetting(new Uint8Array(await row.file.arrayBuffer())),
+        );
+      }
+    }
+
+    _store.accountList = accounts.sort((a) =>
+      a.id === loginedUserId ? -1 : 1,
+    );
+  },
+
+  loadAccount: async (account: User) => {
+    if (_store.directory === undefined) {
+      throw Error("IosBackupAdapter: _store.directory is not loaded");
+    }
+
+    if (!_store.databases.manifest) {
+      throw Error("IosBackupAdapter: Manifest.db is not loaded");
+    }
+
+    const accountIdMd5 = CryptoJS.MD5(account.id).toString();
+
+    const SQL = await initSqlJs({ locateFile: () => sqliteUrl });
+
+    let databaseFileBuffer: ArrayBuffer;
+
+    databaseFileBuffer = await (
+      await getFilesFromManifast(
+        _store.databases.manifest,
+        _store.directory,
+        `Documents/${accountIdMd5}/session/session.db`,
+      )
+    )[0].file.arrayBuffer();
+    _store.databases.session = new SQL.Database(
+      new Uint8Array(databaseFileBuffer),
+    );
+
+    databaseFileBuffer = await (
+      await getFilesFromManifast(
+        _store.databases.manifest,
+        _store.directory,
+        `Documents/${accountIdMd5}/DB/WCDB_Contact.sqlite`,
+      )
+    )[0].file.arrayBuffer();
+
+    _store.databases.WCDB_Contact = new SQL.Database(
+      new Uint8Array(databaseFileBuffer),
+    );
+
+    for (const fileItem of await await getFilesFromManifast(
+      _store.databases.manifest,
+      _store.directory,
+      `Documents/${accountIdMd5}/DB/message_%.sqlite`,
+    )) {
+      const databaseFileBuffer = await fileItem.file.arrayBuffer();
+
+      if (_store.databases.message === undefined) _store.databases.message = [];
+
+      _store.databases.message.push(
+        new SQL.Database(new Uint8Array(databaseFileBuffer)),
+      );
+    }
+
+    _store.user = account;
+  },
+
+  unloadDatabases: async () => {
+    for (const databaseName in _store.databases) {
+      if (Array.isArray(_store.databases[databaseName as WCDatabaseNames])) {
+        for (const db of _store.databases[
+          databaseName as WCDatabaseNames
+        ] as Database[]) {
+          db.close();
+        }
+      } else {
+        (_store.databases[databaseName as WCDatabaseNames] as Database).close();
+      }
+    }
+
+    _store.user = undefined;
+  },
+
+  getAccountList: async () => {
+    return { data: _store.accountList };
+  },
+
+  getAccount: async (accountId) => {
+    return _store.accountList[0];
+  },
+
+  async getChatList(input) {
+    const { userIds } = input ?? {};
+
+    if (userIds) {
+      return await ChatController.find(
+        {
+          ids: userIds,
+        },
+        {
+          databases: _store.databases,
+        },
+      );
+    }
+
+    return await ChatController.all({ databases: _store.databases });
+  },
+
+  getContactList: async (input) => {
+    const { userIds } = input ?? {};
+
+    if (userIds) {
+      return await ContactController.findAll(
+        { ids: userIds },
+        { databases: _store.databases },
+      );
+    }
+
+    return await ContactController.all({ databases: _store.databases });
+  },
+
+  getMessageList: async (controllerInput) => {
+    return await MessageController.all(controllerInput, {
+      databases: _store.databases,
+    });
+  },
+
+  getAllMessageList: async (controllerInput) => {
+    return await MessageController.allFromAll(controllerInput, {
+      databases: _store.databases,
+    });
+  },
+
+  getVerifyMessageList: async () => {
+    return await MessageController.allVerify({ databases: _store.databases });
+  },
+
+  getImages: async (controllerInput) => {
+    return await ImageController.get(controllerInput, {
+      directory: _store.directory,
+      databases: _store.databases,
+    });
+  },
+
+  getVideos: async (controllerInput) => {
+    return await VideoController.get(controllerInput, {
+      directory: _store.directory,
+      databases: _store.databases,
+    });
+  },
+
+  getVoices: async (controllerInput) => {
+    return await VoiceController.get(controllerInput, {
+      directory: _store.directory,
+      databases: _store.databases,
+    });
+  },
+
+  getAttaches: async (controllerInput) => {
+    return await AttachController.get(controllerInput, {
+      directory: _store.directory,
+      databases: _store.databases,
+    });
+  },
+
+  getStatistic: async (controllerInput) => {
+    return await StatisticController.get(controllerInput, {
+      databases: _store.databases,
+    });
+  },
+
+  getWrapped2024: async (controllerInput) => {
+    return await Wrapped2024Controller.wrapped2024(controllerInput, {
+      databases: _store.databases,
+    });
+  },
+
+  getWrapped2024RandomMediaMessage: async (controllerInput) => {
+    return await Wrapped2024Controller.get_random_media_message(
+      controllerInput,
+      { databases: _store.databases },
+    );
+  },
+};
+
+Comlink.expose(adapterWorker);

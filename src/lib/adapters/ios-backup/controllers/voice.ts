@@ -14,22 +14,20 @@ const ffmpeg = new FFmpeg();
 
 let isFFmpegLoading = false; // 防止重复加载, TODO: 更好应该是写一个事件广播
 
-export const VoiceController = {
-  get: async (
-    directory: FileSystemDirectoryHandle,
-    databases: WCDatabases,
+export namespace VoiceController {
+  export type GetInput = [
     {
-      chat,
-      message,
-
-      scope = "all",
-    }: {
       chat: Chat;
       message: MessageVM;
-
-      scope: "all" | "transcription";
+      scope?: "all" | "transcription";
     },
-  ): Promise<VoiceInfo> => {
+    { directory: FileSystemDirectoryHandle | FileList; databases: WCDatabases },
+  ];
+  export type GetOutput = Promise<VoiceInfo>;
+
+  export async function get(...inputs: GetInput): GetOutput {
+    const [{ chat, message, scope = "all" }, { directory, databases }] = inputs;
+
     const db = databases.manifest;
     if (!db) throw new Error("manifest database is not found");
 
@@ -101,5 +99,5 @@ export const VoiceController = {
     }
 
     return result;
-  },
-};
+  }
+}

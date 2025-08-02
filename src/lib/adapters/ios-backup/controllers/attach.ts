@@ -3,24 +3,21 @@ import type { Chat, FileInfo, MessageVM, WCDatabases } from "@/lib/schema.ts";
 import CryptoJS from "crypto-js";
 import { getFilesFromManifast } from "../utils";
 
-export const AttachController = {
-  get: async (
-    directory: FileSystemDirectoryHandle,
-    databases: WCDatabases,
+export namespace AttachController {
+  export type GetInput = [
     {
-      chat,
-      message,
-      record,
-
-      type,
-    }: {
       chat: Chat;
       message: MessageVM;
       record?: RecordVM;
-
       type: string;
     },
-  ): Promise<FileInfo[]> => {
+    { directory: FileSystemDirectoryHandle | FileList; databases: WCDatabases },
+  ];
+  export type GetOutput = Promise<FileInfo[]>;
+
+  export async function get(...inputs: GetInput): GetOutput {
+    const [{ chat, message, record, type }, { directory, databases }] = inputs;
+
     const db = databases.manifest;
     if (!db) throw new Error("manifest database is not found");
 
@@ -49,5 +46,5 @@ export const AttachController = {
     }
 
     return result;
-  },
-};
+  }
+}
