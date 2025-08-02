@@ -12,7 +12,7 @@ import CryptoJS from "crypto-js";
 import { ContactController } from "./contact";
 
 import specialBrandId from "@/assets/specialBrandUserNames.csv?raw";
-import _global from "@/lib/global.ts";
+import { _store } from "../worker";
 
 export namespace ChatController {
   async function parseDatabaseChatRows(
@@ -91,7 +91,7 @@ export namespace ChatController {
             // @ts-ignore
             is_pinned: contactInfo ? (contactInfo as User)._is_pinned : false, // todo
             is_collapsed: false,
-            members: [_global.user, contactInfo], // TODO 添加自己
+            members: [_store.account, contactInfo],
 
             user: contactInfo,
 

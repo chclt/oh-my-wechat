@@ -17,6 +17,7 @@ import type { WeComContactMessageEntity } from "@/components/message/wecom-conta
 import { ChatController } from "./chat.ts";
 import { ContactController } from "./contact.ts";
 import _global from "@/lib/global.ts";
+import { _store } from "../worker.ts";
 import {
   type AppMessage,
   AppMessageType,
@@ -24,6 +25,7 @@ import {
   type Chatroom,
   type ChatroomVoipMessage,
   type ContactMessage,
+  ControllerPaginatorCursor,
   type ControllerPaginatorResult,
   type ControllerResult,
   type DatabaseMessageRow,
@@ -93,7 +95,7 @@ export namespace MessageController {
 
           if (raw_message_row.Des === MessageDirection.outgoing) {
             rawMessageContent = raw_message_row.Message;
-            senderId = _global.user!.id;
+            senderId = _store.account.id;
           } else if (
             raw_message_row.Type === MessageType.SYSTEM ||
             raw_message_row.Message.startsWith("<") ||
@@ -130,7 +132,7 @@ export namespace MessageController {
         if (chat && chat.type === "private") {
           return raw_message_row.Des === MessageDirection.incoming
             ? chat.id
-            : (_global.user?.id ?? "?");
+            : _store.account.id;
         }
       })
       .filter((i) => i !== undefined);
@@ -154,7 +156,7 @@ export namespace MessageController {
         direction:
           // 有些消息比如通话记录的发消息的人，但是记录消息方向不是想要的，可能因为这算系统消息
           (messageSenderIds[index]
-            ? messageSenderIds[index] === _global.user?.id
+            ? messageSenderIds[index] === _store.account.id
               ? MessageDirection.outgoing
               : MessageDirection.incoming
             : undefined) ?? raw_message_row.Des,
@@ -406,8 +408,7 @@ export namespace MessageController {
       chat: Chat;
       type?: MessageType | MessageType[];
       type_app?: AppMessageType | AppMessageType[]; // 有 bug
-      cursor?: number;
-      cursor_condition?: ControllerPaginatorResult<unknown>["meta"]["cursor_condition"];
+      cursor?: string;
       limit: number;
     },
     {
@@ -418,10 +419,26 @@ export namespace MessageController {
   export type AllOutput = Promise<ControllerPaginatorResult<MessageVM[]>>;
 
   export async function all(...inputs: AllInput): AllOutput {
-    const [
-      { chat, type, type_app, cursor, cursor_condition = ">=", limit = 50 },
-      { databases },
-    ] = inputs;
+    const [{ chat, type, type_app, cursor, limit = 50 }, { databases }] =
+      inputs;
+
+    const cursorObject: ControllerPaginatorCursor = {};
+
+    if (cursor) {
+      try {
+        const parsedCursorObject = JSON.parse(cursor);
+        if (parsedCursorObject.value) {
+          cursorObject.value = parsedCursorObject.value;
+        }
+        if (parsedCursorObject.condition) {
+          cursorObject.condition = parsedCursorObject.condition;
+        }
+      } catch (e) {}
+    }
+
+    const { value: cursor_value, condition: cursor_condition } = cursorObject;
+
+    const query_limit = limit + 1;
 
     const dbs = databases.message;
     if (!dbs) throw new Error("message databases are not found");
@@ -429,7 +446,7 @@ export namespace MessageController {
     const rows = [
       ...dbs.map((database) => {
         try {
-          if (cursor) {
+          if (cursor_value) {
             if (cursor_condition === "<" || cursor_condition === "<=") {
               return database.exec(`
                 SELECT 
@@ -440,7 +457,7 @@ export namespace MessageController {
                   FROM Chat_${CryptoJS.MD5(chat.id).toString()}
                   WHERE
                     ${[
-                      `CreateTime ${cursor_condition} ${cursor}`,
+                      `CreateTime ${cursor_condition} ${cursor_value}`,
                       type
                         ? `Type IN (${
                             Array.isArray(type) ? type.join(", ") : type
@@ -455,13 +472,17 @@ export namespace MessageController {
                       .filter((i) => i)
                       .join(" AND ")}
                   ORDER BY CreateTime DESC
-                  LIMIT ${limit}
+                  LIMIT ${query_limit}
                 ) 
                 ORDER BY CreateTime ASC;
               `);
             }
 
-            if (cursor_condition === ">=" || cursor_condition === ">") {
+            if (
+              cursor_condition === ">=" ||
+              cursor_condition === ">" ||
+              cursor_condition === undefined
+            ) {
               return database.exec(`
                 SELECT 
                     rowid, CreateTime, Des, ImgStatus, MesLocalID, Message, CAST (MesSvrID as TEXT) as MesSvrID, Status, TableVer, Type 
@@ -469,7 +490,7 @@ export namespace MessageController {
                   Chat_${CryptoJS.MD5(chat.id).toString()} 
               WHERE 
                   ${[
-                    `CreateTime ${cursor_condition} ${cursor}`,
+                    `CreateTime ${cursor_condition} ${cursor_value}`,
                     type
                       ? `Type IN (${
                           Array.isArray(type) ? type.join(", ") : type
@@ -484,7 +505,7 @@ export namespace MessageController {
                     .filter((i) => i)
                     .join(" AND ")}
               ORDER BY CreateTime ASC 
-              LIMIT ${limit};
+              LIMIT ${query_limit};
             `);
             }
 
@@ -496,7 +517,7 @@ export namespace MessageController {
                       rowid, CreateTime, Des, ImgStatus, MesLocalID, Message, CAST(MesSvrID as TEXT) as MesSvrID, Status, TableVer, Type
                     FROM Chat_${CryptoJS.MD5(chat.id).toString()}
                     WHERE ${[
-                      `CreateTime < ${cursor}`,
+                      `CreateTime < ${cursor_value}`,
                       type
                         ? `Type IN (${
                             Array.isArray(type) ? type.join(", ") : type
@@ -511,7 +532,7 @@ export namespace MessageController {
                       .filter((i) => i)
                       .join(" AND ")}
                     ORDER BY CreateTime DESC
-                    LIMIT ${limit}
+                    LIMIT ${query_limit}
                   )
 
                   UNION ALL
@@ -521,7 +542,7 @@ export namespace MessageController {
                       rowid, CreateTime, Des, ImgStatus, MesLocalID, Message, CAST(MesSvrID as TEXT) as MesSvrID, Status, TableVer, Type
                     FROM Chat_${CryptoJS.MD5(chat.id).toString()}
                     WHERE ${[
-                      `CreateTime >= ${cursor}`,
+                      `CreateTime >= ${cursor_value}`,
                       type
                         ? `Type IN (${
                             Array.isArray(type) ? type.join(", ") : type
@@ -536,7 +557,7 @@ export namespace MessageController {
                       .filter((i) => i)
                       .join(" AND ")}
                     ORDER BY CreateTime ASC
-                    LIMIT ${limit}
+                    LIMIT ${query_limit}
                   )
                 ) 
                 ORDER BY CreateTime ASC;
@@ -570,7 +591,7 @@ export namespace MessageController {
                   : ""
               }
               ORDER BY CreateTime DESC
-              LIMIT ${limit}
+              LIMIT ${query_limit}
             ) 
             ORDER BY CreateTime ASC;
           `);
@@ -642,8 +663,147 @@ export namespace MessageController {
       });
     }
 
-    const currentCursor = raw_message_rows[0].CreateTime;
-    const currentCursorCondition = ">=";
+    // 根据请求游标，和查出来的数据，构建前后的游标
+    const cursors: Partial<{
+      current: ControllerPaginatorCursor;
+      previous: ControllerPaginatorCursor;
+      next: ControllerPaginatorCursor;
+    }> = {};
+    if (cursor_value === undefined && cursor_condition === undefined) {
+      if (raw_message_rows.length === query_limit) {
+        // 有前一页，[0] 是前一页的最后一条
+        cursors.current = {
+          value: raw_message_rows[1].CreateTime,
+          condition: ">=",
+        };
+
+        cursors.previous = {
+          value: raw_message_rows[0].CreateTime,
+          condition: "<=",
+          _hasPreviousPage: true,
+        };
+
+        raw_message_rows.shift(); // 移除第一条数据
+
+        // //  因为是静态数据，后面不会有新数据了，所以其实不会有下一页
+        // cursors.next = {
+        //   value: raw_message_rows.at(-1).CreateTime,
+        //   condition: ">",
+        //   _hasNextPage: false,
+        // };
+      } else {
+        cursors.current = {
+          value: raw_message_rows[0].CreateTime,
+          condition: ">=",
+        };
+
+        // cursors.previous = {
+        //   value: raw_message_rows[0].CreateTime,
+        //   condition: "<",
+        //   _hasPreviousPage: false,
+        // };
+
+        //  因为是静态数据，后面不会有新数据了，所以其实不会有下一页
+        // cursors.next = {
+        //   value: raw_message_rows.at(-1).CreateTime,
+        //   condition: ">",
+        //   _hasNextPage: false,
+        // };
+      }
+    } else if (cursor_value && cursor_condition) {
+      cursors.current = {
+        value: cursor_value,
+        condition: cursor_condition,
+      };
+
+      if (cursor_condition === "<" || cursor_condition === "<=") {
+        if (raw_message_rows.length === query_limit) {
+          cursors.previous = {
+            value: raw_message_rows[0].CreateTime,
+            condition: "<=",
+            _hasPreviousPage: true,
+          };
+
+          raw_message_rows.shift(); // 移除第一条数据
+        } else {
+          // 其实已经没有前一页了
+          // cursors.previous = {
+          //   value: raw_message_rows[0].CreateTime,
+          //   condition: "<",
+          //   _hasPreviousPage: false,
+          // };
+        }
+
+        cursors.next = {
+          value: raw_message_rows.at(-1).CreateTime,
+          condition: ">",
+          _hasNextPage: "unknown",
+        };
+      } else if (cursor_condition === ">" || cursor_condition === ">=") {
+        if (raw_message_rows.length === query_limit) {
+          cursors.next = {
+            value: raw_message_rows.at(-1).CreateTime,
+            condition: ">=",
+            hasNextPage: true,
+          };
+        } else {
+          // 其实已经没有下一页了
+          // cursors.next = {
+          //   value: raw_message_rows.at(-1).CreateTime,
+          //   condition: ">",
+          //   _hasNextPage: false,
+          // };
+        }
+
+        cursors.previous = {
+          value: raw_message_rows[0].CreateTime,
+          condition: "<",
+          _hasPreviousPage: "unknown",
+        };
+      } else if (cursor_condition === "<>") {
+        if (
+          raw_message_rows.filter((row) => row.CreateTime < cursor_value)
+            .length === query_limit
+        ) {
+          cursors.previous = {
+            value: raw_message_rows[0].CreateTime,
+            condition: "<=",
+            _hasPreviousPage: true,
+          };
+
+          raw_message_rows.shift(); // 移除第一条数据
+        } else {
+          // 其实已经没有前一页了
+          // cursors.previous = {
+          //   value: raw_message_rows[0].CreateTime,
+          //   condition: "<",
+          //   _hasPreviousPage: false,
+          // };
+        }
+
+        if (
+          raw_message_rows.filter((row) => row.CreateTime >= cursor_value)
+            .length === query_limit
+        ) {
+          cursors.next = {
+            value: raw_message_rows.at(-1).CreateTime,
+            condition: ">=",
+            _hasNextPage: true,
+          };
+
+          raw_message_rows.pop(); // 移除最后一条数据
+        } else {
+          // 其实已经没有下一页了
+          // cursors.next = {
+          //   value: raw_message_rows.at(-1).CreateTime,
+          //   condition: ">",
+          //   _hasNextPage: false,
+          // };
+        }
+      }
+    } else {
+      console.error("cursor_value and cursor_condition are not set correctly");
+    }
 
     return {
       data: await parseRawMessageRows(raw_message_rows, {
@@ -651,14 +811,11 @@ export namespace MessageController {
         databases,
       }),
       meta: {
-        cursor: currentCursor,
-        cursor_condition: currentCursorCondition,
-        ...(raw_message_rows.length > 0
-          ? {
-              next_cursor:
-                raw_message_rows[raw_message_rows.length - 1].CreateTime,
-            }
+        ...(cursors.current ? { cursor: JSON.stringify(cursors.current) } : {}),
+        ...(cursors.previous
+          ? { previous_cursor: JSON.stringify(cursors.previous) }
           : {}),
+        ...(cursors.next ? { next_cursor: JSON.stringify(cursors.next) } : {}),
       },
     };
   }
@@ -795,7 +952,7 @@ export namespace MessageController {
     }
 
     return {
-      data: await MessageController.parseRawMessageRows(raw_message_rows, {
+      data: await parseRawMessageRows(raw_message_rows, {
         chat,
         databases,
         parseReplyMessage,
@@ -881,7 +1038,7 @@ export namespace MessageController {
     }
 
     return {
-      data: await MessageController.parseRawMessageRows(raw_message_rows, {
+      data: await parseRawMessageRows(raw_message_rows, {
         databases,
       }),
     };

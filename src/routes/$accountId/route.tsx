@@ -6,7 +6,6 @@ import {
   ContactIconFill,
   ContactIconOutline,
 } from "@/components/icon";
-import MessageList from "@/components/message-list";
 import Wrapped2024Trigger from "@/components/statistic/wrapped-2024/wrapped-2024-trigger";
 import {
   ResizableHandle,

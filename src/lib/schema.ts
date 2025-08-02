@@ -98,6 +98,8 @@ export interface User {
   is_openim: boolean;
 }
 
+export interface Account extends User {}
+
 export interface Chatroom {
   id: `${string}@chatroom`;
   title: string;
@@ -166,9 +168,16 @@ export interface ControllerResult<T> {
   data: T;
 }
 
+export interface ControllerPaginatorCursor {
+  value: number;
+  condition: "<" | "<=" | ">" | ">=" | "<>";
+}
+
 export interface ControllerPaginatorResult<T> extends ControllerResult<T> {
   meta: {
-    cursor?: `${"<" | "<=" | ">" | ">=" | "<>"}:${number}`;
+    cursor?: string; // JSON.stringify(ControllerPaginatorCursor);
+    previous_cursor?: string; // JSON.stringify(ControllerPaginatorCursor);
+    next_cursor?: string; // JSON.stringify(ControllerPaginatorCursor);
   };
 }
 

@@ -1,9 +1,8 @@
-import MessageList from "@/components/message-list";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { createFileRoute } from "@tanstack/react-router";
 import { useInfiniteQuery, useSuspenseQuery } from "@tanstack/react-query";
-import { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { MessageListInfiniteQueryOptions } from "@/lib/fetchers/message";
 import {
   Dialog,
@@ -15,6 +14,11 @@ import {
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Calendar } from "@/components/ui/calendar";
 import { ChatSuspenseQueryOptions } from "@/lib/fetchers/chat";
+import { AppMessageType, MessageType, MessageVM } from "@/lib/schema";
+import { differenceInMinutes, format, isSameDay } from "date-fns";
+import { MessageBubbleGroup } from "@/components/message-bubble-group";
+import Message from "@/components/message/message";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/$accountId/chat/$chatId")({
   component: RouteComponent,
@@ -26,6 +30,8 @@ function RouteComponent() {
   const { data: chat } = useSuspenseQuery(
     ChatSuspenseQueryOptions(accountId, chatId),
   );
+
+  const isChatroom = chat.type === "chatroom";
 
   // const [messageList, setMessageList] = useState<{
   //   [key: number]: MessageVM[];
@@ -51,10 +57,16 @@ function RouteComponent() {
   // const {data: account} = useSuspenseQuery(AccountSuspenseQueryOptions)
   // const {data: chat} = useSuspenseQuery(ChatSuspenseQueryOptions)
 
-  const { data } = useInfiniteQuery(
+  const {
+    data = { pages: [], pageParams: [] },
+    fetchPreviousPage,
+    fetchNextPage,
+    hasPreviousPage,
+    hasNextPage,
+  } = useInfiniteQuery(
     MessageListInfiniteQueryOptions(accountId, {
       chat,
-      limit: 50,
+      limit: 20,
     }),
   );
 
@@ -157,23 +169,14 @@ function RouteComponent() {
         </div>
 
         <div className={"mx-auto max-w-screen-md p-4 flex flex-col gap-6"}>
-          {/*
-        <Button
-          variant="outline"
-          onClick={() => {
-            query("/messages", {
-              chat,
-              cursor:
-                messageList[
-                  Math.min(...Object.keys(messageList).map(Number))
-                ][0].date,
-              cursor_condition: "<",
-            });
-          }}
-        >
-          prev
-        </Button>
-        */}
+          <Button
+            variant="outline"
+            onClick={() => {
+              fetchPreviousPage();
+            }}
+          >
+            {hasPreviousPage ? "prev" : "no previous page"}
+          </Button>
 
           {data.pages
             .flatMap((pageData) => pageData.data)
@@ -301,24 +304,14 @@ function RouteComponent() {
               );
             })}
 
-          {/*
-        <Button
-          variant="outline"
-          onClick={() => {
-            query("/messages", {
-              chat,
-              cursor:
-                messageList[Math.max(...Object.keys(messageList).map(Number))][
-                  messageList[Math.max(...Object.keys(messageList).map(Number))]
-                    .length - 1
-                ].date,
-              cursor_condition: ">",
-            });
-          }}
-        >
-          next
-        </Button>
-        */}
+          <Button
+            variant="outline"
+            onClick={() => {
+              fetchNextPage();
+            }}
+          >
+            {hasNextPage ? "next" : "no next page"}
+          </Button>
         </div>
       </ScrollArea>
 

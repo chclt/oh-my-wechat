@@ -4,15 +4,16 @@ import type {
   DefinedInitialDataInfiniteOptions,
   QueryKey,
   UseQueryOptions,
+  UndefinedInitialDataInfiniteOptions,
 } from "@tanstack/react-query";
-import type { MessageController } from "../adapters/ios-backup/controllers/message";
 import type { ControllerPaginatorResult, MessageVM } from "../schema";
 import dataClient from "../adapter";
+import type { MessageController } from "@/adapters/ios-backup/controllers/message";
 
 export function MessageListInfiniteQueryOptions(
   accountId: string,
   requestData: MessageController.AllInput[0],
-): DefinedInitialDataInfiniteOptions<
+): UndefinedInitialDataInfiniteOptions<
   ControllerPaginatorResult<MessageVM[]>,
   DefaultError,
   InfiniteData<ControllerPaginatorResult<MessageVM[]>>,
@@ -21,15 +22,14 @@ export function MessageListInfiniteQueryOptions(
 > {
   return {
     queryKey: ["messages", accountId, requestData.chat.id, requestData.limit],
-    queryFn: ({ pageParam, signal }) =>
-      dataClient.adapter.getMessageList({ ...requestData, cursor: pageParam }),
+    queryFn: ({ pageParam }) =>
+      dataClient.adapter.getMessageList({
+        ...requestData,
+        cursor: pageParam,
+      }),
     initialPageParam: undefined,
-    getPreviousPageParam: (lastPage) => lastPage.meta.cursor,
-    getNextPageParam: (lastPage) => lastPage.meta.cursor,
-    initialData: {
-      pages: [],
-      pageParams: [],
-    },
+    getPreviousPageParam: (lastPage) => lastPage.meta.previous_cursor,
+    getNextPageParam: (lastPage) => lastPage.meta.next_cursor,
   };
 }
 

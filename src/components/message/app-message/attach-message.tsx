@@ -3,7 +3,6 @@ import FileTypeIcon from "@/components/filetype-icon.tsx";
 import type { AppMessageProps } from "@/components/message/app-message.tsx";
 import MessageInlineWrapper from "@/components/message/message-inline.tsx";
 import { AttacheSuspenseQueryOptions } from "@/lib/fetchers";
-import _global from "@/lib/global.ts";
 import { useApp } from "@/lib/hooks/appProvider.tsx";
 import type { AppMessageType, FileInfo } from "@/lib/schema.ts";
 import { cn, decodeUnicodeReferences } from "@/lib/utils.ts";

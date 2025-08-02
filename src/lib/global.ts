@@ -7,14 +7,7 @@ import type { User } from "@/lib/schema.ts";
  * 所以这里使用一个全局变量储存数据
  */
 
-const _global: {
-  user?: User;
-  ChatDatabaseTable: { [key: string]: number };
-
-  enableDebug: boolean;
-} = {
-  ChatDatabaseTable: {},
-
+const _global = {
   enableDebug: true,
 };
 

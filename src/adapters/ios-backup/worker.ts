@@ -2,6 +2,7 @@ import initSqlJs, { type Database } from "sql.js";
 import sqliteUrl from "sql.js/dist/sql-wasm.wasm?url";
 import CryptoJS from "crypto-js";
 import type {
+  Account,
   ControllerResult,
   User,
   WCDatabaseNames,
@@ -25,7 +26,6 @@ import { StatisticController } from "./controllers/statistic";
 import { Wrapped2024Controller } from "./controllers/wrapped-2024";
 
 import * as Comlink from "comlink";
-import { D } from "node_modules/@tanstack/react-query-devtools/build/modern/ReactQueryDevtools-DO8QvfQP";
 
 interface AdapterWorkerStore {
   directory: FileSystemDirectoryHandle | FileList | undefined;
@@ -37,8 +37,8 @@ interface AdapterWorkerStore {
     4?: { url: string; data: Uint8Array };
     5?: { url: string; data: Uint8Array };
   };
-  accountList: User[];
-  user: User | undefined;
+  accountList: Account[];
+  account: Account | undefined;
 }
 
 export interface AdapterWorkerType {
@@ -99,13 +99,13 @@ export interface AdapterWorkerType {
   ) => Wrapped2024Controller.GetRandomMediaMessageOutput;
 }
 
-const _store: AdapterWorkerStore = {
+export const _store: AdapterWorkerStore = {
   directory: undefined,
   databases: {},
   wcdbDicts: {},
 
   accountList: [],
-  user: undefined,
+  account: undefined,
 };
 
 const adapterWorker: AdapterWorkerType = {
@@ -213,7 +213,7 @@ const adapterWorker: AdapterWorkerType = {
       );
     }
 
-    _store.user = account;
+    _store.account = account;
   },
 
   unloadDatabases: async () => {
@@ -229,7 +229,7 @@ const adapterWorker: AdapterWorkerType = {
       }
     }
 
-    _store.user = undefined;
+    _store.account = undefined;
   },
 
   getAccountList: async () => {
@@ -237,7 +237,7 @@ const adapterWorker: AdapterWorkerType = {
   },
 
   getAccount: async (accountId) => {
-    return _store.accountList[0];
+    return _store.account;
   },
 
   async getChatList(input) {
