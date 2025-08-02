@@ -8,6 +8,10 @@ import type { Chat, User, WCDatabaseNames, WCDatabases } from "@/lib/schema";
 import { MessageController } from "./controllers/message";
 
 import type { DataAdapterClassType } from "../adapter.ts";
+import { ImageController } from "./controllers/image.ts";
+import { VideoController } from "./controllers/video.ts";
+import { VoiceController } from "./controllers/voice.ts";
+import { AttachController } from "./controllers/attach.ts";
 
 interface IosBackupAdapterOptions {
   directory: FileSystemDirectoryHandle | FileList;
@@ -50,5 +54,21 @@ export default class IosBackupAdapter implements DataAdapterClassType {
 
   async getMessageList(input: MessageController.AllInput[0]) {
     return await this._workerAdapter.getMessageList(input);
+  }
+
+  async getImage(input: ImageController.GetInput[0]) {
+    return await this._workerAdapter.getImage(input);
+  }
+
+  async getVideo(input: VideoController.GetInput[0]) {
+    return await this._workerAdapter.getVideo(input);
+  }
+
+  async getVoice(input: VoiceController.GetInput[0]) {
+    return await this._workerAdapter.getVoice(input);
+  }
+
+  async getAttache(input: AttachController.GetInput[0]) {
+    return await this._workerAdapter.getAttache(input);
   }
 }

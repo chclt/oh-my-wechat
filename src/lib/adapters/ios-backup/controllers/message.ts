@@ -642,17 +642,17 @@ export namespace MessageController {
       });
     }
 
-    cursor = raw_message_rows[0].CreateTime;
-    cursor_condition = ">=";
+    const currentCursor = raw_message_rows[0].CreateTime;
+    const currentCursorCondition = ">=";
 
     return {
-      data: await MessageController.parseRawMessageRows(raw_message_rows, {
+      data: await parseRawMessageRows(raw_message_rows, {
         chat,
         databases,
       }),
       meta: {
-        cursor,
-        cursor_condition,
+        cursor: currentCursor,
+        cursor_condition: currentCursorCondition,
         ...(raw_message_rows.length > 0
           ? {
               next_cursor:

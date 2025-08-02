@@ -1,10 +1,12 @@
 import type { RecordVM } from "@/components/record/record.tsx";
 import _global from "@/lib/global.ts";
 import { useApp } from "@/lib/hooks/appProvider.tsx";
-import useQuery from "@/lib/hooks/useQuery.ts";
+import { useQuery } from "@tanstack/react-query";
 import type { Chat, MessageVM, PhotpSize } from "@/lib/schema.ts";
 import type React from "react";
 import { forwardRef, useEffect, useRef } from "react";
+import { useInViewport } from "@mantine/hooks";
+import { ImageSuspenseQueryOptions } from "@/lib/fetchers";
 
 type LocalImageProps = React.ImgHTMLAttributes<HTMLImageElement> & {
   chat: Chat;
@@ -28,32 +30,24 @@ const LocalImage = forwardRef<HTMLImageElement, LocalImageProps>(
     },
     ref,
   ) => {
-    const { registerIntersectionObserver } = useApp();
+    const { ref: imgRef, inViewport } = useInViewport();
 
-    const internalRef = useRef<HTMLImageElement>(null);
-    const imgRef = (ref as React.RefObject<HTMLImageElement>) || internalRef;
-
-    const [query, isQuerying, result, error] = useQuery<PhotpSize[]>([]);
-
-    useEffect(() => {
-      if (imgRef.current) {
-        registerIntersectionObserver(imgRef.current, () => {
-          query("/images", {
-            chat,
-            message,
-            record,
-            size,
-            domain,
-          });
-        });
-      }
-    }, [imgRef]);
+    const { data } = useQuery({
+      ...ImageSuspenseQueryOptions({
+        chat,
+        message,
+        record,
+        size,
+        domain,
+      }),
+      initialData: [],
+      enabled: inViewport,
+    });
 
     useEffect(() => {
       return () => {
-        if (result.length)
-          result.map((photo) => {
-            if (_global.enableDebug) console.log("revoke image", photo.src);
+        if (data.length)
+          data.map((photo) => {
             URL.revokeObjectURL(photo.src);
           });
       };
@@ -62,9 +56,9 @@ const LocalImage = forwardRef<HTMLImageElement, LocalImageProps>(
     return (
       <img
         ref={imgRef}
-        src={result?.[0]?.src}
-        width={result?.[0]?.width}
-        height={result?.[0]?.height}
+        src={data?.[0]?.src}
+        width={data?.[0]?.width}
+        height={data?.[0]?.height}
         alt={alt}
         loading="lazy"
         className={className}

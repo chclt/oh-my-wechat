@@ -1,11 +1,29 @@
 import type { UseSuspenseQueryOptions } from "@tanstack/react-query";
-import adapter from "../adapter";
+import dataClient from "../adapter";
+import { Chat } from "../schema";
+import queryClient from "../query-client";
 
 export function ChatListSuspenseQueryOptions(
   accountId: string,
-): UseSuspenseQueryOptions {
+): UseSuspenseQueryOptions<Chat[]> {
   return {
     queryKey: ["chats", accountId],
-    queryFn: () => adapter.getChatList().then((res) => res.data),
+    queryFn: () => dataClient.adapter.getChatList().then((res) => res.data),
+  };
+}
+
+export function ChatSuspenseQueryOptions(
+  accountId: string,
+  chatId: string,
+): UseSuspenseQueryOptions<Chat> {
+  return {
+    queryKey: ["chat", accountId, chatId],
+    queryFn: () => {
+      const chatList = queryClient.getQueryData<Chat[]>(
+        ChatListSuspenseQueryOptions(accountId).queryKey,
+      );
+
+      return chatList?.find((chat) => chat.id === chatId) ?? null;
+    },
   };
 }
