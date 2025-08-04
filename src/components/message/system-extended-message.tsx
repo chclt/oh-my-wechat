@@ -119,6 +119,8 @@ export default function SystemExtendedMessage({
               case "new_tmpl_type_succeed_contact":
               case "new_link_succeed_contact": // eg. 在企业微信联系人中，对方工作变更，会告诉你即将自动加另一个联系人，已经添加或者即将添加联系人的时候，都有这个按钮用来不添加联系人
                 return null;
+              case "link_ecs_gift":
+                return linkObj["@_name"];
               default:
                 console.info("不支持的系统消息内容类型：", linkObj);
                 return "???";

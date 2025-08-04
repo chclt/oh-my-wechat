@@ -1,7 +1,16 @@
 import type { DataAdapter } from "@/adapters/adapter";
 
-const dataClient = {
-  adapter: undefined as DataAdapter | undefined,
+let adapter: DataAdapter | undefined;
+
+const getDataAdapter = () => {
+  if (!adapter) {
+    throw new Error("Data adapter not set");
+  }
+  return adapter;
 };
 
-export default dataClient;
+const setDataAdapter = (newAdapter: DataAdapter) => {
+  adapter = newAdapter;
+};
+
+export { getDataAdapter, setDataAdapter };
