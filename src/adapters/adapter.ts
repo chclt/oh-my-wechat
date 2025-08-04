@@ -13,7 +13,7 @@ import type { MessageController } from "./ios-backup/controllers/message";
 import type { VideoController } from "./ios-backup/controllers/video";
 import type { VoiceController } from "./ios-backup/controllers/voice";
 
-export interface DataAdapterClassType {
+export interface DataAdapter {
   init: () => void;
 
   getAccountList: (...input: any[]) => Promise<ControllerResult<User[]>>;
