@@ -7,7 +7,7 @@ import type { AdapterWorkerType } from "./worker.ts";
 import type { Chat, User, WCDatabaseNames, WCDatabases } from "@/lib/schema";
 import { MessageController } from "./controllers/message";
 
-import type { DataAdapterClassType } from "../adapter.ts";
+import type { DataAdapter } from "../adapter.ts";
 import { ImageController } from "./controllers/image.ts";
 import { VideoController } from "./controllers/video.ts";
 import { VoiceController } from "./controllers/voice.ts";
@@ -17,7 +17,7 @@ interface IosBackupAdapterOptions {
   directory: FileSystemDirectoryHandle | FileList;
 }
 
-export default class IosBackupAdapter implements DataAdapterClassType {
+export default class IosBackupAdapter implements DataAdapter {
   private _directory: FileSystemDirectoryHandle | FileList;
 
   private _workerAdapter: Comlink.Remote<AdapterWorkerType>;

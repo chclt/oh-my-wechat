@@ -1,7 +1,7 @@
-import type { DataAdapterClassType } from "@/adapters/adapter";
+import type { DataAdapter } from "@/adapters/adapter";
 
 const dataClient = {
-  adapter: undefined as DataAdapterClassType | undefined,
+  adapter: undefined as DataAdapter | undefined,
 };
 
 export default dataClient;

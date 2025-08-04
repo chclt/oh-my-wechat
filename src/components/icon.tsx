@@ -1,5 +1,54 @@
 interface IconProps extends React.HTMLAttributes<HTMLOrSVGElement> {}
 
+export function LoaderIcon(props: IconProps) {
+  return (
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}
+    >
+      <title>Loader</title>
+      <g
+        clip-path="url(#paint0_angular_781_22_clip_path)"
+        data-figma-skip-parse="true"
+      >
+        <g transform="matrix(0 -0.01 0.01 0 12 12)">
+          <foreignObject x="-1000" y="-1000" width="2000" height="2000">
+            <div
+              xmlns="http://www.w3.org/1999/xhtml"
+              style={{
+                background:
+                  "conic-gradient(from 90deg,transparent 0deg,transparent 126deg,currentColor 342.626deg,currentColor 360deg)",
+                height: "100%",
+                width: "100%",
+                opacity: 1,
+              }}
+            />
+          </foreignObject>
+        </g>
+      </g>
+      <path
+        fill-rule="evenodd"
+        clip-rule="evenodd"
+        d="M12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2ZM12 6C8.68629 6 6 8.68629 6 12C6 15.3137 8.68629 18 12 18C15.3137 18 18 15.3137 18 12C18 8.68629 15.3137 6 12 6Z"
+      />
+      <circle cx="12" cy="4" r="2" fill="currentColor" />
+      <defs>
+        <clipPath id="paint0_angular_781_22_clip_path">
+          <path
+            fill-rule="evenodd"
+            clip-rule="evenodd"
+            d="M12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2ZM12 6C8.68629 6 6 8.68629 6 12C6 15.3137 8.68629 18 12 18C15.3137 18 18 15.3137 18 12C18 8.68629 15.3137 6 12 6Z"
+          />
+        </clipPath>
+      </defs>
+    </svg>
+  );
+}
+
 export function ChatIconFill(props: IconProps) {
   return (
     <svg
