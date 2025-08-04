@@ -8,49 +8,50 @@ import {
 import Image from "@/components/image.tsx";
 import Link from "@/components/link.tsx";
 import { Button } from "@/components/ui/button.tsx";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogTitle,
-} from "@/components/ui/dialog.tsx";
 import { Label } from "@/components/ui/label.tsx";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group.tsx";
-import { useApp } from "@/lib/hooks/appProvider.tsx";
-import { useDatabase } from "@/lib/hooks/databaseProvider.tsx";
-import type { User } from "@/lib/schema.ts";
 import { cn } from "@/lib/utils.ts";
-import type { DialogProps } from "@radix-ui/react-dialog";
-import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { LoaderIcon } from "lucide-react";
-import { useEffect, useState } from "react";
-import * as React from "react";
+import { useRef, useState } from "react";
 import logo from "/images/logo.svg?url";
-import dataClient from "@/lib/adapter";
 import IosBackupAdapter from "@/adapters/ios-backup";
-import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { AccountListSuspenseQueryOptions } from "@/lib/fetchers/account";
 import queryClient from "@/lib/query-client";
+import { setDataAdapter } from "@/lib/adapter";
+import {
+  LoadAccountDatabaseMutationOptions,
+  LoadDirectoryMutationOptions,
+} from "@/adapters/ios-backup/fetchers";
+import type { Account } from "@/lib/schema";
+
 export const Route = createFileRoute("/")({
   component: RouteComponent,
 });
 
 function RouteComponent() {
   const navigate = useNavigate();
-  // const { loadDirectory, loadDatabases } = useDatabase();
+
+  const adapterRef = useRef(new IosBackupAdapter());
 
   const [adapterInited, setAdapterInited] = useState(false);
 
-  const initAdapter = async (
+  const { mutateAsync: loadDirectory } = useMutation(
+    LoadDirectoryMutationOptions(adapterRef.current),
+  );
+
+  const { mutateAsync: loadAccountDatabase } = useMutation(
+    LoadAccountDatabaseMutationOptions(adapterRef.current),
+  );
+
+  const handleDirectorySelect = async (
     directoryHandle: FileSystemDirectoryHandle | FileList,
   ) => {
-    dataClient.adapter = new IosBackupAdapter({
-      directory: directoryHandle,
+    setDataAdapter(adapterRef.current);
+    loadDirectory(directoryHandle).then(() => {
+      setAdapterInited(true);
     });
 
-    await dataClient.adapter._loadDirectory();
-
-    setAdapterInited(true);
     queryClient.invalidateQueries({
       queryKey: AccountListSuspenseQueryOptions().queryKey,
     });
@@ -62,16 +63,19 @@ function RouteComponent() {
     enabled: adapterInited,
   });
 
-  useEffect(() => {
-    if (accountList.length > 0) {
-      setSelectedAccountId(accountList[0].id);
-    }
-  }, [accountList]);
+  const handleAccountSelect = async (account: Account) => {
+    loadAccountDatabase(account).then(() => {
+      navigate({
+        to: "/$accountId",
+        params: { accountId: account.id },
+      });
+    });
+  };
 
   const [isLoadingDirectory, setIsLoadingDirectory] = useState(false);
-  const { setUser } = useApp();
   const [selectedAccountId, setSelectedAccountId] = useState<string>();
 
+  const isWorkerEnabled = typeof Worker !== "undefined";
   const isFSAEnabled = "showOpenFilePicker" in window;
 
   return (
@@ -89,13 +93,14 @@ function RouteComponent() {
             <Button
               variant="outline"
               className="h-12 py-3 pl-6 pr-3.5 inline-flex gap-1 text-base text-foreground [&_svg]:size-6 rounded-xl border-foreground shadow-none"
+              disabled={!isWorkerEnabled}
               onClick={async () => {
                 if ("showOpenFilePicker" in window) {
                   const directoryHandle = await window.showDirectoryPicker();
                   if (
                     (await directoryHandle.requestPermission()) === "granted"
                   ) {
-                    initAdapter(directoryHandle);
+                    handleDirectorySelect(directoryHandle);
                   }
                 }
               }}
@@ -113,7 +118,7 @@ function RouteComponent() {
                 // @ts-ignore
                 webkitdirectory=""
                 className={"peer absolute pointer-events-none opacity-0"}
-                disabled={isLoadingDirectory}
+                disabled={!isWorkerEnabled || isLoadingDirectory}
                 onChange={(event) => {
                   if (event.target.files && event.target.files.length > 0) {
                     setIsLoadingDirectory(true);
@@ -204,13 +209,7 @@ function RouteComponent() {
                     (account) => account.id === selectedAccountId,
                   );
                   if (account) {
-                    await dataClient.adapter._loadDatabases(account);
-                    navigate({
-                      to: "/$accountId",
-                      params: {
-                        accountId: account.id,
-                      },
-                    });
+                    handleAccountSelect(account);
                   }
                 }
               }}

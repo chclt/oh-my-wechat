@@ -17,15 +17,7 @@ if (rootEl) {
     <React.StrictMode>
       <QueryClientProvider client={queryClient}>
         <AppProvider>
-          <ErrorBoundary
-            fallback={
-              typeof Worker === "undefined" && (
-                <p>你的浏览器不支持 Web Worker，请检查浏览器版本或浏览器设置</p>
-              )
-            }
-          >
-            <RouterProvider router={router} />
-          </ErrorBoundary>
+          <RouterProvider router={router} />
         </AppProvider>
         <ReactQueryDevtools buttonPosition="bottom-left" />
         <TanStackRouterDevtools router={router} />

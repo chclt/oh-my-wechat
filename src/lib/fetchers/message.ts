@@ -7,8 +7,8 @@ import type {
   UndefinedInitialDataInfiniteOptions,
 } from "@tanstack/react-query";
 import type { ControllerPaginatorResult, MessageVM } from "../schema";
-import dataClient from "../adapter";
 import type { MessageController } from "@/adapters/ios-backup/controllers/message";
+import { getDataAdapter } from "../adapter";
 
 export function MessageListInfiniteQueryOptions(
   accountId: string,
@@ -23,7 +23,7 @@ export function MessageListInfiniteQueryOptions(
   return {
     queryKey: ["messages", accountId, requestData.chat.id, requestData.limit],
     queryFn: ({ pageParam }) =>
-      dataClient.adapter.getMessageList({
+      getDataAdapter().getMessageList({
         ...requestData,
         cursor: pageParam,
       }),
@@ -40,7 +40,7 @@ export function LastMessageQueryOptions(
   return {
     queryKey: ["lastMessage", accountId, requestData.chat.id],
     queryFn: () =>
-      dataClient.adapter
+      getDataAdapter()
         .getMessageList({ ...requestData, limit: 1 })
         .then((res) => res.data[0] ?? null),
   };

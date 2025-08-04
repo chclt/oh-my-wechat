@@ -1,47 +1,39 @@
-import initSqlJs, { type Database } from "sql.js";
-import sqliteUrl from "sql.js/dist/sql-wasm.wasm?url";
-import CryptoJS from "crypto-js";
 import * as Comlink from "comlink";
 import AdapterWorker from "./worker.ts?worker";
 import type { AdapterWorkerType } from "./worker.ts";
-import type { Chat, User, WCDatabaseNames, WCDatabases } from "@/lib/schema";
-import { MessageController } from "./controllers/message";
+import type { User } from "@/lib/schema";
+import type { MessageController } from "./controllers/message";
 
 import type { DataAdapter } from "../adapter.ts";
-import { ImageController } from "./controllers/image.ts";
-import { VideoController } from "./controllers/video.ts";
-import { VoiceController } from "./controllers/voice.ts";
-import { AttachController } from "./controllers/attach.ts";
-
-interface IosBackupAdapterOptions {
-  directory: FileSystemDirectoryHandle | FileList;
-}
+import type { ImageController } from "./controllers/image.ts";
+import type { VideoController } from "./controllers/video.ts";
+import type { VoiceController } from "./controllers/voice.ts";
+import type { AttachController } from "./controllers/attach.ts";
 
 export default class IosBackupAdapter implements DataAdapter {
   private _directory: FileSystemDirectoryHandle | FileList;
 
   private _workerAdapter: Comlink.Remote<AdapterWorkerType>;
 
-  async _loadDirectory() {
-    await this._workerAdapter.loadDirectory(this._directory);
+  async _loadDirectory(directoryHandle: FileSystemDirectoryHandle | FileList) {
+    this._directory = directoryHandle;
+    await this._workerAdapter._loadDirectory(this._directory);
   }
 
-  async _loadDatabases(account: User) {
-    await this._workerAdapter.loadAccount(account);
+  async _loadAccountDatabase(account: User) {
+    await this._workerAdapter._loadAccountDatabase(account);
   }
 
-  async _unloadDatabases() {
-    await this._workerAdapter.unloadDatabases();
+  async _unloadAccountDatabase() {
+    await this._workerAdapter._unloadAccountDatabase();
   }
 
-  constructor(options: IosBackupAdapterOptions) {
-    this._directory = options.directory;
-
+  constructor() {
     this._workerAdapter = Comlink.wrap(new AdapterWorker());
   }
 
   async init() {
-    await this._workerAdapter.loadDirectory(this._directory);
+    await this._workerAdapter._loadDirectory(this._directory);
   }
 
   async getAccountList() {

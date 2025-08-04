@@ -42,17 +42,17 @@ interface AdapterWorkerStore {
 }
 
 export interface AdapterWorkerType {
-  loadDirectory: (
+  _loadDirectory: (
     directory: FileSystemDirectoryHandle | FileList,
   ) => Promise<void>;
 
-  loadAccount: (account: User) => Promise<void>;
+  _loadAccountDatabase: (account: User) => Promise<void>;
 
-  unloadDatabases: () => void;
+  _unloadAccountDatabase: () => void;
 
   getAccountList: () => Promise<ControllerResult<User[]>>;
 
-  getAccount: (accountId: string) => Promise<User>;
+  getAccount: (accountId: string) => Promise<Account>;
 
   getChatList: (input?: { userIds?: string[] }) => ChatController.AllOutput;
 
@@ -109,7 +109,7 @@ export const _store: AdapterWorkerStore = {
 };
 
 const adapterWorker: AdapterWorkerType = {
-  loadDirectory: async (directory) => {
+  _loadDirectory: async (directory) => {
     console.log("loadDirectory", directory);
 
     _store.directory = directory;
@@ -161,7 +161,7 @@ const adapterWorker: AdapterWorkerType = {
     );
   },
 
-  loadAccount: async (account: User) => {
+  _loadAccountDatabase: async (account: User) => {
     if (_store.directory === undefined) {
       throw Error("IosBackupAdapter: _store.directory is not loaded");
     }
@@ -216,7 +216,7 @@ const adapterWorker: AdapterWorkerType = {
     _store.account = account;
   },
 
-  unloadDatabases: async () => {
+  _unloadAccountDatabase: async () => {
     for (const databaseName in _store.databases) {
       if (Array.isArray(_store.databases[databaseName as WCDatabaseNames])) {
         for (const db of _store.databases[
@@ -237,7 +237,15 @@ const adapterWorker: AdapterWorkerType = {
   },
 
   getAccount: async (accountId) => {
-    return _store.account;
+    const account = _store.accountList.find(
+      (account) => account.id === accountId,
+    );
+
+    if (!account) {
+      throw new Error("Account not found");
+    }
+
+    return account;
   },
 
   async getChatList(input) {
