@@ -2,12 +2,13 @@ import { FileBendSolid } from "@/components/central-icon.tsx";
 import FileTypeIcon from "@/components/filetype-icon.tsx";
 import type { AppMessageProps } from "@/components/message/app-message.tsx";
 import MessageInlineWrapper from "@/components/message/message-inline.tsx";
+import { getDataAdapter } from "@/lib/adapter";
 import { AttacheSuspenseQueryOptions } from "@/lib/fetchers";
 import { useApp } from "@/lib/hooks/appProvider.tsx";
 import type { AppMessageType, FileInfo } from "@/lib/schema.ts";
 import { cn, decodeUnicodeReferences } from "@/lib/utils.ts";
-import { useQuery } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 
 export interface AttachMessageEntity {
   type: AppMessageType.ATTACH;
@@ -41,23 +42,25 @@ export default function AttachMessage({
 }: AttachMessageProps) {
   const chat = message.chat;
 
-  const { data } = useQuery({
-    ...AttacheSuspenseQueryOptions({
-      chat,
-      message,
-    }),
-  });
+  const [isAttachmentNotFound, setIsAttachmentNotFound] = useState(false);
 
-  useEffect(() => {
-    if (data && data.length) {
+  const { mutateAsync: download, data } = useMutation<FileInfo[]>({
+    mutationKey: ["attache", chat.id, message.id],
+    mutationFn: () => {
+      return getDataAdapter().getAttache({ chat, message });
+    },
+    onSuccess: (data) => {
       const downlaodLink = document.createElement("a");
       downlaodLink.href = data[0].src;
       downlaodLink.download = decodeUnicodeReferences(
         message.message_entity.msg.appmsg.title,
       );
       downlaodLink.click();
-    }
-  }, [data]);
+    },
+    onError: () => {
+      setIsAttachmentNotFound(true);
+    },
+  });
 
   useEffect(() => {
     return () => {
@@ -77,9 +80,7 @@ export default function AttachMessage({
         )}
         {...props}
         onClick={() => {
-          console.log(data);
-          // TODO
-          // query("/attaches", { chat, message });
+          download();
         }}
       >
         <div>
@@ -101,6 +102,11 @@ export default function AttachMessage({
             ).toFixed(2)}
             MB
           </small>
+          {isAttachmentNotFound && (
+            <p className="inline ml-2 text-red-500">
+              <small>没找到对应文件</small>
+            </p>
+          )}
         </div>
 
         {/*<img src={filetype_any} alt={"文件"} />*/}
