@@ -57,9 +57,8 @@ function RouteComponent() {
     });
   };
 
-  const { data: accountList } = useQuery({
+  const { data: accountList = [] } = useQuery({
     ...AccountListSuspenseQueryOptions(),
-    initialData: [],
     enabled: adapterInited,
   });
 

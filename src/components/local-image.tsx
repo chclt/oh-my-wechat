@@ -40,18 +40,17 @@ const LocalImage = forwardRef<HTMLImageElement, LocalImageProps>(
         size,
         domain,
       }),
-      initialData: [],
       enabled: inViewport,
     });
 
     useEffect(() => {
       return () => {
-        if (data.length)
+        if (data && data.length)
           data.map((photo) => {
             URL.revokeObjectURL(photo.src);
           });
       };
-    });
+    }, [data]);
 
     return (
       <img
