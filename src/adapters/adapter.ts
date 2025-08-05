@@ -1,20 +1,16 @@
-import { Account } from "@/lib/schema";
+import type { Account } from "@/lib/schema";
 import type {
   Chat,
   ControllerPaginatorResult,
   ControllerResult,
   MessageVM,
-  PhotpSize,
-  User,
-} from "../schema";
+} from "@/lib/schema";
 import type { AttachController } from "./ios-backup/controllers/attach";
-import type { ChatController } from "./ios-backup/controllers/chat";
 import type { ImageController } from "./ios-backup/controllers/image";
 import type { MessageController } from "./ios-backup/controllers/message";
-import { StatisticController } from "./ios-backup/controllers/statistic";
+import type { StatisticController } from "./ios-backup/controllers/statistic";
 import type { VideoController } from "./ios-backup/controllers/video";
 import type { VoiceController } from "./ios-backup/controllers/voice";
-import { Wrapped2024Controller } from "./ios-backup/controllers/wrapped-2024";
 
 export interface DataAdapter {
   init: () => void;
@@ -50,12 +46,4 @@ export interface DataAdapter {
   getStatistic: (
     controllerInput: StatisticController.GetInput[0],
   ) => StatisticController.GetOutput;
-
-  getWrapped2024: (
-    controllerInput: Wrapped2024Controller.Wrapped2024Input[0],
-  ) => Wrapped2024Controller.Wrapped2024Output;
-
-  getWrapped2024RandomMediaMessage: (
-    controllerInput: Wrapped2024Controller.GetRandomMediaMessageInput[0],
-  ) => Wrapped2024Controller.GetRandomMediaMessageOutput;
 }
