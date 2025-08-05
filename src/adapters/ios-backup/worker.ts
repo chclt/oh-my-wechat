@@ -46,13 +46,13 @@ export interface AdapterWorkerType {
     directory: FileSystemDirectoryHandle | FileList,
   ) => Promise<void>;
 
-  _loadAccountDatabase: (account: User) => Promise<void>;
+  _loadAccountDatabase: (account: Account) => Promise<void>;
 
   _unloadAccountDatabase: () => void;
 
-  getAccountList: () => Promise<ControllerResult<User[]>>;
+  getAccountList: () => Promise<ControllerResult<Account[]>>;
 
-  getAccount: (accountId: string) => Promise<Account>;
+  getAccount: (accountId: string) => Promise<ControllerResult<Account>>;
 
   getChatList: (input?: { userIds?: string[] }) => ChatController.AllOutput;
 
@@ -245,7 +245,7 @@ const adapterWorker: AdapterWorkerType = {
       throw new Error("Account not found");
     }
 
-    return account;
+    return { data: account };
   },
 
   async getChatList(input) {

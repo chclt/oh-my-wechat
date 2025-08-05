@@ -4,6 +4,9 @@ import { useApp } from "@/lib/hooks/appProvider.tsx";
 import type React from "react";
 
 import footer_logo from "/images/wrapped-2024/footer-logo.svg?url";
+import { Route } from "@/routes/$accountId/chat/route";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { AccountSuspenseQueryOptions } from "@/lib/fetchers/account";
 
 export default function SectionSentMessageWordCount({
   data,
@@ -13,7 +16,10 @@ export default function SectionSentMessageWordCount({
     sent_message_word_count_description: string;
   };
 }) {
-  const { user } = useApp();
+  const { accountId } = Route.useParams();
+  const { data: account } = useSuspenseQuery(
+    AccountSuspenseQueryOptions(accountId),
+  );
 
   return (
     <section
@@ -46,7 +52,7 @@ export default function SectionSentMessageWordCount({
             src={footer_logo}
             alt={"访问ohmywechat.com，查看微信报告2024"}
           />
-          <User.Photo user={user!} variant={"default"} />
+          <User.Photo user={account!} variant={"default"} />
         </div>
       </div>
     </section>

@@ -3,6 +3,7 @@ import {
   type AppMessage,
   AppMessageType,
   type Chat,
+  ControllerPaginatorCursor,
   type ControllerPaginatorResult,
   type ControllerResult,
   MessageDirection,
@@ -472,13 +473,20 @@ export namespace StatisticController {
     const received_wxemoji_usage: ChatStatistics["received_wxemoji_usage"] = [];
 
     do {
-      result = await MessageController.all(databases, {
-        chat,
-        type: MessageType.TEXT,
-        cursor,
-        cursor_condition: "<",
-        limit,
-      });
+      result = await MessageController.all(
+        {
+          chat,
+          type: MessageType.TEXT,
+          cursor: JSON.stringify({
+            value: cursor,
+            condition: "<",
+          } satisfies ControllerPaginatorCursor),
+          limit,
+        },
+        {
+          databases,
+        },
+      );
 
       cursor = result.meta.cursor;
 
@@ -532,14 +540,21 @@ export namespace StatisticController {
     cursor = undefined;
 
     do {
-      result = await MessageController.all(databases, {
-        chat,
-        type: MessageType.APP,
-        type_app: AppMessageType.REFER,
-        cursor,
-        cursor_condition: "<",
-        limit,
-      });
+      result = await MessageController.all(
+        {
+          chat,
+          type: MessageType.APP,
+          type_app: AppMessageType.REFER,
+          cursor: JSON.stringify({
+            value: cursor,
+            condition: "<",
+          } satisfies ControllerPaginatorCursor),
+          limit,
+        },
+        {
+          databases,
+        },
+      );
 
       cursor = result.meta.cursor;
 

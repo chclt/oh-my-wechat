@@ -13,6 +13,7 @@ import { Route as AccountIdRouteRouteImport } from './routes/$accountId/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AccountIdIndexRouteImport } from './routes/$accountId/index'
 import { Route as AccountIdChatRouteRouteImport } from './routes/$accountId/chat/route'
+import { Route as AccountIdChatIndexRouteImport } from './routes/$accountId/chat/index'
 import { Route as AccountIdChatChatIdRouteImport } from './routes/$accountId/chat/$chatId'
 
 const AccountIdRouteRoute = AccountIdRouteRouteImport.update({
@@ -35,6 +36,11 @@ const AccountIdChatRouteRoute = AccountIdChatRouteRouteImport.update({
   path: '/chat',
   getParentRoute: () => AccountIdRouteRoute,
 } as any)
+const AccountIdChatIndexRoute = AccountIdChatIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AccountIdChatRouteRoute,
+} as any)
 const AccountIdChatChatIdRoute = AccountIdChatChatIdRouteImport.update({
   id: '/$chatId',
   path: '/$chatId',
@@ -47,12 +53,13 @@ export interface FileRoutesByFullPath {
   '/$accountId/chat': typeof AccountIdChatRouteRouteWithChildren
   '/$accountId/': typeof AccountIdIndexRoute
   '/$accountId/chat/$chatId': typeof AccountIdChatChatIdRoute
+  '/$accountId/chat/': typeof AccountIdChatIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/$accountId/chat': typeof AccountIdChatRouteRouteWithChildren
   '/$accountId': typeof AccountIdIndexRoute
   '/$accountId/chat/$chatId': typeof AccountIdChatChatIdRoute
+  '/$accountId/chat': typeof AccountIdChatIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -61,6 +68,7 @@ export interface FileRoutesById {
   '/$accountId/chat': typeof AccountIdChatRouteRouteWithChildren
   '/$accountId/': typeof AccountIdIndexRoute
   '/$accountId/chat/$chatId': typeof AccountIdChatChatIdRoute
+  '/$accountId/chat/': typeof AccountIdChatIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -70,8 +78,9 @@ export interface FileRouteTypes {
     | '/$accountId/chat'
     | '/$accountId/'
     | '/$accountId/chat/$chatId'
+    | '/$accountId/chat/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/$accountId/chat' | '/$accountId' | '/$accountId/chat/$chatId'
+  to: '/' | '/$accountId' | '/$accountId/chat/$chatId' | '/$accountId/chat'
   id:
     | '__root__'
     | '/'
@@ -79,6 +88,7 @@ export interface FileRouteTypes {
     | '/$accountId/chat'
     | '/$accountId/'
     | '/$accountId/chat/$chatId'
+    | '/$accountId/chat/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -116,6 +126,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AccountIdChatRouteRouteImport
       parentRoute: typeof AccountIdRouteRoute
     }
+    '/$accountId/chat/': {
+      id: '/$accountId/chat/'
+      path: '/'
+      fullPath: '/$accountId/chat/'
+      preLoaderRoute: typeof AccountIdChatIndexRouteImport
+      parentRoute: typeof AccountIdChatRouteRoute
+    }
     '/$accountId/chat/$chatId': {
       id: '/$accountId/chat/$chatId'
       path: '/$chatId'
@@ -128,10 +145,12 @@ declare module '@tanstack/react-router' {
 
 interface AccountIdChatRouteRouteChildren {
   AccountIdChatChatIdRoute: typeof AccountIdChatChatIdRoute
+  AccountIdChatIndexRoute: typeof AccountIdChatIndexRoute
 }
 
 const AccountIdChatRouteRouteChildren: AccountIdChatRouteRouteChildren = {
   AccountIdChatChatIdRoute: AccountIdChatChatIdRoute,
+  AccountIdChatIndexRoute: AccountIdChatIndexRoute,
 }
 
 const AccountIdChatRouteRouteWithChildren =

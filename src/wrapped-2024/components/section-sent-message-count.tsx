@@ -1,11 +1,17 @@
 import Image from "@/components/image.tsx";
-import { DailyMessageCountChart } from "@/components/statistic/wrapped-2024/daily-message-count-chart.tsx";
+import { DailyMessageCountChart } from "./daily-message-count-chart.tsx";
 import User from "@/components/user.tsx";
 import { useApp } from "@/lib/hooks/appProvider.tsx";
 import { differenceInMonths, format } from "date-fns";
 import React from "react";
 
 import footer_logo from "/images/wrapped-2024/footer-logo.svg?url";
+import { Route } from "@/routes/$accountId/chat/index.tsx";
+import { useSuspenseQueries, useSuspenseQuery } from "@tanstack/react-query";
+import {
+  AccountListSuspenseQueryOptions,
+  AccountSuspenseQueryOptions,
+} from "@/lib/fetchers/account.ts";
 
 export default function SectionSentMessageCount({
   data,
@@ -18,7 +24,10 @@ export default function SectionSentMessageCount({
     daily_received_message_count: { date: string; message_count: number }[];
   };
 }) {
-  const { user } = useApp();
+  const { accountId } = Route.useParams();
+  const { data: account } = useSuspenseQuery(
+    AccountSuspenseQueryOptions(accountId),
+  );
 
   const { startTime, endTime } = data;
 
@@ -64,7 +73,7 @@ export default function SectionSentMessageCount({
             src={footer_logo}
             alt={"访问ohmywechat.com，查看微信报告2024"}
           />
-          <User.Photo user={user!} variant={"default"} />
+          <User.Photo user={account!} variant={"default"} />
         </div>
       </div>
     </section>

@@ -29,35 +29,35 @@ const LinkCard = ({
   icon,
   ...props
 }: LinkCardProps) => {
-  return (
-    <Link href={href}>
-      <Card className={cn("max-w-[20em]")} {...props}>
-        <CardContent className="p-3">
-          <CardTitle>{heading}</CardTitle>
-          <div
-            className={cn(
-              "mt-1 text-pretty line-clamp-5 text-muted-foreground",
-            )}
-          >
-            {preview && (
-              <Slot className={"float-end ms-2 h-12 w-auto rounded"}>
-                {preview}
-              </Slot>
-            )}
+  const renderLinkCardInner = (
+    <Card className={cn("max-w-[20em]")} {...props}>
+      <CardContent className="p-3">
+        <CardTitle>{heading}</CardTitle>
+        <div
+          className={cn("mt-1 text-pretty line-clamp-5 text-muted-foreground")}
+        >
+          {preview && (
+            <Slot className={"float-end ms-2 h-12 w-auto rounded"}>
+              {preview}
+            </Slot>
+          )}
 
-            {abstract}
-          </div>
-        </CardContent>
+          {abstract}
+        </div>
+      </CardContent>
 
-        <CardFooter>
-          {from && from.length > 0 ? from : "\u200B"}
+      <CardFooter>
+        {from && from.length > 0 ? from : "\u200B"}
 
-          <CardIndicator>
-            <ArrowShareRightSolid />
-          </CardIndicator>
-        </CardFooter>
-      </Card>
-    </Link>
+        <CardIndicator>{icon ? icon : <ArrowShareRightSolid />}</CardIndicator>
+      </CardFooter>
+    </Card>
+  );
+
+  return href ? (
+    <Link href={href}>{renderLinkCardInner}</Link>
+  ) : (
+    renderLinkCardInner
   );
 };
 

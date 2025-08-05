@@ -6,6 +6,9 @@ import type { Chat } from "@/lib/schema.ts";
 import type React from "react";
 
 import footer_logo from "/images/wrapped-2024/footer-logo.svg?url";
+import { AccountSuspenseQueryOptions } from "@/lib/fetchers/account";
+import { Route } from "@/routes/$accountId/chat/route";
+import { useSuspenseQuery } from "@tanstack/react-query";
 
 export default function SectionMostMessageChat({
   data,
@@ -20,7 +23,10 @@ export default function SectionMostMessageChat({
     }[];
   };
 }) {
-  const { user } = useApp();
+  const { accountId } = Route.useParams();
+  const { data: account } = useSuspenseQuery(
+    AccountSuspenseQueryOptions(accountId),
+  );
 
   const messageCountMax = data.chat_message_count.length
     ? data.chat_message_count[0].message_count
@@ -108,7 +114,7 @@ export default function SectionMostMessageChat({
             src={footer_logo}
             alt={"访问ohmywechat.com，查看微信报告2024"}
           />
-          <User.Photo user={user!} variant={"default"} />
+          <User.Photo user={account!} variant={"default"} />
         </div>
       </div>
     </section>

@@ -39,7 +39,7 @@ export default function StickerSetMessage({
         abstract={message.message_entity.msg.appmsg.des}
         preview={preview}
         from={"表情包"}
-        icon={<></>}
+        icon={<span />}
         {...props}
       />
     );

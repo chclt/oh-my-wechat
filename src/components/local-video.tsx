@@ -8,7 +8,7 @@ import type {
   VideoMessage,
 } from "@/lib/schema.ts";
 import type React from "react";
-import { forwardRef, useEffect, useRef } from "react";
+import { forwardRef, useEffect, useRef, useState } from "react";
 import { VideoSuspenseQueryOptions } from "@/lib/fetchers";
 import { useInViewport } from "@mantine/hooks";
 
@@ -27,20 +27,6 @@ const LocalVideo = forwardRef<HTMLVideoElement, LocalVideoProps>(
         message,
       }),
       enabled: inViewport,
-    });
-
-    useEffect(() => {
-      return () => {
-        if (data?.poster) {
-          if (_global.enableDebug)
-            console.log("revoke video poster", data.poster);
-          URL.revokeObjectURL(data.poster);
-        }
-        if (data?.src) {
-          if (_global.enableDebug) console.log("revoke video", data.src);
-          URL.revokeObjectURL(data.src);
-        }
-      };
     });
 
     return (

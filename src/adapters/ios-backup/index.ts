@@ -9,6 +9,8 @@ import type { ImageController } from "./controllers/image.ts";
 import type { VideoController } from "./controllers/video.ts";
 import type { VoiceController } from "./controllers/voice.ts";
 import type { AttachController } from "./controllers/attach.ts";
+import { Wrapped2024Controller } from "./controllers/wrapped-2024.ts";
+import { StatisticController } from "./controllers/statistic.ts";
 
 export default class IosBackupAdapter implements DataAdapter {
   private _directory: FileSystemDirectoryHandle | FileList;
@@ -40,6 +42,15 @@ export default class IosBackupAdapter implements DataAdapter {
     const data = await this._workerAdapter.getAccountList();
 
     console.groupCollapsed("getAccountList");
+    console.log(data);
+    console.groupEnd();
+    return data;
+  }
+
+  async getAccount(accountId: string) {
+    const data = await this._workerAdapter.getAccount(accountId);
+
+    console.groupCollapsed("getAccount");
     console.log(data);
     console.groupEnd();
     return data;
@@ -94,6 +105,36 @@ export default class IosBackupAdapter implements DataAdapter {
     const data = await this._workerAdapter.getAttache(input);
 
     console.groupCollapsed("getAttache");
+    console.log(data);
+    console.groupEnd();
+    return data;
+  }
+
+  async getStatistic(input: StatisticController.GetInput[0]) {
+    const data = await this._workerAdapter.getStatistic(input);
+
+    console.groupCollapsed("getStatistic");
+    console.log(data);
+    console.groupEnd();
+    return data;
+  }
+
+  async getWrapped2024(input: Wrapped2024Controller.Wrapped2024Input[0]) {
+    const data = await this._workerAdapter.getWrapped2024(input);
+
+    console.groupCollapsed("getWrapped2024");
+    console.log(data);
+    console.groupEnd();
+    return data;
+  }
+
+  async getWrapped2024RandomMediaMessage(
+    input: Wrapped2024Controller.GetRandomMediaMessageInput[0],
+  ) {
+    const data =
+      await this._workerAdapter.getWrapped2024RandomMediaMessage(input);
+
+    console.groupCollapsed("getWrapped2024RandomMediaMessage");
     console.log(data);
     console.groupEnd();
     return data;

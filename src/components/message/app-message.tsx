@@ -96,6 +96,10 @@ import {
   AppMessageType,
   type AppMessage as AppMessageVM,
 } from "@/lib/schema.ts";
+import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
+import { ScrollArea, ScrollBar } from "../ui/scroll-area";
+import { LinkCard } from "../link-card";
+import { CircleQuestionmarkSolid } from "../icon";
 
 export type AppMessageProps<
   T = {
@@ -388,10 +392,23 @@ export default function AppMessage({
 
     default:
       return (
-        <div className="" {...props}>
-          不支持，解析失败：49/
-          {message.message_entity.msg.appmsg.type as number}
-        </div>
+        <Dialog>
+          <DialogTrigger className="text-start">
+            <LinkCard
+              abstract={`暂未支持的消息类型：${message.message_entity.msg.appmsg.type}`}
+              from={`49:${message.message_entity.msg.appmsg.type}`}
+              icon={<CircleQuestionmarkSolid className=" scale-[135%]" />}
+            />
+          </DialogTrigger>
+          <DialogContent>
+            <ScrollArea>
+              <pre className="text-sm pb-4 text-wrap">
+                {message.raw_message}
+              </pre>
+              <ScrollBar orientation="horizontal" />
+            </ScrollArea>
+          </DialogContent>
+        </Dialog>
       );
   }
 }
