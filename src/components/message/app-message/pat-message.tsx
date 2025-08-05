@@ -1,7 +1,7 @@
 import type { AppMessageProps } from "@/components/message/app-message.tsx";
 import { FormatTextMessageContent } from "@/components/message/text-message.tsx";
 import User from "@/components/user.tsx";
-import type { AppMessageTypeEnum, UserType } from "@/lib/schema.ts";
+import type { AppMessageTypeEnum, UserType } from "@/schema";
 import { useEffect, useRef, useState } from "react";
 
 export interface PatMessageEntity {

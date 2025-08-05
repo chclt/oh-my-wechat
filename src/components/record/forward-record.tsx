@@ -11,7 +11,7 @@ import {
 	MessageDirection,
 	type MessageType,
 	type RecordTypeEnum,
-} from "@/lib/schema.ts";
+} from "@/schema";
 
 import { MessageBubbleGroup } from "@/components/message-bubble-group";
 

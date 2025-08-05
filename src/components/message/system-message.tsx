@@ -1,5 +1,5 @@
 import type { MessageProp } from "@/components/message/message.tsx";
-import type { SystemMessageType } from "@/lib/schema.ts";
+import type { SystemMessageType } from "@/schema";
 
 type SystemMessageProp = MessageProp<SystemMessageType>;
 

@@ -5,7 +5,7 @@ import {
 	FormatTextMessageContent,
 	textMessageVariants,
 } from "@/components/message/text-message.tsx";
-import type { AppMessageTypeEnum } from "@/lib/schema.ts";
+import type { AppMessageTypeEnum } from "@/schema";
 import { cn } from "@/lib/utils.ts";
 
 export interface AnnouncementMessageEntity {

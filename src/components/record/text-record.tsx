@@ -6,7 +6,7 @@ import {
 	MessageDirection,
 	type MessageType,
 	type RecordTypeEnum,
-} from "@/lib/schema.ts";
+} from "@/schema";
 import { cn } from "@/lib/utils.ts";
 import type { RecordType } from "./record";
 

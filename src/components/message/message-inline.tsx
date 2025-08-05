@@ -1,4 +1,4 @@
-import type { MessageType } from "@/lib/schema.ts";
+import type { MessageType } from "@/schema";
 import User from "../user";
 
 interface MessageInlineProps

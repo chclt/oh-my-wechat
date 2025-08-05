@@ -1,5 +1,5 @@
 import Link from "@/components/link.tsx";
-import type { MessageType, RecordTypeEnum } from "@/lib/schema.ts";
+import type { MessageType, RecordTypeEnum } from "@/schema";
 import type { RecordType } from "./record";
 
 interface MusicRecordProps extends React.HTMLAttributes<HTMLDivElement> {

@@ -1,7 +1,7 @@
 import Image from "@/components/image.tsx";
 import MessageInlineWrapper from "@/components/message/message-inline.tsx";
 import type { MessageProp } from "@/components/message/message.tsx";
-import type { StickerMessageType } from "@/lib/schema.ts";
+import type { StickerMessageType } from "@/schema";
 
 type StickerMessageProps = MessageProp<StickerMessageType>;
 

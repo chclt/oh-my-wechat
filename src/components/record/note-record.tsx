@@ -1,4 +1,4 @@
-import type { MessageType, RecordTypeEnum } from "@/lib/schema.ts";
+import type { MessageType, RecordTypeEnum } from "@/schema";
 import { cn, decodeUnicodeReferences } from "@/lib/utils.ts";
 import type { RecordType } from "./record";
 

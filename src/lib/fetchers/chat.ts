@@ -1,5 +1,5 @@
 import type { UseSuspenseQueryOptions } from "@tanstack/react-query";
-import type { ChatType } from "../schema";
+import type { ChatType } from "@/schema";
 import { getDataAdapter } from "../adapter";
 import queryClient from "../query-client";
 

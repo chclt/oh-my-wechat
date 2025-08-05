@@ -1,7 +1,7 @@
 import type { AppMessageProps } from "@/components/message/app-message.tsx";
 import MessageInlineWrapper from "@/components/message/message-inline.tsx";
 import type { RecordType } from "@/components/record/record.tsx";
-import type { AppMessageTypeEnum, FileInfo } from "@/lib/schema.ts";
+import type { AppMessageTypeEnum, FileInfo } from "@/schema";
 import { cn, decodeUnicodeReferences } from "@/lib/utils.ts";
 import { XMLParser } from "fast-xml-parser";
 import { useEffect } from "react";

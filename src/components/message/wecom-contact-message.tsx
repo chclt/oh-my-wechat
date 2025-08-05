@@ -1,6 +1,6 @@
 import Image from "@/components/image.tsx";
 import type { MessageProp } from "@/components/message/message.tsx";
-import type { WeComContactMessageType } from "@/lib/schema.ts";
+import type { WeComContactMessageType } from "@/schema";
 import type * as React from "react";
 import MessageInlineWrapper from "./message-inline";
 

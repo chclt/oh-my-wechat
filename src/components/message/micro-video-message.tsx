@@ -1,7 +1,7 @@
 import LocalVideo from "@/components/local-video.tsx";
 import MessageInlineWrapper from "@/components/message/message-inline.tsx";
 import type { MessageProp } from "@/components/message/message.tsx";
-import type { MicroVideoMessageType } from "@/lib/schema.ts";
+import type { MicroVideoMessageType } from "@/schema";
 
 type MicroVideoMessageProps = MessageProp<MicroVideoMessageType>;
 

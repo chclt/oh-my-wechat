@@ -5,7 +5,7 @@ import type {
 	DatabaseFriendRow,
 	UserType,
 	WCDatabases,
-} from "@/lib/schema.ts";
+} from "@/schema";
 import protobuf from "protobufjs";
 
 const dbContactProtos = {

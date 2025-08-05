@@ -1,5 +1,5 @@
 import Image from "@/components/image.tsx";
-import type { MessageType, RecordTypeEnum } from "@/lib/schema.ts";
+import type { MessageType, RecordTypeEnum } from "@/schema";
 import type { RecordType } from "./record";
 
 interface LiveRecordProps extends React.HTMLAttributes<HTMLDivElement> {

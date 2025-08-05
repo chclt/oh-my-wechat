@@ -1,6 +1,6 @@
 import Image from "@/components/image.tsx";
 import LocalImage from "@/components/local-image.tsx";
-import type { MessageType, RecordTypeEnum } from "@/lib/schema.ts";
+import type { MessageType, RecordTypeEnum } from "@/schema";
 import { cn } from "@/lib/utils.ts";
 
 import { CardTitle } from "@/components/ui/card.tsx";

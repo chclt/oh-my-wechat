@@ -1,7 +1,7 @@
 import { RedEnvelopeIcon } from "@/components/icon.tsx";
 import type { AppMessageProps } from "@/components/message/app-message.tsx";
 import MessageInlineWrapper from "@/components/message/message-inline.tsx";
-import { type AppMessageTypeEnum, MessageDirection } from "@/lib/schema.ts";
+import { type AppMessageTypeEnum, MessageDirection } from "@/schema";
 
 export interface RedEnvelopeMessageEntity {
 	type: AppMessageTypeEnum.RED_ENVELOPE;

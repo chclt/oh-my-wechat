@@ -5,7 +5,7 @@ import {
 	CardFooter,
 	CardTitle,
 } from "@/components/ui/card.tsx";
-import type { MessageType, RecordTypeEnum } from "@/lib/schema.ts";
+import type { MessageType, RecordTypeEnum } from "@/schema";
 import { XMLParser } from "fast-xml-parser";
 import type { RecordType } from "./record";
 

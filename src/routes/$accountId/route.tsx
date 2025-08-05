@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/resizable";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ChatType } from "@/lib/schema";
+import { ChatType } from "@/schema";
 import { cn } from "@/lib/utils";
 import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
 import { useState } from "react";

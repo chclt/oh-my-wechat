@@ -1,5 +1,5 @@
 import { VoiceSuspenseQueryOptions } from "@/lib/fetchers";
-import type { ChatType, VoiceMessageType } from "@/lib/schema.ts";
+import type { ChatType, VoiceMessageType } from "@/schema";
 import { useInViewport } from "@mantine/hooks";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";

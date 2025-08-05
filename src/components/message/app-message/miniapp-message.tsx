@@ -3,7 +3,7 @@ import LocalImage from "@/components/local-image.tsx";
 import type { AppMessageProps } from "@/components/message/app-message.tsx";
 import MessageInlineWrapper from "@/components/message/message-inline.tsx";
 import { CardTitle } from "@/components/ui/card";
-import type { AppMessageTypeEnum } from "@/lib/schema.ts";
+import type { AppMessageTypeEnum } from "@/schema";
 import { cn, decodeUnicodeReferences } from "@/lib/utils";
 
 export interface MiniappMessageEntity {

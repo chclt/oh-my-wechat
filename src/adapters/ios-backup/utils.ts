@@ -1,4 +1,4 @@
-import type { UserType } from "@/lib/schema.ts";
+import type { UserType } from "@/schema";
 import protobuf from "protobufjs";
 import type { Database } from "sql.js";
 

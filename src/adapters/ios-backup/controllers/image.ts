@@ -1,10 +1,5 @@
 import type { RecordType } from "@/components/record/record";
-import type {
-	ChatType,
-	MessageType,
-	PhotpSize,
-	WCDatabases,
-} from "@/lib/schema.ts";
+import type { ChatType, MessageType, PhotpSize, WCDatabases } from "@/schema";
 import CryptoJS from "crypto-js";
 import { getFilesFromManifast } from "../utils";
 

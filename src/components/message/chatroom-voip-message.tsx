@@ -1,9 +1,6 @@
 import { CallIncoming, CallOutgoing } from "@/components/icon.tsx";
 import type { MessageProp } from "@/components/message/message.tsx";
-import {
-	type ChatroomVoipMessageType,
-	MessageDirection,
-} from "@/lib/schema.ts";
+import { type ChatroomVoipMessageType, MessageDirection } from "@/schema";
 
 type ChatroomVoipMessageProps = MessageProp<ChatroomVoipMessageType>;
 

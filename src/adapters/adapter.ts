@@ -1,10 +1,10 @@
-import type { AccountType } from "@/lib/schema";
+import type { AccountType } from "@/schema";
 import type {
 	ChatType,
 	ControllerPaginatorResult,
 	ControllerResult,
 	MessageType,
-} from "@/lib/schema";
+} from "@/schema";
 import type { AttachController } from "./ios-backup/controllers/attach";
 import type { ImageController } from "./ios-backup/controllers/image";
 import type { MessageController } from "./ios-backup/controllers/message";

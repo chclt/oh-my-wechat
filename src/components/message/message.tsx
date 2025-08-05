@@ -14,11 +14,7 @@ import VideoMessage from "@/components/message/video-message.tsx";
 import VoiceMessage from "@/components/message/voice-message.tsx";
 import VoipMessage from "@/components/message/voip-message.tsx";
 import WeComContactMessage from "@/components/message/wecom-contact-message.tsx";
-import {
-	MessageDirection,
-	MessageTypeEnum,
-	type MessageType,
-} from "@/lib/schema.ts";
+import { MessageDirection, MessageTypeEnum, type MessageType } from "@/schema";
 import { formatDateTime } from "@/lib/utils.ts";
 import { ErrorBoundary } from "react-error-boundary";
 import { Route } from "@/routes/$accountId/route.tsx";

@@ -1,6 +1,6 @@
 import { LinkCard } from "@/components/link-card.tsx";
 import type { MessageProp } from "@/components/message/message.tsx";
-import type { MailMessageType } from "@/lib/schema.ts";
+import type { MailMessageType } from "@/schema";
 import MessageInlineWrapper from "./message-inline";
 
 type MailMessageProps = MessageProp<MailMessageType>;

@@ -1,6 +1,6 @@
 import Image from "@/components/image.tsx";
 import Link from "@/components/link.tsx";
-import type { MessageType, RecordTypeEnum } from "@/lib/schema.ts";
+import type { MessageType, RecordTypeEnum } from "@/schema";
 import { cn } from "@/lib/utils";
 import type { RecordType } from "./record";
 interface TingRecordProps extends React.HTMLAttributes<HTMLDivElement> {

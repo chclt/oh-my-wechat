@@ -17,7 +17,7 @@ import {
 	AppMessageTypeEnum,
 	MessageTypeEnum,
 	type MessageType,
-} from "@/lib/schema";
+} from "@/schema";
 import { differenceInMinutes, format, isSameDay } from "date-fns";
 import { MessageBubbleGroup } from "@/components/message-bubble-group";
 import Message from "@/components/message/message";

@@ -6,7 +6,7 @@ import type {
 	UseQueryOptions,
 	UndefinedInitialDataInfiniteOptions,
 } from "@tanstack/react-query";
-import type { ControllerPaginatorResult, MessageType } from "../schema";
+import type { ControllerPaginatorResult, MessageType } from "@/schema";
 import type { MessageController } from "@/adapters/ios-backup/controllers/message";
 import { getDataAdapter } from "../adapter";
 
