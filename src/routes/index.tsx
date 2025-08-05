@@ -7,11 +7,10 @@ import {
 } from "@/components/central-icon.tsx";
 import Image from "@/components/image.tsx";
 import Link from "@/components/link.tsx";
-import { Button } from "@/components/ui/button.tsx";
+import { Button, buttonVariants } from "@/components/ui/button.tsx";
 import { Label } from "@/components/ui/label.tsx";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group.tsx";
 import { cn } from "@/lib/utils.ts";
-import { LoaderIcon } from "lucide-react";
 import { useRef, useState } from "react";
 import logo from "/images/logo.svg?url";
 import IosBackupAdapter from "@/adapters/ios-backup";
@@ -24,6 +23,7 @@ import {
 	LoadDirectoryMutationOptions,
 } from "@/adapters/ios-backup/fetchers";
 import type { AccountType } from "@/schema";
+import { LoaderIcon } from "@/components/icon.tsx";
 
 export const Route = createFileRoute("/")({
 	component: RouteComponent,
@@ -36,13 +36,17 @@ function RouteComponent() {
 
 	const [adapterInited, setAdapterInited] = useState(false);
 
-	const { mutateAsync: loadDirectory } = useMutation(
-		LoadDirectoryMutationOptions(adapterRef.current),
-	);
+	const {
+		mutateAsync: loadDirectory,
+		isPending: isLoadingDirectory,
+		isSuccess: isLoadDirectorySuccess,
+	} = useMutation(LoadDirectoryMutationOptions(adapterRef.current));
 
-	const { mutateAsync: loadAccountDatabase } = useMutation(
-		LoadAccountDatabaseMutationOptions(adapterRef.current),
-	);
+	const {
+		mutateAsync: loadAccountDatabase,
+		isPending: isLoadingAccountDatabase,
+		isSuccess: isLoadAccountDatabaseSuccess,
+	} = useMutation(LoadAccountDatabaseMutationOptions(adapterRef.current));
 
 	const handleDirectorySelect = async (
 		directoryHandle: FileSystemDirectoryHandle | FileList,
@@ -71,7 +75,6 @@ function RouteComponent() {
 		});
 	};
 
-	const [isLoadingDirectory, setIsLoadingDirectory] = useState(false);
 	const [selectedAccountId, setSelectedAccountId] = useState<string>();
 
 	const isWorkerEnabled = typeof Worker !== "undefined";
@@ -91,21 +94,21 @@ function RouteComponent() {
 					{isFSAEnabled && !accountList.length && (
 						<Button
 							variant="outline"
-							className="h-12 py-3 pl-6 pr-3.5 inline-flex gap-1 text-base text-foreground [&_svg]:size-6 rounded-xl border-foreground shadow-none"
-							disabled={!isWorkerEnabled}
+							className="h-12 py-3 ps-6 pe-4 inline-flex text-base rounded-xl [&:not(:disabled)]:border-foreground [&>svg]:size-6"
+							disabled={isLoadingDirectory}
 							onClick={async () => {
-								if ("showOpenFilePicker" in window) {
-									const directoryHandle = await window.showDirectoryPicker();
-									if (
-										(await directoryHandle.requestPermission()) === "granted"
-									) {
-										handleDirectorySelect(directoryHandle);
-									}
+								const directoryHandle = await window.showDirectoryPicker();
+								if ((await directoryHandle.requestPermission()) === "granted") {
+									handleDirectorySelect(directoryHandle);
 								}
 							}}
 						>
 							选择 iTunes 备份
-							<ChevronRightSmallLine />
+							{isLoadingDirectory ? (
+								<LoaderIcon className="scale-90 opacity-75 animate-spin" />
+							) : (
+								<ChevronRightSmallLine />
+							)}
 						</Button>
 					)}
 
@@ -114,32 +117,40 @@ function RouteComponent() {
 						<label className={"relative"}>
 							<input
 								type={"file"}
-								// @ts-ignore
 								webkitdirectory=""
 								className={"peer absolute pointer-events-none opacity-0"}
-								disabled={!isWorkerEnabled || isLoadingDirectory}
+								disabled={
+									!isWorkerEnabled ||
+									isLoadingDirectory ||
+									isLoadDirectorySuccess
+								}
 								onChange={(event) => {
 									if (event.target.files && event.target.files.length > 0) {
-										setIsLoadingDirectory(true);
-										loadDirectory(event.target.files);
-										event.target.files === null;
+										// setIsLoadingDirectory(true);
+										handleDirectorySelect(event.target.files).then(() => {
+											event.target.files === null;
+										});
 									} else {
-										setIsLoadingDirectory(false);
+										// setIsLoadingDirectory(false);
 										event.target.files === null;
 									}
 								}}
 							/>
 							<div
 								className={cn(
-									"whitespace-nowrap rounded-xl text-base font-medium border transition-colors peer-focus-visible:outline-none peer-focus-visible:ring-1 peer-focus-visible:ring-ring peer-disabled:pointer-events-none peer-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-8 [&_svg]:shrink-0",
-									"h-12 py-3 pl-6 pr-3.5 inline-flex gap-1 text-base text-foreground [&_svg]:size-6 rounded-xl border-foreground shadow-none",
+									buttonVariants({
+										variant: "outline",
+										size: "default",
+										className:
+											"h-12 py-3 ps-6 pe-3.5 inline-flex text-base rounded-xl [&:not(:disabled)]:border-foreground",
+									}),
 								)}
 							>
 								打开 iTunes 备份
-								{isLoadingDirectory ? (
-									<LoaderIcon className={"animate-spin"} />
+								{isLoadingDirectory || isLoadDirectorySuccess ? (
+									<LoaderIcon className="scale-90 opacity-75 animate-spin" />
 								) : (
-									<ChevronRightSmallLine className={""} />
+									<ChevronRightSmallLine className={"size-6"} />
 								)}
 							</div>
 						</label>
@@ -147,17 +158,17 @@ function RouteComponent() {
 				</div>
 				{!!accountList.length && (
 					<div className={"justify-self-stretch space-y-4 flex flex-col"}>
-						<div className={"flex gap-3 text-foreground"}>
+						<div className={"flex text-foreground"}>
 							<div>
 								<h4 className={"font-medium"}>选择账号</h4>
-								<p className={"text-sm text-black/45"}>
+								<p className={"mt-0.5 text-sm text-muted-foreground"}>
 									在备份中找到 {accountList.length} 个账号
 								</p>
 							</div>
 						</div>
 
 						<RadioGroup
-							className={"flex flex-wrap gap-4"}
+							className={"flex flex-wrap gap-2.5"}
 							onValueChange={setSelectedAccountId}
 						>
 							{accountList.map((account) => (
@@ -168,7 +179,9 @@ function RouteComponent() {
 									<RadioGroupItem
 										value={account.id}
 										id={account.id}
-										className={"peer z-20 absolute bottom-2 right-2"}
+										className={
+											"peer z-20 absolute bottom-2 right-2 data-[state=checked]:border-foreground"
+										}
 									/>
 									<Label
 										htmlFor={account.id}
@@ -199,9 +212,13 @@ function RouteComponent() {
 						<Button
 							variant="outline"
 							className={
-								"self-end w-fit h-auto py-1.5 pl-4.5 pr-1.5 flex items-center gap-1 [&_svg]:size-6 text-base rounded-xl shadow-none"
+								"self-end w-fit h-11 ps-4.5 pe-2 flex items-center gap-1 text-base rounded-xl [&:not(:disabled)]:border-foreground [&>svg]:size-6"
 							}
-							disabled={!selectedAccountId}
+							disabled={
+								!selectedAccountId ||
+								isLoadingAccountDatabase ||
+								isLoadAccountDatabaseSuccess
+							}
 							onClick={async () => {
 								if (selectedAccountId) {
 									const account = accountList.find(
@@ -214,11 +231,15 @@ function RouteComponent() {
 							}}
 						>
 							打开
-							<ChevronRightSmallLine />
+							{isLoadingAccountDatabase || isLoadAccountDatabaseSuccess ? (
+								<LoaderIcon className="scale-90 opacity-75 animate-spin" />
+							) : (
+								<ChevronRightSmallLine />
+							)}
 						</Button>
 					</div>
 				)}
-				<p className={"mt-7 flex items-center text-sm text-black/45"}>
+				<p className={"mt-7 flex items-center text-sm text-muted-foreground"}>
 					<span
 						className={
 							"mr-1 shrink-0 size-4.5 [&_svg]:size-full relative bottom-px"
