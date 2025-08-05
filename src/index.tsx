@@ -1,7 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
-import { AppProvider } from "@/lib/hooks/appProvider.tsx";
 import { ErrorBoundary } from "react-error-boundary";
 import { QueryClientProvider } from "@tanstack/react-query";
 import queryClient from "@/lib/query-client.ts";
@@ -12,16 +11,14 @@ import router from "./lib/router";
 
 const rootEl = document.getElementById("root");
 if (rootEl) {
-  const root = ReactDOM.createRoot(rootEl);
-  root.render(
-    <React.StrictMode>
-      <QueryClientProvider client={queryClient}>
-        <AppProvider>
-          <RouterProvider router={router} />
-        </AppProvider>
-        <ReactQueryDevtools buttonPosition="bottom-left" />
-        <TanStackRouterDevtools router={router} />
-      </QueryClientProvider>
-    </React.StrictMode>,
-  );
+	const root = ReactDOM.createRoot(rootEl);
+	root.render(
+		<React.StrictMode>
+			<QueryClientProvider client={queryClient}>
+				<RouterProvider router={router} />
+				<ReactQueryDevtools buttonPosition="bottom-left" />
+				<TanStackRouterDevtools router={router} />
+			</QueryClientProvider>
+		</React.StrictMode>,
+	);
 }
