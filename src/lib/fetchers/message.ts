@@ -1,7 +1,6 @@
 import type {
 	InfiniteData,
 	DefaultError,
-	DefinedInitialDataInfiniteOptions,
 	QueryKey,
 	UseQueryOptions,
 	UndefinedInitialDataInfiniteOptions,
