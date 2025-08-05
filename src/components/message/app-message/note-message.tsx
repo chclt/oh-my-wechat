@@ -1,7 +1,6 @@
 import type { AppMessageProps } from "@/components/message/app-message.tsx";
 import MessageInlineWrapper from "@/components/message/message-inline.tsx";
 import type { RecordVM } from "@/components/record/record.tsx";
-import useQuery from "@/lib/hooks/useQuery";
 import type { AppMessageType, FileInfo } from "@/lib/schema.ts";
 import { cn, decodeUnicodeReferences } from "@/lib/utils.ts";
 import { XMLParser } from "fast-xml-parser";

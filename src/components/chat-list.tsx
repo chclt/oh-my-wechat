@@ -8,24 +8,14 @@ import {
 import { useApp } from "@/lib/hooks/appProvider";
 import type { Chat, ControllerResult, MessageVM } from "@/lib/schema.ts";
 import { cn, formatDateTime } from "@/lib/utils.ts";
-import type { WorkerResponse } from "@/lib/worker.ts";
 import { Route } from "@/routes/$accountId/chat/route";
 import { useInViewport } from "@mantine/hooks";
-import {
-  useInfiniteQuery,
-  useQuery,
-  useSuspenseQuery,
-} from "@tanstack/react-query";
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import type React from "react";
-import { forwardRef, useEffect, useRef, useState } from "react";
+import { forwardRef } from "react";
 
-interface ChatListProps
-  extends Omit<React.HTMLAttributes<HTMLLIElement>, "onClick"> {
-  onClick: (chat: Chat) => void;
-}
-
-export default function ChatList({ onClick, ...props }: ChatListProps) {
+export default function ChatList() {
   const { accountId } = Route.useParams();
 
   const { data } = useSuspenseQuery(ChatListSuspenseQueryOptions(accountId));
@@ -35,13 +25,7 @@ export default function ChatList({ onClick, ...props }: ChatListProps) {
       {data
         .sort((i) => (i.is_pinned ? -1 : 1))
         .map((chat) => (
-          <ChatItem
-            key={chat.id}
-            chat={chat}
-            onClick={() => {
-              onClick(chat);
-            }}
-          />
+          <ChatItem key={chat.id} chat={chat} />
         ))}
     </ul>
   );
