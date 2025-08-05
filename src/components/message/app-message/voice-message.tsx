@@ -3,10 +3,7 @@ import UrlMessage, {
 	type UrlMessageEntity,
 } from "@/components/message/app-message/url-message.tsx";
 import MessageInlineWrapper from "@/components/message/message-inline.tsx";
-import type {
-	AppMessageTypeEnum,
-	AppMessage as AppMessageType,
-} from "@/lib/schema.ts";
+import type { AppMessageTypeEnum, AppMessageType } from "@/lib/schema.ts";
 import { decodeUnicodeReferences } from "@/lib/utils.ts";
 
 export interface VoiceMessageEntity {

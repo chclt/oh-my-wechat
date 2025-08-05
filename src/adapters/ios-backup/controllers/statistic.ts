@@ -1,16 +1,16 @@
 import type { ReferMessageEntity } from "@/components/message/app-message/refer-message.tsx";
 import {
-	type AppMessage,
+	type AppMessageType,
 	AppMessageTypeEnum,
-	type Chat,
+	type ChatType,
 	type ControllerPaginatorCursor,
 	type ControllerPaginatorResult,
 	type ControllerResult,
 	MessageDirection,
 	MessageTypeEnum,
 	type MessageType,
-	type TextMessage,
-	type User,
+	type TextMessageType,
+	type UserType,
 	type WCDatabases,
 } from "@/lib/schema.ts";
 import { countStringLength, formatDateTime } from "@/lib/utils.ts";
@@ -22,7 +22,7 @@ import { MessageController } from "./message";
 export interface ChatStatistics {
 	date_contact_added?: string;
 	earliest_message_date?: string;
-	user_message_count?: { user: User; message_count: number }[];
+	user_message_count?: { user: UserType; message_count: number }[];
 
 	message_count?: number;
 	sent_message_count?: number;
@@ -91,7 +91,7 @@ export interface ChatStatistics {
 
 export namespace StatisticController {
 	export type GetInput = [
-		{ chat: Chat; startTime?: Date; endTime?: Date },
+		{ chat: ChatType; startTime?: Date; endTime?: Date },
 		{ databases: WCDatabases },
 	];
 	export type GetOutput = Promise<ControllerResult<ChatStatistics>>;
@@ -498,7 +498,7 @@ export namespace StatisticController {
 					continue;
 
 				const length = countStringLength(
-					(message as TextMessage).message_entity,
+					(message as TextMessageType).message_entity,
 				);
 
 				if (message.direction === MessageDirection.outgoing) {
@@ -507,30 +507,30 @@ export namespace StatisticController {
 					received_word_count += length;
 				}
 
-				((message as TextMessage).message_entity.match(/\[\S+\]/g) ?? []).map(
-					(wxemojiKey) => {
-						if (WechatEmojiTable[wxemojiKey]) {
-							if (message.direction === MessageDirection.outgoing) {
-								let index = sent_wxemoji_usage.findIndex(
-									(i) => i.key === wxemojiKey,
-								);
-								if (index === -1)
-									index =
-										sent_wxemoji_usage.push({ key: wxemojiKey, count: 0 }) - 1;
-								sent_wxemoji_usage[index].count++;
-							} else {
-								let index = received_wxemoji_usage.findIndex(
-									(i) => i.key === wxemojiKey,
-								);
-								if (index === -1)
-									index =
-										received_wxemoji_usage.push({ key: wxemojiKey, count: 0 }) -
-										1;
-								received_wxemoji_usage[index].count++;
-							}
+				(
+					(message as TextMessageType).message_entity.match(/\[\S+\]/g) ?? []
+				).map((wxemojiKey) => {
+					if (WechatEmojiTable[wxemojiKey]) {
+						if (message.direction === MessageDirection.outgoing) {
+							let index = sent_wxemoji_usage.findIndex(
+								(i) => i.key === wxemojiKey,
+							);
+							if (index === -1)
+								index =
+									sent_wxemoji_usage.push({ key: wxemojiKey, count: 0 }) - 1;
+							sent_wxemoji_usage[index].count++;
+						} else {
+							let index = received_wxemoji_usage.findIndex(
+								(i) => i.key === wxemojiKey,
+							);
+							if (index === -1)
+								index =
+									received_wxemoji_usage.push({ key: wxemojiKey, count: 0 }) -
+									1;
+							received_wxemoji_usage[index].count++;
 						}
-					},
-				);
+					}
+				});
 			}
 		} while (
 			result.data.length === limit &&
@@ -569,7 +569,7 @@ export namespace StatisticController {
 
 				try {
 					length = countStringLength(
-						(message as AppMessage<ReferMessageEntity>).message_entity.msg
+						(message as AppMessageType<ReferMessageEntity>).message_entity.msg
 							.appmsg.title,
 					);
 				} catch (e) {
@@ -584,7 +584,7 @@ export namespace StatisticController {
 
 				(
 					(
-						message as AppMessage<ReferMessageEntity>
+						message as AppMessageType<ReferMessageEntity>
 					).message_entity.msg.appmsg.title.match(/\[\S+\]/g) ?? []
 				).map((wxemojiKey) => {
 					if (WechatEmojiTable[wxemojiKey]) {

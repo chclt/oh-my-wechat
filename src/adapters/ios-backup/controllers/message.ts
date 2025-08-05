@@ -18,34 +18,34 @@ import { ChatController } from "./chat.ts";
 import { ContactController } from "./contact.ts";
 import { _store } from "../worker.ts";
 import {
-	type AppMessage,
+	type AppMessageType,
 	AppMessageTypeEnum,
-	type Chat,
-	type Chatroom,
-	type ChatroomVoipMessage,
-	type ContactMessage,
+	type ChatType,
+	type ChatroomType,
+	type ChatroomVoipMessageType,
+	type ContactMessageType,
 	type ControllerPaginatorCursor,
 	type ControllerPaginatorResult,
 	type ControllerResult,
 	type DatabaseMessageRow,
-	type ImageMessage,
-	type LocationMessage,
-	type MailMessage,
+	type ImageMessageType,
+	type LocationMessageType,
+	type MailMessageType,
 	MessageDirection,
 	MessageTypeEnum,
 	type MessageType,
-	type MicroVideoMessage,
-	type StickerMessage,
-	type SystemExtendedMessage,
-	type SystemMessage,
-	type TextMessage,
-	type User,
-	type VerityMessage,
-	type VideoMessage,
-	type VoiceMessage,
-	type VoipMessage,
+	type MicroVideoMessageType,
+	type StickerMessageType,
+	type SystemExtendedMessageType,
+	type SystemMessageType,
+	type TextMessageType,
+	type UserType,
+	type VerityMessageType,
+	type VideoMessageType,
+	type VoiceMessageType,
+	type VoipMessageType,
 	type WCDatabases,
-	type WeComContactMessage,
+	type WeComContactMessageType,
 } from "@/lib/schema.ts";
 import CryptoJS from "crypto-js";
 import { XMLParser } from "fast-xml-parser";
@@ -58,7 +58,7 @@ export namespace MessageController {
 			databases,
 			parseReplyMessage = true,
 		}: {
-			chat?: Chat;
+			chat?: ChatType;
 			databases: WCDatabases;
 			parseReplyMessage?: boolean;
 		},
@@ -138,7 +138,7 @@ export namespace MessageController {
 		const usersArray = (
 			await ContactController.findAll({ ids: messageSenderIds }, { databases })
 		).data;
-		const usersTable: { [key: string]: User | Chatroom } = {};
+		const usersTable: { [key: string]: UserType | ChatroomType } = {};
 		usersArray.map((user) => {
 			usersTable[user.id] = user;
 		});
@@ -191,7 +191,7 @@ export namespace MessageController {
 					return {
 						...message,
 						message_entity: raw_message_row.Message,
-					} as TextMessage;
+					} as TextMessageType;
 				}
 
 				case MessageTypeEnum.IMAGE: {
@@ -201,7 +201,7 @@ export namespace MessageController {
 					return {
 						...message,
 						message_entity: messageEntity,
-					} as ImageMessage;
+					} as ImageMessageType;
 				}
 
 				case MessageTypeEnum.VOICE: {
@@ -211,7 +211,7 @@ export namespace MessageController {
 					return {
 						...message,
 						message_entity: messageEntity,
-					} as VoiceMessage;
+					} as VoiceMessageType;
 				}
 
 				case MessageTypeEnum.MAIL: {
@@ -221,7 +221,7 @@ export namespace MessageController {
 					return {
 						...message,
 						message_entity: messageEntity,
-					} as MailMessage;
+					} as MailMessageType;
 				}
 
 				case MessageTypeEnum.VERITY: {
@@ -231,7 +231,7 @@ export namespace MessageController {
 					return {
 						...message,
 						message_entity: messageEntity,
-					} as VerityMessage;
+					} as VerityMessageType;
 				}
 
 				case MessageTypeEnum.CONTACT: {
@@ -241,7 +241,7 @@ export namespace MessageController {
 					return {
 						...message,
 						message_entity: messageEntity,
-					} as ContactMessage;
+					} as ContactMessageType;
 				}
 
 				case MessageTypeEnum.VIDEO: {
@@ -251,7 +251,7 @@ export namespace MessageController {
 					return {
 						...message,
 						message_entity: messageEntity,
-					} as VideoMessage;
+					} as VideoMessageType;
 				}
 
 				case MessageTypeEnum.STICKER: {
@@ -261,7 +261,7 @@ export namespace MessageController {
 					return {
 						...message,
 						message_entity: messageEntity,
-					} as StickerMessage;
+					} as StickerMessageType;
 				}
 
 				case MessageTypeEnum.LOCATION: {
@@ -272,7 +272,7 @@ export namespace MessageController {
 					return {
 						...message,
 						message_entity: messageEntity,
-					} as LocationMessage;
+					} as LocationMessageType;
 				}
 
 				case MessageTypeEnum.APP: {
@@ -293,7 +293,7 @@ export namespace MessageController {
 					return {
 						...message,
 						message_entity: messageEntity,
-					} as AppMessage<ReferMessageEntity>;
+					} as AppMessageType<ReferMessageEntity>;
 				}
 
 				case MessageTypeEnum.VOIP: {
@@ -304,7 +304,7 @@ export namespace MessageController {
 					return {
 						...message,
 						message_entity: messageEntity,
-					} as VoipMessage;
+					} as VoipMessageType;
 				}
 
 				case MessageTypeEnum.MICROVIDEO: {
@@ -315,7 +315,7 @@ export namespace MessageController {
 					return {
 						...message,
 						message_entity: messageEntity,
-					} as MicroVideoMessage;
+					} as MicroVideoMessageType;
 				}
 
 				case MessageTypeEnum.GROUP_VOIP: {
@@ -326,7 +326,7 @@ export namespace MessageController {
 					return {
 						...message,
 						message_entity: messageEntity,
-					} as ChatroomVoipMessage;
+					} as ChatroomVoipMessageType;
 				}
 
 				case MessageTypeEnum.WECOM_CONTACT: {
@@ -337,7 +337,7 @@ export namespace MessageController {
 					return {
 						...message,
 						message_entity: messageEntity,
-					} as WeComContactMessage;
+					} as WeComContactMessageType;
 				}
 
 				case MessageTypeEnum.SYSTEM: {
@@ -346,7 +346,7 @@ export namespace MessageController {
 					return {
 						...message,
 						message_entity: messageEntity,
-					} as SystemMessage;
+					} as SystemMessageType;
 				}
 
 				case MessageTypeEnum.SYSTEM_EXTENDED: {
@@ -357,7 +357,7 @@ export namespace MessageController {
 					return {
 						...message,
 						message_entity: messageEntity,
-					} as SystemExtendedMessage;
+					} as SystemExtendedMessageType;
 				}
 
 				default: {
@@ -389,7 +389,9 @@ export namespace MessageController {
 			});
 
 			for (const index of messageIndexesHasReplyMessage) {
-				(messages[index] as AppMessage<ReferMessageEntity>).reply_to_message =
+				(
+					messages[index] as AppMessageType<ReferMessageEntity>
+				).reply_to_message =
 					replyMessageTable[
 						(
 							messages[index]
@@ -404,7 +406,7 @@ export namespace MessageController {
 
 	export type AllInput = [
 		{
-			chat: Chat;
+			chat: ChatType;
 			type?: MessageTypeEnum | MessageTypeEnum[];
 			type_app?: AppMessageTypeEnum | AppMessageTypeEnum[]; // 有 bug
 			cursor?: string;
@@ -869,7 +871,7 @@ export namespace MessageController {
 
 	export type findInput = [
 		{
-			chat: Chat;
+			chat: ChatType;
 			messageIds: string[];
 			parseReplyMessage?: boolean;
 		},
