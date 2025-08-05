@@ -82,7 +82,6 @@ function RouteComponent() {
 	]);
 
 	useEffect(() => {
-		console.log(accountList.length);
 		switch (accountList.length) {
 			case 0:
 				toggleStep("SELECT_DIRECTORY");
