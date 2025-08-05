@@ -8,7 +8,6 @@ import type {
   VideoMessage,
 } from "@/lib/schema.ts";
 import type React from "react";
-import { forwardRef, useEffect, useRef, useState } from "react";
 import { VideoSuspenseQueryOptions } from "@/lib/fetchers";
 import { useInViewport } from "@mantine/hooks";
 
@@ -17,30 +16,30 @@ interface LocalVideoProps extends React.VideoHTMLAttributes<HTMLVideoElement> {
   message: VideoMessage | MicroVideoMessage;
 }
 
-const LocalVideo = forwardRef<HTMLVideoElement, LocalVideoProps>(
-  ({ chat, message, ...props }, ref) => {
-    const { ref: videoRef, inViewport } = useInViewport();
+export default function LocalVideo({
+  chat,
+  message,
+  ...props
+}: LocalVideoProps) {
+  const { ref: videoRef, inViewport } = useInViewport();
 
-    const { data } = useQuery({
-      ...VideoSuspenseQueryOptions({
-        chat,
-        message,
-      }),
-      enabled: inViewport,
-    });
+  const { data } = useQuery({
+    ...VideoSuspenseQueryOptions({
+      chat,
+      message,
+    }),
+    enabled: inViewport,
+  });
 
-    return (
-      <video
-        ref={videoRef}
-        src={data?.src}
-        poster={data?.poster}
-        controls
-        // width={result?.[0]?.width}
-        // height={result?.[0]?.height}
-        {...props}
-      />
-    );
-  },
-);
-
-export default LocalVideo;
+  return (
+    <video
+      ref={videoRef}
+      src={data?.src}
+      poster={data?.poster}
+      controls
+      // width={result?.[0]?.width}
+      // height={result?.[0]?.height}
+      {...props}
+    />
+  );
+}
