@@ -399,7 +399,7 @@ export default function AppMessage({
 					<DialogTrigger className="text-start">
 						<LinkCard
 							abstract="暂未支持的消息类型，点击查看原始数据"
-							from={`49:${message.message_entity.msg.appmsg.type}`}
+							from={`错误代码：49:${message.message_entity.msg.appmsg.type}`}
 							icon={<CircleQuestionmarkSolid className=" scale-[135%]" />}
 						/>
 					</DialogTrigger>
