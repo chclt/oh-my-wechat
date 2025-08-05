@@ -1,6 +1,6 @@
 import type { AppMessageProps } from "@/components/message/app-message.tsx";
 import MessageInlineWrapper from "@/components/message/message-inline.tsx";
-import type { AppMessageTypeEnum } from "@/lib/schema.ts";
+import type { AppMessageTypeEnum } from "@/schema";
 import { cn, decodeUnicodeReferences } from "@/lib/utils.ts";
 
 export interface ForwardMessage2Entity {

@@ -3,7 +3,7 @@ import type {
 	ChatType,
 	MicroVideoMessageType,
 	VideoMessageType,
-} from "@/lib/schema.ts";
+} from "@/schema";
 import type React from "react";
 import { VideoSuspenseQueryOptions } from "@/lib/fetchers";
 import { useInViewport } from "@mantine/hooks";

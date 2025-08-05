@@ -23,7 +23,7 @@ import {
 	LoadAccountDatabaseMutationOptions,
 	LoadDirectoryMutationOptions,
 } from "@/adapters/ios-backup/fetchers";
-import type { AccountType } from "@/lib/schema";
+import type { AccountType } from "@/schema";
 
 export const Route = createFileRoute("/")({
 	component: RouteComponent,

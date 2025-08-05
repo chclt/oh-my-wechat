@@ -1,6 +1,6 @@
 import type { DefaultError, MutationOptions } from "@tanstack/react-query";
 import type IosBackupAdapter from ".";
-import type { AccountType } from "@/lib/schema";
+import type { AccountType } from "@/schema";
 
 export function LoadDirectoryMutationOptions(
 	adapterInstance: IosBackupAdapter,

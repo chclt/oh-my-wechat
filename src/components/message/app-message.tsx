@@ -92,7 +92,7 @@ import VoiceMessage, {
 	type VoiceMessageEntity,
 } from "@/components/message/app-message/voice-message.tsx";
 import type { MessageProp } from "@/components/message/message.tsx";
-import { AppMessageTypeEnum, type AppMessageType } from "@/lib/schema.ts";
+import { AppMessageTypeEnum, type AppMessageType } from "@/schema";
 import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 import { LinkCard } from "../link-card";

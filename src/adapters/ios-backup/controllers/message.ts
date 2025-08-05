@@ -46,7 +46,7 @@ import {
 	type VoipMessageType,
 	type WCDatabases,
 	type WeComContactMessageType,
-} from "@/lib/schema.ts";
+} from "@/schema";
 import CryptoJS from "crypto-js";
 import { XMLParser } from "fast-xml-parser";
 

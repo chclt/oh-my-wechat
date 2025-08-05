@@ -3,7 +3,7 @@ import MessageInlineWrapper from "@/components/message/message-inline.tsx";
 import type { MessageProp } from "@/components/message/message.tsx";
 import User from "@/components/user.tsx";
 import WechatEmoji from "@/components/wechat-emoji.tsx";
-import { MessageDirection, type TextMessageType } from "@/lib/schema.ts";
+import { MessageDirection, type TextMessageType } from "@/schema";
 import WechatEmojiTable from "@/lib/wechat-emojis.ts";
 import { cva } from "class-variance-authority";
 import type { ReactNode } from "react";

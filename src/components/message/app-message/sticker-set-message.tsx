@@ -2,7 +2,7 @@ import Image from "@/components/image.tsx";
 import { LinkCard } from "@/components/link-card.tsx";
 import type { AppMessageProps } from "@/components/message/app-message.tsx";
 import MessageInlineWrapper from "@/components/message/message-inline.tsx";
-import type { AppMessageTypeEnum } from "@/lib/schema.ts";
+import type { AppMessageTypeEnum } from "@/schema";
 import { decodeUnicodeReferences } from "@/lib/utils.ts";
 
 export interface StickerSetMessageEntity {

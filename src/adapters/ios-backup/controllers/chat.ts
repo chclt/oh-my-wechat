@@ -7,7 +7,7 @@ import type {
 	PrivateChatType,
 	UserType,
 	WCDatabases,
-} from "@/lib/schema.ts";
+} from "@/schema";
 import CryptoJS from "crypto-js";
 import { ContactController } from "./contact";
 

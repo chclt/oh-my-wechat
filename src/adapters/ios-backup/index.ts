@@ -1,7 +1,7 @@
 import * as Comlink from "comlink";
 import AdapterWorker from "./worker.ts?worker";
 import type { AdapterWorkerType } from "./worker.ts";
-import type { UserType } from "@/lib/schema";
+import type { UserType } from "@/schema";
 import type { MessageController } from "./controllers/message";
 
 import type { DataAdapter } from "../adapter.ts";

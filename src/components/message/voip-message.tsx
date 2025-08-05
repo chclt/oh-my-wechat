@@ -1,6 +1,6 @@
 import { CallIncoming, CallOutgoing } from "@/components/icon.tsx";
 import type { MessageProp } from "@/components/message/message.tsx";
-import { MessageDirection, type VoipMessageType } from "@/lib/schema.ts";
+import { MessageDirection, type VoipMessageType } from "@/schema";
 
 type VoipMessageProps = MessageProp<VoipMessageType>;
 export interface VoipMessageEntity {

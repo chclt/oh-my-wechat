@@ -16,7 +16,7 @@ import {
 	MessageDirection,
 	type MessageType,
 	type RecordTypeEnum,
-} from "@/lib/schema.ts";
+} from "@/schema";
 import { decodeUnicodeReferences } from "@/lib/utils.ts";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { cva } from "class-variance-authority";

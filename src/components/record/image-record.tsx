@@ -1,5 +1,5 @@
 import LocalImage from "@/components/local-image";
-import type { MessageType, RecordTypeEnum } from "@/lib/schema.ts";
+import type { MessageType, RecordTypeEnum } from "@/schema";
 import { cn } from "@/lib/utils.ts";
 import type { RecordType } from "./record";
 

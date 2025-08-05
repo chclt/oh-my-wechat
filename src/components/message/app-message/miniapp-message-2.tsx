@@ -2,7 +2,7 @@ import type { AppMessageProps } from "@/components/message/app-message.tsx";
 import MiniappMessage, {
 	type MiniappMessageEntity,
 } from "@/components/message/app-message/miniapp-message.tsx";
-import type { AppMessageTypeEnum, AppMessageType } from "@/lib/schema.ts";
+import type { AppMessageTypeEnum, AppMessageType } from "@/schema";
 
 export interface MiniappMessage2Entity {
 	type: AppMessageTypeEnum.MINIAPP_2;

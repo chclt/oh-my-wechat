@@ -12,7 +12,7 @@ import {
 	type TextMessageType,
 	type UserType,
 	type WCDatabases,
-} from "@/lib/schema.ts";
+} from "@/schema";
 import { countStringLength, formatDateTime } from "@/lib/utils.ts";
 import WechatEmojiTable from "@/lib/wechat-emojis.ts";
 import CryptoJS from "crypto-js";

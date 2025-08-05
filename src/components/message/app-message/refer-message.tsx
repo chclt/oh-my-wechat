@@ -6,7 +6,7 @@ import {
 	textMessageVariants,
 } from "@/components/message/text-message.tsx";
 import User from "@/components/user.tsx";
-import type { AppMessageTypeEnum } from "@/lib/schema.ts";
+import type { AppMessageTypeEnum } from "@/schema";
 import { cn } from "@/lib/utils";
 
 export interface ReferMessageEntity {

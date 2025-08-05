@@ -5,7 +5,7 @@ import {
 	CardFooter,
 	CardTitle,
 } from "@/components/ui/card.tsx";
-import type { MessageType, RecordTypeEnum } from "@/lib/schema.ts";
+import type { MessageType, RecordTypeEnum } from "@/schema";
 import type { RecordType } from "./record";
 
 interface ChannelRecordProps extends React.HTMLAttributes<HTMLDivElement> {

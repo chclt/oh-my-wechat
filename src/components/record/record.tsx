@@ -1,7 +1,7 @@
 import LiveRecord, {
 	type LiveRecordEntity,
 } from "@/components/record/live-record.tsx";
-import { type MessageType, RecordTypeEnum } from "@/lib/schema";
+import { type MessageType, RecordTypeEnum } from "@/schema";
 import { decodeUnicodeReferences } from "@/lib/utils";
 import { ErrorBoundary } from "react-error-boundary";
 import AttatchRecord, { type AttatchRecordEntity } from "./attatch-record";

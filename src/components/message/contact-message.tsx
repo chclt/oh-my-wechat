@@ -7,7 +7,7 @@ import {
 	CardFooter,
 	CardTitle,
 } from "@/components/ui/card.tsx";
-import type { ContactMessageType } from "@/lib/schema.ts";
+import type { ContactMessageType } from "@/schema";
 import type * as React from "react";
 
 type ContactMessageProps = MessageProp<ContactMessageType>;

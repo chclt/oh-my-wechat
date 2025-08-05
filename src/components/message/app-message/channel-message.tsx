@@ -7,7 +7,7 @@ import {
 	CardFooter,
 	CardTitle,
 } from "@/components/ui/card.tsx";
-import type { AppMessageTypeEnum } from "@/lib/schema.ts";
+import type { AppMessageTypeEnum } from "@/schema";
 
 export interface ChannelMessageEntity {
 	type: AppMessageTypeEnum.CHANNEL;

@@ -1,9 +1,4 @@
-import type {
-	ChatType,
-	MessageType,
-	VoiceInfo,
-	WCDatabases,
-} from "@/lib/schema.ts";
+import type { ChatType, MessageType, VoiceInfo, WCDatabases } from "@/schema";
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { toBlobURL } from "@ffmpeg/util";
 import CryptoJS from "crypto-js";

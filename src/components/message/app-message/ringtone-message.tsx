@@ -1,5 +1,5 @@
 import type { AppMessageProps } from "@/components/message/app-message.tsx";
-import type { AppMessageTypeEnum } from "@/lib/schema.ts";
+import type { AppMessageTypeEnum } from "@/schema";
 
 export interface RingtoneMessageEntity {
 	type: AppMessageTypeEnum.RINGTONE;

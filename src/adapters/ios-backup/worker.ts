@@ -7,7 +7,7 @@ import type {
 	UserType,
 	WCDatabaseNames,
 	WCDatabases,
-} from "@/lib/schema";
+} from "@/schema";
 import {
 	getFileFromDirectory,
 	getFilesFromManifast,

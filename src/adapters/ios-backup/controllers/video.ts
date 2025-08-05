@@ -1,9 +1,4 @@
-import type {
-	ChatType,
-	MessageType,
-	VideoInfo,
-	WCDatabases,
-} from "@/lib/schema.ts";
+import type { ChatType, MessageType, VideoInfo, WCDatabases } from "@/schema";
 import CryptoJS from "crypto-js";
 import { getFilesFromManifast } from "../utils";
 
