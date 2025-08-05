@@ -23,7 +23,6 @@ import { VideoController } from "./controllers/video";
 import { VoiceController } from "./controllers/voice";
 import { AttachController } from "./controllers/attach";
 import { StatisticController } from "./controllers/statistic";
-import { Wrapped2024Controller } from "./controllers/wrapped-2024";
 
 import * as Comlink from "comlink";
 
@@ -89,14 +88,6 @@ export interface AdapterWorkerType {
   getStatistic: (
     controllerInput: StatisticController.GetInput[0],
   ) => StatisticController.GetOutput;
-
-  getWrapped2024: (
-    controllerInput: Wrapped2024Controller.Wrapped2024Input[0],
-  ) => Wrapped2024Controller.Wrapped2024Output;
-
-  getWrapped2024RandomMediaMessage: (
-    controllerInput: Wrapped2024Controller.GetRandomMediaMessageInput[0],
-  ) => Wrapped2024Controller.GetRandomMediaMessageOutput;
 }
 
 export const _store: AdapterWorkerStore = {
@@ -326,19 +317,6 @@ const adapterWorker: AdapterWorkerType = {
     return await StatisticController.get(controllerInput, {
       databases: _store.databases,
     });
-  },
-
-  getWrapped2024: async (controllerInput) => {
-    return await Wrapped2024Controller.wrapped2024(controllerInput, {
-      databases: _store.databases,
-    });
-  },
-
-  getWrapped2024RandomMediaMessage: async (controllerInput) => {
-    return await Wrapped2024Controller.get_random_media_message(
-      controllerInput,
-      { databases: _store.databases },
-    );
   },
 };
 

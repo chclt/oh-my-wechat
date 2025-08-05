@@ -1,7 +1,6 @@
-# OhMyWeChat：微信备份 & 数据报告
+# OhMyWeChat：微信备份浏览器
 
 这是一个为微信设计的备份阅读器，总体上还原了微信，但经过了无数的重新设计，看起来焕然一新~  
-以及，刚刚糊完（不是）做完的微信年度数据报告
 
 [关注我的 Telegram 频道](https://t.me/chclt_hi) | [关注我的 Twitter](https://twitter.com/realChclt)
 
@@ -25,7 +24,7 @@
 
   ![Oh My WeChat Components](https://github.com/user-attachments/assets/e46e4db9-5cd3-4a5a-952e-320044b8630e)
 
-- 2024 微信年度数据报告
+- <del>2024 微信年度数据报告</del> (已下线)
 
   ![WeChat Wrapped 2024](https://github.com/user-attachments/assets/76b31eca-c671-43a9-8aa4-cb77e396e41c)
 
