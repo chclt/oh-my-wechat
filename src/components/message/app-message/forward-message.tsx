@@ -218,7 +218,7 @@ export default function ForwardMessage({
                       is_openim: false,
                     }}
                     showUsername={true}
-                    className={"[&>img]:top-[3.125rem]"}
+                    className="[&>img]:top-12.5"
                   >
                     <Record message={message} record={record} />
                   </MessageBubbleGroup>

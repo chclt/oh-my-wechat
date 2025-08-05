@@ -199,7 +199,7 @@ function RouteComponent() {
             <Button
               variant="outline"
               className={
-                "self-end w-fit h-auto py-1.5 pl-[1.125rem] pr-1.5 flex items-center gap-1 [&_svg]:size-6 text-base rounded-xl shadow-none"
+                "self-end w-fit h-auto py-1.5 pl-4.5 pr-1.5 flex items-center gap-1 [&_svg]:size-6 text-base rounded-xl shadow-none"
               }
               disabled={!selectedAccountId}
               onClick={async () => {
@@ -221,7 +221,7 @@ function RouteComponent() {
         <p className={"mt-7 flex items-center text-sm text-black/45"}>
           <span
             className={
-              "mr-1 shrink-0 size-[1.125rem] [&_svg]:size-full relative bottom-px"
+              "mr-1 shrink-0 size-4.5 [&_svg]:size-full relative bottom-px"
             }
           >
             <TriangleExclamationLine className={"inline"} />

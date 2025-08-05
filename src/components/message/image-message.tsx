@@ -86,7 +86,7 @@ export default function ImageMessage({
             size="origin"
             alt={"图片"}
             className={
-              "max-w-[16em] max-h-[32rem] min-w-32 min-h-16 object-contain bg-white"
+              "max-w-[16em] max-h-128 min-w-32 min-h-16 object-contain bg-white"
             }
           />
         </div>

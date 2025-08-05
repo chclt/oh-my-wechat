@@ -124,19 +124,19 @@ function RouteComponent() {
       <ScrollAreaPrimitive.Root
         className={cn(
           "relative overflow-hidden contain-strict bg-neutral-100",
-          "[&_[data-orientation]]:z-50",
-          "w-full h-full [&>div>div]:!block",
+          "**:data-orientation:z-50",
+          "w-full h-full [&>div>div]:block!",
         )}
       >
         <ScrollAreaPrimitive.Viewport
           className="h-full w-full"
           onScroll={onScroll}
         >
-          <div className="z-20 sticky top-0 mb-4 w-full h-[4.5rem] px-6 flex items-center bg-white/80 backdrop-blur">
+          <div className="z-20 sticky top-0 mb-4 w-full h-18 px-6 flex items-center bg-white/80 backdrop-blur">
             <h2 className={"font-medium text-lg"}>{chat.title}</h2>
           </div>
 
-          <div className={"mx-auto max-w-screen-md p-4 flex flex-col gap-6"}>
+          <div className="mx-auto max-w-3xl p-4 flex flex-col gap-6">
             {hasPreviousPage && (
               <div className="flex justify-center items-center text-neutral-400">
                 <LoaderIcon className="animate-spin" />

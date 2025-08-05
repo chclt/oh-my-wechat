@@ -27,7 +27,7 @@ function RouteComponent() {
         <Suspense>
           <div className={"relative w-full h-full"}>
             <div className={"absolute inset-0"}>
-              <ScrollArea className={"w-full h-full [&>div>div]:!block"}>
+              <ScrollArea className={"w-full h-full [&>div>div]:block!"}>
                 <ChatList />
               </ScrollArea>
             </div>
