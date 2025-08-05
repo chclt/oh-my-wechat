@@ -11,7 +11,7 @@ import { Button, buttonVariants } from "@/components/ui/button.tsx";
 import { Label } from "@/components/ui/label.tsx";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group.tsx";
 import { cn } from "@/lib/utils.ts";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import logo from "/images/logo.svg?url";
 import IosBackupAdapter from "@/adapters/ios-backup";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -24,6 +24,7 @@ import {
 } from "@/adapters/ios-backup/fetchers";
 import type { AccountType } from "@/schema";
 import { LoaderIcon } from "@/components/icon.tsx";
+import { useToggle } from "@mantine/hooks";
 
 export const Route = createFileRoute("/")({
 	component: RouteComponent,
@@ -74,6 +75,12 @@ function RouteComponent() {
 			});
 		});
 	};
+
+	useEffect(() => {
+		if (accountList.length === 1) {
+			handleAccountSelect(accountList[0]);
+		}
+	}, [accountList]);
 
 	const [selectedAccountId, setSelectedAccountId] = useState<string>();
 
