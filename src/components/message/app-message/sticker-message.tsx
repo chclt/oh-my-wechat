@@ -38,9 +38,9 @@ export default function StickerMessage({
         <LocalImage
           chat={chat!}
           message={message}
-          size={"origin"}
-          domain={"opendata"}
-          className={"max-w-[8rem]"}
+          size="origin"
+          domain="opendata"
+          className="max-w-32"
         />
       </div>
     );
