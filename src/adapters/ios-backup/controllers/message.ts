@@ -19,7 +19,7 @@ import { ContactController } from "./contact.ts";
 import { _store } from "../worker.ts";
 import {
 	type AppMessage,
-	AppMessageType,
+	AppMessageTypeEnum,
 	type Chat,
 	type Chatroom,
 	type ChatroomVoipMessage,
@@ -32,8 +32,8 @@ import {
 	type LocationMessage,
 	type MailMessage,
 	MessageDirection,
-	MessageType,
-	type MessageVM,
+	MessageTypeEnum,
+	type MessageType,
 	type MicroVideoMessage,
 	type StickerMessage,
 	type SystemExtendedMessage,
@@ -62,7 +62,7 @@ export namespace MessageController {
 			databases: WCDatabases;
 			parseReplyMessage?: boolean;
 		},
-	): Promise<MessageVM[]> {
+	): Promise<MessageType[]> {
 		const messageSenderIds = raw_message_rows
 			.map((raw_message_row) => {
 				if ((raw_message_row.Message as unknown) === null) {
@@ -96,7 +96,7 @@ export namespace MessageController {
 						rawMessageContent = raw_message_row.Message;
 						senderId = _store.account.id;
 					} else if (
-						raw_message_row.Type === MessageType.SYSTEM ||
+						raw_message_row.Type === MessageTypeEnum.SYSTEM ||
 						raw_message_row.Message.startsWith("<") ||
 						raw_message_row.Message.startsWith('"<')
 					) {
@@ -109,7 +109,7 @@ export namespace MessageController {
 						if (messageXml?.msg?.fromusername) {
 							senderId = messageXml.msg.fromusername;
 						} else {
-							if (raw_message_row.Type === MessageType.VIDEO) {
+							if (raw_message_row.Type === MessageTypeEnum.VIDEO) {
 								senderId = (messageXml as VideoMessageEntity).msg.videomsg[
 									"@_fromusername"
 								];
@@ -187,14 +187,14 @@ export namespace MessageController {
 			});
 
 			switch (raw_message_row.Type) {
-				case MessageType.TEXT: {
+				case MessageTypeEnum.TEXT: {
 					return {
 						...message,
 						message_entity: raw_message_row.Message,
 					} as TextMessage;
 				}
 
-				case MessageType.IMAGE: {
+				case MessageTypeEnum.IMAGE: {
 					const messageEntity: ImageMessageEntity = xmlParser.parse(
 						raw_message_row.Message,
 					);
@@ -204,7 +204,7 @@ export namespace MessageController {
 					} as ImageMessage;
 				}
 
-				case MessageType.VOICE: {
+				case MessageTypeEnum.VOICE: {
 					const messageEntity: VoiceMessageEntity = xmlParser.parse(
 						raw_message_row.Message,
 					);
@@ -214,7 +214,7 @@ export namespace MessageController {
 					} as VoiceMessage;
 				}
 
-				case MessageType.MAIL: {
+				case MessageTypeEnum.MAIL: {
 					const messageEntity: MailMessageEntity = xmlParser.parse(
 						raw_message_row.Message,
 					);
@@ -224,7 +224,7 @@ export namespace MessageController {
 					} as MailMessage;
 				}
 
-				case MessageType.VERITY: {
+				case MessageTypeEnum.VERITY: {
 					const messageEntity: VerityMessageEntity = xmlParser.parse(
 						raw_message_row.Message,
 					);
@@ -234,7 +234,7 @@ export namespace MessageController {
 					} as VerityMessage;
 				}
 
-				case MessageType.CONTACT: {
+				case MessageTypeEnum.CONTACT: {
 					const messageEntity: ContactMessageEntity = xmlParser.parse(
 						raw_message_row.Message,
 					);
@@ -244,7 +244,7 @@ export namespace MessageController {
 					} as ContactMessage;
 				}
 
-				case MessageType.VIDEO: {
+				case MessageTypeEnum.VIDEO: {
 					const messageEntity: VideoMessageEntity = xmlParser.parse(
 						raw_message_row.Message,
 					);
@@ -254,7 +254,7 @@ export namespace MessageController {
 					} as VideoMessage;
 				}
 
-				case MessageType.STICKER: {
+				case MessageTypeEnum.STICKER: {
 					const messageEntity: StickerMessageEntity = xmlParser.parse(
 						raw_message_row.Message,
 					);
@@ -264,7 +264,7 @@ export namespace MessageController {
 					} as StickerMessage;
 				}
 
-				case MessageType.LOCATION: {
+				case MessageTypeEnum.LOCATION: {
 					const messageEntity: LocationMessageEntity = xmlParser.parse(
 						raw_message_row.Message,
 					);
@@ -275,12 +275,12 @@ export namespace MessageController {
 					} as LocationMessage;
 				}
 
-				case MessageType.APP: {
+				case MessageTypeEnum.APP: {
 					const messageEntity: AppMessageEntity<{ type: number }> =
 						xmlParser.parse(raw_message_row.Message);
 
 					try {
-						if (messageEntity.msg.appmsg.type === AppMessageType.REFER) {
+						if (messageEntity.msg.appmsg.type === AppMessageTypeEnum.REFER) {
 							messageIndexesHasReplyMessage.push(index);
 
 							const replyMessageId = (
@@ -296,7 +296,7 @@ export namespace MessageController {
 					} as AppMessage<ReferMessageEntity>;
 				}
 
-				case MessageType.VOIP: {
+				case MessageTypeEnum.VOIP: {
 					const messageEntity: VoipMessageEntity = xmlParser.parse(
 						raw_message_row.Message,
 					);
@@ -307,7 +307,7 @@ export namespace MessageController {
 					} as VoipMessage;
 				}
 
-				case MessageType.MICROVIDEO: {
+				case MessageTypeEnum.MICROVIDEO: {
 					const messageEntity: MicroVideoMessageEntity = xmlParser.parse(
 						raw_message_row.Message,
 					);
@@ -318,7 +318,7 @@ export namespace MessageController {
 					} as MicroVideoMessage;
 				}
 
-				case MessageType.GROUP_VOIP: {
+				case MessageTypeEnum.GROUP_VOIP: {
 					const messageEntity: ChatroomVoipMessageEntity = JSON.parse(
 						raw_message_row.Message,
 					);
@@ -329,7 +329,7 @@ export namespace MessageController {
 					} as ChatroomVoipMessage;
 				}
 
-				case MessageType.WECOM_CONTACT: {
+				case MessageTypeEnum.WECOM_CONTACT: {
 					const messageEntity: WeComContactMessageEntity = xmlParser.parse(
 						raw_message_row.Message,
 					);
@@ -340,7 +340,7 @@ export namespace MessageController {
 					} as WeComContactMessage;
 				}
 
-				case MessageType.SYSTEM: {
+				case MessageTypeEnum.SYSTEM: {
 					const messageEntity: SystemMessageEntity = raw_message_row.Message;
 
 					return {
@@ -349,7 +349,7 @@ export namespace MessageController {
 					} as SystemMessage;
 				}
 
-				case MessageType.SYSTEM_EXTENDED: {
+				case MessageTypeEnum.SYSTEM_EXTENDED: {
 					const messageEntity: SystemExtendedMessageEntity = xmlParser.parse(
 						raw_message_row.Message,
 					);
@@ -370,7 +370,7 @@ export namespace MessageController {
 				}
 			}
 		});
-		let replyMessageArray: MessageVM[] = [];
+		let replyMessageArray: MessageType[] = [];
 
 		if (parseReplyMessage && chat && replyMessageIds.length) {
 			replyMessageArray = (
@@ -383,7 +383,7 @@ export namespace MessageController {
 				)
 			).data;
 
-			const replyMessageTable: { [key: string]: MessageVM } = {};
+			const replyMessageTable: { [key: string]: MessageType } = {};
 			replyMessageArray.map((message) => {
 				replyMessageTable[message.id] = message;
 			});
@@ -399,14 +399,14 @@ export namespace MessageController {
 			}
 		}
 
-		return messages as MessageVM[];
+		return messages as MessageType[];
 	}
 
 	export type AllInput = [
 		{
 			chat: Chat;
-			type?: MessageType | MessageType[];
-			type_app?: AppMessageType | AppMessageType[]; // 有 bug
+			type?: MessageTypeEnum | MessageTypeEnum[];
+			type_app?: AppMessageTypeEnum | AppMessageTypeEnum[]; // 有 bug
 			cursor?: string;
 			limit: number;
 		},
@@ -415,7 +415,7 @@ export namespace MessageController {
 		},
 	];
 
-	export type AllOutput = Promise<ControllerPaginatorResult<MessageVM[]>>;
+	export type AllOutput = Promise<ControllerPaginatorResult<MessageType[]>>;
 
 	export async function all(...inputs: AllInput): AllOutput {
 		const [{ chat, type, type_app, cursor, limit = 50 }, { databases }] =
@@ -462,7 +462,7 @@ export namespace MessageController {
 														Array.isArray(type) ? type.join(", ") : type
 													})`
 												: undefined,
-											type === MessageType.APP && type_app
+											type === MessageTypeEnum.APP && type_app
 												? `(${(Array.isArray(type_app) ? type_app : [type_app])
 														.map((i) => `Message like '%<type>${i}</type>%'`)
 														.join(" OR ")})`
@@ -495,7 +495,7 @@ export namespace MessageController {
 													Array.isArray(type) ? type.join(", ") : type
 												})`
 											: undefined,
-										type === MessageType.APP && type_app
+										type === MessageTypeEnum.APP && type_app
 											? `(${(Array.isArray(type_app) ? type_app : [type_app])
 													.map((i) => `Message like '%<type>${i}</type>%'`)
 													.join(" OR ")})`
@@ -522,7 +522,7 @@ export namespace MessageController {
 														Array.isArray(type) ? type.join(", ") : type
 													})`
 												: undefined,
-											type === MessageType.APP && type_app
+											type === MessageTypeEnum.APP && type_app
 												? `(${(Array.isArray(type_app) ? type_app : [type_app])
 														.map((i) => `Message like '%<type>${i}</type>%'`)
 														.join(" OR ")})`
@@ -547,7 +547,7 @@ export namespace MessageController {
 														Array.isArray(type) ? type.join(", ") : type
 													})`
 												: undefined,
-											type === MessageType.APP && type_app
+											type === MessageTypeEnum.APP && type_app
 												? `(${(Array.isArray(type_app) ? type_app : [type_app])
 														.map((i) => `Message like '%<type>${i}</type>%'`)
 														.join(" OR ")})`
@@ -579,7 +579,7 @@ export namespace MessageController {
 											`Type IN (${
 												Array.isArray(type) ? type.join(", ") : type
 											})`,
-											type === MessageType.APP && type_app
+											type === MessageTypeEnum.APP && type_app
 												? `(${(Array.isArray(type_app) ? type_app : [type_app])
 														.map((i) => `Message like '%<type>${i}</type>%'`)
 														.join(" OR ")})`
@@ -821,8 +821,8 @@ export namespace MessageController {
 
 	export type AllFromAllInput = [
 		{
-			type?: MessageType | MessageType[];
-			type_app?: AppMessageType | AppMessageType[];
+			type?: MessageTypeEnum | MessageTypeEnum[];
+			type_app?: AppMessageTypeEnum | AppMessageTypeEnum[];
 			limit: number;
 		},
 		{
@@ -831,7 +831,7 @@ export namespace MessageController {
 	];
 
 	export type AllFromAllOutput = Promise<
-		ControllerPaginatorResult<MessageVM[]>
+		ControllerPaginatorResult<MessageType[]>
 	>;
 
 	export async function allFromAll(
@@ -878,7 +878,7 @@ export namespace MessageController {
 		},
 	];
 
-	export type findOutput = Promise<ControllerResult<MessageVM[]>>;
+	export type findOutput = Promise<ControllerResult<MessageType[]>>;
 
 	export async function find(...inputs: findInput): findOutput {
 		const [{ chat, messageIds, parseReplyMessage = true }, { databases }] =
@@ -968,7 +968,7 @@ export namespace MessageController {
 		},
 	];
 
-	export type allVerifyOutput = Promise<ControllerResult<MessageVM[]>>;
+	export type allVerifyOutput = Promise<ControllerResult<MessageType[]>>;
 
 	export async function allVerify(...inputs: allVerifyInput): allVerifyOutput {
 		const [{ databases }] = inputs;

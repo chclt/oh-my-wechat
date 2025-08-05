@@ -1,9 +1,9 @@
 import { LinkCard } from "@/components/link-card.tsx";
 import type { MessageProp } from "@/components/message/message.tsx";
-import type { MailMessage as MailMessageVM } from "@/lib/schema.ts";
+import type { MailMessage as MailMessageType } from "@/lib/schema.ts";
 import MessageInlineWrapper from "./message-inline";
 
-type MailMessageProps = MessageProp<MailMessageVM>;
+type MailMessageProps = MessageProp<MailMessageType>;
 
 export interface MailMessageEntity {
   msg: {

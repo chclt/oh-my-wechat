@@ -3,13 +3,13 @@ import FileTypeIcon from "@/components/filetype-icon.tsx";
 import type { AppMessageProps } from "@/components/message/app-message.tsx";
 import MessageInlineWrapper from "@/components/message/message-inline.tsx";
 import { getDataAdapter } from "@/lib/adapter";
-import type { AppMessageType, FileInfo } from "@/lib/schema.ts";
+import type { AppMessageTypeEnum, FileInfo } from "@/lib/schema.ts";
 import { cn, decodeUnicodeReferences } from "@/lib/utils.ts";
 import { useMutation } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
 export interface AttachMessageEntity {
-	type: AppMessageType.ATTACH;
+	type: AppMessageTypeEnum.ATTACH;
 	title: string;
 	des: string;
 	appattach: {

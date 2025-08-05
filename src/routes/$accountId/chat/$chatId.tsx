@@ -13,7 +13,11 @@ import {
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Calendar } from "@/components/ui/calendar";
 import { ChatSuspenseQueryOptions } from "@/lib/fetchers/chat";
-import { AppMessageType, MessageType, type MessageVM } from "@/lib/schema";
+import {
+	AppMessageTypeEnum,
+	MessageTypeEnum,
+	type MessageType,
+} from "@/lib/schema";
 import { differenceInMinutes, format, isSameDay } from "date-fns";
 import { MessageBubbleGroup } from "@/components/message-bubble-group";
 import Message from "@/components/message/message";
@@ -36,10 +40,10 @@ function RouteComponent() {
 	const isChatroom = chat.type === "chatroom";
 
 	// const [messageList, setMessageList] = useState<{
-	//   [key: number]: MessageVM[];
+	//   [key: number]: MessageType[];
 	// }>({});
 	// const [query, isQuerying, result, error] = useQuery<
-	//   ControllerPaginatorResult<MessageVM[]>
+	//   ControllerPaginatorResult<MessageType[]>
 	// >({
 	//   data: [],
 	//   meta: {},
@@ -172,19 +176,19 @@ function RouteComponent() {
 									const isSameUser =
 										user && prevUser && user.id === prevUser.id;
 
-									const isMessageGroupable = (message: MessageVM) => {
-										if (message.type === MessageType.APP) {
+									const isMessageGroupable = (message: MessageType) => {
+										if (message.type === MessageTypeEnum.APP) {
 											return ![
-												AppMessageType.PAT,
-												AppMessageType.RINGTONE,
+												AppMessageTypeEnum.PAT,
+												AppMessageTypeEnum.RINGTONE,
 											].includes(
 												message.message_entity.msg.appmsg.type as number,
 											);
 										}
 
 										return ![
-											MessageType.SYSTEM,
-											MessageType.SYSTEM_EXTENDED,
+											MessageTypeEnum.SYSTEM,
+											MessageTypeEnum.SYSTEM_EXTENDED,
 										].includes(message.type);
 									};
 
@@ -208,7 +212,7 @@ function RouteComponent() {
 
 									return messagesGroupByTimeAndUser;
 								},
-								[] as (MessageVM | MessageVM[])[][],
+								[] as (MessageType | MessageType[])[][],
 							)
 							.map((messagesGroupByTime) => {
 								const firstElement = messagesGroupByTime[0];

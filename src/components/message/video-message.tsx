@@ -2,13 +2,13 @@ import LocalImage from "@/components/local-image.tsx";
 import LocalVideo from "@/components/local-video.tsx";
 import MessageInlineWrapper from "@/components/message/message-inline.tsx";
 import type { MessageProp } from "@/components/message/message.tsx";
-import type { VideoMessage as VideoMessageVM } from "@/lib/schema.ts";
+import type { VideoMessage as VideoMessageType } from "@/lib/schema.ts";
 import { cn } from "@/lib/utils.ts";
 
 // @ts-ignore
-interface VideoMessageProps extends MessageProp<VideoMessageVM> {
+interface VideoMessageProps extends MessageProp<VideoMessageType> {
 	variant?:
-		| MessageProp<VideoMessageVM>["variant"]
+		| MessageProp<VideoMessageType>["variant"]
 		| "viewer_detail"
 		| "viewer_thumb";
 }

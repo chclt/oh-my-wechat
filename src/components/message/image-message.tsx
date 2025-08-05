@@ -2,13 +2,13 @@ import LocalImage from "@/components/local-image.tsx";
 import MessageInlineWrapper from "@/components/message/message-inline.tsx";
 import type { MessageProp } from "@/components/message/message.tsx";
 import User from "@/components/user.tsx";
-import type { ImageMessage as ImageMessageVM } from "@/lib/schema.ts";
+import type { ImageMessage as ImageMessageType } from "@/lib/schema.ts";
 import { cn } from "@/lib/utils.ts";
 
 // @ts-ignore
-interface ImageMessageProps extends MessageProp<ImageMessageVM> {
+interface ImageMessageProps extends MessageProp<ImageMessageType> {
 	variant?:
-		| MessageProp<ImageMessageVM>["variant"]
+		| MessageProp<ImageMessageType>["variant"]
 		| "viewer_detail"
 		| "viewer_thumb";
 }

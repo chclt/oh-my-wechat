@@ -1,10 +1,10 @@
 import LocalImage from "@/components/local-image.tsx";
 import type { AppMessageProps } from "@/components/message/app-message.tsx";
 import MessageInlineWrapper from "@/components/message/message-inline.tsx";
-import type { AppMessageType } from "@/lib/schema.ts";
+import type { AppMessageTypeEnum } from "@/lib/schema.ts";
 
 export interface StickerMessageEntity {
-	type: AppMessageType.STICKER;
+	type: AppMessageTypeEnum.STICKER;
 	title: string;
 	appattach: {
 		totallen: number;

@@ -1,10 +1,10 @@
 import LocalVoice from "@/components/local-voice.tsx";
 import MessageInlineWrapper from "@/components/message/message-inline.tsx";
 import type { MessageProp } from "@/components/message/message.tsx";
-import type { VoiceMessage as VoiceMessageVM } from "@/lib/schema.ts";
+import type { VoiceMessage as VoiceMessageType } from "@/lib/schema.ts";
 import { cn } from "@/lib/utils.ts";
 
-type VoiceMessageProps = MessageProp<VoiceMessageVM>;
+type VoiceMessageProps = MessageProp<VoiceMessageType>;
 
 export interface VoiceMessageEntity {
   msg: {

@@ -2,10 +2,10 @@ import { CallIncoming, CallOutgoing } from "@/components/icon.tsx";
 import type { MessageProp } from "@/components/message/message.tsx";
 import {
   MessageDirection,
-  type VoipMessage as VoipMessageVM,
+  type VoipMessage as VoipMessageType,
 } from "@/lib/schema.ts";
 
-type VoipMessageProps = MessageProp<VoipMessageVM>;
+type VoipMessageProps = MessageProp<VoipMessageType>;
 export interface VoipMessageEntity {
   voipmsg?: {
     "@_type": "VoIPBubbleMsg" | string; // eg. VoIPBubbleMsg

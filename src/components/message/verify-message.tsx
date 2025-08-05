@@ -1,8 +1,8 @@
 import type { MessageProp } from "@/components/message/message.tsx";
 import User from "@/components/user.tsx";
-import type { VerityMessage as VerityMessageVM } from "@/lib/schema.ts";
+import type { VerityMessage as VerityMessageType } from "@/lib/schema.ts";
 
-type VerifyMessageProps = MessageProp<VerityMessageVM>;
+type VerifyMessageProps = MessageProp<VerityMessageType>;
 
 export interface VerityMessageEntity {
   msg: {

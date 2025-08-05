@@ -1,50 +1,50 @@
-import type { RecordVM } from "@/components/record/record";
-import type { Chat, FileInfo, MessageVM, WCDatabases } from "@/lib/schema.ts";
+import type { RecordType } from "@/components/record/record";
+import type { Chat, FileInfo, MessageType, WCDatabases } from "@/lib/schema.ts";
 import CryptoJS from "crypto-js";
 import { getFilesFromManifast } from "../utils";
 
 export namespace AttachController {
-  export type GetInput = [
-    {
-      chat: Chat;
-      message: MessageVM;
-      record?: RecordVM;
-      type: string;
-    },
-    { directory: FileSystemDirectoryHandle | FileList; databases: WCDatabases },
-  ];
-  export type GetOutput = Promise<FileInfo[]>;
+	export type GetInput = [
+		{
+			chat: Chat;
+			message: MessageType;
+			record?: RecordType;
+			type: string;
+		},
+		{ directory: FileSystemDirectoryHandle | FileList; databases: WCDatabases },
+	];
+	export type GetOutput = Promise<FileInfo[]>;
 
-  export async function get(...inputs: GetInput): GetOutput {
-    const [{ chat, message, record, type }, { directory, databases }] = inputs;
+	export async function get(...inputs: GetInput): GetOutput {
+		const [{ chat, message, record, type }, { directory, databases }] = inputs;
 
-    const db = databases.manifest;
-    if (!db) throw new Error("manifest database is not found");
+		const db = databases.manifest;
+		if (!db) throw new Error("manifest database is not found");
 
-    const files = await getFilesFromManifast(
-      db,
-      directory,
-      record
-        ? `%/OpenData/${CryptoJS.MD5(chat.id).toString()}/${message.local_id}/${record["@_dataid"]}.%`
-        : `%/OpenData/${CryptoJS.MD5(chat.id).toString()}/${message.local_id}.%`,
-    );
+		const files = await getFilesFromManifast(
+			db,
+			directory,
+			record
+				? `%/OpenData/${CryptoJS.MD5(chat.id).toString()}/${message.local_id}/${record["@_dataid"]}.%`
+				: `%/OpenData/${CryptoJS.MD5(chat.id).toString()}/${message.local_id}.%`,
+		);
 
-    const result = [];
+		const result = [];
 
-    for (const file of files) {
-      if (type) {
-        const fileBuffer = await file.file.arrayBuffer();
-        const fileBlob = new Blob([fileBuffer], { type });
-        result.push({
-          src: URL.createObjectURL(fileBlob),
-        });
-      } else {
-        result.push({
-          src: URL.createObjectURL(file.file),
-        });
-      }
-    }
+		for (const file of files) {
+			if (type) {
+				const fileBuffer = await file.file.arrayBuffer();
+				const fileBlob = new Blob([fileBuffer], { type });
+				result.push({
+					src: URL.createObjectURL(fileBlob),
+				});
+			} else {
+				result.push({
+					src: URL.createObjectURL(file.file),
+				});
+			}
+		}
 
-    return result;
-  }
+		return result;
+	}
 }

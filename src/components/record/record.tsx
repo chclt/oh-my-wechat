@@ -1,7 +1,7 @@
 import LiveRecord, {
 	type LiveRecordEntity,
 } from "@/components/record/live-record.tsx";
-import { type MessageVM, RecordType } from "@/lib/schema";
+import { type MessageType, RecordTypeEnum } from "@/lib/schema";
 import { decodeUnicodeReferences } from "@/lib/utils";
 import { ErrorBoundary } from "react-error-boundary";
 import AttatchRecord, { type AttatchRecordEntity } from "./attatch-record";
@@ -27,13 +27,13 @@ import TingRecord, { type TingRecordEntity } from "./ting-record";
  */
 
 interface RecordProps extends React.HTMLAttributes<HTMLDivElement> {
-	message: MessageVM;
-	record: RecordVM;
+	message: MessageType;
+	record: RecordType;
 	variant?: "default" | "note" | string; // 笔记消息中的记录需要不同样式
 }
 
-export interface RecordVM {
-	"@_datatype": RecordType;
+export interface RecordType {
+	"@_datatype": RecordTypeEnum;
 	"@_dataid": string;
 }
 
@@ -72,7 +72,7 @@ function RecordComponent({
 	...props
 }: RecordProps) {
 	switch (record["@_datatype"]) {
-		case RecordType.TEXT:
+		case RecordTypeEnum.TEXT:
 			return (
 				<TextRecord
 					message={message}
@@ -81,7 +81,7 @@ function RecordComponent({
 					{...props}
 				/>
 			);
-		case RecordType.IMAGE:
+		case RecordTypeEnum.IMAGE:
 			return (
 				<ImageRecord
 					message={message}
@@ -90,7 +90,7 @@ function RecordComponent({
 					{...props}
 				/>
 			);
-		case RecordType.LINK:
+		case RecordTypeEnum.LINK:
 			return (
 				<LinkRecord
 					message={message}
@@ -99,7 +99,7 @@ function RecordComponent({
 					{...props}
 				/>
 			);
-		case RecordType.LOCATION:
+		case RecordTypeEnum.LOCATION:
 			return (
 				<LocationRecord
 					message={message}
@@ -108,7 +108,7 @@ function RecordComponent({
 					{...props}
 				/>
 			);
-		case RecordType.ATTACH:
+		case RecordTypeEnum.ATTACH:
 			return (
 				<AttatchRecord
 					message={message}
@@ -117,7 +117,7 @@ function RecordComponent({
 					{...props}
 				/>
 			);
-		case RecordType.CONTACT:
+		case RecordTypeEnum.CONTACT:
 			return (
 				<ContactRecord
 					message={message}
@@ -126,7 +126,7 @@ function RecordComponent({
 					{...props}
 				/>
 			);
-		case RecordType.FORWARD_MESSAGE:
+		case RecordTypeEnum.FORWARD_MESSAGE:
 			return (
 				<ForwardMessageRecord
 					message={message}
@@ -135,7 +135,7 @@ function RecordComponent({
 					{...props}
 				/>
 			);
-		case RecordType.MINIAPP:
+		case RecordTypeEnum.MINIAPP:
 			return (
 				<MiniAppRecord
 					message={message}
@@ -144,7 +144,7 @@ function RecordComponent({
 					{...props}
 				/>
 			);
-		case RecordType.NOTE:
+		case RecordTypeEnum.NOTE:
 			return (
 				<NoteRecord
 					message={message}
@@ -153,7 +153,7 @@ function RecordComponent({
 					{...props}
 				/>
 			);
-		case RecordType.CHANNEL_VIDEO:
+		case RecordTypeEnum.CHANNEL_VIDEO:
 			return (
 				<ChannelVideoRecord
 					message={message}
@@ -162,7 +162,7 @@ function RecordComponent({
 					{...props}
 				/>
 			);
-		case RecordType.LIVE:
+		case RecordTypeEnum.LIVE:
 			return (
 				<LiveRecord
 					message={message}
@@ -171,7 +171,7 @@ function RecordComponent({
 					{...props}
 				/>
 			);
-		case RecordType.CHANNEL:
+		case RecordTypeEnum.CHANNEL:
 			return (
 				<ChannelRecord
 					message={message}
@@ -180,7 +180,7 @@ function RecordComponent({
 					{...props}
 				/>
 			);
-		case RecordType.MUSIC:
+		case RecordTypeEnum.MUSIC:
 			return (
 				<MusicRecord
 					message={message}
@@ -189,7 +189,7 @@ function RecordComponent({
 					{...props}
 				/>
 			);
-		case RecordType.TING:
+		case RecordTypeEnum.TING:
 			return (
 				<TingRecord
 					message={message}
