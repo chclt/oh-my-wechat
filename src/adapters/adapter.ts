@@ -1,6 +1,6 @@
-import type { Account } from "@/lib/schema";
+import type { AccountType } from "@/lib/schema";
 import type {
-	Chat,
+	ChatType,
 	ControllerPaginatorResult,
 	ControllerResult,
 	MessageType,
@@ -15,13 +15,13 @@ import type { VoiceController } from "./ios-backup/controllers/voice";
 export interface DataAdapter {
 	init: () => void;
 
-	getAccountList: (...input: any[]) => Promise<ControllerResult<Account[]>>;
+	getAccountList: (...input: any[]) => Promise<ControllerResult<AccountType[]>>;
 
-	getAccount: (accountId: string) => Promise<ControllerResult<Account>>;
+	getAccount: (accountId: string) => Promise<ControllerResult<AccountType>>;
 
 	getChatList: (input?: {
 		userIds?: string[];
-	}) => Promise<ControllerResult<Chat[]>>;
+	}) => Promise<ControllerResult<ChatType[]>>;
 
 	getMessageList: (
 		input: MessageController.AllInput[0],

@@ -1,8 +1,5 @@
 import type { AppMessageProps } from "@/components/message/app-message.tsx";
-import type {
-	AppMessageTypeEnum,
-	AppMessage as AppMessageType,
-} from "@/lib/schema.ts";
+import type { AppMessageTypeEnum, AppMessageType } from "@/lib/schema.ts";
 import UrlMessage, { type UrlMessageEntity } from "./url-message";
 
 export interface LinkMessage2Entity {

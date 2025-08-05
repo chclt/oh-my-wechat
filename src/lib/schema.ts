@@ -83,7 +83,7 @@ export interface Contact {
 	remarkPinyinInits: string;
 }
 
-export interface User {
+export interface UserType {
 	id: string; // wxid
 	user_id: string;
 	username: string;
@@ -98,9 +98,9 @@ export interface User {
 	is_openim: boolean;
 }
 
-export interface Account extends User {}
+export interface AccountType extends UserType {}
 
-export interface Chatroom {
+export interface ChatroomType {
 	id: `${string}@chatroom`;
 	title: string;
 	remark?: string;
@@ -109,11 +109,11 @@ export interface Chatroom {
 		thumb: string;
 	};
 
-	members: User[];
+	members: UserType[];
 	is_openim: boolean;
 }
 
-interface BasicChat {
+interface BasicChatType {
 	id: string;
 	title: string;
 	photo?: string;
@@ -121,21 +121,21 @@ interface BasicChat {
 	is_muted: boolean;
 	is_pinned: boolean;
 	is_collapsed: boolean;
-	members: User[];
+	members: UserType[];
 	background?: string;
 }
 
-export interface PrivateChat extends BasicChat {
+export interface PrivateChatType extends BasicChatType {
 	type: "private";
-	user: User;
+	user: UserType;
 }
 
-export interface GroupChat extends BasicChat {
+export interface GroupChatType extends BasicChatType {
 	type: "chatroom";
-	chatroom: Chatroom;
+	chatroom: ChatroomType;
 }
 
-export type Chat = PrivateChat | GroupChat;
+export type ChatType = PrivateChatType | GroupChatType;
 
 export interface PhotpSize {
 	src: string;
@@ -256,90 +256,99 @@ export enum RecordTypeEnum {
 	TING = 32,
 }
 
-export interface BasicMessage<T extends MessageTypeEnum, S> {
+export interface BasicMessageType<T extends MessageTypeEnum, S> {
 	id: string; // Message server id
 	local_id: string;
 	type: T;
-	from: User;
+	from: UserType;
 	date: number;
 	direction: MessageDirection;
-	chat: Chat; // Chat the message belongs to
+	chat: ChatType; // Chat the message belongs to
 	message_entity: S;
 	reply_to_message?: MessageType;
 	raw_message: string;
 }
 
-export type TextMessage = BasicMessage<MessageTypeEnum.TEXT, TextMessageEntity>;
-export type ImageMessage = BasicMessage<
+export type TextMessageType = BasicMessageType<
+	MessageTypeEnum.TEXT,
+	TextMessageEntity
+>;
+export type ImageMessageType = BasicMessageType<
 	MessageTypeEnum.IMAGE,
 	ImageMessageEntity
 >;
-export type VoiceMessage = BasicMessage<
+export type VoiceMessageType = BasicMessageType<
 	MessageTypeEnum.VOICE,
 	VoiceMessageEntity
 >;
-export type MailMessage = BasicMessage<MessageTypeEnum.MAIL, MailMessageEntity>;
-export type VerityMessage = BasicMessage<
+export type MailMessageType = BasicMessageType<
+	MessageTypeEnum.MAIL,
+	MailMessageEntity
+>;
+export type VerityMessageType = BasicMessageType<
 	MessageTypeEnum.VERITY,
 	VerityMessageEntity
 >;
-export type ContactMessage = BasicMessage<
+export type ContactMessageType = BasicMessageType<
 	MessageTypeEnum.CONTACT,
 	ContactMessageEntity
 >;
-export type VideoMessage = BasicMessage<
+export type VideoMessageType = BasicMessageType<
 	MessageTypeEnum.VIDEO,
 	VideoMessageEntity
 >;
-export type StickerMessage = BasicMessage<
+export type StickerMessageType = BasicMessageType<
 	MessageTypeEnum.STICKER,
 	StickerMessageEntity
 >;
-export type LocationMessage = BasicMessage<
+export type LocationMessageType = BasicMessageType<
 	MessageTypeEnum.LOCATION,
 	LocationMessageEntity
 >;
-export type AppMessage<
+export type AppMessageType<
 	T = {
 		type: unknown;
 	},
-> = BasicMessage<MessageTypeEnum.APP, AppMessageEntity<T>>;
-export type VoipMessage = BasicMessage<MessageTypeEnum.VOIP, VoipMessageEntity>;
-export type MicroVideoMessage = BasicMessage<
+> = BasicMessageType<MessageTypeEnum.APP, AppMessageEntity<T>>;
+export type VoipMessageType = BasicMessageType<
+	MessageTypeEnum.VOIP,
+	VoipMessageEntity
+>;
+export type MicroVideoMessageType = BasicMessageType<
 	MessageTypeEnum.MICROVIDEO,
 	MicroVideoMessageEntity
 >;
-export type ChatroomVoipMessage = BasicMessage<
+export type ChatroomVoipMessageType = BasicMessageType<
 	MessageTypeEnum.GROUP_VOIP,
 	ChatroomVoipMessageEntity
 >;
-export type WeComContactMessage = BasicMessage<
+export type WeComContactMessageType = BasicMessageType<
 	MessageTypeEnum.WECOM_CONTACT,
 	WeComContactMessageEntity
 >;
-export type SystemMessage = BasicMessage<
+export type SystemMessageType = BasicMessageType<
 	MessageTypeEnum.SYSTEM,
 	SystemMessageEntity
 >;
-export type SystemExtendedMessage = BasicMessage<
+export type SystemExtendedMessageType = BasicMessageType<
 	MessageTypeEnum.SYSTEM_EXTENDED,
 	SystemExtendedMessageEntity
 >;
 
 export type MessageType =
-	| TextMessage
-	| ImageMessage
-	| VoiceMessage
-	| MailMessage
-	| VerityMessage
-	| ContactMessage
-	| VideoMessage
-	| StickerMessage
-	| LocationMessage
-	| AppMessage
-	| VoipMessage
-	| MicroVideoMessage
-	| ChatroomVoipMessage
-	| WeComContactMessage
-	| SystemMessage
-	| SystemExtendedMessage;
+	| TextMessageType
+	| ImageMessageType
+	| VoiceMessageType
+	| MailMessageType
+	| VerityMessageType
+	| ContactMessageType
+	| VideoMessageType
+	| StickerMessageType
+	| LocationMessageType
+	| AppMessageType
+	| VoipMessageType
+	| MicroVideoMessageType
+	| ChatroomVoipMessageType
+	| WeComContactMessageType
+	| SystemMessageType
+	| SystemExtendedMessageType;

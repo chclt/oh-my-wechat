@@ -1,5 +1,5 @@
 import type {
-	Chat,
+	ChatType,
 	MessageType,
 	VoiceInfo,
 	WCDatabases,
@@ -22,7 +22,7 @@ let isFFmpegLoading = false; // 防止重复加载, TODO: 更好应该是写一�
 export namespace VoiceController {
 	export type GetInput = [
 		{
-			chat: Chat;
+			chat: ChatType;
 			message: MessageType;
 			scope?: "all" | "transcription";
 		},

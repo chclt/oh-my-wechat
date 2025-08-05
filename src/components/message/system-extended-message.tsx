@@ -1,6 +1,6 @@
 import type { MessageProp } from "@/components/message/message.tsx";
 import User from "@/components/user.tsx";
-import type { SystemExtendedMessage as SystemExtendedMessageType } from "@/lib/schema.ts";
+import type { SystemExtendedMessageType } from "@/lib/schema.ts";
 import { cn } from "@/lib/utils.ts";
 import { XMLParser } from "fast-xml-parser";
 import type { ReactNode } from "react";

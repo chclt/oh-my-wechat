@@ -1,5 +1,5 @@
 import User from "@/components/user.tsx";
-import { MessageDirection, type User as UserType } from "@/lib/schema.ts";
+import { MessageDirection, type UserType } from "@/lib/schema.ts";
 import type { MessageType } from "@/lib/schema.ts";
 import { cn } from "@/lib/utils.ts";
 import { ErrorBoundary } from "react-error-boundary";

@@ -1,12 +1,12 @@
 import type { RecordType } from "@/components/record/record.tsx";
 import { useQuery } from "@tanstack/react-query";
-import type { Chat, MessageType } from "@/lib/schema.ts";
+import type { ChatType, MessageType } from "@/lib/schema.ts";
 import type React from "react";
 import { useInViewport } from "@mantine/hooks";
 import { ImageSuspenseQueryOptions } from "@/lib/fetchers";
 
 type LocalImageProps = React.ImgHTMLAttributes<HTMLImageElement> & {
-	chat: Chat;
+	chat: ChatType;
 	message: MessageType;
 	record?: RecordType;
 	size?: "origin" | "thumb"; // 期望的尺寸，可能因为没有指定尺寸而使用另一尺寸

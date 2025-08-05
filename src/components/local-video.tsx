@@ -1,12 +1,16 @@
 import { useQuery } from "@tanstack/react-query";
-import type { Chat, MicroVideoMessage, VideoMessage } from "@/lib/schema.ts";
+import type {
+	ChatType,
+	MicroVideoMessageType,
+	VideoMessageType,
+} from "@/lib/schema.ts";
 import type React from "react";
 import { VideoSuspenseQueryOptions } from "@/lib/fetchers";
 import { useInViewport } from "@mantine/hooks";
 
 interface LocalVideoProps extends React.VideoHTMLAttributes<HTMLVideoElement> {
-	chat: Chat;
-	message: VideoMessage | MicroVideoMessage;
+	chat: ChatType;
+	message: VideoMessageType | MicroVideoMessageType;
 }
 
 export default function LocalVideo({

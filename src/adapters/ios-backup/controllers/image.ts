@@ -1,6 +1,6 @@
 import type { RecordType } from "@/components/record/record";
 import type {
-	Chat,
+	ChatType,
 	MessageType,
 	PhotpSize,
 	WCDatabases,
@@ -11,7 +11,7 @@ import { getFilesFromManifast } from "../utils";
 export namespace ImageController {
 	export type GetInput = [
 		{
-			chat: Chat;
+			chat: ChatType;
 			message: MessageType;
 			record?: RecordType;
 			size?: "origin" | "thumb";

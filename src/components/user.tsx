@@ -1,5 +1,5 @@
 import Image from "@/components/image.tsx";
-import type { User as UserType } from "@/lib/schema.ts";
+import type { UserType } from "@/lib/schema.ts";
 import { cn } from "@/lib/utils.ts";
 
 interface UserProps extends React.HTMLProps<HTMLDivElement> {

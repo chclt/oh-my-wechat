@@ -1,5 +1,5 @@
 import type { MessageProp } from "@/components/message/message.tsx";
-import type { LocationMessage as LocationMessageType } from "@/lib/schema.ts";
+import type { LocationMessageType } from "@/lib/schema.ts";
 import { cn } from "@/lib/utils.ts";
 import { cva } from "class-variance-authority";
 import { LocationIcon } from "../icon";

@@ -2,7 +2,7 @@ import LocalImage from "@/components/local-image.tsx";
 import MessageInlineWrapper from "@/components/message/message-inline.tsx";
 import type { MessageProp } from "@/components/message/message.tsx";
 import User from "@/components/user.tsx";
-import type { ImageMessage as ImageMessageType } from "@/lib/schema.ts";
+import type { ImageMessageType } from "@/lib/schema.ts";
 import { cn } from "@/lib/utils.ts";
 
 // @ts-ignore

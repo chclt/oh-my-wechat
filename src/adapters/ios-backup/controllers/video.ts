@@ -1,5 +1,5 @@
 import type {
-	Chat,
+	ChatType,
 	MessageType,
 	VideoInfo,
 	WCDatabases,
@@ -10,7 +10,7 @@ import { getFilesFromManifast } from "../utils";
 export namespace VideoController {
 	export type GetInput = [
 		{
-			chat: Chat;
+			chat: ChatType;
 			message: MessageType;
 		},
 		{ directory: FileSystemDirectoryHandle | FileList; databases: WCDatabases },

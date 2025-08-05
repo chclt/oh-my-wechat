@@ -2,7 +2,7 @@ import LocalImage from "@/components/local-image.tsx";
 import LocalVideo from "@/components/local-video.tsx";
 import MessageInlineWrapper from "@/components/message/message-inline.tsx";
 import type { MessageProp } from "@/components/message/message.tsx";
-import type { VideoMessage as VideoMessageType } from "@/lib/schema.ts";
+import type { VideoMessageType } from "@/lib/schema.ts";
 import { cn } from "@/lib/utils.ts";
 
 // @ts-ignore

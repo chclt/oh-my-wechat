@@ -2,7 +2,7 @@ import Image from "@/components/image.tsx";
 import Message from "@/components/message/message.tsx";
 import { ChatListSuspenseQueryOptions } from "@/lib/fetchers/chat";
 import { LastMessageQueryOptions } from "@/lib/fetchers/message";
-import type { Chat } from "@/lib/schema.ts";
+import type { ChatType } from "@/lib/schema.ts";
 import { cn, formatDateTime } from "@/lib/utils.ts";
 import { Route } from "@/routes/$accountId/chat/route";
 import { useInViewport } from "@mantine/hooks";
@@ -27,7 +27,7 @@ export default function ChatList() {
 }
 
 interface ChatItemProps extends React.HTMLAttributes<HTMLLIElement> {
-	chat: Chat;
+	chat: ChatType;
 }
 
 function ChatItem({ chat, className, ...props }: ChatItemProps) {
