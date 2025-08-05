@@ -736,6 +736,8 @@ export namespace MessageController {
 				}
 
 				cursors.next = {
+					// TODO
+					// @ts-ignore
 					value: raw_message_rows.at(-1).CreateTime,
 					condition: ">",
 					_hasNextPage: "unknown",
@@ -743,6 +745,8 @@ export namespace MessageController {
 			} else if (cursor_condition === ">" || cursor_condition === ">=") {
 				if (raw_message_rows.length === query_limit) {
 					cursors.next = {
+						// TODO
+						// @ts-ignore
 						value: raw_message_rows.at(-1).CreateTime,
 						condition: ">=",
 						hasNextPage: true,
@@ -787,6 +791,8 @@ export namespace MessageController {
 						.length === query_limit
 				) {
 					cursors.next = {
+						// TODO
+						// @ts-ignore
 						value: raw_message_rows.at(-1).CreateTime,
 						condition: ">=",
 						_hasNextPage: true,

@@ -12,6 +12,7 @@ import type { AttachController } from "./controllers/attach.ts";
 import type { StatisticController } from "./controllers/statistic.ts";
 
 export default class IosBackupAdapter implements DataAdapter {
+	// @ts-ignore
 	private _directory: FileSystemDirectoryHandle | FileList;
 
 	private _workerAdapter: Comlink.Remote<AdapterWorkerType>;

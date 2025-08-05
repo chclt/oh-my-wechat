@@ -27,7 +27,7 @@ import { StatisticController } from "./controllers/statistic";
 import * as Comlink from "comlink";
 
 interface AdapterWorkerStore {
-	directory: FileSystemDirectoryHandle | FileList | undefined;
+	directory: FileSystemDirectoryHandle | FileList;
 	databases: WCDatabases;
 	wcdbDicts: {
 		1?: { url: string; data: Uint8Array };
@@ -91,11 +91,14 @@ export interface AdapterWorkerType {
 }
 
 export const _store: AdapterWorkerStore = {
+	// TODO
+	// @ts-ignore
 	directory: undefined,
 	databases: {},
 	wcdbDicts: {},
 
 	accountList: [],
+	// @ts-ignore
 	account: undefined,
 };
 
@@ -220,6 +223,8 @@ const adapterWorker: AdapterWorkerType = {
 			}
 		}
 
+		// TODO
+		// @ts-ignore
 		_store.account = undefined;
 	},
 
