@@ -1,10 +1,10 @@
 import Image from "@/components/image.tsx";
 import type { MessageProp } from "@/components/message/message.tsx";
-import type { WeComContactMessage as WeComContactMessageVM } from "@/lib/schema.ts";
+import type { WeComContactMessage as WeComContactMessageType } from "@/lib/schema.ts";
 import type * as React from "react";
 import MessageInlineWrapper from "./message-inline";
 
-type WeComContactMessageProps = MessageProp<WeComContactMessageVM>;
+type WeComContactMessageProps = MessageProp<WeComContactMessageType>;
 
 export interface WeComContactMessageEntity {
   msg: {

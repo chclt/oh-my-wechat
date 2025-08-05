@@ -1,13 +1,13 @@
 import User from "@/components/user.tsx";
-import { MessageDirection, type User as UserVM } from "@/lib/schema.ts";
-import type { MessageVM } from "@/lib/schema.ts";
+import { MessageDirection, type User as UserType } from "@/lib/schema.ts";
+import type { MessageType } from "@/lib/schema.ts";
 import { cn } from "@/lib/utils.ts";
 import { ErrorBoundary } from "react-error-boundary";
 import Message from "./message/message.tsx";
 
 interface BubbleGroupProps extends React.HTMLAttributes<HTMLDivElement> {
-	user: UserVM;
-	messages?: MessageVM[];
+	user: UserType;
+	messages?: MessageType[];
 
 	showPhoto?: boolean;
 	showUsername?: boolean;

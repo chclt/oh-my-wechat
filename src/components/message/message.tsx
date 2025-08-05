@@ -14,14 +14,18 @@ import VideoMessage from "@/components/message/video-message.tsx";
 import VoiceMessage from "@/components/message/voice-message.tsx";
 import VoipMessage from "@/components/message/voip-message.tsx";
 import WeComContactMessage from "@/components/message/wecom-contact-message.tsx";
-import { MessageDirection, MessageType, type MessageVM } from "@/lib/schema.ts";
+import {
+	MessageDirection,
+	MessageTypeEnum,
+	type MessageType,
+} from "@/lib/schema.ts";
 import { formatDateTime } from "@/lib/utils.ts";
 import { ErrorBoundary } from "react-error-boundary";
 import { Route } from "@/routes/$accountId/route.tsx";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { AccountSuspenseQueryOptions } from "@/lib/fetchers/account.ts";
 
-export interface MessageProp<T = MessageVM>
+export interface MessageProp<T = MessageType>
 	extends React.HTMLAttributes<HTMLDivElement> {
 	message: T;
 	variant?: "default" | "referenced" | "abstract";
@@ -72,65 +76,65 @@ export default function Message({
 
 function MessageComponent({ message, variant, ...props }: MessageProp) {
 	switch (message.type) {
-		case MessageType.TEXT:
+		case MessageTypeEnum.TEXT:
 			return <TextMessage message={message} variant={variant} {...props} />;
 
-		case MessageType.IMAGE:
+		case MessageTypeEnum.IMAGE:
 			return <ImageMessage message={message} variant={variant} {...props} />;
 
-		case MessageType.VOICE:
+		case MessageTypeEnum.VOICE:
 			return <VoiceMessage message={message} variant={variant} {...props} />;
 
-		case MessageType.MAIL:
+		case MessageTypeEnum.MAIL:
 			return <MailMessage message={message} variant={variant} {...props} />;
 
-		case MessageType.VERITY:
+		case MessageTypeEnum.VERITY:
 			return <VerityMessage message={message} variant={variant} {...props} />;
 
-		case MessageType.CONTACT:
+		case MessageTypeEnum.CONTACT:
 			return <ContactMessage message={message} variant={variant} {...props} />;
 
-		case MessageType.VIDEO:
+		case MessageTypeEnum.VIDEO:
 			return <VideoMessage message={message} variant={variant} {...props} />;
 
-		case MessageType.MICROVIDEO:
+		case MessageTypeEnum.MICROVIDEO:
 			return (
 				<MicroVideoMessage message={message} variant={variant} {...props} />
 			);
 
-		case MessageType.STICKER:
+		case MessageTypeEnum.STICKER:
 			return <StickerMessage message={message} variant={variant} {...props} />;
 
-		case MessageType.LOCATION:
+		case MessageTypeEnum.LOCATION:
 			return <LocationMessage message={message} variant={variant} {...props} />;
 
-		case MessageType.APP:
+		case MessageTypeEnum.APP:
 			return <AppMessage message={message} variant={variant} {...props} />;
 
-		case MessageType.VOIP:
+		case MessageTypeEnum.VOIP:
 			return <VoipMessage message={message} variant={variant} {...props} />;
 
-		case MessageType.GROUP_VOIP:
+		case MessageTypeEnum.GROUP_VOIP:
 			return (
 				<ChatroomVoipMessage message={message} variant={variant} {...props} />
 			);
 
-		case MessageType.WECOM_CONTACT:
+		case MessageTypeEnum.WECOM_CONTACT:
 			return (
 				<WeComContactMessage message={message} variant={variant} {...props} />
 			);
 
-		case MessageType.SYSTEM:
+		case MessageTypeEnum.SYSTEM:
 			return <SystemMessage message={message} variant={variant} {...props} />;
 
-		case MessageType.SYSTEM_EXTENDED:
+		case MessageTypeEnum.SYSTEM_EXTENDED:
 			return (
 				<SystemExtendedMessage message={message} variant={variant} {...props} />
 			);
 
 		default:
 			return (
-				<div {...props}>解析失败的消息: {(message as MessageVM).type}</div>
+				<div {...props}>解析失败的消息: {(message as MessageType).type}</div>
 			);
 	}
 }

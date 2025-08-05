@@ -1,11 +1,11 @@
 import LocalImage from "@/components/local-image.tsx";
 import type { AppMessageProps } from "@/components/message/app-message.tsx";
 import MessageInlineWrapper from "@/components/message/message-inline.tsx";
-import type { AppMessageType } from "@/lib/schema.ts";
+import type { AppMessageTypeEnum } from "@/lib/schema.ts";
 import { cn } from "@/lib/utils.ts";
 
 export interface GameMessageEntity {
-	type: AppMessageType.GAME;
+	type: AppMessageTypeEnum.GAME;
 	title: string;
 	des: string;
 	appattach: {

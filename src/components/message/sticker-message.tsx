@@ -1,9 +1,9 @@
 import Image from "@/components/image.tsx";
 import MessageInlineWrapper from "@/components/message/message-inline.tsx";
 import type { MessageProp } from "@/components/message/message.tsx";
-import type { StickerMessage as StickerMessageVM } from "@/lib/schema.ts";
+import type { StickerMessage as StickerMessageType } from "@/lib/schema.ts";
 
-type StickerMessageProps = MessageProp<StickerMessageVM>;
+type StickerMessageProps = MessageProp<StickerMessageType>;
 
 export interface StickerMessageEntity {
   msg: {

@@ -5,13 +5,13 @@ import User from "@/components/user.tsx";
 import WechatEmoji from "@/components/wechat-emoji.tsx";
 import {
   MessageDirection,
-  type TextMessage as TextMessageVM,
+  type TextMessage as TextMessageType,
 } from "@/lib/schema.ts";
 import WechatEmojiTable from "@/lib/wechat-emojis.ts";
 import { cva } from "class-variance-authority";
 import type { ReactNode } from "react";
 
-type TextMessageProps = MessageProp<TextMessageVM>;
+type TextMessageProps = MessageProp<TextMessageType>;
 
 export type TextMessageEntity = string;
 

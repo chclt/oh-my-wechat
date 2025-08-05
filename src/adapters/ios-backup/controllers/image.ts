@@ -1,78 +1,83 @@
-import type { RecordVM } from "@/components/record/record";
-import type { Chat, MessageVM, PhotpSize, WCDatabases } from "@/lib/schema.ts";
+import type { RecordType } from "@/components/record/record";
+import type {
+	Chat,
+	MessageType,
+	PhotpSize,
+	WCDatabases,
+} from "@/lib/schema.ts";
 import CryptoJS from "crypto-js";
 import { getFilesFromManifast } from "../utils";
 
 export namespace ImageController {
-  export type GetInput = [
-    {
-      chat: Chat;
-      message: MessageVM;
-      record?: RecordVM;
-      size?: "origin" | "thumb";
-      domain?: "image" | "opendata" | "video";
-    },
-    { directory: FileSystemDirectoryHandle | FileList; databases: WCDatabases },
-  ];
-  export type GetOutput = Promise<PhotpSize[]>;
+	export type GetInput = [
+		{
+			chat: Chat;
+			message: MessageType;
+			record?: RecordType;
+			size?: "origin" | "thumb";
+			domain?: "image" | "opendata" | "video";
+		},
+		{ directory: FileSystemDirectoryHandle | FileList; databases: WCDatabases },
+	];
+	export type GetOutput = Promise<PhotpSize[]>;
 
-  export async function get(...inputs: GetInput): GetOutput {
-    const [
-      { chat, message, record, size = "origin", domain = "image" },
-      { directory, databases },
-    ] = inputs;
+	export async function get(...inputs: GetInput): GetOutput {
+		const [
+			{ chat, message, record, size = "origin", domain = "image" },
+			{ directory, databases },
+		] = inputs;
 
-    const db = databases.manifest;
-    if (!db) throw new Error("manifest database is not found");
+		const db = databases.manifest;
+		if (!db) throw new Error("manifest database is not found");
 
-    const files = await getFilesFromManifast(
-      db,
-      directory,
-      record
-        ? `%/OpenData/${CryptoJS.MD5(chat.id).toString()}/${message.local_id}/${record["@_dataid"]}.%`
-        : `%/${
-            { image: "Img", opendata: "OpenData", video: "Video" }[domain]
-          }/${CryptoJS.MD5(chat.id).toString()}/${message.local_id}.%`,
-    );
+		const files = await getFilesFromManifast(
+			db,
+			directory,
+			record
+				? `%/OpenData/${CryptoJS.MD5(chat.id).toString()}/${message.local_id}/${record["@_dataid"]}.%`
+				: `%/${
+						{ image: "Img", opendata: "OpenData", video: "Video" }[domain]
+					}/${CryptoJS.MD5(chat.id).toString()}/${message.local_id}.%`,
+		);
 
-    const result: PhotpSize[] = [];
+		const result: PhotpSize[] = [];
 
-    for (const file of files) {
-      if (file.filename.endsWith(".pic")) {
-        const newPhoto: PhotpSize = {
-          size: "origin",
-          src: URL.createObjectURL(file.file),
-        };
-        if (size === "origin") result.push(newPhoto);
-        else result.unshift(newPhoto);
-      }
+		for (const file of files) {
+			if (file.filename.endsWith(".pic")) {
+				const newPhoto: PhotpSize = {
+					size: "origin",
+					src: URL.createObjectURL(file.file),
+				};
+				if (size === "origin") result.push(newPhoto);
+				else result.unshift(newPhoto);
+			}
 
-      if (
-        file.filename.endsWith(".pic_thum") ||
-        file.filename.endsWith(".record_thum")
-      ) {
-        const newPhoto: PhotpSize = {
-          size: "thumb",
-          src: URL.createObjectURL(file.file),
-          // width: Number.parseInt(messageEntity.msg.img["@_cdnthumbwidth"]),
-          // height: Number.parseInt(messageEntity.msg.img["@_cdnthumbheight"]),
-        };
-        if (size === "origin") result.push(newPhoto);
-        else result.unshift(newPhoto);
-      }
+			if (
+				file.filename.endsWith(".pic_thum") ||
+				file.filename.endsWith(".record_thum")
+			) {
+				const newPhoto: PhotpSize = {
+					size: "thumb",
+					src: URL.createObjectURL(file.file),
+					// width: Number.parseInt(messageEntity.msg.img["@_cdnthumbwidth"]),
+					// height: Number.parseInt(messageEntity.msg.img["@_cdnthumbheight"]),
+				};
+				if (size === "origin") result.push(newPhoto);
+				else result.unshift(newPhoto);
+			}
 
-      if (file.filename.endsWith(".video_thum")) {
-        const newPhoto: PhotpSize = {
-          size: "thumb",
-          src: URL.createObjectURL(file.file),
-          // width: Number.parseInt(messageEntity.msg.img["@_cdnthumbwidth"]),
-          // height: Number.parseInt(messageEntity.msg.img["@_cdnthumbheight"]),
-        };
-        if (size === "origin") result.push(newPhoto);
-        else result.unshift(newPhoto);
-      }
-    }
+			if (file.filename.endsWith(".video_thum")) {
+				const newPhoto: PhotpSize = {
+					size: "thumb",
+					src: URL.createObjectURL(file.file),
+					// width: Number.parseInt(messageEntity.msg.img["@_cdnthumbwidth"]),
+					// height: Number.parseInt(messageEntity.msg.img["@_cdnthumbheight"]),
+				};
+				if (size === "origin") result.push(newPhoto);
+				else result.unshift(newPhoto);
+			}
+		}
 
-    return result;
-  }
+		return result;
+	}
 }
