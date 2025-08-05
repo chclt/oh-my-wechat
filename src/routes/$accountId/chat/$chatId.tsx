@@ -1,22 +1,22 @@
 import { cn } from "@/lib/utils";
 import { createFileRoute } from "@tanstack/react-router";
 import { useInfiniteQuery, useSuspenseQuery } from "@tanstack/react-query";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { MessageListInfiniteQueryOptions } from "@/lib/fetchers/message";
 import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogHeader,
-	DialogTitle,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Calendar } from "@/components/ui/calendar";
 import { ChatSuspenseQueryOptions } from "@/lib/fetchers/chat";
 import {
-	AppMessageTypeEnum,
-	MessageTypeEnum,
-	type MessageType,
+  AppMessageTypeEnum,
+  MessageTypeEnum,
+  type MessageType,
 } from "@/schema";
 import { differenceInMinutes, format, isSameDay } from "date-fns";
 import { MessageBubbleGroup } from "@/components/message-bubble-group";
@@ -27,267 +27,260 @@ import * as ScrollAreaPrimitive from "@radix-ui/react-scroll-area";
 import { ScrollBar } from "@/components/ui/scroll-area";
 
 export const Route = createFileRoute("/$accountId/chat/$chatId")({
-	component: RouteComponent,
+  component: RouteComponent,
 });
 
 function RouteComponent() {
-	const { accountId, chatId } = Route.useParams();
+  const { accountId, chatId } = Route.useParams();
 
-	const { data: chat } = useSuspenseQuery(
-		ChatSuspenseQueryOptions(accountId, chatId),
-	);
+  const { data: chat } = useSuspenseQuery(
+    ChatSuspenseQueryOptions(accountId, chatId),
+  );
 
-	const isChatroom = chat.type === "chatroom";
+  const isChatroom = chat.type === "chatroom";
 
-	// const [messageList, setMessageList] = useState<{
-	//   [key: number]: MessageType[];
-	// }>({});
-	// const [query, isQuerying, result, error] = useQuery<
-	//   ControllerPaginatorResult<MessageType[]>
-	// >({
-	//   data: [],
-	//   meta: {},
-	// });
+  const {
+    data = { pages: [], pageParams: [] },
 
-	// const paginatorCursor = useRef<number>();
+    hasPreviousPage,
+    fetchPreviousPage,
+    isFetchingPreviousPage,
 
-	// useEffect(() => {
-	//   setMessageList({});
-	//   query("/messages", {
-	//     chat,
-	//   });
-	// }, [chat]);
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery(
+    MessageListInfiniteQueryOptions(accountId, {
+      chat,
+      limit: 20,
+    }),
+  );
 
-	// const { accountId, chatId } = Route.useParams();
+  const scrollAreaViewportRef = useRef<HTMLDivElement>(null);
 
-	// const {data: account} = useSuspenseQuery(AccountSuspenseQueryOptions)
-	// const {data: chat} = useSuspenseQuery(ChatSuspenseQueryOptions)
+  useEffect(() => {
+    if (
+      data.pageParams.length === 1 &&
+      !data.pageParams[0] &&
+      scrollAreaViewportRef.current
+    ) {
+      const maxScrollTop =
+        scrollAreaViewportRef.current.scrollHeight -
+        scrollAreaViewportRef.current.clientHeight;
+      scrollAreaViewportRef.current.scrollTop = maxScrollTop;
+    }
+  }, [data.pageParams]);
 
-	const {
-		data = { pages: [], pageParams: [] },
+  const scrollHeightBeforeUpdate = useRef<number>();
 
-		hasPreviousPage,
-		fetchPreviousPage,
-		isFetchingPreviousPage,
+  const onScroll = (event: Event) => {
+    const target = event.target as HTMLDivElement;
+    if (target.scrollTop === 0) {
+      scrollHeightBeforeUpdate.current = target.scrollHeight;
+      if (hasPreviousPage && !isFetchingPreviousPage) {
+        fetchPreviousPage().finally(() => {
+          // TODO
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              if (scrollHeightBeforeUpdate.current) {
+                const heightDiff =
+                  target.scrollHeight - scrollHeightBeforeUpdate.current;
+                target.scrollTop = heightDiff;
+                scrollHeightBeforeUpdate.current = undefined;
+              }
+            });
+          });
+        });
+      }
+    } else if (
+      Math.abs(target.scrollTop - target.scrollHeight + target.clientHeight) < 1
+    ) {
+      if (hasNextPage && !isFetchingNextPage) {
+        fetchNextPage();
+      }
+    }
+  };
 
-		hasNextPage,
-		fetchNextPage,
-		isFetchingNextPage,
-	} = useInfiniteQuery(
-		MessageListInfiniteQueryOptions(accountId, {
-			chat,
-			limit: 20,
-		}),
-	);
+  const [isOpenCalendar, setIsOpenCalendar] = useState(false);
+  const [calendarMonth, setCalendarMonth] = useState<Date | undefined>();
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>();
+  // const onSelectDate = (date: Date | undefined) => {
+  //   if (!date) return;
+  //   // setMessageList({});
+  //   // query("/messages", {
+  //   //   chat,
+  //   //   cursor: date.getTime() / 1000,
+  //   //   cursor_condition: "<>",
+  //   // });
+  //   // setIsOpenCalendar(false);
+  // };
 
-	const scrollHeightBeforeUpdate = useRef<number>();
+  return (
+    <>
+      <ScrollAreaPrimitive.Root
+        className={cn(
+          "relative overflow-hidden contain-strict bg-neutral-100",
+          "**:data-orientation:z-50",
+          "w-full h-full [&>div>div]:block!",
+        )}
+      >
+        <ScrollAreaPrimitive.Viewport
+          className="h-full w-full"
+          ref={scrollAreaViewportRef}
+          onScroll={onScroll}
+        >
+          <div className="z-20 sticky top-0 mb-4 w-full h-18 px-6 flex items-center bg-white/80 backdrop-blur">
+            <h2 className={"font-medium text-lg"}>{chat.title}</h2>
+          </div>
 
-	const onScroll = (event: Event) => {
-		const target = event.target as HTMLDivElement;
-		if (target.scrollTop === 0) {
-			scrollHeightBeforeUpdate.current = target.scrollHeight;
-			if (hasPreviousPage && !isFetchingPreviousPage) {
-				fetchPreviousPage().finally(() => {
-					requestAnimationFrame(() => {
-						requestAnimationFrame(() => {
-							if (scrollHeightBeforeUpdate.current) {
-								const heightDiff =
-									target.scrollHeight - scrollHeightBeforeUpdate.current;
-								target.scrollTop = heightDiff;
-								scrollHeightBeforeUpdate.current = undefined;
-							}
-						});
-					});
-				});
-			}
-		} else if (
-			Math.abs(target.scrollTop - target.scrollHeight + target.clientHeight) < 1
-		) {
-			if (hasNextPage && !isFetchingNextPage) {
-				fetchNextPage();
-			}
-		}
-	};
+          <div className="mx-auto max-w-3xl p-4 flex flex-col gap-6">
+            {hasPreviousPage && (
+              <div className="flex justify-center items-center text-neutral-400">
+                <LoaderIcon className="animate-spin" />
+              </div>
+            )}
 
-	const [isOpenCalendar, setIsOpenCalendar] = useState(false);
-	const [calendarMonth, setCalendarMonth] = useState<Date | undefined>();
-	const [selectedDate, setSelectedDate] = useState<Date | undefined>();
-	// const onSelectDate = (date: Date | undefined) => {
-	//   if (!date) return;
-	//   // setMessageList({});
-	//   // query("/messages", {
-	//   //   chat,
-	//   //   cursor: date.getTime() / 1000,
-	//   //   cursor_condition: "<>",
-	//   // });
-	//   // setIsOpenCalendar(false);
-	// };
+            {data.pages
+              .flatMap((pageData) => pageData.data)
+              .reduce(
+                (messagesGroupByTimeAndUser, message, index, messageArray) => {
+                  const prevMessage = messageArray[index - 1];
 
-	return (
-		<>
-			<ScrollAreaPrimitive.Root
-				className={cn(
-					"relative overflow-hidden contain-strict bg-neutral-100",
-					"**:data-orientation:z-50",
-					"w-full h-full [&>div>div]:block!",
-				)}
-			>
-				<ScrollAreaPrimitive.Viewport
-					className="h-full w-full"
-					onScroll={onScroll}
-				>
-					<div className="z-20 sticky top-0 mb-4 w-full h-18 px-6 flex items-center bg-white/80 backdrop-blur">
-						<h2 className={"font-medium text-lg"}>{chat.title}</h2>
-					</div>
+                  let anchor: Array<unknown> = messagesGroupByTimeAndUser; // 把消息插入到哪个位置
 
-					<div className="mx-auto max-w-3xl p-4 flex flex-col gap-6">
-						{hasPreviousPage && (
-							<div className="flex justify-center items-center text-neutral-400">
-								<LoaderIcon className="animate-spin" />
-							</div>
-						)}
+                  const date = new Date(message.date * 1000);
+                  const prevDate = prevMessage
+                    ? new Date(prevMessage.date * 1000)
+                    : undefined;
 
-						{data.pages
-							.flatMap((pageData) => pageData.data)
-							.reduce(
-								(messagesGroupByTimeAndUser, message, index, messageArray) => {
-									const prevMessage = messageArray[index - 1];
+                  const isSameDate = prevDate && isSameDay(date, prevDate);
+                  const timeDiff = prevDate
+                    ? differenceInMinutes(date, prevDate)
+                    : undefined;
 
-									let anchor: Array<unknown> = messagesGroupByTimeAndUser; // 把消息插入到哪个位置
+                  if (!isSameDate || (timeDiff && timeDiff > 15)) {
+                    anchor.push([]);
+                  }
 
-									const date = new Date(message.date * 1000);
-									const prevDate = prevMessage
-										? new Date(prevMessage.date * 1000)
-										: undefined;
+                  anchor = anchor[anchor.length - 1] as Array<unknown>;
 
-									const isSameDate = prevDate && isSameDay(date, prevDate);
-									const timeDiff = prevDate
-										? differenceInMinutes(date, prevDate)
-										: undefined;
+                  const user = message.from;
+                  const prevUser = prevMessage?.from;
+                  const isSameUser =
+                    user && prevUser && user.id === prevUser.id;
 
-									if (!isSameDate || (timeDiff && timeDiff > 15)) {
-										anchor.push([]);
-									}
+                  const isMessageGroupable = (message: MessageType) => {
+                    if (message.type === MessageTypeEnum.APP) {
+                      return ![
+                        AppMessageTypeEnum.PAT,
+                        AppMessageTypeEnum.RINGTONE,
+                      ].includes(
+                        message.message_entity.msg.appmsg.type as number,
+                      );
+                    }
 
-									anchor = anchor[anchor.length - 1] as Array<unknown>;
+                    return ![
+                      MessageTypeEnum.SYSTEM,
+                      MessageTypeEnum.SYSTEM_EXTENDED,
+                    ].includes(message.type);
+                  };
 
-									const user = message.from;
-									const prevUser = prevMessage?.from;
-									const isSameUser =
-										user && prevUser && user.id === prevUser.id;
+                  const isGroupable = isMessageGroupable(message);
+                  const isPrevGroupable =
+                    prevMessage && isMessageGroupable(prevMessage);
 
-									const isMessageGroupable = (message: MessageType) => {
-										if (message.type === MessageTypeEnum.APP) {
-											return ![
-												AppMessageTypeEnum.PAT,
-												AppMessageTypeEnum.RINGTONE,
-											].includes(
-												message.message_entity.msg.appmsg.type as number,
-											);
-										}
+                  if (isSameUser && isPrevGroupable && isGroupable) {
+                    if (anchor.length > 0) {
+                      anchor = anchor[anchor.length - 1] as Array<unknown>;
+                    } else {
+                      anchor.push([]);
+                      anchor = anchor[anchor.length - 1] as Array<unknown>;
+                    }
+                  } else if (user && isGroupable) {
+                    anchor.push([]);
+                    anchor = anchor[anchor.length - 1] as Array<unknown>;
+                  }
 
-										return ![
-											MessageTypeEnum.SYSTEM,
-											MessageTypeEnum.SYSTEM_EXTENDED,
-										].includes(message.type);
-									};
+                  anchor.push(message);
 
-									const isGroupable = isMessageGroupable(message);
-									const isPrevGroupable =
-										prevMessage && isMessageGroupable(prevMessage);
+                  return messagesGroupByTimeAndUser;
+                },
+                [] as (MessageType | MessageType[])[][],
+              )
+              .map((messagesGroupByTime) => {
+                const firstElement = messagesGroupByTime[0];
+                const isMessageGroup = Array.isArray(firstElement);
+                const firstMessage = isMessageGroup
+                  ? firstElement[0]
+                  : firstElement;
 
-									if (isSameUser && isPrevGroupable && isGroupable) {
-										if (anchor.length > 0) {
-											anchor = anchor[anchor.length - 1] as Array<unknown>;
-										} else {
-											anchor.push([]);
-											anchor = anchor[anchor.length - 1] as Array<unknown>;
-										}
-									} else if (user && isGroupable) {
-										anchor.push([]);
-										anchor = anchor[anchor.length - 1] as Array<unknown>;
-									}
+                return (
+                  <div
+                    key={`${chat.id}/time:${new Date(firstMessage.date * 1000).getTime()}`}
+                    className="space-y-4"
+                  >
+                    <div className={"text-center text-sm text-neutral-600"}>
+                      <button
+                        type="button"
+                        // onClick={() => {
+                        //   setCalendarMonth(new Date(firstMessage.date * 1000));
+                        //   setSelectedDate(new Date(firstMessage.date * 1000));
+                        //   setIsOpenCalendar(true);
+                        // }}
+                      >
+                        {format(
+                          new Date(firstMessage.date * 1000),
+                          "yyyy/MM/dd HH:mm",
+                        )}
+                      </button>
+                    </div>
 
-									anchor.push(message);
+                    {messagesGroupByTime.map(
+                      (messagesGroupByUser, groupIndex) => {
+                        const isMessageGroup =
+                          Array.isArray(messagesGroupByUser);
+                        const firstMessage = isMessageGroup
+                          ? messagesGroupByUser[0]
+                          : messagesGroupByUser;
 
-									return messagesGroupByTimeAndUser;
-								},
-								[] as (MessageType | MessageType[])[][],
-							)
-							.map((messagesGroupByTime) => {
-								const firstElement = messagesGroupByTime[0];
-								const isMessageGroup = Array.isArray(firstElement);
-								const firstMessage = isMessageGroup
-									? firstElement[0]
-									: firstElement;
+                        const lastMessage = isMessageGroup
+                          ? messagesGroupByUser[messagesGroupByUser.length - 1]
+                          : messagesGroupByUser;
 
-								return (
-									<div
-										key={`${chat.id}/time:${new Date(firstMessage.date * 1000).getTime()}`}
-										className="space-y-4"
-									>
-										<div className={"text-center text-sm text-neutral-600"}>
-											<button
-												type="button"
-												// onClick={() => {
-												//   setCalendarMonth(new Date(firstMessage.date * 1000));
-												//   setSelectedDate(new Date(firstMessage.date * 1000));
-												//   setIsOpenCalendar(true);
-												// }}
-											>
-												{format(
-													new Date(firstMessage.date * 1000),
-													"yyyy/MM/dd HH:mm",
-												)}
-											</button>
-										</div>
+                        return (
+                          <React.Fragment
+                            key={`${chat.id}/(${groupIndex})${firstMessage.id}-${lastMessage.id}`}
+                          >
+                            {isMessageGroup ? (
+                              <MessageBubbleGroup
+                                user={firstMessage.from}
+                                messages={messagesGroupByUser}
+                                showPhoto={true}
+                                showUsername={isChatroom}
+                              />
+                            ) : (
+                              <Message message={messagesGroupByUser} />
+                            )}
+                          </React.Fragment>
+                        );
+                      },
+                    )}
+                  </div>
+                );
+              })}
 
-										{messagesGroupByTime.map(
-											(messagesGroupByUser, groupIndex) => {
-												const isMessageGroup =
-													Array.isArray(messagesGroupByUser);
-												const firstMessage = isMessageGroup
-													? messagesGroupByUser[0]
-													: messagesGroupByUser;
+            {hasNextPage && (
+              <div className="flex justify-center items-center text-neutral-400">
+                <LoaderIcon className="animate-spin" />
+              </div>
+            )}
+          </div>
+        </ScrollAreaPrimitive.Viewport>
+        <ScrollBar />
+        <ScrollAreaPrimitive.Corner />
+      </ScrollAreaPrimitive.Root>
 
-												const lastMessage = isMessageGroup
-													? messagesGroupByUser[messagesGroupByUser.length - 1]
-													: messagesGroupByUser;
-
-												return (
-													<React.Fragment
-														key={`${chat.id}/(${groupIndex})${firstMessage.id}-${lastMessage.id}`}
-													>
-														{isMessageGroup ? (
-															<MessageBubbleGroup
-																user={firstMessage.from}
-																messages={messagesGroupByUser}
-																showPhoto={true}
-																showUsername={isChatroom}
-															/>
-														) : (
-															<Message message={messagesGroupByUser} />
-														)}
-													</React.Fragment>
-												);
-											},
-										)}
-									</div>
-								);
-							})}
-
-						{hasNextPage && (
-							<div className="flex justify-center items-center text-neutral-400">
-								<LoaderIcon className="animate-spin" />
-							</div>
-						)}
-					</div>
-				</ScrollAreaPrimitive.Viewport>
-				<ScrollBar />
-				<ScrollAreaPrimitive.Corner />
-			</ScrollAreaPrimitive.Root>
-
-			{/* <Dialog
+      {/* <Dialog
         open={isOpenCalendar}
         onOpenChange={(open) => {
           setIsOpenCalendar(open);
@@ -312,6 +305,6 @@ function RouteComponent() {
           />
         </DialogContent>
       </Dialog> */}
-		</>
-	);
+    </>
+  );
 }
