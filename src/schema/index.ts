@@ -1,6 +1,7 @@
 export * from "./message";
 
 import type { Database } from "sql.js";
+import { MessageType, MessageTypeEnum } from "./message";
 
 export interface WCDatabases {
 	manifest?: Database;

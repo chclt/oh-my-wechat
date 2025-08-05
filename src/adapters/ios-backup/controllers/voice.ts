@@ -85,6 +85,8 @@ export namespace VoiceController {
 						ffmpeg.deleteFile(ffmpegInputFilename);
 						ffmpeg.deleteFile(ffmpegOutputFilename);
 
+						// TODO
+						// @ts-ignore
 						return URL.createObjectURL(new Blob([wav], { type: "audio/wav" }));
 					})(),
 				};

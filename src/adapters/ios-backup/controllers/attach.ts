@@ -9,7 +9,7 @@ export namespace AttachController {
 			chat: ChatType;
 			message: MessageType;
 			record?: RecordType;
-			type: string;
+			type?: string;
 		},
 		{ directory: FileSystemDirectoryHandle | FileList; databases: WCDatabases },
 	];

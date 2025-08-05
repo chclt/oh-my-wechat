@@ -88,9 +88,9 @@ export namespace ChatController {
 							: row.UsrName,
 						...(contactInfo?.photo ? { photo: contactInfo.photo.thumb } : {}),
 						is_muted: !!row.ConIntRes1,
-						// @ts-ignore
 						is_pinned: contactInfo
-							? (contactInfo as UserType)._is_pinned
+							? // @ts-ignore
+								(contactInfo as UserType)._is_pinned
 							: false, // todo
 						is_collapsed: false,
 						members: [_store.account, contactInfo],

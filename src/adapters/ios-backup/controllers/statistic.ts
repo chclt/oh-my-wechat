@@ -91,7 +91,7 @@ export interface ChatStatistics {
 
 export namespace StatisticController {
 	export type GetInput = [
-		{ chat: ChatType; startTime?: Date; endTime?: Date },
+		{ chat: ChatType; startTime: Date; endTime: Date },
 		{ databases: WCDatabases },
 	];
 	export type GetOutput = Promise<ControllerResult<ChatStatistics>>;
@@ -478,6 +478,8 @@ export namespace StatisticController {
 					chat,
 					type: MessageTypeEnum.TEXT,
 					cursor: JSON.stringify({
+						// TODO
+						// @ts-ignore
 						value: cursor,
 						condition: "<",
 					} satisfies ControllerPaginatorCursor),
@@ -546,6 +548,8 @@ export namespace StatisticController {
 					type: MessageTypeEnum.APP,
 					type_app: AppMessageTypeEnum.REFER,
 					cursor: JSON.stringify({
+						// TODO
+						// @ts-ignore
 						value: cursor,
 						condition: "<",
 					} satisfies ControllerPaginatorCursor),
