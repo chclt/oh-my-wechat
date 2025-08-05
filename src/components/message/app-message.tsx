@@ -93,10 +93,10 @@ import VoiceMessage, {
 } from "@/components/message/app-message/voice-message.tsx";
 import type { MessageProp } from "@/components/message/message.tsx";
 import { AppMessageTypeEnum, type AppMessageType } from "@/schema";
-import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
-import { ScrollArea, ScrollBar } from "../ui/scroll-area";
-import { LinkCard } from "../link-card";
-import { CircleQuestionmarkSolid } from "../icon";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { LinkCard } from "@/components/link-card";
+import { CircleQuestionmarkSolid } from "@/components/icon";
 
 export type AppMessageProps<
 	T = {
@@ -398,16 +398,14 @@ export default function AppMessage({
 				<Dialog>
 					<DialogTrigger className="text-start">
 						<LinkCard
-							abstract={`暂未支持的消息类型：${message.message_entity.msg.appmsg.type}`}
+							abstract="暂未支持的消息类型，点击查看原始数据"
 							from={`49:${message.message_entity.msg.appmsg.type}`}
 							icon={<CircleQuestionmarkSolid className=" scale-[135%]" />}
 						/>
 					</DialogTrigger>
 					<DialogContent>
-						<ScrollArea>
-							<pre className="text-sm pb-4 text-wrap">
-								{message.raw_message}
-							</pre>
+						<ScrollArea className="max-w-full overflow-hidden">
+							<pre className="text-sm pb-4">{message.raw_message}</pre>
 							<ScrollBar orientation="horizontal" />
 						</ScrollArea>
 					</DialogContent>

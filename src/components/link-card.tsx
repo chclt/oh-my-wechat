@@ -2,7 +2,7 @@ import {
   Card,
   CardContent,
   CardFooter,
-  // CardIndicator,
+  CardIndicator,
   CardTitle,
 } from "@/components/ui/card.tsx";
 import { cn } from "@/lib/utils";
@@ -49,7 +49,7 @@ const LinkCard = ({
       <CardFooter>
         {from && from.length > 0 ? from : "\u200B"}
 
-        {/*<CardIndicator>{icon ? icon : <ArrowShareRightSolid />}</CardIndicator>*/}
+        <CardIndicator>{icon ? icon : <ArrowShareRightSolid />}</CardIndicator>
       </CardFooter>
     </Card>
   );
