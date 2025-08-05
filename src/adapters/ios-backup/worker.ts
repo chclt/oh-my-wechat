@@ -104,8 +104,6 @@ export const _store: AdapterWorkerStore = {
 
 const adapterWorker: AdapterWorkerType = {
 	_loadDirectory: async (directory) => {
-		console.log("loadDirectory", directory);
-
 		_store.directory = directory;
 
 		const SQL = await initSqlJs({ locateFile: () => sqliteUrl });

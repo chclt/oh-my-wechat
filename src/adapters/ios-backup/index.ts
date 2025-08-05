@@ -41,81 +41,108 @@ export default class IosBackupAdapter implements DataAdapter {
 	async getAccountList() {
 		const data = await this._workerAdapter.getAccountList();
 
-		console.groupCollapsed("getAccountList");
-		console.log(data);
-		console.groupEnd();
+		if (import.meta.env.DEV) {
+			console.groupCollapsed("getAccountList");
+			console.log(data);
+			console.groupEnd();
+		}
+
 		return data;
 	}
 
 	async getAccount(accountId: string) {
 		const data = await this._workerAdapter.getAccount(accountId);
 
-		console.groupCollapsed("getAccount");
-		console.log(data);
-		console.groupEnd();
+		if (import.meta.env.DEV) {
+			console.groupCollapsed("getAccount");
+			console.log(data);
+			console.groupEnd();
+		}
+
 		return data;
 	}
 
 	async getChatList(input?: { userIds?: string[] }) {
 		const data = await this._workerAdapter.getChatList(input);
 
-		console.groupCollapsed("getChatList");
-		console.log(data);
-		console.groupEnd();
+		if (import.meta.env.DEV) {
+			console.groupCollapsed("getChatList");
+			console.log(data);
+			console.groupEnd();
+		}
+
 		return data;
 	}
 
 	async getMessageList(input: MessageController.AllInput[0]) {
 		const data = await this._workerAdapter.getMessageList(input);
 
-		console.groupCollapsed("getMessageList");
-		console.log(data);
-		console.groupEnd();
+		if (import.meta.env.DEV) {
+			console.groupCollapsed("getMessageList");
+			console.log(data);
+			console.groupEnd();
+		}
+
 		return data;
 	}
 
 	async getImage(input: ImageController.GetInput[0]) {
 		const data = await this._workerAdapter.getImage(input);
 
-		console.groupCollapsed("getImage");
-		console.log(data);
-		console.groupEnd();
+		if (import.meta.env.DEV) {
+			console.groupCollapsed("getImage");
+			console.log(data);
+			console.groupEnd();
+		}
+
 		return data;
 	}
 
 	async getVideo(input: VideoController.GetInput[0]) {
 		const data = await this._workerAdapter.getVideo(input);
 
-		console.groupCollapsed("getVideo");
-		console.log(data);
-		console.groupEnd();
+		if (import.meta.env.DEV) {
+			console.groupCollapsed("getVideo");
+			console.log(data);
+			console.groupEnd();
+		}
+
 		return data;
 	}
 
 	async getVoice(input: VoiceController.GetInput[0]) {
 		const data = await this._workerAdapter.getVoice(input);
 
-		console.groupCollapsed("getVoice");
-		console.log(data);
-		console.groupEnd();
+		if (import.meta.env.DEV) {
+			console.groupCollapsed("getVoice");
+			console.log(data);
+			console.groupEnd();
+		}
+
 		return data;
 	}
 
 	async getAttache(input: AttachController.GetInput[0]) {
 		const data = await this._workerAdapter.getAttache(input);
 
-		console.groupCollapsed("getAttache");
-		console.log(data);
-		console.groupEnd();
+		if (import.meta.env.DEV) {
+			console.groupCollapsed("getAttache");
+			console.log(data);
+			console.groupEnd();
+		}
+
 		return data;
 	}
 
 	async getStatistic(input: StatisticController.GetInput[0]) {
 		const data = await this._workerAdapter.getStatistic(input);
 
-		console.groupCollapsed("getStatistic");
-		console.log(data);
-		console.groupEnd();
+		if (import.meta.env.DEV) {
+			console.groupCollapsed("getStatistic");
+			console.log(data);
+			console.groupEnd();
+		}
+
 		return data;
 	}
 }
