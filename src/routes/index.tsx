@@ -188,7 +188,9 @@ function RouteComponent() {
 							<div>
 								<h4 className={"font-medium"}>选择账号</h4>
 								<p className={"mt-0.5 text-sm text-muted-foreground"}>
-									在备份中找到 {accountList.length} 个账号
+									在备份中找到
+									<span className="mx-[0.166em]">{accountList.length}</span>
+									个账号
 								</p>
 							</div>
 						</div>
