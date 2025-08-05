@@ -5,6 +5,9 @@ import WechatEmojiTable from "@/lib/wechat-emojis.ts";
 import type React from "react";
 
 import footer_logo from "/images/wrapped-2024/footer-logo.svg?url";
+import { Route } from "@/routes/$accountId/chat/route";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { AccountSuspenseQueryOptions } from "@/lib/fetchers/account";
 
 export default function SectionMostUsedWxemoji({
   data,
@@ -13,7 +16,10 @@ export default function SectionMostUsedWxemoji({
     sent_wxemoji_usage: { key: string; count: number }[];
   };
 }) {
-  const { user } = useApp();
+  const { accountId } = Route.useParams();
+  const { data: account } = useSuspenseQuery(
+    AccountSuspenseQueryOptions(accountId),
+  );
 
   const mostUsedWxemoji = data.sent_wxemoji_usage.sort(
     (a, b) => b.count - a.count,
@@ -75,7 +81,7 @@ export default function SectionMostUsedWxemoji({
             src={footer_logo}
             alt={"访问ohmywechat.com，查看微信报告2024"}
           />
-          <User.Photo user={user!} variant={"default"} />
+          <User.Photo user={account!} variant={"default"} />
         </div>{" "}
       </div>
     </section>

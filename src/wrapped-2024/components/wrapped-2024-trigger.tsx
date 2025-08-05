@@ -2,7 +2,7 @@ import {
   CelebrateSolid,
   ChevronRightSmallLine,
 } from "@/components/central-icon.tsx";
-import Wrapped2024 from "@/components/statistic/wrapped-2024/wrapped-2024.tsx";
+import Wrapped2024 from "./wrapped-2024.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import {
   Dialog,

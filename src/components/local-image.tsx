@@ -43,15 +43,6 @@ const LocalImage = forwardRef<HTMLImageElement, LocalImageProps>(
       enabled: inViewport,
     });
 
-    useEffect(() => {
-      return () => {
-        if (data && data.length)
-          data.map((photo) => {
-            URL.revokeObjectURL(photo.src);
-          });
-      };
-    }, [data]);
-
     return (
       <img
         ref={imgRef}

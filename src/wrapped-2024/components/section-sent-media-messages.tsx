@@ -3,12 +3,16 @@ import Image from "@/components/image.tsx";
 import Message from "@/components/message/message.tsx";
 import User from "@/components/user.tsx";
 import { useApp } from "@/lib/hooks/appProvider.tsx";
-import useQuery from "@/lib/hooks/useQuery.ts";
 import type { ControllerResult, MessageVM } from "@/lib/schema.ts";
 import React, { useEffect } from "react";
 
 import { format } from "date-fns";
 import footer_logo from "/images/wrapped-2024/footer-logo.svg?url";
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import { getDataAdapter } from "@/lib/adapter.ts";
+import { Wrapped2024RandomMediaMessageQueryOptions } from "../fetchers.ts";
+import { Route } from "@/routes/$accountId/chat/route.tsx";
+import { AccountSuspenseQueryOptions } from "@/lib/fetchers/account.ts";
 
 export default function SectionSentMediaMessages({
   data,
@@ -20,26 +24,22 @@ export default function SectionSentMediaMessages({
     sent_video_message_count: number;
   };
 }) {
-  const { user } = useApp();
+  const { accountId } = Route.useParams();
+  const { data: account } = useSuspenseQuery(
+    AccountSuspenseQueryOptions(accountId),
+  );
 
   const { startTime, endTime } = data;
 
-  const [query, isQuerying, result, error] = useQuery<
-    ControllerResult<MessageVM[]>
-  >({
-    data: [],
+  const { data: randomMediaMessages = [], isFetching } = useQuery({
+    ...Wrapped2024RandomMediaMessageQueryOptions(),
   });
 
   const handleGetRandomMessages = () => {
-    query("/wrapped/messages/media/random", {
-      startTime,
-      endTime,
+    queryClient.invalidateQueries({
+      queryKey: Wrapped2024RandomMediaMessageQueryOptions().queryKey,
     });
   };
-
-  useEffect(() => {
-    handleGetRandomMessages();
-  }, []);
 
   return (
     <section
@@ -61,7 +61,7 @@ export default function SectionSentMediaMessages({
       <div className={"grow overflow-hidden drop-shadow-lg"}>
         <div className={"size-full"}>
           <div className={"h-full w-full"}>
-            {result.data
+            {randomMediaMessages
               .filter((_, index) => index < 1)
               .map((message) => (
                 <div
@@ -101,7 +101,7 @@ export default function SectionSentMediaMessages({
           }}
         >
           <ArrowRotateRightLeftLine
-            className={isQuerying ? "animate-spin" : ""}
+            className={isFetching ? "animate-spin" : ""}
           />
           换一张
         </button>
@@ -110,7 +110,7 @@ export default function SectionSentMediaMessages({
             src={footer_logo}
             alt={"访问ohmywechat.com，查看微信报告2024"}
           />
-          <User.Photo user={user!} variant={"default"} />
+          <User.Photo user={account} variant={"default"} />
         </div>
       </div>
     </section>

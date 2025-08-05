@@ -4,7 +4,7 @@ import type { Chat, VoiceInfo, VoiceMessage } from "@/lib/schema.ts";
 import { useInViewport } from "@mantine/hooks";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
-import { forwardRef, useEffect, useRef } from "react";
+import { forwardRef, useEffect, useRef, useState } from "react";
 
 interface LocalVoiceProps extends React.ImgHTMLAttributes<HTMLAudioElement> {
   chat: Chat;
@@ -14,6 +14,13 @@ interface LocalVoiceProps extends React.ImgHTMLAttributes<HTMLAudioElement> {
 const LocalVoice = forwardRef<HTMLAudioElement, LocalVoiceProps>(
   ({ chat, message, ...props }, ref) => {
     const { ref: voiceRef, inViewport } = useInViewport();
+    const [hadBeenInViewport, setHadBeenInViewport] = useState(false);
+
+    useEffect(() => {
+      if (inViewport) {
+        setHadBeenInViewport(true);
+      }
+    }, [inViewport]);
 
     const { data } = useQuery({
       ...VoiceSuspenseQueryOptions({
@@ -22,14 +29,7 @@ const LocalVoice = forwardRef<HTMLAudioElement, LocalVoiceProps>(
 
         scope: "transcription",
       }),
-    });
-
-    useEffect(() => {
-      return () => {
-        if (data?.src) {
-          URL.revokeObjectURL(data.src);
-        }
-      };
+      enabled: hadBeenInViewport,
     });
 
     return (
