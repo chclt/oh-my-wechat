@@ -171,6 +171,7 @@ export interface ControllerResult<T> {
 export interface ControllerPaginatorCursor {
   value: number;
   condition: "<" | "<=" | ">" | ">=" | "<>";
+  [key: string]: any;
 }
 
 export interface ControllerPaginatorResult<T> extends ControllerResult<T> {

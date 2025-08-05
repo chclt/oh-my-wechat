@@ -37,7 +37,7 @@ interface AdapterWorkerStore {
     5?: { url: string; data: Uint8Array };
   };
   accountList: Account[];
-  account: Account | undefined;
+  account: Account;
 }
 
 export interface AdapterWorkerType {

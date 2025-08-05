@@ -1,5 +1,3 @@
-import ChatDetails from "@/components/chat-details";
-import ChatList from "@/components/chat-list";
 import {
   ChatIconFill,
   ChatIconOutline,

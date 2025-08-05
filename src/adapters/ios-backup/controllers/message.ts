@@ -25,7 +25,7 @@ import {
   type Chatroom,
   type ChatroomVoipMessage,
   type ContactMessage,
-  ControllerPaginatorCursor,
+  type ControllerPaginatorCursor,
   type ControllerPaginatorResult,
   type ControllerResult,
   type DatabaseMessageRow,
@@ -422,7 +422,7 @@ export namespace MessageController {
     const [{ chat, type, type_app, cursor, limit = 50 }, { databases }] =
       inputs;
 
-    const cursorObject: ControllerPaginatorCursor = {};
+    const cursorObject: Partial<ControllerPaginatorCursor> = {};
 
     if (cursor) {
       try {
@@ -844,17 +844,20 @@ export namespace MessageController {
       throw new Error("databases are not found");
     }
 
-    const chats = await ChatController.all(databases);
+    const chats = await ChatController.all({ databases });
 
     const chatMessagePromiseResults = (
       await Promise.all(
         chats.data.map((chat) => {
-          return MessageController.all(databases, {
-            chat,
-            type,
-            type_app,
-            limit,
-          });
+          return MessageController.all(
+            {
+              chat,
+              type,
+              type_app,
+              limit,
+            },
+            { databases },
+          );
         }),
       )
     ).flatMap((result) => result.data);
