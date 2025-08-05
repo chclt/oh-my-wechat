@@ -120,6 +120,8 @@ export default function SystemExtendedMessage({
 								return null;
 							case "link_ecs_gift":
 								return linkObj["@_name"];
+							case "link_massend_url": // 使用群发助手发送消息会有提示
+								return linkObj.title;
 							default:
 								console.info("不支持的系统消息内容类型：", linkObj);
 								return "???";
