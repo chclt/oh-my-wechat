@@ -37,21 +37,22 @@ function RouteComponent() {
 						<span className="mt-0.5 text-xs">消息</span>
 					</Link>
 
-					{/* <button
-            type="button"
-            className={cn(
-              "w-16 h-16 p-0 flex flex-col items-center justify-center text-sm ",
-              "group hover:text-[#03C160] rounded-none after:content-none hover:bg-neutral-100",
-            )}
-          >
-            <div className="mt-1 w-8 h-8">
-              <ContactIconOutline className={"group-hover:hidden size-full"} />
-              <ContactIconFill
-                className={"hidden group-hover:block size-full"}
-              />
-            </div>
-            <span className="mt-0.5 text-xs">通讯录</span>
-          </button> */}
+					<button
+						type="button"
+						className={cn(
+							"w-16 h-16 p-0 flex flex-col items-center justify-center text-sm ",
+							"group hover:text-[#03C160] rounded-none after:content-none hover:bg-neutral-100",
+						)}
+						hidden
+					>
+						<div className="mt-1 w-8 h-8">
+							<ContactIconOutline className={"group-hover:hidden size-full"} />
+							<ContactIconFill
+								className={"hidden group-hover:block size-full"}
+							/>
+						</div>
+						<span className="mt-0.5 text-xs">通讯录</span>
+					</button>
 				</div>
 			</aside>
 

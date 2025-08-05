@@ -1,9 +1,9 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
-	BubbleQuestionSolid,
-	ChevronRightSmallLine,
-	GithubSolid,
-	TriangleExclamationLine,
+  BubbleQuestionSolid,
+  ChevronRightSmallLine,
+  GithubSolid,
+  TriangleExclamationLine,
 } from "@/components/central-icon.tsx";
 import Image from "@/components/image.tsx";
 import Link from "@/components/link.tsx";
@@ -19,265 +19,284 @@ import { AccountListSuspenseQueryOptions } from "@/lib/fetchers/account";
 import queryClient from "@/lib/query-client";
 import { setDataAdapter } from "@/lib/adapter";
 import {
-	LoadAccountDatabaseMutationOptions,
-	LoadDirectoryMutationOptions,
+  LoadAccountDatabaseMutationOptions,
+  LoadDirectoryMutationOptions,
 } from "@/adapters/ios-backup/fetchers";
 import type { AccountType } from "@/schema";
 import { LoaderIcon } from "@/components/icon.tsx";
 import { useToggle } from "@mantine/hooks";
 
 export const Route = createFileRoute("/")({
-	component: RouteComponent,
+  component: RouteComponent,
 });
 
 function RouteComponent() {
-	const navigate = useNavigate();
+  const navigate = useNavigate();
 
-	const adapterRef = useRef(new IosBackupAdapter());
+  const adapterRef = useRef(new IosBackupAdapter());
 
-	const [adapterInited, setAdapterInited] = useState(false);
+  const [adapterInited, setAdapterInited] = useState(false);
 
-	const {
-		mutateAsync: loadDirectory,
-		isPending: isLoadingDirectory,
-		isSuccess: isLoadDirectorySuccess,
-	} = useMutation(LoadDirectoryMutationOptions(adapterRef.current));
+  const {
+    mutateAsync: loadDirectory,
+    isPending: isLoadingDirectory,
+    isSuccess: isLoadDirectorySuccess,
+  } = useMutation(LoadDirectoryMutationOptions(adapterRef.current));
 
-	const {
-		mutateAsync: loadAccountDatabase,
-		isPending: isLoadingAccountDatabase,
-		isSuccess: isLoadAccountDatabaseSuccess,
-	} = useMutation(LoadAccountDatabaseMutationOptions(adapterRef.current));
+  const {
+    mutateAsync: loadAccountDatabase,
+    isPending: isLoadingAccountDatabase,
+    isSuccess: isLoadAccountDatabaseSuccess,
+  } = useMutation(LoadAccountDatabaseMutationOptions(adapterRef.current));
 
-	const handleDirectorySelect = async (
-		directoryHandle: FileSystemDirectoryHandle | FileList,
-	) => {
-		setDataAdapter(adapterRef.current);
-		loadDirectory(directoryHandle).then(() => {
-			setAdapterInited(true);
-		});
+  const handleDirectorySelect = async (
+    directoryHandle: FileSystemDirectoryHandle | FileList,
+  ) => {
+    setDataAdapter(adapterRef.current);
+    loadDirectory(directoryHandle).then(() => {
+      setAdapterInited(true);
+    });
 
-		queryClient.invalidateQueries({
-			queryKey: AccountListSuspenseQueryOptions().queryKey,
-		});
-	};
+    queryClient.invalidateQueries({
+      queryKey: AccountListSuspenseQueryOptions().queryKey,
+    });
+  };
 
-	const { data: accountList = [] } = useQuery({
-		...AccountListSuspenseQueryOptions(),
-		enabled: adapterInited,
-	});
+  const { data: accountList = [] } = useQuery({
+    ...AccountListSuspenseQueryOptions(),
+    enabled: adapterInited,
+  });
 
-	const handleAccountSelect = async (account: AccountType) => {
-		loadAccountDatabase(account).then(() => {
-			navigate({
-				to: "/$accountId",
-				params: { accountId: account.id },
-			});
-		});
-	};
+  const handleAccountSelect = async (account: AccountType) => {
+    loadAccountDatabase(account).then(() => {
+      navigate({
+        to: "/$accountId",
+        params: { accountId: account.id },
+      });
+    });
+  };
 
-	useEffect(() => {
-		if (accountList.length === 1) {
-			handleAccountSelect(accountList[0]);
-		}
-	}, [accountList]);
+  const [step, toggleStep] = useToggle<"SELECT_DIRECTORY" | "SELECT_ACCOUNT">([
+    "SELECT_DIRECTORY",
+    "SELECT_ACCOUNT",
+  ]);
 
-	const [selectedAccountId, setSelectedAccountId] = useState<string>();
+  useEffect(() => {
+    console.log(accountList.length);
+    switch (accountList.length) {
+      case 0:
+        toggleStep("SELECT_DIRECTORY");
+        break;
+      case 1:
+        handleAccountSelect(accountList[0]);
+        break;
+      default:
+        toggleStep("SELECT_ACCOUNT");
+        break;
+    }
+  }, [accountList.length]);
 
-	const isWorkerEnabled = typeof Worker !== "undefined";
-	const isFSAEnabled = "showOpenFilePicker" in window;
+  const [selectedAccountId, setSelectedAccountId] = useState<string>();
 
-	return (
-		<main className={"w-full h-full p-8 flex flex-col"}>
-			<div className={"grow grid justify-items-center place-content-center"}>
-				<Image
-					src={logo}
-					alt={"OhMyWechat.com (beta) logo"}
-					draggable={false}
-					className={"select-none"}
-				/>
+  const isWorkerEnabled = typeof Worker !== "undefined";
+  const isFSAEnabled = "showOpenFilePicker" in window;
 
-				<div className={"mt-5"}>
-					{isFSAEnabled && !accountList.length && (
-						<Button
-							variant="outline"
-							className="h-12 py-3 ps-6 pe-4 inline-flex text-base rounded-xl [&:not(:disabled)]:border-foreground [&>svg]:size-6"
-							disabled={isLoadingDirectory}
-							onClick={async () => {
-								const directoryHandle = await window.showDirectoryPicker();
-								if ((await directoryHandle.requestPermission()) === "granted") {
-									handleDirectorySelect(directoryHandle);
-								}
-							}}
-						>
-							选择 iTunes 备份
-							{isLoadingDirectory ? (
-								<LoaderIcon className="scale-90 opacity-75 animate-spin" />
-							) : (
-								<ChevronRightSmallLine />
-							)}
-						</Button>
-					)}
+  return (
+    <main className={"w-full h-full p-8 flex flex-col"}>
+      <div className={"grow grid justify-items-center place-content-center"}>
+        <Image
+          src={logo}
+          alt={"OhMyWechat.com (beta) logo"}
+          draggable={false}
+          className={"select-none"}
+        />
 
-					{/* TODO */}
-					{!isFSAEnabled && !accountList.length && (
-						<label className={"relative"}>
-							<input
-								type={"file"}
-								webkitdirectory=""
-								className={"peer absolute pointer-events-none opacity-0"}
-								disabled={
-									!isWorkerEnabled ||
-									isLoadingDirectory ||
-									isLoadDirectorySuccess
-								}
-								onChange={(event) => {
-									if (event.target.files && event.target.files.length > 0) {
-										// setIsLoadingDirectory(true);
-										handleDirectorySelect(event.target.files).then(() => {
-											event.target.files === null;
-										});
-									} else {
-										// setIsLoadingDirectory(false);
-										event.target.files === null;
-									}
-								}}
-							/>
-							<div
-								className={cn(
-									buttonVariants({
-										variant: "outline",
-										size: "default",
-										className:
-											"h-12 py-3 ps-6 pe-3.5 inline-flex text-base rounded-xl [&:not(:disabled)]:border-foreground",
-									}),
-								)}
-							>
-								打开 iTunes 备份
-								{isLoadingDirectory || isLoadDirectorySuccess ? (
-									<LoaderIcon className="scale-90 opacity-75 animate-spin" />
-								) : (
-									<ChevronRightSmallLine className={"size-6"} />
-								)}
-							</div>
-						</label>
-					)}
-				</div>
-				{!!accountList.length && (
-					<div className={"justify-self-stretch space-y-4 flex flex-col"}>
-						<div className={"flex text-foreground"}>
-							<div>
-								<h4 className={"font-medium"}>选择账号</h4>
-								<p className={"mt-0.5 text-sm text-muted-foreground"}>
-									在备份中找到 {accountList.length} 个账号
-								</p>
-							</div>
-						</div>
+        {step === "SELECT_DIRECTORY" && (
+          <div className={"mt-5"}>
+            {isFSAEnabled && (
+              <Button
+                variant="outline"
+                className="h-12 py-3 ps-6 pe-4 inline-flex text-base rounded-xl [&:not(:disabled)]:border-foreground [&>svg]:size-6"
+                disabled={isLoadingDirectory}
+                onClick={async () => {
+                  const directoryHandle = await window.showDirectoryPicker();
+                  if (
+                    (await directoryHandle.requestPermission()) === "granted"
+                  ) {
+                    handleDirectorySelect(directoryHandle);
+                  }
+                }}
+              >
+                选择 iTunes 备份
+                {isLoadingDirectory ? (
+                  <LoaderIcon className="scale-90 opacity-75 animate-spin" />
+                ) : (
+                  <ChevronRightSmallLine />
+                )}
+              </Button>
+            )}
 
-						<RadioGroup
-							className={"flex flex-wrap gap-2.5"}
-							onValueChange={setSelectedAccountId}
-						>
-							{accountList.map((account) => (
-								<div
-									key={account.id}
-									className="grow basis-40 relative after:content-[''] after:block after:w-full after:pb-[62.5%]"
-								>
-									<RadioGroupItem
-										value={account.id}
-										id={account.id}
-										className={
-											"peer z-20 absolute bottom-2 right-2 data-[state=checked]:border-foreground"
-										}
-									/>
-									<Label
-										htmlFor={account.id}
-										className={
-											"z-10 absolute size-full pt-4 pb-3 px-5 flex flex-col justify-center items-center gap-2.5 hover:bg-accent rounded-xl border border-input peer-data-[state=checked]:border-primary"
-										}
-									>
-										<div
-											className={
-												"relative min-w-11 w-[27.5%] after:content-[''] after:block after:w-full after:pb-[100%]"
+            {!isFSAEnabled && (
+              <label className={"relative"}>
+                <input
+                  type={"file"}
+                  webkitdirectory=""
+                  className={"peer absolute pointer-events-none opacity-0"}
+                  disabled={
+                    !isWorkerEnabled ||
+                    isLoadingDirectory ||
+                    isLoadDirectorySuccess
+                  }
+                  onChange={(event) => {
+                    if (event.target.files && event.target.files.length > 0) {
+                      // setIsLoadingDirectory(true);
+                      handleDirectorySelect(event.target.files).then(() => {
+                        event.target.files === null;
+                      });
+                    } else {
+                      // setIsLoadingDirectory(false);
+                      event.target.files === null;
+                    }
+                  }}
+                />
+                <div
+                  className={cn(
+                    buttonVariants({
+                      variant: "outline",
+                      size: "default",
+                      className:
+                        "h-12 py-3 ps-6 pe-3.5 inline-flex text-base rounded-xl [&:not(:disabled)]:border-foreground",
+                    }),
+                  )}
+                >
+                  打开 iTunes 备份
+                  {isLoadingDirectory || isLoadDirectorySuccess ? (
+                    <LoaderIcon className="scale-90 opacity-75 animate-spin" />
+                  ) : (
+                    <ChevronRightSmallLine className={"size-6"} />
+                  )}
+                </div>
+              </label>
+            )}
+          </div>
+        )}
 
-												// className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-transparent p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-											}
-										>
-											<Image
-												src={account.photo?.thumb}
-												alt={account.username}
-												className={
-													"absolute inset-0 size-full clothoid-corner-[18.18%]"
-												}
-											/>
-										</div>
-										{account.username}
-									</Label>
-								</div>
-							))}
-						</RadioGroup>
-						<Button
-							variant="outline"
-							className={
-								"self-end w-fit h-11 ps-4.5 pe-2 flex items-center gap-1 text-base rounded-xl [&:not(:disabled)]:border-foreground [&>svg]:size-6"
-							}
-							disabled={
-								!selectedAccountId ||
-								isLoadingAccountDatabase ||
-								isLoadAccountDatabaseSuccess
-							}
-							onClick={async () => {
-								if (selectedAccountId) {
-									const account = accountList.find(
-										(account) => account.id === selectedAccountId,
-									);
-									if (account) {
-										handleAccountSelect(account);
-									}
-								}
-							}}
-						>
-							打开
-							{isLoadingAccountDatabase || isLoadAccountDatabaseSuccess ? (
-								<LoaderIcon className="scale-90 opacity-75 animate-spin" />
-							) : (
-								<ChevronRightSmallLine />
-							)}
-						</Button>
-					</div>
-				)}
-				<p className={"mt-7 flex items-center text-sm text-muted-foreground"}>
-					<span
-						className={
-							"mr-1 shrink-0 size-4.5 [&_svg]:size-full relative bottom-px"
-						}
-					>
-						<TriangleExclamationLine className={"inline"} />
-					</span>
-					为了防止浏览器插件造成的隐私泄露，建议使用使用无痕模式打开
-				</p>
-			</div>
-			<div className={"flex justify-end gap-4"}>
-				<Link
-					href="https://github.com/chclt/oh-my-wechat?tab=readme-ov-file#%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E"
-					className={
-						"h-9 py-2 pl-2 pr-3 inline-flex items-center gap-1.5 [&_svg]:shrink-0 [&_svg]:size-6 hover:underline"
-					}
-				>
-					<BubbleQuestionSolid />
-					使用教程
-				</Link>
+        {step === "SELECT_ACCOUNT" && (
+          <div className={"justify-self-stretch space-y-4 flex flex-col"}>
+            <div className={"flex text-foreground"}>
+              <div>
+                <h4 className={"font-medium"}>选择账号</h4>
+                <p className={"mt-0.5 text-sm text-muted-foreground"}>
+                  在备份中找到 {accountList.length} 个账号
+                </p>
+              </div>
+            </div>
 
-				<Link
-					href="https://github.com/chclt/oh-my-wechat/"
-					className={
-						"h-9 py-2 pl-2 pr-3 inline-flex items-center gap-1.5 [&_svg]:shrink-0 [&_svg]:size-6 hover:underline"
-					}
-				>
-					<GithubSolid />
-					开放源代码
-				</Link>
-			</div>
-		</main>
-	);
+            <RadioGroup
+              className={"flex flex-wrap gap-2.5"}
+              onValueChange={setSelectedAccountId}
+            >
+              {accountList.map((account) => (
+                <div
+                  key={account.id}
+                  className="grow basis-40 relative after:content-[''] after:block after:w-full after:pb-[62.5%]"
+                >
+                  <RadioGroupItem
+                    value={account.id}
+                    id={account.id}
+                    className={
+                      "peer z-20 absolute bottom-2 right-2 data-[state=checked]:border-foreground"
+                    }
+                  />
+                  <Label
+                    htmlFor={account.id}
+                    className={
+                      "z-10 absolute size-full pt-4 pb-3 px-5 flex flex-col justify-center items-center gap-2.5 hover:bg-accent rounded-xl border border-input peer-data-[state=checked]:border-primary"
+                    }
+                  >
+                    <div
+                      className={
+                        "relative min-w-11 w-[27.5%] after:content-[''] after:block after:w-full after:pb-[100%]"
+
+                        // className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-transparent p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+                      }
+                    >
+                      <Image
+                        src={account.photo?.thumb}
+                        alt={account.username}
+                        className={
+                          "absolute inset-0 size-full clothoid-corner-[18.18%]"
+                        }
+                      />
+                    </div>
+                    {account.username}
+                  </Label>
+                </div>
+              ))}
+            </RadioGroup>
+            <Button
+              variant="outline"
+              className={
+                "self-end w-fit h-11 ps-4.5 pe-2 flex items-center gap-1 text-base rounded-xl [&:not(:disabled)]:border-foreground [&>svg]:size-6"
+              }
+              disabled={
+                !selectedAccountId ||
+                isLoadingAccountDatabase ||
+                isLoadAccountDatabaseSuccess
+              }
+              onClick={async () => {
+                if (selectedAccountId) {
+                  const account = accountList.find(
+                    (account) => account.id === selectedAccountId,
+                  );
+                  if (account) {
+                    handleAccountSelect(account);
+                  }
+                }
+              }}
+            >
+              打开
+              {isLoadingAccountDatabase || isLoadAccountDatabaseSuccess ? (
+                <LoaderIcon className="scale-90 opacity-75 animate-spin" />
+              ) : (
+                <ChevronRightSmallLine />
+              )}
+            </Button>
+          </div>
+        )}
+
+        <p className={"mt-7 flex items-center text-sm text-muted-foreground"}>
+          <span
+            className={
+              "mr-1 shrink-0 size-4.5 [&_svg]:size-full relative bottom-px"
+            }
+          >
+            <TriangleExclamationLine className={"inline"} />
+          </span>
+          为了防止浏览器插件造成的隐私泄露，建议使用使用无痕模式打开
+        </p>
+      </div>
+      <div className={"flex justify-end gap-4"}>
+        <Link
+          href="https://github.com/chclt/oh-my-wechat?tab=readme-ov-file#%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E"
+          className={
+            "h-9 py-2 pl-2 pr-3 inline-flex items-center gap-1.5 [&_svg]:shrink-0 [&_svg]:size-6 hover:underline"
+          }
+        >
+          <BubbleQuestionSolid />
+          使用教程
+        </Link>
+
+        <Link
+          href="https://github.com/chclt/oh-my-wechat/"
+          className={
+            "h-9 py-2 pl-2 pr-3 inline-flex items-center gap-1.5 [&_svg]:shrink-0 [&_svg]:size-6 hover:underline"
+          }
+        >
+          <GithubSolid />
+          开放源代码
+        </Link>
+      </div>
+    </main>
+  );
 }
