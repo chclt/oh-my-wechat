@@ -38,20 +38,17 @@ export async function getFileFromDirectory(
 	directory: FileSystemDirectoryHandle | FileList,
 	fileName: string | string[],
 ) {
-	if (fileName.length === 0) return null;
-
 	if (directory instanceof FileList) {
-		fileName = Array.isArray(fileName) ? fileName.join("/") : fileName;
-		let pathTrimLength: number | undefined;
+		const shortFileName = Array.isArray(fileName)
+			? fileName.at(-1)
+			: fileName.split("/").pop();
 
-		const file = Array.from(directory).find((entry) => {
-			if (pathTrimLength === undefined) {
-				pathTrimLength = entry.webkitRelativePath.indexOf("/") + 1;
-			}
-			return entry.webkitRelativePath.slice(pathTrimLength) === fileName;
-		});
-		return file;
+		if (!shortFileName) return null;
+
+		return getFileFromITunesFileList(directory, shortFileName);
 	}
+
+	if (fileName.length === 0) return null;
 
 	if (directory instanceof FileSystemDirectoryHandle) {
 		const fileNameSegment = Array.isArray(fileName)
@@ -74,6 +71,20 @@ export async function getFileFromDirectory(
 			);
 		}
 	}
+}
+
+/**
+ * 在我测试的 Safari 17.6 中，File 的 webkitRelativePath 属性会在传到 worker 后消失，
+ * 但在 iTunes 的备份文件夹，不同的子文件夹里也不会有重名的文件，所以这里可以不用判断相对路径，
+ * 以此兼容 Safari 浏览器
+ */
+export async function getFileFromITunesFileList(
+	fileList: FileList,
+	fileName: string,
+) {
+	return Array.from(fileList).find((entry) => {
+		return entry.name === fileName;
+	});
 }
 
 export function parseUserFromMmsetting(buffer: Uint8Array): UserType {
