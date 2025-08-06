@@ -1,4 +1,4 @@
-import { Database } from "sql.js";
+import type { Database } from "sql.js";
 import { ZstdCodec } from "zstd-codec";
 
 enum WCDBCompressionDictionaryName {
@@ -79,6 +79,10 @@ const WCDB: WCDBType = {
 			return wcdbCompressionDictionary[dictionaryName];
 		}
 		await WCDB._loadCompressionDictionary(dictionaryName);
+
+		if (wcdbCompressionDictionary[dictionaryName] === undefined) {
+			throw new Error("WCDB Compression Dictionary not found");
+		}
 		return wcdbCompressionDictionary[dictionaryName];
 	},
 
@@ -105,9 +109,9 @@ const WCDB: WCDBType = {
 			return wcdbCompressionConfig[databaseName];
 		}
 
-		let tableNameIndex: number | undefined = undefined;
-		let columnNameIndex: number | undefined = undefined;
-		let rowidIndex: number | undefined = undefined;
+		let tableNameIndex: number | undefined;
+		let columnNameIndex: number | undefined;
+		let rowidIndex: number | undefined;
 
 		queryResult2[0].columns.forEach((columnName, index) => {
 			if (columnName === "tableName") {
@@ -141,7 +145,6 @@ const WCDB: WCDBType = {
 				pendindColumnName.push(columnName);
 
 				if (dictionaryId === undefined) {
-					continue;
 				} else {
 					for (const columnName of pendindColumnName) {
 						settledColumnConfig[columnName] = Number(
