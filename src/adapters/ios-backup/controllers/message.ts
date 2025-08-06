@@ -452,33 +452,36 @@ export namespace MessageController {
 							if (cursor_condition === "<" || cursor_condition === "<=") {
 								return WCDB.execAsync(
 									`
-                SELECT 
-                  * 
-                FROM (
-                  SELECT 
-                      rowid, CreateTime, Des, ImgStatus, MesLocalID, Message, CAST(MesSvrID as TEXT) as MesSvrID, Status, TableVer, Type
-                  FROM ${tableName}
-                  WHERE
-                    ${[
-											`CreateTime ${cursor_condition} ${cursor_value}`,
-											type
-												? `Type IN (${
-														Array.isArray(type) ? type.join(", ") : type
-													})`
-												: undefined,
-											type === MessageTypeEnum.APP && type_app
-												? `(${(Array.isArray(type_app) ? type_app : [type_app])
-														.map((i) => `Message like '%<type>${i}</type>%'`)
-														.join(" OR ")})`
-												: undefined,
-										]
-											.filter((i) => i)
-											.join(" AND ")}
-                  ORDER BY CreateTime DESC
-                  LIMIT ${query_limit}
-                ) 
-                ORDER BY CreateTime ASC;
-              `,
+										SELECT 
+										* 
+										FROM (
+										SELECT
+											rowid, CreateTime, Des, ImgStatus, MesLocalID, Message, CAST(MesSvrID as TEXT) as MesSvrID, Status, TableVer, Type
+										FROM ${tableName}
+										WHERE
+											${[
+												`CreateTime ${cursor_condition} ${cursor_value}`,
+												type
+													? `Type IN (${
+															Array.isArray(type) ? type.join(", ") : type
+														})`
+													: undefined,
+												type === MessageTypeEnum.APP && type_app
+													? `(${(Array.isArray(type_app)
+															? type_app
+															: [type_app]
+														)
+															.map((i) => `Message like '%<type>${i}</type>%'`)
+															.join(" OR ")})`
+													: undefined,
+											]
+												.filter((i) => i)
+												.join(" AND ")}
+										ORDER BY CreateTime DESC
+										LIMIT ${query_limit}
+										) 
+										ORDER BY CreateTime ASC;
+									`,
 									{ databaseName, database, tableName },
 								);
 							}
@@ -490,86 +493,95 @@ export namespace MessageController {
 							) {
 								return WCDB.execAsync(
 									`
-                SELECT 
-                    rowid, CreateTime, Des, ImgStatus, MesLocalID, Message, CAST (MesSvrID as TEXT) as MesSvrID, Status, TableVer, Type 
-              FROM 
-                  ${tableName} 
-              WHERE 
-                  ${[
-										`CreateTime ${cursor_condition} ${cursor_value}`,
-										type
-											? `Type IN (${
-													Array.isArray(type) ? type.join(", ") : type
-												})`
-											: undefined,
-										type === MessageTypeEnum.APP && type_app
-											? `(${(Array.isArray(type_app) ? type_app : [type_app])
-													.map((i) => `Message like '%<type>${i}</type>%'`)
-													.join(" OR ")})`
-											: undefined,
-									]
-										.filter((i) => i)
-										.join(" AND ")}
-              ORDER BY CreateTime ASC 
-              LIMIT ${query_limit};
-            `,
+										SELECT 
+											rowid, CreateTime, Des, ImgStatus, MesLocalID, Message, CAST (MesSvrID as TEXT) as MesSvrID, Status, TableVer, Type 
+										FROM 
+											${tableName} 
+										WHERE 
+											${[
+												`CreateTime ${cursor_condition} ${cursor_value}`,
+												type
+													? `Type IN (${
+															Array.isArray(type) ? type.join(", ") : type
+														})`
+													: undefined,
+												type === MessageTypeEnum.APP && type_app
+													? `(${(Array.isArray(type_app)
+															? type_app
+															: [type_app]
+														)
+															.map((i) => `Message like '%<type>${i}</type>%'`)
+															.join(" OR ")})`
+													: undefined,
+											]
+												.filter((i) => i)
+												.join(" AND ")}
+										ORDER BY CreateTime ASC 
+										LIMIT ${query_limit};
+									`,
 									{ databaseName, database, tableName },
 								);
 							}
 
 							return WCDB.execAsync(
 								`
-                SELECT * FROM (
-                  SELECT * FROM (
-                    SELECT 
-                      rowid, CreateTime, Des, ImgStatus, MesLocalID, Message, CAST(MesSvrID as TEXT) as MesSvrID, Status, TableVer, Type
-                    FROM ${tableName}
-                    WHERE ${[
-											`CreateTime < ${cursor_value}`,
-											type
-												? `Type IN (${
-														Array.isArray(type) ? type.join(", ") : type
-													})`
-												: undefined,
-											type === MessageTypeEnum.APP && type_app
-												? `(${(Array.isArray(type_app) ? type_app : [type_app])
-														.map((i) => `Message like '%<type>${i}</type>%'`)
-														.join(" OR ")})`
-												: undefined,
-										]
-											.filter((i) => i)
-											.join(" AND ")}
-                    ORDER BY CreateTime DESC
-                    LIMIT ${query_limit}
-                  )
+									SELECT * FROM (
+										SELECT * FROM (
+											SELECT 
+												rowid, CreateTime, Des, ImgStatus, MesLocalID, Message, CAST(MesSvrID as TEXT) as MesSvrID, Status, TableVer, Type
+											FROM ${tableName}
+											WHERE ${[
+												`CreateTime < ${cursor_value}`,
+												type
+													? `Type IN (${
+															Array.isArray(type) ? type.join(", ") : type
+														})`
+													: undefined,
+												type === MessageTypeEnum.APP && type_app
+													? `(${(Array.isArray(type_app)
+															? type_app
+															: [type_app]
+														)
+															.map((i) => `Message like '%<type>${i}</type>%'`)
+															.join(" OR ")})`
+													: undefined,
+											]
+												.filter((i) => i)
+												.join(" AND ")}
+											ORDER BY CreateTime DESC
+											LIMIT ${query_limit}
+										)
 
-                  UNION ALL
+										UNION ALL
 
-                  SELECT * FROM (
-                    SELECT 
-                      rowid, CreateTime, Des, ImgStatus, MesLocalID, Message, CAST(MesSvrID as TEXT) as MesSvrID, Status, TableVer, Type
-                    FROM ${tableName}
-                    WHERE ${[
-											`CreateTime >= ${cursor_value}`,
-											type
-												? `Type IN (${
-														Array.isArray(type) ? type.join(", ") : type
-													})`
-												: undefined,
-											type === MessageTypeEnum.APP && type_app
-												? `(${(Array.isArray(type_app) ? type_app : [type_app])
-														.map((i) => `Message like '%<type>${i}</type>%'`)
-														.join(" OR ")})`
-												: undefined,
-										]
-											.filter((i) => i)
-											.join(" AND ")}
-                    ORDER BY CreateTime ASC
-                    LIMIT ${query_limit}
-                  )
-                ) 
-                ORDER BY CreateTime ASC;
-              `,
+										SELECT * FROM (
+											SELECT 
+											rowid, CreateTime, Des, ImgStatus, MesLocalID, Message, CAST(MesSvrID as TEXT) as MesSvrID, Status, TableVer, Type
+											FROM ${tableName}
+											WHERE ${[
+												`CreateTime >= ${cursor_value}`,
+												type
+													? `Type IN (${
+															Array.isArray(type) ? type.join(", ") : type
+														})`
+													: undefined,
+												type === MessageTypeEnum.APP && type_app
+													? `(${(Array.isArray(type_app)
+															? type_app
+															: [type_app]
+														)
+															.map((i) => `Message like '%<type>${i}</type>%'`)
+															.join(" OR ")})`
+													: undefined,
+											]
+												.filter((i) => i)
+												.join(" AND ")}
+											ORDER BY CreateTime ASC
+											LIMIT ${query_limit}
+										)
+									)
+									ORDER BY CreateTime ASC;
+								`,
 								{ databaseName, database, tableName },
 							);
 						}
@@ -908,23 +920,42 @@ export namespace MessageController {
 		const dbs = databases.message;
 		if (!dbs) throw new Error("message databases are not found");
 
-		const rows = [
-			...dbs.map((database) => {
-				try {
-					return database.exec(`
-            SELECT 
-                rowid, CreateTime, Des, ImgStatus, MesLocalID, Message, CAST (MesSvrID as TEXT) as MesSvrID, Status, TableVer, Type 
-            FROM 
-                Chat_${CryptoJS.MD5(chat.id).toString()} 
-            WHERE 
-                MesSvrID IN (${messageIds.map((id) => `'${id}'`).join(",")});
-            ;
-          `);
-				} catch (e) {
-					return [];
+		const tableName = `Chat_${CryptoJS.MD5(chat.id).toString()}`;
+
+		const rows = (
+			await Promise.allSettled(
+				dbs.map((database, index) => {
+					const databaseName = `message_${index}`;
+
+					try {
+						return WCDB.execAsync(
+							`
+								SELECT 
+									rowid, CreateTime, Des, ImgStatus, MesLocalID, Message, CAST (MesSvrID as TEXT) as MesSvrID, Status, TableVer, Type 
+								FROM 
+									${tableName} 
+								WHERE 
+									MesSvrID IN (${messageIds.map((id) => `'${id}'`).join(",")});
+								;
+							`,
+							{ databaseName, database, tableName },
+						);
+					} catch (e) {
+						return [];
+					}
+				}),
+			)
+		)
+			.filter((promiseResult, index) => {
+				if (
+					promiseResult.status === "fulfilled" &&
+					promiseResult.value.length > 0
+				) {
+					return true;
 				}
-			}),
-		].filter((row) => row.length > 0)[0];
+				return false;
+			})
+			.map((promiseResult) => promiseResult.value)[0];
 
 		const raw_message_rows: DatabaseMessageRow[] = [];
 
