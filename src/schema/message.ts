@@ -33,6 +33,8 @@ export enum MessageTypeEnum {
 	WECOM_CONTACT = 66, // 企业微信名片
 	SYSTEM = 10000, // 系统消息,应该只是文本
 	SYSTEM_EXTENDED = 10002,
+
+	OMW_ERROR = "OMW_ERROR",
 }
 
 export enum AppMessageTypeEnum {
@@ -168,6 +170,10 @@ export type SystemExtendedMessageType = BasicMessageType<
 	MessageTypeEnum.SYSTEM_EXTENDED,
 	SystemExtendedMessageEntity
 >;
+export type OMWErrorMessageType = BasicMessageType<
+	MessageTypeEnum.OMW_ERROR,
+	TextMessageEntity
+>;
 
 export type MessageType =
 	| TextMessageType
@@ -185,4 +191,5 @@ export type MessageType =
 	| ChatroomVoipMessageType
 	| WeComContactMessageType
 	| SystemMessageType
-	| SystemExtendedMessageType;
+	| SystemExtendedMessageType
+	| OMWErrorMessageType;
