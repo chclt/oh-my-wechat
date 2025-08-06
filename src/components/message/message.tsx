@@ -20,6 +20,11 @@ import { ErrorBoundary } from "react-error-boundary";
 import { Route } from "@/routes/$accountId/route.tsx";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { AccountSuspenseQueryOptions } from "@/lib/fetchers/account.ts";
+import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
+import { LinkCard } from "../link-card";
+import { ScrollArea, ScrollBar } from "../ui/scroll-area";
+import { CircleQuestionmarkSolid } from "../icon";
+import { Card, CardContent, CardFooter, CardIndicator } from "../ui/card";
 
 export interface MessageProp<T = MessageType>
 	extends React.HTMLAttributes<HTMLDivElement> {
@@ -128,9 +133,52 @@ function MessageComponent({ message, variant, ...props }: MessageProp) {
 				<SystemExtendedMessage message={message} variant={variant} {...props} />
 			);
 
+		case MessageTypeEnum.OMW_ERROR:
+			return (
+				<Card className={"max-w-[20em]"} {...props}>
+					<CardContent className="p-3">
+						<div className={"mt-1 text-pretty text-foreground break-all"}>
+							{(message as MessageType).raw_message}
+						</div>
+					</CardContent>
+					<CardFooter>
+						解析失败的消息
+						<CardIndicator>
+							<CircleQuestionmarkSolid className=" scale-[135%]" />
+						</CardIndicator>
+					</CardFooter>
+				</Card>
+			);
+
 		default:
 			return (
-				<div {...props}>解析失败的消息: {(message as MessageType).type}</div>
+				<Dialog>
+					<DialogTrigger className="text-start">
+						<Card className={"max-w-[20em]"} {...props}>
+							<CardContent className="p-3">
+								<div
+									className={"mt-1 text-pretty text-mute-foreground break-all"}
+								>
+									暂未支持的消息类型，点击查看原始数据{" "}
+								</div>
+							</CardContent>
+							<CardFooter>
+								未知的消息类型：{(message as MessageType).type}
+								<CardIndicator>
+									<CircleQuestionmarkSolid className=" scale-[135%]" />
+								</CardIndicator>
+							</CardFooter>
+						</Card>
+					</DialogTrigger>
+					<DialogContent>
+						<ScrollArea className="max-w-full overflow-hidden">
+							<pre className="text-sm pb-4">
+								{(message as MessageType).raw_message}
+							</pre>
+							<ScrollBar orientation="horizontal" />
+						</ScrollArea>
+					</DialogContent>
+				</Dialog>
 			);
 	}
 }

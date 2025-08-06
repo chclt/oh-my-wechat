@@ -72,21 +72,16 @@ export namespace MessageController {
 					return chat?.id ?? undefined;
 				}
 
+				// Message 字段依然可能是个二进制，暂时不解决
 				if (typeof (raw_message_row.Message as unknown) === "object") {
-					// Message 字段可能是个二进制，具体情况还未知
-					console.log("消息格式错误", raw_message_row);
-					raw_message_row.Message = `解析失败的消息：${new TextDecoder(
-						"utf-8",
-					).decode(
+					raw_message_row.Message = new TextDecoder("utf-8").decode(
 						new Uint8Array(
 							Object.values(
 								raw_message_row.Message as unknown as Record<string, number>,
 							),
 						),
-					)}
-            `;
-					raw_message_row.Type = 1;
-					return chat?.id ?? undefined;
+					);
+					raw_message_row.Type = MessageTypeEnum.OMW_ERROR;
 				}
 
 				if (chat && chat.type === "chatroom") {
