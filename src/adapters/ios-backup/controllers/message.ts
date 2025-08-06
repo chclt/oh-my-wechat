@@ -49,6 +49,7 @@ import {
 } from "@/schema";
 import CryptoJS from "crypto-js";
 import { XMLParser } from "fast-xml-parser";
+import WCDB from "../wcdb.ts";
 
 export namespace MessageController {
 	async function parseRawMessageRows(
@@ -444,18 +445,24 @@ export namespace MessageController {
 		const dbs = databases.message;
 		if (!dbs) throw new Error("message databases are not found");
 
-		const rows = [
-			...dbs.map((database) => {
-				try {
-					if (cursor_value) {
-						if (cursor_condition === "<" || cursor_condition === "<=") {
-							return database.exec(`
+		const tableName = `Chat_${CryptoJS.MD5(chat.id).toString()}`;
+
+		const rows = (
+			await Promise.allSettled(
+				dbs.map((database, index) => {
+					const databaseName = `message_${index}`;
+
+					try {
+						if (cursor_value) {
+							if (cursor_condition === "<" || cursor_condition === "<=") {
+								return WCDB.execAsync(
+									`
                 SELECT 
                   * 
                 FROM (
                   SELECT 
                       rowid, CreateTime, Des, ImgStatus, MesLocalID, Message, CAST(MesSvrID as TEXT) as MesSvrID, Status, TableVer, Type
-                  FROM Chat_${CryptoJS.MD5(chat.id).toString()}
+                  FROM ${tableName}
                   WHERE
                     ${[
 											`CreateTime ${cursor_condition} ${cursor_value}`,
@@ -476,19 +483,22 @@ export namespace MessageController {
                   LIMIT ${query_limit}
                 ) 
                 ORDER BY CreateTime ASC;
-              `);
-						}
+              `,
+									{ databaseName, database, tableName },
+								);
+							}
 
-						if (
-							cursor_condition === ">=" ||
-							cursor_condition === ">" ||
-							cursor_condition === undefined
-						) {
-							return database.exec(`
+							if (
+								cursor_condition === ">=" ||
+								cursor_condition === ">" ||
+								cursor_condition === undefined
+							) {
+								return WCDB.execAsync(
+									`
                 SELECT 
                     rowid, CreateTime, Des, ImgStatus, MesLocalID, Message, CAST (MesSvrID as TEXT) as MesSvrID, Status, TableVer, Type 
               FROM 
-                  Chat_${CryptoJS.MD5(chat.id).toString()} 
+                  ${tableName} 
               WHERE 
                   ${[
 										`CreateTime ${cursor_condition} ${cursor_value}`,
@@ -507,16 +517,18 @@ export namespace MessageController {
 										.join(" AND ")}
               ORDER BY CreateTime ASC 
               LIMIT ${query_limit};
-            `);
-						}
+            `,
+									{ databaseName, database, tableName },
+								);
+							}
 
-						return database.exec(
-							`
+							return WCDB.execAsync(
+								`
                 SELECT * FROM (
                   SELECT * FROM (
                     SELECT 
                       rowid, CreateTime, Des, ImgStatus, MesLocalID, Message, CAST(MesSvrID as TEXT) as MesSvrID, Status, TableVer, Type
-                    FROM Chat_${CryptoJS.MD5(chat.id).toString()}
+                    FROM ${tableName}
                     WHERE ${[
 											`CreateTime < ${cursor_value}`,
 											type
@@ -541,7 +553,7 @@ export namespace MessageController {
                   SELECT * FROM (
                     SELECT 
                       rowid, CreateTime, Des, ImgStatus, MesLocalID, Message, CAST(MesSvrID as TEXT) as MesSvrID, Status, TableVer, Type
-                    FROM Chat_${CryptoJS.MD5(chat.id).toString()}
+                    FROM ${tableName}
                     WHERE ${[
 											`CreateTime >= ${cursor_value}`,
 											type
@@ -563,18 +575,20 @@ export namespace MessageController {
                 ) 
                 ORDER BY CreateTime ASC;
               `,
-						);
-					}
+								{ databaseName, database, tableName },
+							);
+						}
 
-					// 没有游标的时候查询最新的数据但是按时间正序排列
-					// 游标在第一行
-					return database.exec(`
+						// 没有游标的时候查询最新的数据但是按时间正序排列
+						// 游标在第一行
+						return WCDB.execAsync(
+							`
             SELECT 
               * 
             FROM (
               SELECT 
                   rowid, CreateTime, Des, ImgStatus, MesLocalID, Message, CAST(MesSvrID as TEXT) as MesSvrID, Status, TableVer, Type
-              FROM Chat_${CryptoJS.MD5(chat.id).toString()}
+              FROM ${tableName}
               ${
 								type
 									? `WHERE ${[
@@ -595,27 +609,31 @@ export namespace MessageController {
               LIMIT ${query_limit}
             ) 
             ORDER BY CreateTime ASC;
-          `);
-				} catch (e) {
-					if (e instanceof Error && e.message.startsWith("no such table")) {
-					} else {
-						console.error(e);
+          `,
+							{ databaseName, database, tableName },
+						);
+					} catch (e) {
+						if (e instanceof Error && e.message.startsWith("no such table")) {
+						} else {
+							console.error(e);
+						}
+						return [];
 					}
-					return [];
+				}),
+			)
+		)
+			.filter((promiseResult, index) => {
+				if (
+					promiseResult.status === "fulfilled" &&
+					promiseResult.value.length > 0
+				) {
+					if (import.meta.env.DEV)
+						console.log(chat.title, tableName, `message_${index + 1}.sqlite`);
+					return true;
 				}
-			}),
-		].filter((row, index) => {
-			if (row.length > 0) {
-				if (import.meta.env.DEV)
-					console.log(
-						chat.title,
-						`Chat_${CryptoJS.MD5(chat.id).toString()}`,
-						`message_${index + 1}.sqlite`,
-					);
-			}
-
-			return row.length > 0;
-		})[0];
+				return false;
+			})
+			.map((promiseResult) => promiseResult.value)[0];
 
 		if (!rows || rows.length === 0)
 			return {
