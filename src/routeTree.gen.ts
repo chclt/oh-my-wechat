@@ -10,7 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AccountIdRouteRouteImport } from './routes/$accountId/route'
-import { Route as IndexRouteImport } from './routes/index'
+import { Route as IndexRouteRouteImport } from './routes/index/route'
 import { Route as AccountIdIndexRouteImport } from './routes/$accountId/index'
 import { Route as AccountIdChatRouteRouteImport } from './routes/$accountId/chat/route'
 import { Route as AccountIdChatIndexRouteImport } from './routes/$accountId/chat/index'
@@ -21,7 +21,7 @@ const AccountIdRouteRoute = AccountIdRouteRouteImport.update({
   path: '/$accountId',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
+const IndexRouteRoute = IndexRouteRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
@@ -48,7 +48,7 @@ const AccountIdChatChatIdRoute = AccountIdChatChatIdRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
+  '/': typeof IndexRouteRoute
   '/$accountId': typeof AccountIdRouteRouteWithChildren
   '/$accountId/chat': typeof AccountIdChatRouteRouteWithChildren
   '/$accountId/': typeof AccountIdIndexRoute
@@ -56,14 +56,14 @@ export interface FileRoutesByFullPath {
   '/$accountId/chat/': typeof AccountIdChatIndexRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
+  '/': typeof IndexRouteRoute
   '/$accountId': typeof AccountIdIndexRoute
   '/$accountId/chat/$chatId': typeof AccountIdChatChatIdRoute
   '/$accountId/chat': typeof AccountIdChatIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
+  '/': typeof IndexRouteRoute
   '/$accountId': typeof AccountIdRouteRouteWithChildren
   '/$accountId/chat': typeof AccountIdChatRouteRouteWithChildren
   '/$accountId/': typeof AccountIdIndexRoute
@@ -92,7 +92,7 @@ export interface FileRouteTypes {
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
+  IndexRouteRoute: typeof IndexRouteRoute
   AccountIdRouteRoute: typeof AccountIdRouteRouteWithChildren
 }
 
@@ -109,7 +109,7 @@ declare module '@tanstack/react-router' {
       id: '/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+      preLoaderRoute: typeof IndexRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/$accountId/': {
@@ -171,7 +171,7 @@ const AccountIdRouteRouteWithChildren = AccountIdRouteRoute._addFileChildren(
 )
 
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
+  IndexRouteRoute: IndexRouteRoute,
   AccountIdRouteRoute: AccountIdRouteRouteWithChildren,
 }
 export const routeTree = rootRouteImport
