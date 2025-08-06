@@ -1,4 +1,4 @@
-import { Database } from "sql.js";
+import type { Database } from "sql.js";
 
 interface WCDBCompressionConfig {
 	[DatabaseName: string]: null | {
@@ -51,9 +51,9 @@ const WCDB: WCDBType = {
 			return wcdbCompressionConfig[databaseName];
 		}
 
-		let tableNameIndex: number | undefined = undefined;
-		let columnNameIndex: number | undefined = undefined;
-		let rowidIndex: number | undefined = undefined;
+		let tableNameIndex: number | undefined;
+		let columnNameIndex: number | undefined;
+		let rowidIndex: number | undefined;
 
 		queryResult2[0].columns.forEach((columnName, index) => {
 			if (columnName === "tableName") {
@@ -86,7 +86,6 @@ const WCDB: WCDBType = {
 				pendindColumnName.push(columnName);
 
 				if (dictionaryId === undefined) {
-					continue;
 				} else {
 					for (const columnName of pendindColumnName) {
 						settledColumnConfig[columnName] = true;
