@@ -2,6 +2,11 @@ import type { Database, QueryExecResult } from "sql.js";
 // @ts-ignore
 import { ZstdCodec } from "zstd-codec";
 
+/**
+ * 实际发现从 wcdb_builtin_compression_record 表中获取的压缩配置大概率不完整
+ * 所以为数据库、数据表配置固定的压缩列，判断字段值是否是二进制决定是不是需要解压
+ */
+
 enum WCDBCompressionDictionaryName {
 	NewBrandDict = 1,
 	NewBrandExtDic = 2,
@@ -23,6 +28,10 @@ const WCDBCompressionDictionaryPath = {
 		"/wcdb-compression-dicts/MsgDict.dict",
 };
 
+const wcdbCompressionDictionary: Partial<
+	Record<WCDBCompressionDictionaryName, Uint8Array>
+> = {};
+
 interface WCDBCompressionConfig {
 	[DatabaseName: string]: null | {
 		[TableName: string]: {
@@ -31,11 +40,31 @@ interface WCDBCompressionConfig {
 	};
 }
 
-const wcdbCompressionDictionary: Partial<
-	Record<WCDBCompressionDictionaryName, Uint8Array>
-> = {};
-
 const wcdbCompressionConfig: WCDBCompressionConfig = {};
+
+export enum WCDBDatabaseSeriesName {
+	Message = "MessageDatabase",
+}
+
+export enum WCDBTableSeriesName {
+	Chat = "ChatTable",
+}
+
+type WCDBCompressionConfigConstant = {
+	[DatabaseSeries in WCDBDatabaseSeriesName]: {
+		[TableSeries in WCDBTableSeriesName]: {
+			[ColumnName: string]: WCDBCompressionDictionaryName;
+		};
+	};
+};
+
+const wcdbCompressionConfigConstant: WCDBCompressionConfigConstant = {
+	[WCDBDatabaseSeriesName.Message]: {
+		[WCDBTableSeriesName.Chat]: {
+			Message: WCDBCompressionDictionaryName.MsgDict,
+		},
+	},
+};
 
 interface WCDBType {
 	_loadCompressionDictionary: (
@@ -58,7 +87,11 @@ interface WCDBType {
 
 	execAsync: (
 		sql: string,
-		options: { databaseName: string; database: Database; tableName: string },
+		options: {
+			database: Database;
+			databaseSeries: WCDBDatabaseSeriesName;
+			tableSeries: WCDBTableSeriesName;
+		},
 	) => Promise<QueryExecResult[]>;
 }
 
@@ -182,17 +215,15 @@ const WCDB: WCDBType = {
 		return wcdbCompressionConfig[databaseName];
 	},
 
-	execAsync: async (sql, { databaseName, database, tableName }) => {
-		const databaseCompressionConfig = WCDB._getDatabaseCompressionConfig({
-			databaseName,
-			database,
-		});
+	execAsync: async (sql, { database, databaseSeries, tableSeries }) => {
+		const databaseCompressionConfig =
+			wcdbCompressionConfigConstant[databaseSeries];
 
 		if (!databaseCompressionConfig) {
 			return database.exec(sql);
 		}
 
-		const tableCompressionConfig = databaseCompressionConfig[tableName];
+		const tableCompressionConfig = databaseCompressionConfig[tableSeries];
 		if (!tableCompressionConfig) {
 			return database.exec(sql);
 		}
@@ -204,10 +235,7 @@ const WCDB: WCDBType = {
 				for (const segmentResult of queryResult) {
 					const decompressedColumnIndex: Record<number, string> = {}; // 标记哪些列启用了压缩， columnIndex: columnName
 					segmentResult.columns.forEach((columnName, index) => {
-						const columnCompressionConfig = tableCompressionConfig[columnName];
-						if (columnCompressionConfig) {
-							decompressedColumnIndex[index] = columnName;
-						}
+						decompressedColumnIndex[index] = columnName;
 					});
 
 					for (const row of segmentResult.values) {

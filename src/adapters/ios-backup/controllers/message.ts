@@ -44,7 +44,7 @@ import {
 } from "@/schema";
 import CryptoJS from "crypto-js";
 import { XMLParser } from "fast-xml-parser";
-import WCDB from "../wcdb.ts";
+import WCDB, { WCDBDatabaseSeriesName, WCDBTableSeriesName } from "../wcdb.ts";
 import type {
 	DataAdapterCursorPagination,
 	DataAdapterResponse,
@@ -486,7 +486,11 @@ export namespace MessageController {
 										) 
 										ORDER BY CreateTime ASC;
 									`,
-									{ databaseName, database, tableName },
+									{
+										database,
+										databaseSeries: WCDBDatabaseSeriesName.Message,
+										tableSeries: WCDBTableSeriesName.Chat,
+									},
 								);
 							}
 
@@ -523,7 +527,11 @@ export namespace MessageController {
 										ORDER BY CreateTime ASC 
 										LIMIT ${query_limit};
 									`,
-									{ databaseName, database, tableName },
+									{
+										database,
+										databaseSeries: WCDBDatabaseSeriesName.Message,
+										tableSeries: WCDBTableSeriesName.Chat,
+									},
 								);
 							}
 
@@ -586,7 +594,11 @@ export namespace MessageController {
 									)
 									ORDER BY CreateTime ASC;
 								`,
-								{ databaseName, database, tableName },
+								{
+									database,
+									databaseSeries: WCDBDatabaseSeriesName.Message,
+									tableSeries: WCDBTableSeriesName.Chat,
+								},
 							);
 						}
 
@@ -621,7 +633,11 @@ export namespace MessageController {
             ) 
             ORDER BY CreateTime ASC;
           `,
-							{ databaseName, database, tableName },
+							{
+								database,
+								databaseSeries: WCDBDatabaseSeriesName.Message,
+								tableSeries: WCDBTableSeriesName.Chat,
+							},
 						);
 					} catch (e) {
 						if (e instanceof Error && e.message.startsWith("no such table")) {
@@ -935,7 +951,11 @@ export namespace MessageController {
 									MesSvrID IN (${messageIds.map((id) => `'${id}'`).join(",")});
 								;
 							`,
-							{ databaseName, database, tableName },
+							{
+								database,
+								databaseSeries: WCDBDatabaseSeriesName.Message,
+								tableSeries: WCDBTableSeriesName.Chat,
+							},
 						);
 					} catch (error) {
 						return [];
