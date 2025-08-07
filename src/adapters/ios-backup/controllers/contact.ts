@@ -1,5 +1,5 @@
 import { DataAdapterResponse } from "@/adapters/adapter";
-import { _store } from "../worker";
+import { _store, adapterWorker } from "../worker";
 import type { ChatroomType, UserType } from "@/schema";
 import protobuf from "protobufjs";
 import { DatabaseFriendRow, WCDatabases } from "../types";
@@ -337,8 +337,11 @@ export namespace ContactController {
 		).data as UserType[];
 
 		// 加入当前登录的微信账号数据
-		if (_store.account && allMemberIds.indexOf(_store.account.id) > -1) {
-			allMembers.push(_store.account);
+		if (
+			adapterWorker._getStoreItem("account") &&
+			allMemberIds.indexOf(adapterWorker._getStoreItem("account").id) > -1
+		) {
+			allMembers.push(adapterWorker._getStoreItem("account"));
 		}
 
 		const allMembersTable: { [key: string]: UserType } = {};
@@ -453,8 +456,8 @@ export namespace ContactController {
 
 		return {
 			data: [
-				...(ids.indexOf(_store.account.id) > -1
-					? [_store.account as UserType]
+				...(ids.indexOf(adapterWorker._getStoreItem("account").id) > -1
+					? [adapterWorker._getStoreItem("account") as UserType]
 					: []),
 				...(await parseDatabaseContactRows(
 					databases,

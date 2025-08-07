@@ -8,7 +8,7 @@ import type {
 import CryptoJS from "crypto-js";
 import { ContactController } from "./contact";
 import specialBrandId from "@/assets/specialBrandUserNames.csv?raw";
-import { _store } from "../worker";
+import { _store, adapterWorker } from "../worker";
 import { DataAdapterResponse } from "@/adapters/adapter";
 import { DatabaseSessionAbstractRow, WCDatabases } from "../types";
 
@@ -91,7 +91,7 @@ export namespace ChatController {
 								(contactInfo as UserType)._is_pinned
 							: false, // todo
 						is_collapsed: false,
-						members: [_store.account, contactInfo],
+						members: [adapterWorker._getStoreItem("account"), contactInfo],
 
 						user: contactInfo,
 

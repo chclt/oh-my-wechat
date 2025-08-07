@@ -1,4 +1,5 @@
 import type { Database } from "sql.js";
+// @ts-ignore
 import { ZstdCodec } from "zstd-codec";
 
 enum WCDBCompressionDictionaryName {
