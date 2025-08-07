@@ -640,6 +640,8 @@ export namespace MessageController {
 				}
 				return false;
 			})
+			// todo
+			// @ts-ignore
 			.map((promiseResult) => promiseResult.value)[0];
 
 		if (!rows || rows.length === 0)
@@ -955,6 +957,8 @@ export namespace MessageController {
 				}
 				return false;
 			})
+			// todo
+			// @ts-ignore
 			.map((promiseResult) => promiseResult.value)[0];
 
 		const raw_message_rows: DatabaseMessageRow[] = [];
