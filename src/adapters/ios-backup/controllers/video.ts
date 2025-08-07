@@ -1,16 +1,14 @@
-import type { ChatType, MessageType, VideoInfo, WCDatabases } from "@/schema";
+import type { VideoInfo, WCDatabases } from "@/schema";
 import CryptoJS from "crypto-js";
 import { getFilesFromManifast } from "../utils";
+import { DataAdapterResponse, GetVideoRequest } from "@/adapters/adapter";
 
 export namespace VideoController {
 	export type GetInput = [
-		{
-			chat: ChatType;
-			message: MessageType;
-		},
+		GetVideoRequest,
 		{ directory: FileSystemDirectoryHandle | FileList; databases: WCDatabases },
 	];
-	export type GetOutput = Promise<VideoInfo>;
+	export type GetOutput = Promise<DataAdapterResponse<VideoInfo>>;
 
 	export async function get(...inputs: GetInput): GetOutput {
 		const [{ chat, message }, { directory, databases }] = inputs;
@@ -51,6 +49,6 @@ export namespace VideoController {
 			}
 		}
 
-		return result;
+		return { data: result };
 	}
 }

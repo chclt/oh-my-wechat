@@ -1,7 +1,7 @@
+import { DataAdapterResponse } from "@/adapters/adapter";
 import { _store } from "../worker";
 import type {
 	ChatroomType,
-	ControllerResult,
 	DatabaseFriendRow,
 	UserType,
 	WCDatabases,
@@ -370,7 +370,7 @@ export namespace ContactController {
 
 	export type AllInput = [{ databases: WCDatabases }];
 	export type AllOutput = Promise<
-		ControllerResult<(UserType | ChatroomType)[]>
+		DataAdapterResponse<(UserType | ChatroomType)[]>
 	>;
 
 	export async function all(...inputs: AllInput): AllOutput {
@@ -417,7 +417,7 @@ export namespace ContactController {
 
 	export type FindAllInput = [{ ids: string[] }, { databases: WCDatabases }];
 	export type FinfAllOutput = Promise<
-		ControllerResult<(UserType | ChatroomType)[]>
+		DataAdapterResponse<(UserType | ChatroomType)[]>
 	>;
 
 	export async function findAll(...inputs: FindAllInput): FinfAllOutput {

@@ -5,17 +5,18 @@ import type {
 	UseQueryOptions,
 	UndefinedInitialDataInfiniteOptions,
 } from "@tanstack/react-query";
-import type { ControllerPaginatorResult, MessageType } from "@/schema";
+import type { MessageType } from "@/schema";
 import type { MessageController } from "@/adapters/ios-backup/controllers/message";
 import { getDataAdapter } from "../data-adapter.ts";
+import { DataAdapterCursorPagination } from "@/adapters/adapter.ts";
 
 export function MessageListInfiniteQueryOptions(
 	accountId: string,
 	requestData: MessageController.AllInput[0],
 ): UndefinedInitialDataInfiniteOptions<
-	ControllerPaginatorResult<MessageType[]>,
+	DataAdapterCursorPagination<MessageType[]>,
 	DefaultError,
-	InfiniteData<ControllerPaginatorResult<MessageType[]>>,
+	InfiniteData<DataAdapterCursorPagination<MessageType[]>>,
 	QueryKey,
 	string | undefined
 > {

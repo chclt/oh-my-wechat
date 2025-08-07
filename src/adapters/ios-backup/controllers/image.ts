@@ -2,19 +2,14 @@ import type { RecordType } from "@/components/record/record";
 import type { ChatType, MessageType, PhotpSize, WCDatabases } from "@/schema";
 import CryptoJS from "crypto-js";
 import { getFilesFromManifast } from "../utils";
+import { DataAdapterResponse, GetImageRequest } from "@/adapters/adapter";
 
 export namespace ImageController {
 	export type GetInput = [
-		{
-			chat: ChatType;
-			message: MessageType;
-			record?: RecordType;
-			size?: "origin" | "thumb";
-			domain?: "image" | "opendata" | "video";
-		},
+		GetImageRequest,
 		{ directory: FileSystemDirectoryHandle | FileList; databases: WCDatabases },
 	];
-	export type GetOutput = Promise<PhotpSize[]>;
+	export type GetOutput = Promise<DataAdapterResponse<PhotpSize[]>>;
 
 	export async function get(...inputs: GetInput): GetOutput {
 		const [
@@ -73,6 +68,6 @@ export namespace ImageController {
 			}
 		}
 
-		return result;
+		return { data: result };
 	}
 }

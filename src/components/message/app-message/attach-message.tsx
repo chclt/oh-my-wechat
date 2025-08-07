@@ -45,7 +45,9 @@ export default function AttachMessage({
 	const { mutateAsync: download, data } = useMutation<FileInfo[]>({
 		mutationKey: ["attache", chat.id, message.id],
 		mutationFn: () => {
-			return getDataAdapter().getAttache({ chat, message });
+			return getDataAdapter()
+				.getAttach({ chat, message })
+				.then((res) => res.data);
 		},
 		onSuccess: (data) => {
 			const downlaodLink = document.createElement("a");

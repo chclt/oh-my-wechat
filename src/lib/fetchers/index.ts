@@ -14,7 +14,7 @@ export function ImageSuspenseQueryOptions(
 		queryFn: () =>
 			getDataAdapter()
 				.getImage(requestData)
-				.then((res) => res),
+				.then((res) => res.data),
 	};
 }
 
@@ -26,7 +26,7 @@ export function VideoSuspenseQueryOptions(
 		queryFn: () =>
 			getDataAdapter()
 				.getVideo(requestData)
-				.then((res) => res),
+				.then((res) => res.data),
 	};
 }
 
@@ -38,7 +38,7 @@ export function VoiceSuspenseQueryOptions(
 		queryFn: () =>
 			getDataAdapter()
 				.getVoice(requestData)
-				.then((res) => res),
+				.then((res) => res.data),
 	};
 }
 
@@ -49,7 +49,7 @@ export function AttacheSuspenseQueryOptions(
 		queryKey: ["attache", requestData.chat.id, requestData.message.id],
 		queryFn: () =>
 			getDataAdapter()
-				.getAttache(requestData)
-				.then((res) => res),
+				.getAttach(requestData)
+				.then((res) => res.data),
 	};
 }
