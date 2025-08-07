@@ -1,5 +1,6 @@
 import type { MessageType } from "@/schema";
 import User from "../user";
+import type React from "react";
 
 interface MessageInlineProps
 	extends React.HTMLAttributes<HTMLParagraphElement> {

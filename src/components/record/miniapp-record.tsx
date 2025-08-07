@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils.ts";
 
 import { CardTitle } from "@/components/ui/card.tsx";
 import type { RecordType } from "./record";
+import type React from "react";
 
 interface MiniAppRecordProps extends React.HTMLAttributes<HTMLDivElement> {
 	message: MessageType;

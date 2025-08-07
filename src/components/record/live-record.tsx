@@ -1,6 +1,7 @@
 import Image from "@/components/image.tsx";
 import type { MessageType, RecordTypeEnum } from "@/schema";
 import type { RecordType } from "./record";
+import type React from "react";
 
 interface LiveRecordProps extends React.HTMLAttributes<HTMLDivElement> {
 	message: MessageType;

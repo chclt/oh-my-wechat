@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import { LocationIcon } from "../icon";
 import { locationMessageVariants } from "../message/location-message";
 import type { RecordType } from "./record";
+import type React from "react";
 
 interface LocationRecordProps extends React.HTMLAttributes<HTMLDivElement> {
 	message: MessageType;

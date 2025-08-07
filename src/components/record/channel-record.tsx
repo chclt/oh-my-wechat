@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/card.tsx";
 import type { MessageType, RecordTypeEnum } from "@/schema";
 import type { RecordType } from "./record";
+import type React from "react";
 
 interface ChannelRecordProps extends React.HTMLAttributes<HTMLDivElement> {
 	message: MessageType;

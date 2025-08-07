@@ -4,6 +4,7 @@ import type { MessageProp } from "@/components/message/message.tsx";
 import User from "@/components/user.tsx";
 import type { ImageMessageType } from "@/schema";
 import { cn } from "@/lib/utils.ts";
+import type React from "react";
 
 type ImageMessageProps = MessageProp<
 	ImageMessageType,

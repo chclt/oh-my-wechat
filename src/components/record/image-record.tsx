@@ -2,6 +2,7 @@ import LocalImage from "@/components/local-image";
 import type { MessageType, RecordTypeEnum } from "@/schema";
 import { cn } from "@/lib/utils.ts";
 import type { RecordType } from "./record";
+import type React from "react";
 
 interface ImageRecordProps extends React.HTMLAttributes<HTMLDivElement> {
 	message: MessageType;

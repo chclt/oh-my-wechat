@@ -8,6 +8,7 @@ import {
 import type { MessageType, RecordTypeEnum } from "@/schema";
 import { XMLParser } from "fast-xml-parser";
 import type { RecordType } from "./record";
+import type React from "react";
 
 interface ContactRecordProps extends React.HTMLAttributes<HTMLDivElement> {
 	message: MessageType;

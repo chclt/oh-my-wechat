@@ -4,6 +4,7 @@ import type { MessageType } from "@/schema";
 import { cn } from "@/lib/utils.ts";
 import { ErrorBoundary } from "react-error-boundary";
 import Message from "./message/message.tsx";
+import type React from "react";
 
 interface BubbleGroupProps extends React.HTMLAttributes<HTMLDivElement> {
 	user: UserType;

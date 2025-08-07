@@ -9,6 +9,7 @@ import {
 } from "@/schema";
 import { cn } from "@/lib/utils.ts";
 import type { RecordType } from "./record";
+import type React from "react";
 
 interface TextRecordProps extends React.HTMLAttributes<HTMLDivElement> {
 	message: MessageType;

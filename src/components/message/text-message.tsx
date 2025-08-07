@@ -6,6 +6,7 @@ import WechatEmoji from "@/components/wechat-emoji.tsx";
 import { MessageDirection, type TextMessageType } from "@/schema";
 import WechatEmojiTable from "@/lib/wechat-emojis.ts";
 import { cva } from "class-variance-authority";
+import type React from "react";
 import type { ReactNode } from "react";
 
 type TextMessageProps = MessageProp<TextMessageType> &

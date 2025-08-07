@@ -1,5 +1,6 @@
 import type { MessageType, RecordTypeEnum } from "@/schema";
 import type { RecordType } from "./record";
+import type React from "react";
 
 interface AttatchRecordProps extends React.HTMLAttributes<HTMLDivElement> {
 	message: MessageType;
