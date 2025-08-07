@@ -1,64 +1,6 @@
 export * from "./message";
 
-import type { Database } from "sql.js";
-import { MessageType, MessageTypeEnum } from "./message";
-
-export interface WCDatabases {
-	manifest?: Database;
-	session?: Database;
-	message?: Database[];
-	WCDB_Contact?: Database;
-}
-
-export type WCDatabaseNames = keyof WCDatabases;
-
-export enum MessageDirection {
-	outgoing = 0,
-	incoming = 1,
-}
-
-export type DatabaseRow<T extends object> = T & {
-	rowid: number;
-};
-
-export type DatabaseSessionAbstractRow = DatabaseRow<{
-	CreateTime: number;
-	UsrName: string;
-	ConIntRes1: number; // 这一字段应该是代表有没有静音
-}>;
-
-export type DatabaseFriendRow = DatabaseRow<{
-	userName: string;
-	certificationFlag: number; // 0: 个人
-	// dbContactBrand BLOB,
-	dbContactChatRoom: Uint8Array;
-	// dbContactEncryptSecret BLOB,
-	dbContactHeadImage: Uint8Array;
-	// dbContactLocal BLOB,
-	dbContactOpenIM: Uint8Array;
-	// dbContactOther BLOB,
-	dbContactProfile: Uint8Array;
-	dbContactRemark: Uint8Array;
-	dbContactSocial: Uint8Array;
-	encodeUserName: string;
-	extFlag: number;
-	imgStatus: number;
-	openIMAppid: string;
-	type: number;
-	typeExt: number;
-}>;
-
-export type DatabaseMessageRow = DatabaseRow<{
-	CreateTime: number;
-	Des: MessageDirection;
-	ImgStatus: 1 | 2; // unknown
-	MesLocalID: string;
-	Message: string;
-	MesSvrID: string;
-	Status: number;
-	TableVer: number;
-	Type: MessageTypeEnum;
-}>;
+import { MessageType } from "./message";
 
 export interface Contact {
 	wxid: `wxid_${string}`;

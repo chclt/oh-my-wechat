@@ -1,10 +1,11 @@
-import type { ChatType, MessageType, VoiceInfo, WCDatabases } from "@/schema";
+import type { VoiceInfo } from "@/schema";
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { toBlobURL } from "@ffmpeg/util";
 import CryptoJS from "crypto-js";
 import { decode } from "silk-wasm";
 import { getFilesFromManifast } from "../utils";
 import { DataAdapterResponse, GetVoiceRequest } from "@/adapters/adapter";
+import { WCDatabases } from "../types";
 
 const ffmpegCoreURL =
 	"https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.js";

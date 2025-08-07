@@ -1,18 +1,16 @@
 import type {
 	ChatType,
 	ChatroomType,
-	DatabaseSessionAbstractRow,
 	GroupChatType,
 	PrivateChatType,
 	UserType,
-	WCDatabases,
 } from "@/schema";
 import CryptoJS from "crypto-js";
 import { ContactController } from "./contact";
-
 import specialBrandId from "@/assets/specialBrandUserNames.csv?raw";
 import { _store } from "../worker";
 import { DataAdapterResponse } from "@/adapters/adapter";
+import { DatabaseSessionAbstractRow, WCDatabases } from "../types";
 
 export namespace ChatController {
 	async function parseDatabaseChatRows(

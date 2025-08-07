@@ -1,8 +1,8 @@
-import type { RecordType } from "@/components/record/record";
-import type { ChatType, MessageType, PhotpSize, WCDatabases } from "@/schema";
+import type { PhotpSize } from "@/schema";
 import CryptoJS from "crypto-js";
 import { getFilesFromManifast } from "../utils";
 import { DataAdapterResponse, GetImageRequest } from "@/adapters/adapter";
+import { WCDatabases } from "../types";
 
 export namespace ImageController {
 	export type GetInput = [

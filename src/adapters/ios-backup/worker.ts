@@ -1,19 +1,13 @@
 import initSqlJs, { type Database } from "sql.js";
 import sqliteUrl from "sql.js/dist/sql-wasm.wasm?url";
 import CryptoJS from "crypto-js";
-import type {
-	AccountType,
-	UserType,
-	WCDatabaseNames,
-	WCDatabases,
-} from "@/schema";
+import type { AccountType, UserType } from "@/schema";
 import {
 	getFileFromDirectory,
 	getFilesFromManifast,
 	parseLocalInfo,
 	parseUserFromMmsetting,
 } from "./utils";
-
 import { ChatController } from "./controllers/chat";
 import { ContactController } from "./controllers/contact";
 import { MessageController } from "./controllers/message";
@@ -22,9 +16,9 @@ import { VideoController } from "./controllers/video";
 import { VoiceController } from "./controllers/voice";
 import { AttachController } from "./controllers/attach";
 import { StatisticController } from "./controllers/statistic";
-
 import * as Comlink from "comlink";
 import { DataAdapterResponse } from "../adapter";
+import { WCDatabaseNames, WCDatabases } from "./types";
 
 interface AdapterWorkerStore {
 	directory: FileSystemDirectoryHandle | FileList;
