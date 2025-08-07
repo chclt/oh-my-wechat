@@ -5,13 +5,11 @@ import type { MessageProp } from "@/components/message/message.tsx";
 import type { VideoMessageType } from "@/schema";
 import { cn } from "@/lib/utils.ts";
 
-// @ts-ignore
-interface VideoMessageProps extends MessageProp<VideoMessageType> {
-	variant?:
-		| MessageProp<VideoMessageType>["variant"]
-		| "viewer_detail"
-		| "viewer_thumb";
-}
+type VideoMessageProps = MessageProp<
+	VideoMessageType,
+	"viewer_detail" | "viewer_thumb"
+> &
+	React.HTMLAttributes<HTMLElement>;
 
 export interface VideoMessageEntity {
 	msg: {

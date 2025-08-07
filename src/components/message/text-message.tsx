@@ -8,7 +8,8 @@ import WechatEmojiTable from "@/lib/wechat-emojis.ts";
 import { cva } from "class-variance-authority";
 import type { ReactNode } from "react";
 
-type TextMessageProps = MessageProp<TextMessageType>;
+type TextMessageProps = MessageProp<TextMessageType> &
+	React.HTMLAttributes<HTMLElement>;
 
 export type TextMessageEntity = string;
 

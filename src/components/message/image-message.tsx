@@ -5,13 +5,11 @@ import User from "@/components/user.tsx";
 import type { ImageMessageType } from "@/schema";
 import { cn } from "@/lib/utils.ts";
 
-// @ts-ignore
-interface ImageMessageProps extends MessageProp<ImageMessageType> {
-	variant?:
-		| MessageProp<ImageMessageType>["variant"]
-		| "viewer_detail"
-		| "viewer_thumb";
-}
+type ImageMessageProps = MessageProp<
+	ImageMessageType,
+	"viewer_detail" | "viewer_thumb"
+> &
+	React.HTMLAttributes<HTMLElement>;
 
 export interface ImageMessageEntity {
 	msg: {

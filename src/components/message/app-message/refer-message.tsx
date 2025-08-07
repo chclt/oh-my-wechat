@@ -58,7 +58,6 @@ export default function ReferMessage({
 						<Message
 							variant={"referenced"}
 							message={message.reply_to_message}
-							direction={message.direction}
 						/>
 					) : (
 						//  TODO 当引用了一个不存在的消息（比如加入群之前的消息），content 是一个 xml
