@@ -10,6 +10,30 @@ interface WCDBCompressionConfig {
 
 const wcdbCompressionConfig: WCDBCompressionConfig = {};
 
+export enum WCDBDatabaseSeriesName {
+	Message = "MessageDatabase",
+}
+
+export enum WCDBTableSeriesName {
+	Chat = "ChatTable",
+}
+
+type WCDBCompressionConfigConstant = {
+	[DatabaseSeries in WCDBDatabaseSeriesName]: {
+		[TableSeries in WCDBTableSeriesName]: {
+			[ColumnName: string]: boolean;
+		};
+	};
+};
+
+const wcdbCompressionConfigConstant: WCDBCompressionConfigConstant = {
+	[WCDBDatabaseSeriesName.Message]: {
+		[WCDBTableSeriesName.Chat]: {
+			Message: true,
+		},
+	},
+};
+
 interface WCDBType {
 	_parseDatabaseCompressionConfig: (databaseInfo: {
 		databaseName: string;
@@ -23,7 +47,11 @@ interface WCDBType {
 
 	execAsync: (
 		sql: string,
-		options: { databaseName: string; database: Database; tableName: string },
+		options: {
+			database: Database;
+			databaseSeries: WCDBDatabaseSeriesName;
+			tableSeries: WCDBTableSeriesName;
+		},
 	) => Promise<QueryExecResult[]>;
 }
 
@@ -117,17 +145,15 @@ const WCDB: WCDBType = {
 		return wcdbCompressionConfig[databaseName];
 	},
 
-	execAsync: async (sql, { databaseName, database, tableName }) => {
-		const databaseCompressionConfig = WCDB._getDatabaseCompressionConfig({
-			databaseName,
-			database,
-		});
+	execAsync: async (sql, { database, databaseSeries, tableSeries }) => {
+		const databaseCompressionConfig =
+			wcdbCompressionConfigConstant[databaseSeries];
 
 		if (!databaseCompressionConfig) {
 			return database.exec(sql);
 		}
 
-		const tableCompressionConfig = databaseCompressionConfig[tableName];
+		const tableCompressionConfig = databaseCompressionConfig[tableSeries];
 		if (!tableCompressionConfig) {
 			return database.exec(sql);
 		}
