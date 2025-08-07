@@ -1,6 +1,7 @@
 import type { MessageType, RecordTypeEnum } from "@/schema";
 import { cn, decodeUnicodeReferences } from "@/lib/utils.ts";
 import type { RecordType } from "./record";
+import type React from "react";
 
 interface NoteRecordProps extends React.HTMLAttributes<HTMLDivElement> {
 	message: MessageType;

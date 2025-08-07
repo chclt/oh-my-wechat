@@ -48,7 +48,7 @@ export default function Configurer(
 			setAdapterInited(true);
 		});
 
-		queryClient.invalidateQueries({
+		await queryClient.invalidateQueries({
 			queryKey: AccountListSuspenseQueryOptions().queryKey,
 		});
 	};
@@ -103,7 +103,7 @@ export default function Configurer(
 							onClick={async () => {
 								const directoryHandle = await window.showDirectoryPicker();
 								if ((await directoryHandle.requestPermission()) === "granted") {
-									handleDirectorySelect(directoryHandle);
+									await handleDirectorySelect(directoryHandle);
 								}
 							}}
 						>
@@ -132,11 +132,11 @@ export default function Configurer(
 									if (event.target.files && event.target.files.length > 0) {
 										// setIsLoadingDirectory(true)
 										handleDirectorySelect(event.target.files).then(() => {
-											event.target.files === null;
+											event.target.files = null;
 										});
 									} else {
 										// setIsLoadingDirectory(false)
-										event.target.files === null;
+										event.target.files = null;
 									}
 								}}
 							/>
@@ -233,7 +233,7 @@ export default function Configurer(
 									(account) => account.id === selectedAccountId,
 								);
 								if (account) {
-									handleAccountSelect(account);
+									await handleAccountSelect(account);
 								}
 							}
 						}}

@@ -1,6 +1,6 @@
 import type { UseSuspenseQueryOptions } from "@tanstack/react-query";
 import { getDataAdapter } from "../data-adapter.ts";
-import type { AccountType, UserType } from "@/schema";
+import type { AccountType } from "@/schema";
 
 export function AccountSuspenseQueryOptions(
 	accountId: string,

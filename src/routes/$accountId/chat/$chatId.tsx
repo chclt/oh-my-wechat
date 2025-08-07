@@ -1,17 +1,8 @@
 import { cn } from "@/lib/utils";
 import { createFileRoute } from "@tanstack/react-router";
 import { useInfiniteQuery, useSuspenseQuery } from "@tanstack/react-query";
-import React, { UIEventHandler, useEffect, useRef, useState } from "react";
+import React, { type UIEventHandler, useEffect, useRef, useState } from "react";
 import { MessageListInfiniteQueryOptions } from "@/lib/fetchers/message";
-import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogHeader,
-	DialogTitle,
-} from "@/components/ui/dialog";
-import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
-import { Calendar } from "@/components/ui/calendar";
 import { ChatSuspenseQueryOptions } from "@/lib/fetchers/chat";
 import {
 	AppMessageTypeEnum,
@@ -21,7 +12,6 @@ import {
 import { differenceInMinutes, format, isSameDay } from "date-fns";
 import { MessageBubbleGroup } from "@/components/message-bubble-group";
 import Message from "@/components/message/message";
-import { Button } from "@/components/ui/button";
 import { LoaderIcon } from "@/components/icon";
 import * as ScrollAreaPrimitive from "@radix-ui/react-scroll-area";
 import { ScrollBar } from "@/components/ui/scroll-area";
@@ -100,20 +90,6 @@ function RouteComponent() {
 			}
 		}
 	};
-
-	const [isOpenCalendar, setIsOpenCalendar] = useState(false);
-	const [calendarMonth, setCalendarMonth] = useState<Date | undefined>();
-	const [selectedDate, setSelectedDate] = useState<Date | undefined>();
-	// const onSelectDate = (date: Date | undefined) => {
-	//   if (!date) return;
-	//   // setMessageList({});
-	//   // query("/messages", {
-	//   //   chat,
-	//   //   cursor: date.getTime() / 1000,
-	//   //   cursor_condition: "<>",
-	//   // });
-	//   // setIsOpenCalendar(false);
-	// };
 
 	return (
 		<>

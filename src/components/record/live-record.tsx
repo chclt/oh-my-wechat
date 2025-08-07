@@ -49,7 +49,6 @@ export default function LiveRecord({
 	message,
 	record,
 	variant = "default",
-	className,
 	...props
 }: LiveRecordProps) {
 	if (variant === "default")

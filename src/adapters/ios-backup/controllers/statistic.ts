@@ -452,6 +452,7 @@ export namespace StatisticController {
 				}
 			} catch (e) {
 				if (e instanceof Error && e.message.startsWith("no such table")) {
+					//
 				} else {
 					console.error(e);
 				}
@@ -546,8 +547,6 @@ export namespace StatisticController {
 				},
 			);
 
-			cursor = result.meta.cursor;
-
 			for (const message of result.data) {
 				if (
 					message.date > endTimestampUnix ||
@@ -562,7 +561,7 @@ export namespace StatisticController {
 						(message as AppMessageType<ReferMessageEntity>).message_entity.msg
 							.appmsg.title,
 					);
-				} catch (e) {
+				} catch (error) {
 					continue;
 				}
 

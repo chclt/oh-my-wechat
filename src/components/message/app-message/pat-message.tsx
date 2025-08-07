@@ -26,11 +26,7 @@ interface PatMessageRecord {
 
 type PatMessageProps = AppMessageProps<PatMessageEntity>;
 
-export default function PatMessage({
-	message,
-	variant = "default",
-	...props
-}: PatMessageProps) {
+export default function PatMessage({ message, ...props }: PatMessageProps) {
 	const chat = message.chat;
 	// 在用户退群的情况下，chat信息中可能缺少用户信息，需额外查询
 	const queryFlag = useRef(false);

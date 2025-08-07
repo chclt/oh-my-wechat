@@ -1,6 +1,7 @@
 import Image from "@/components/image.tsx";
 import type { MessageType, RecordTypeEnum } from "@/schema";
 import type { RecordType } from "./record";
+import { cn } from "@/lib/utils.ts";
 
 interface ChannelVideoRecordProps extends React.HTMLAttributes<HTMLDivElement> {
 	message: MessageType;
@@ -43,7 +44,10 @@ export default function ChannelVideoRecord({
 }: ChannelVideoRecordProps) {
 	if (variant === "default")
 		return (
-			<div className="relative w-48 rounded-lg overflow-hidden" {...props}>
+			<div
+				className={cn("relative w-48 rounded-lg overflow-hidden", className)}
+				{...props}
+			>
 				<Image
 					src={record.finderFeed.mediaList.media.thumbUrl}
 					alt={record.datatitle}

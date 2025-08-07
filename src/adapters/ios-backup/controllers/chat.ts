@@ -8,9 +8,9 @@ import type {
 import CryptoJS from "crypto-js";
 import { ContactController } from "./contact";
 import specialBrandId from "@/assets/specialBrandUserNames.csv?raw";
-import { _store, adapterWorker } from "../worker";
-import { DataAdapterResponse } from "@/adapters/adapter";
-import { DatabaseSessionAbstractRow, WCDatabases } from "../types";
+import { adapterWorker } from "../worker";
+import type { DataAdapterResponse } from "@/adapters/adapter";
+import type { DatabaseSessionAbstractRow, WCDatabases } from "../types";
 
 export namespace ChatController {
 	async function parseDatabaseChatRows(

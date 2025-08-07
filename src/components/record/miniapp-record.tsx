@@ -36,7 +36,10 @@ export default function MiniAppRecord({
 	if (variant === "default")
 		return (
 			<div
-				className={cn("relative w-52 bg-white rounded-lg overflow-hidden")}
+				className={cn(
+					"relative w-52 bg-white rounded-lg overflow-hidden",
+					className,
+				)}
 				{...props}
 			>
 				<div className="p-2.5 flex flex-col space-y-2.5">
