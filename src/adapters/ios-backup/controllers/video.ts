@@ -1,7 +1,8 @@
-import type { VideoInfo, WCDatabases } from "@/schema";
+import type { VideoInfo } from "@/schema";
 import CryptoJS from "crypto-js";
 import { getFilesFromManifast } from "../utils";
 import { DataAdapterResponse, GetVideoRequest } from "@/adapters/adapter";
+import { WCDatabases } from "../types";
 
 export namespace VideoController {
 	export type GetInput = [

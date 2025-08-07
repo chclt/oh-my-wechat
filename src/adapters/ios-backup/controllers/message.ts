@@ -24,11 +24,9 @@ import {
 	type ChatroomType,
 	type ChatroomVoipMessageType,
 	type ContactMessageType,
-	type DatabaseMessageRow,
 	type ImageMessageType,
 	type LocationMessageType,
 	type MailMessageType,
-	MessageDirection,
 	MessageTypeEnum,
 	type MessageType,
 	type MicroVideoMessageType,
@@ -41,8 +39,8 @@ import {
 	type VideoMessageType,
 	type VoiceMessageType,
 	type VoipMessageType,
-	type WCDatabases,
 	type WeComContactMessageType,
+	MessageDirection,
 } from "@/schema";
 import CryptoJS from "crypto-js";
 import { XMLParser } from "fast-xml-parser";
@@ -52,7 +50,11 @@ import type {
 	DataAdapterResponse,
 	GetMessageListRequest,
 } from "@/adapters/adapter.ts";
-import { ControllerPaginatorCursor } from "../types.ts";
+import {
+	ControllerPaginatorCursor,
+	DatabaseMessageRow,
+	WCDatabases,
+} from "../types.ts";
 
 export namespace MessageController {
 	async function parseRawMessageRows(

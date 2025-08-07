@@ -1,8 +1,8 @@
-import type { RecordType } from "@/components/record/record";
-import type { ChatType, FileInfo, MessageType, WCDatabases } from "@/schema";
+import type { FileInfo } from "@/schema";
 import CryptoJS from "crypto-js";
 import { getFilesFromManifast } from "../utils";
 import { DataAdapterResponse, GetAttachRequest } from "@/adapters/adapter";
+import { WCDatabases } from "../types";
 
 export namespace AttachController {
 	export type GetInput = [

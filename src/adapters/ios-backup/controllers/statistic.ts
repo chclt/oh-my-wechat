@@ -2,13 +2,11 @@ import type { ReferMessageEntity } from "@/components/message/app-message/refer-
 import {
 	type AppMessageType,
 	AppMessageTypeEnum,
-	type ChatType,
-	MessageDirection,
 	MessageTypeEnum,
 	type MessageType,
 	type TextMessageType,
 	type UserType,
-	type WCDatabases,
+	MessageDirection,
 } from "@/schema";
 import { countStringLength, formatDateTime } from "@/lib/utils.ts";
 import WechatEmojiTable from "@/lib/wechat-emojis.ts";
@@ -20,7 +18,7 @@ import {
 	DataAdapterResponse,
 	GetStatisticRequest,
 } from "@/adapters/adapter";
-import { ControllerPaginatorCursor } from "../types";
+import { ControllerPaginatorCursor, WCDatabases } from "../types";
 
 export interface ChatStatistics {
 	date_contact_added?: string;

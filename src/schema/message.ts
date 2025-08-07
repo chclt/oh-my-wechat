@@ -14,7 +14,12 @@ import type { ChatroomVoipMessageEntity } from "@/components/message/chatroom-vo
 import type { WeComContactMessageEntity } from "@/components/message/wecom-contact-message.tsx";
 import type { SystemMessageEntity } from "@/components/message/system-message.tsx";
 import type { SystemExtendedMessageEntity } from "@/components/message/system-extended-message.tsx";
-import type { ChatType, MessageDirection, UserType } from "@/schema/index.ts";
+import type { ChatType, UserType } from "@/schema/index.ts";
+
+export enum MessageDirection {
+	outgoing = 0,
+	incoming = 1,
+}
 
 export enum MessageTypeEnum {
 	TEXT = 1, // 文本消息

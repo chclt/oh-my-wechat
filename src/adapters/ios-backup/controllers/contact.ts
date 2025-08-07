@@ -1,12 +1,8 @@
 import { DataAdapterResponse } from "@/adapters/adapter";
 import { _store } from "../worker";
-import type {
-	ChatroomType,
-	DatabaseFriendRow,
-	UserType,
-	WCDatabases,
-} from "@/schema";
+import type { ChatroomType, UserType } from "@/schema";
 import protobuf from "protobufjs";
+import { DatabaseFriendRow, WCDatabases } from "../types";
 
 const dbContactProtos = {
 	dbContactRemark: {
