@@ -1,11 +1,11 @@
 import * as Comlink from "comlink";
 import AdapterWorker from "./worker.ts?worker";
 import type { AdapterWorkerType } from "./worker.ts";
-import type { UserType } from "@/schema";
-import type {
-	DataAdapter,
+import type {ChatType, UserType} from "@/schema";
+import {
+	DataAdapter, DataAdapterResponse,
 	GetAttachRequest,
-	GetChatListRequest,
+	GetChatListRequest, GetChatRequest,
 	GetImageRequest,
 	GetMessageListRequest,
 	GetStatisticRequest,
@@ -66,6 +66,19 @@ export default class IosBackupAdapter implements DataAdapter {
 
 	async getChatList(input: GetChatListRequest) {
 		const data = await this._workerAdapter.getChatList(input);
+
+		if (import.meta.env.DEV) {
+			console.groupCollapsed("getChatList");
+			console.log(data);
+			console.groupEnd();
+		}
+
+		return data;
+	}
+
+	async getChat(input: GetChatRequest) {
+		const temp = await this._workerAdapter.getChatList({ userIds: [input.chatId] });
+		const data = { data: temp.data[0] } satisfies DataAdapterResponse<ChatType>
 
 		if (import.meta.env.DEV) {
 			console.groupCollapsed("getChatList");
