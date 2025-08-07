@@ -15,31 +15,29 @@ import VoiceMessage from "@/components/message/voice-message.tsx";
 import VoipMessage from "@/components/message/voip-message.tsx";
 import WeComContactMessage from "@/components/message/wecom-contact-message.tsx";
 import { MessageDirection, MessageTypeEnum, type MessageType } from "@/schema";
-import { formatDateTime } from "@/lib/utils.ts";
 import { ErrorBoundary } from "react-error-boundary";
 import { Route } from "@/routes/$accountId/route.tsx";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { AccountSuspenseQueryOptions } from "@/lib/fetchers/account.ts";
 import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
-import { LinkCard } from "../link-card";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 import { CircleQuestionmarkSolid } from "../icon";
 import { Card, CardContent, CardFooter, CardIndicator } from "../ui/card";
+import type React from "react";
 
-export interface MessageProp<T = MessageType>
-	extends React.HTMLAttributes<HTMLDivElement> {
-	message: T;
-	variant?: "default" | "referenced" | "abstract";
+// TODO
+export interface MessageProp<Message = MessageType, Variant = undefined> {
+	message: Message;
+	variant?: "default" | "referenced" | "abstract" | Variant;
 	showPhoto?: boolean;
 	showUsername?: boolean;
-	[key: string]: unknown;
 }
 
 export default function Message({
 	message,
 	variant = "default",
 	...props
-}: MessageProp) {
+}: MessageProp & React.HTMLAttributes<HTMLElement>) {
 	const { accountId } = Route.useParams();
 	const { data: account } = useSuspenseQuery(
 		AccountSuspenseQueryOptions(accountId),

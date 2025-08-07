@@ -69,7 +69,8 @@ interface ForwardMessageContent {
 	};
 }
 
-type ForwardMessageProps = AppMessageProps<ForwardMessageEntity>;
+type ForwardMessageProps = AppMessageProps<ForwardMessageEntity> &
+	React.HTMLAttributes<HTMLElement>;
 
 export const forwardMessageVariants = cva(
 	[

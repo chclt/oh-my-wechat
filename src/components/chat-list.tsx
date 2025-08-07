@@ -100,7 +100,6 @@ function ChatItem({ chat, className, ...props }: ChatItemProps) {
 						{last_message && (
 							<Message
 								variant="abstract"
-								type={chat.type}
 								message={last_message}
 								showUsername={chat.type === "chatroom"}
 								className={""}
