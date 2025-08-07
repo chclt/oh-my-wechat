@@ -150,21 +150,3 @@ export interface VoiceInfo {
 export interface FileInfo {
 	src: string;
 }
-
-export interface ControllerResult<T> {
-	data: T;
-}
-
-export interface ControllerPaginatorCursor {
-	value: number;
-	condition: "<" | "<=" | ">" | ">=" | "<>";
-	[key: string]: any;
-}
-
-export interface ControllerPaginatorResult<T> extends ControllerResult<T> {
-	meta: {
-		cursor?: string; // JSON.stringify(ControllerPaginatorCursor);
-		previous_cursor?: string; // JSON.stringify(ControllerPaginatorCursor);
-		next_cursor?: string; // JSON.stringify(ControllerPaginatorCursor);
-	};
-}

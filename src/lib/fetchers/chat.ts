@@ -10,7 +10,7 @@ export function ChatListSuspenseQueryOptions(
 		queryKey: ["chats", accountId],
 		queryFn: () =>
 			getDataAdapter()
-				.getChatList()
+				.getChatList({})
 				.then((res) => res.data),
 	};
 }

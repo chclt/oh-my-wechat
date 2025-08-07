@@ -2,14 +2,16 @@ import * as Comlink from "comlink";
 import AdapterWorker from "./worker.ts?worker";
 import type { AdapterWorkerType } from "./worker.ts";
 import type { UserType } from "@/schema";
-import type { MessageController } from "./controllers/message";
-
-import type { DataAdapter } from "../adapter.ts";
-import type { ImageController } from "./controllers/image.ts";
-import type { VideoController } from "./controllers/video.ts";
-import type { VoiceController } from "./controllers/voice.ts";
-import type { AttachController } from "./controllers/attach.ts";
-import type { StatisticController } from "./controllers/statistic.ts";
+import type {
+	DataAdapter,
+	GetAttachRequest,
+	GetChatListRequest,
+	GetImageRequest,
+	GetMessageListRequest,
+	GetStatisticRequest,
+	GetVideoRequest,
+	GetVoiceRequest,
+} from "../adapter.ts";
 
 export default class IosBackupAdapter implements DataAdapter {
 	// @ts-ignore
@@ -62,7 +64,7 @@ export default class IosBackupAdapter implements DataAdapter {
 		return data;
 	}
 
-	async getChatList(input?: { userIds?: string[] }) {
+	async getChatList(input: GetChatListRequest) {
 		const data = await this._workerAdapter.getChatList(input);
 
 		if (import.meta.env.DEV) {
@@ -74,7 +76,7 @@ export default class IosBackupAdapter implements DataAdapter {
 		return data;
 	}
 
-	async getMessageList(input: MessageController.AllInput[0]) {
+	async getMessageList(input: GetMessageListRequest) {
 		const data = await this._workerAdapter.getMessageList(input);
 
 		if (import.meta.env.DEV) {
@@ -86,7 +88,7 @@ export default class IosBackupAdapter implements DataAdapter {
 		return data;
 	}
 
-	async getImage(input: ImageController.GetInput[0]) {
+	async getImage(input: GetImageRequest) {
 		const data = await this._workerAdapter.getImage(input);
 
 		if (import.meta.env.DEV) {
@@ -98,7 +100,7 @@ export default class IosBackupAdapter implements DataAdapter {
 		return data;
 	}
 
-	async getVideo(input: VideoController.GetInput[0]) {
+	async getVideo(input: GetVideoRequest) {
 		const data = await this._workerAdapter.getVideo(input);
 
 		if (import.meta.env.DEV) {
@@ -110,7 +112,7 @@ export default class IosBackupAdapter implements DataAdapter {
 		return data;
 	}
 
-	async getVoice(input: VoiceController.GetInput[0]) {
+	async getVoice(input: GetVoiceRequest) {
 		const data = await this._workerAdapter.getVoice(input);
 
 		if (import.meta.env.DEV) {
@@ -122,11 +124,11 @@ export default class IosBackupAdapter implements DataAdapter {
 		return data;
 	}
 
-	async getAttache(input: AttachController.GetInput[0]) {
-		const data = await this._workerAdapter.getAttache(input);
+	async getAttach(input: GetAttachRequest) {
+		const data = await this._workerAdapter.getAttach(input);
 
 		if (import.meta.env.DEV) {
-			console.groupCollapsed("getAttache");
+			console.groupCollapsed("getAttach");
 			console.log(data);
 			console.groupEnd();
 		}
@@ -134,7 +136,7 @@ export default class IosBackupAdapter implements DataAdapter {
 		return data;
 	}
 
-	async getStatistic(input: StatisticController.GetInput[0]) {
+	async getStatistic(input: GetStatisticRequest) {
 		const data = await this._workerAdapter.getStatistic(input);
 
 		if (import.meta.env.DEV) {

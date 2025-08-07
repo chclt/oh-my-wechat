@@ -4,6 +4,7 @@ import { toBlobURL } from "@ffmpeg/util";
 import CryptoJS from "crypto-js";
 import { decode } from "silk-wasm";
 import { getFilesFromManifast } from "../utils";
+import { DataAdapterResponse, GetVoiceRequest } from "@/adapters/adapter";
 
 const ffmpegCoreURL =
 	"https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.js";
@@ -16,14 +17,10 @@ let isFFmpegLoading = false; // 防止重复加载, TODO: 更好应该是写一�
 
 export namespace VoiceController {
 	export type GetInput = [
-		{
-			chat: ChatType;
-			message: MessageType;
-			scope?: "all" | "transcription";
-		},
+		GetVoiceRequest,
 		{ directory: FileSystemDirectoryHandle | FileList; databases: WCDatabases },
 	];
-	export type GetOutput = Promise<VoiceInfo>;
+	export type GetOutput = Promise<DataAdapterResponse<VoiceInfo>>;
 
 	export async function get(...inputs: GetInput): GetOutput {
 		const [{ chat, message, scope = "all" }, { directory, databases }] = inputs;
@@ -100,6 +97,6 @@ export namespace VoiceController {
 			}
 		}
 
-		return result;
+		return { data: result };
 	}
 }

@@ -1,49 +1,117 @@
-import type { AccountType } from "@/schema";
 import type {
-	ChatType,
-	ControllerPaginatorResult,
-	ControllerResult,
-	MessageType,
+	AccountType,
+	AppMessageTypeEnum,
+	FileInfo,
+	MessageTypeEnum,
+	PhotpSize,
+	VideoInfo,
+	VoiceInfo,
 } from "@/schema";
-import type { AttachController } from "./ios-backup/controllers/attach";
-import type { ImageController } from "./ios-backup/controllers/image";
-import type { MessageController } from "./ios-backup/controllers/message";
-import type { StatisticController } from "./ios-backup/controllers/statistic";
-import type { VideoController } from "./ios-backup/controllers/video";
-import type { VoiceController } from "./ios-backup/controllers/voice";
+import type { ChatType, MessageType } from "@/schema";
+import type { ChatStatistics } from "./ios-backup/controllers/statistic";
+import { RecordType } from "@/components/record/record";
+
+export interface GetMessageListRequest {
+	chat: ChatType;
+	type?: MessageTypeEnum | MessageTypeEnum[];
+	type_app?: AppMessageTypeEnum | AppMessageTypeEnum[]; // 有 bug
+	cursor?: string;
+	limit: number;
+}
+
+export interface GetChatRequest {
+	chatId: string;
+}
+
+export interface GetChatListRequest {
+	userIds?: string[];
+}
+
+export interface GetImageRequest {
+	chat: ChatType;
+	message: MessageType;
+	record?: RecordType;
+	size?: "origin" | "thumb";
+	domain?: "image" | "opendata" | "video";
+}
+
+export interface GetVideoRequest {
+	chat: ChatType;
+	message: MessageType;
+}
+
+export interface GetVoiceRequest {
+	chat: ChatType;
+	message: MessageType;
+	scope?: "all" | "transcription";
+}
+
+export interface GetAttachRequest {
+	chat: ChatType;
+	message: MessageType;
+	record?: RecordType;
+	type?: string;
+}
+
+export interface GetStatisticRequest {
+	chat: ChatType;
+	startTime: Date;
+	endTime: Date;
+}
 
 export interface DataAdapter {
 	init: () => void;
 
-	getAccountList: (...input: any[]) => Promise<ControllerResult<AccountType[]>>;
+	getAccountList: (
+		...requestData: any[]
+	) => Promise<DataAdapterResponse<AccountType[]>>;
 
-	getAccount: (accountId: string) => Promise<ControllerResult<AccountType>>;
+	getAccount: (accountId: string) => Promise<DataAdapterResponse<AccountType>>;
 
-	getChatList: (input?: {
-		userIds?: string[];
-	}) => Promise<ControllerResult<ChatType[]>>;
+	getChat: (
+		requestData: GetChatRequest,
+	) => Promise<DataAdapterResponse<ChatType>>;
+
+	getChatList: (
+		requestData: GetChatListRequest,
+	) => Promise<DataAdapterResponse<ChatType[]>>;
 
 	getMessageList: (
-		input: MessageController.AllInput[0],
-	) => Promise<ControllerPaginatorResult<MessageType[]>>;
+		requestData: GetMessageListRequest,
+	) => Promise<DataAdapterCursorPagination<MessageType[]>>;
 
 	getImage: (
-		controllerInput: ImageController.GetInput[0],
-	) => ImageController.GetOutput;
+		requestData: GetImageRequest,
+	) => Promise<DataAdapterResponse<PhotpSize[]>>;
 
 	getVideo: (
-		controllerInput: VideoController.GetInput[0],
-	) => VideoController.GetOutput;
+		requestData: GetVideoRequest,
+	) => Promise<DataAdapterResponse<VideoInfo>>;
 
 	getVoice: (
-		controllerInput: VoiceController.GetInput[0],
-	) => VoiceController.GetOutput;
+		requestData: GetVoiceRequest,
+	) => Promise<DataAdapterResponse<VoiceInfo>>;
 
-	getAttache: (
-		controllerInput: AttachController.GetInput[0],
-	) => AttachController.GetOutput;
+	getAttach: (
+		requestData: GetAttachRequest,
+	) => Promise<DataAdapterResponse<FileInfo[]>>;
 
 	getStatistic: (
-		controllerInput: StatisticController.GetInput[0],
-	) => StatisticController.GetOutput;
+		requestData: GetStatisticRequest,
+	) => Promise<DataAdapterResponse<ChatStatistics>>;
 }
+
+export interface DataAdapterResponse<DataType> {
+	data: DataType;
+	meta?: Record<string, any>;
+}
+
+export interface DataAdapterCursorPagination<DataType>
+	extends DataAdapterResponse<DataType> {
+	meta: {
+		cursor?: string;
+		previous_cursor?: string;
+		next_cursor?: string;
+	};
+}
+ 

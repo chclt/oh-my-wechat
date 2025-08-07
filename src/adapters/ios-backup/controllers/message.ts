@@ -24,9 +24,6 @@ import {
 	type ChatroomType,
 	type ChatroomVoipMessageType,
 	type ContactMessageType,
-	type ControllerPaginatorCursor,
-	type ControllerPaginatorResult,
-	type ControllerResult,
 	type DatabaseMessageRow,
 	type ImageMessageType,
 	type LocationMessageType,
@@ -50,6 +47,12 @@ import {
 import CryptoJS from "crypto-js";
 import { XMLParser } from "fast-xml-parser";
 import WCDB from "../wcdb.ts";
+import type {
+	DataAdapterCursorPagination,
+	DataAdapterResponse,
+	GetMessageListRequest,
+} from "@/adapters/adapter.ts";
+import { ControllerPaginatorCursor } from "../types.ts";
 
 export namespace MessageController {
 	async function parseRawMessageRows(
@@ -401,19 +404,13 @@ export namespace MessageController {
 	}
 
 	export type AllInput = [
-		{
-			chat: ChatType;
-			type?: MessageTypeEnum | MessageTypeEnum[];
-			type_app?: AppMessageTypeEnum | AppMessageTypeEnum[]; // 有 bug
-			cursor?: string;
-			limit: number;
-		},
+		GetMessageListRequest,
 		{
 			databases: WCDatabases;
 		},
 	];
 
-	export type AllOutput = Promise<ControllerPaginatorResult<MessageType[]>>;
+	export type AllOutput = Promise<DataAdapterCursorPagination<MessageType[]>>;
 
 	export async function all(...inputs: AllInput): AllOutput {
 		const [{ chat, type, type_app, cursor, limit = 50 }, { databases }] =
@@ -866,7 +863,7 @@ export namespace MessageController {
 	];
 
 	export type AllFromAllOutput = Promise<
-		ControllerPaginatorResult<MessageType[]>
+		DataAdapterCursorPagination<MessageType[]>
 	>;
 
 	export async function allFromAll(
@@ -913,7 +910,7 @@ export namespace MessageController {
 		},
 	];
 
-	export type findOutput = Promise<ControllerResult<MessageType[]>>;
+	export type findOutput = Promise<DataAdapterResponse<MessageType[]>>;
 
 	export async function find(...inputs: findInput): findOutput {
 		const [{ chat, messageIds, parseReplyMessage = true }, { databases }] =
@@ -1024,7 +1021,7 @@ export namespace MessageController {
 		},
 	];
 
-	export type allVerifyOutput = Promise<ControllerResult<MessageType[]>>;
+	export type allVerifyOutput = Promise<DataAdapterResponse<MessageType[]>>;
 
 	export async function allVerify(...inputs: allVerifyInput): allVerifyOutput {
 		const [{ databases }] = inputs;

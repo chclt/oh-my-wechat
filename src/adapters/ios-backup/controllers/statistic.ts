@@ -3,9 +3,6 @@ import {
 	type AppMessageType,
 	AppMessageTypeEnum,
 	type ChatType,
-	type ControllerPaginatorCursor,
-	type ControllerPaginatorResult,
-	type ControllerResult,
 	MessageDirection,
 	MessageTypeEnum,
 	type MessageType,
@@ -18,6 +15,12 @@ import WechatEmojiTable from "@/lib/wechat-emojis.ts";
 import CryptoJS from "crypto-js";
 import { getUnixTime } from "date-fns";
 import { MessageController } from "./message";
+import {
+	DataAdapterCursorPagination,
+	DataAdapterResponse,
+	GetStatisticRequest,
+} from "@/adapters/adapter";
+import { ControllerPaginatorCursor } from "../types";
 
 export interface ChatStatistics {
 	date_contact_added?: string;
@@ -90,11 +93,8 @@ export interface ChatStatistics {
 }
 
 export namespace StatisticController {
-	export type GetInput = [
-		{ chat: ChatType; startTime: Date; endTime: Date },
-		{ databases: WCDatabases },
-	];
-	export type GetOutput = Promise<ControllerResult<ChatStatistics>>;
+	export type GetInput = [GetStatisticRequest, { databases: WCDatabases }];
+	export type GetOutput = Promise<DataAdapterResponse<ChatStatistics>>;
 
 	export async function get(...inputs: GetInput): GetOutput {
 		const [{ chat, startTime, endTime }, { databases }] = inputs;
@@ -463,7 +463,7 @@ export namespace StatisticController {
 
 		/* 字数和微信表情使用统计 */
 
-		let result: ControllerPaginatorResult<MessageType[]>;
+		let result: DataAdapterCursorPagination<MessageType[]>;
 		let cursor;
 		const limit = 2000;
 		let sent_word_count = 0;

@@ -2,18 +2,14 @@ import type { RecordType } from "@/components/record/record";
 import type { ChatType, FileInfo, MessageType, WCDatabases } from "@/schema";
 import CryptoJS from "crypto-js";
 import { getFilesFromManifast } from "../utils";
+import { DataAdapterResponse, GetAttachRequest } from "@/adapters/adapter";
 
 export namespace AttachController {
 	export type GetInput = [
-		{
-			chat: ChatType;
-			message: MessageType;
-			record?: RecordType;
-			type?: string;
-		},
+		GetAttachRequest,
 		{ directory: FileSystemDirectoryHandle | FileList; databases: WCDatabases },
 	];
-	export type GetOutput = Promise<FileInfo[]>;
+	export type GetOutput = Promise<DataAdapterResponse<FileInfo[]>>;
 
 	export async function get(...inputs: GetInput): GetOutput {
 		const [{ chat, message, record, type }, { directory, databases }] = inputs;
@@ -45,6 +41,6 @@ export namespace AttachController {
 			}
 		}
 
-		return result;
+		return { data: result };
 	}
 }

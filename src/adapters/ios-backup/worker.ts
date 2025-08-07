@@ -3,7 +3,6 @@ import sqliteUrl from "sql.js/dist/sql-wasm.wasm?url";
 import CryptoJS from "crypto-js";
 import type {
 	AccountType,
-	ControllerResult,
 	UserType,
 	WCDatabaseNames,
 	WCDatabases,
@@ -25,6 +24,7 @@ import { AttachController } from "./controllers/attach";
 import { StatisticController } from "./controllers/statistic";
 
 import * as Comlink from "comlink";
+import { DataAdapterResponse } from "../adapter";
 
 interface AdapterWorkerStore {
 	directory: FileSystemDirectoryHandle | FileList;
@@ -49,9 +49,9 @@ export interface AdapterWorkerType {
 
 	_unloadAccountDatabase: () => void;
 
-	getAccountList: () => Promise<ControllerResult<AccountType[]>>;
+	getAccountList: () => Promise<DataAdapterResponse<AccountType[]>>;
 
-	getAccount: (accountId: string) => Promise<ControllerResult<AccountType>>;
+	getAccount: (accountId: string) => Promise<DataAdapterResponse<AccountType>>;
 
 	getChatList: (input?: { userIds?: string[] }) => ChatController.AllOutput;
 
@@ -81,7 +81,7 @@ export interface AdapterWorkerType {
 		controllerInput: VoiceController.GetInput[0],
 	) => VoiceController.GetOutput;
 
-	getAttache: (
+	getAttach: (
 		controllerInput: AttachController.GetInput[0],
 	) => AttachController.GetOutput;
 
@@ -309,7 +309,7 @@ const adapterWorker: AdapterWorkerType = {
 		});
 	},
 
-	getAttache: async (controllerInput) => {
+	getAttach: async (controllerInput) => {
 		return await AttachController.get(controllerInput, {
 			directory: _store.directory,
 			databases: _store.databases,

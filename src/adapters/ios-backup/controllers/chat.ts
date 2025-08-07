@@ -1,7 +1,6 @@
 import type {
 	ChatType,
 	ChatroomType,
-	ControllerResult,
 	DatabaseSessionAbstractRow,
 	GroupChatType,
 	PrivateChatType,
@@ -13,6 +12,7 @@ import { ContactController } from "./contact";
 
 import specialBrandId from "@/assets/specialBrandUserNames.csv?raw";
 import { _store } from "../worker";
+import { DataAdapterResponse } from "@/adapters/adapter";
 
 export namespace ChatController {
 	async function parseDatabaseChatRows(
@@ -111,7 +111,7 @@ export namespace ChatController {
 	}
 
 	export type AllInput = [{ databases: WCDatabases }];
-	export type AllOutput = Promise<ControllerResult<ChatType[]>>;
+	export type AllOutput = Promise<DataAdapterResponse<ChatType[]>>;
 
 	export async function all(...inputs: AllInput): AllOutput {
 		const [{ databases }] = inputs;
@@ -141,7 +141,7 @@ export namespace ChatController {
 	}
 
 	export type FindInput = [{ ids: string[] }, { databases: WCDatabases }];
-	export type FindOutput = Promise<ControllerResult<ChatType[]>>;
+	export type FindOutput = Promise<DataAdapterResponse<ChatType[]>>;
 
 	export async function find(...inputs: FindInput): FindOutput {
 		const [{ ids }, { databases }] = inputs;
