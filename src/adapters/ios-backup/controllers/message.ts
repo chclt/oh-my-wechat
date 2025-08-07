@@ -50,7 +50,7 @@ import type {
 	DataAdapterResponse,
 	GetMessageListRequest,
 } from "@/adapters/adapter.ts";
-import {
+import type {
 	ControllerPaginatorCursor,
 	DatabaseMessageRow,
 	WCDatabases,
@@ -430,7 +430,9 @@ export namespace MessageController {
 				if (parsedCursorObject.condition) {
 					cursorObject.condition = parsedCursorObject.condition;
 				}
-			} catch (e) {}
+			} catch (error) {
+				//
+			}
 		}
 
 		const { value: cursor_value, condition: cursor_condition } = cursorObject;
@@ -628,21 +630,17 @@ export namespace MessageController {
 					}
 				}),
 			)
-		)
-			.filter((promiseResult, index) => {
-				if (
-					promiseResult.status === "fulfilled" &&
-					promiseResult.value.length > 0
-				) {
-					if (import.meta.env.DEV)
-						console.log(chat.title, tableName, `message_${index + 1}.sqlite`);
-					return true;
-				}
-				return false;
-			})
-			// todo
-			// @ts-ignore
-			.map((promiseResult) => promiseResult.value)[0];
+		).flatMap((promiseResult, index) => {
+			if (
+				promiseResult.status === "fulfilled" &&
+				promiseResult.value.length > 0
+			) {
+				if (import.meta.env.DEV)
+					console.log(chat.title, tableName, `message_${index + 1}.sqlite`);
+				return promiseResult.value;
+			}
+			return [];
+		});
 
 		if (!rows || rows.length === 0)
 			return {
@@ -763,18 +761,14 @@ export namespace MessageController {
 				}
 
 				cursors.next = {
-					// TODO
-					// @ts-ignore
-					value: raw_message_rows.at(-1).CreateTime,
+					value: raw_message_rows.at(-1)!.CreateTime,
 					condition: ">",
 					_hasNextPage: "unknown",
 				};
 			} else if (cursor_condition === ">" || cursor_condition === ">=") {
 				if (raw_message_rows.length === query_limit) {
 					cursors.next = {
-						// TODO
-						// @ts-ignore
-						value: raw_message_rows.at(-1).CreateTime,
+						value: raw_message_rows.at(-1)!.CreateTime,
 						condition: ">=",
 						hasNextPage: true,
 					};
@@ -818,9 +812,7 @@ export namespace MessageController {
 						.length === query_limit
 				) {
 					cursors.next = {
-						// TODO
-						// @ts-ignore
-						value: raw_message_rows.at(-1).CreateTime,
+						value: raw_message_rows.at(-1)!.CreateTime,
 						condition: ">=",
 						_hasNextPage: true,
 					};
@@ -947,23 +939,18 @@ export namespace MessageController {
 					}
 				}),
 			)
-		)
-			.filter((promiseResult, index) => {
-				if (
-					promiseResult.status === "fulfilled" &&
-					promiseResult.value.length > 0
-				) {
-					return true;
-				}
-				return false;
-			})
-			// todo
-			// @ts-ignore
-			.map((promiseResult) => promiseResult.value)[0];
+		).flatMap((promiseResult, index) => {
+			if (
+				promiseResult.status === "fulfilled" &&
+				promiseResult.value.length > 0
+			) {
+				return promiseResult.value;
+			}
+			return [];
+		});
 
 		const raw_message_rows: DatabaseMessageRow[] = [];
 
-		// TODO
 		if (!rows) {
 			return {
 				data: [],

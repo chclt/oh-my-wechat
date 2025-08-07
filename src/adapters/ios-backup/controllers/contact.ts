@@ -1,8 +1,8 @@
-import { DataAdapterResponse } from "@/adapters/adapter";
-import { _store, adapterWorker } from "../worker";
+import type { DataAdapterResponse } from "@/adapters/adapter";
+import { adapterWorker } from "../worker";
 import type { ChatroomType, UserType } from "@/schema";
 import protobuf from "protobufjs";
-import { DatabaseFriendRow, WCDatabases } from "../types";
+import type { DatabaseFriendRow, WCDatabases } from "../types";
 
 const dbContactProtos = {
 	dbContactRemark: {
@@ -182,36 +182,36 @@ export namespace ContactController {
 		const allMemberIds: string[] = [];
 
 		const resultWithoutMembers = raw_contact_rows.map((row) => {
-			// @ts-ignore
-			const remarkObj: { [key: string]: unknown } = dbContactProtobufRoot
+			const remarkObj = dbContactProtobufRoot
 				.lookupType("ContactRemark")
-				.decode(row.dbContactRemark);
-			// @ts-ignore
-			const headImageObj: { [key: string]: unknown } = dbContactProtobufRoot
+				.decode(row.dbContactRemark) as unknown as Record<string, unknown>;
+
+			const headImageObj = dbContactProtobufRoot
 				.lookupType("HeadImage")
-				.decode(row.dbContactHeadImage);
-			// @ts-ignore
-			const profileObj: { [key: string]: unknown } = dbContactProtobufRoot
+				.decode(row.dbContactHeadImage) as unknown as Record<string, unknown>;
+
+			const profileObj = dbContactProtobufRoot
 				.lookupType("Profile")
-				.decode(row.dbContactProfile);
-			// @ts-ignore
-			const socialObj: { [key: string]: unknown } = dbContactProtobufRoot
+				.decode(row.dbContactProfile) as unknown as Record<string, unknown>;
+
+			const socialObj = dbContactProtobufRoot
 				.lookupType("Social")
-				.decode(row.dbContactSocial);
-			// @ts-ignore
-			const chatroomObj: { [key: string]: unknown } | undefined =
-				row.dbContactChatRoom
-					? dbContactProtobufRoot
-							.lookupType("Chatroom")
-							.decode(row.dbContactChatRoom)
-					: undefined;
-			// @ts-ignore
-			const openIMObj: { [key: string]: unknown } | undefined =
-				row.dbContactOpenIM
-					? dbContactProtobufRoot
-							.lookupType("OpenIM")
-							.decode(row.dbContactOpenIM)
-					: undefined;
+				.decode(row.dbContactSocial) as unknown as Record<string, unknown>;
+
+			const chatroomObj = row.dbContactChatRoom
+				? (dbContactProtobufRoot
+						.lookupType("Chatroom")
+						.decode(row.dbContactChatRoom) as unknown as Record<
+						string,
+						unknown
+					>)
+				: undefined;
+
+			const openIMObj = row.dbContactOpenIM
+				? (dbContactProtobufRoot
+						.lookupType("OpenIM")
+						.decode(row.dbContactOpenIM) as unknown as Record<string, unknown>)
+				: undefined;
 
 			if (openIMObj?.openIMContactInfo) {
 				openIMObj.openIMContactInfo = JSON.parse(

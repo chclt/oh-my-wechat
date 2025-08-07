@@ -13,12 +13,12 @@ import WechatEmojiTable from "@/lib/wechat-emojis.ts";
 import CryptoJS from "crypto-js";
 import { getUnixTime } from "date-fns";
 import { MessageController } from "./message";
-import {
+import type {
 	DataAdapterCursorPagination,
 	DataAdapterResponse,
 	GetStatisticRequest,
 } from "@/adapters/adapter";
-import { ControllerPaginatorCursor, WCDatabases } from "../types";
+import { ControllerPaginatorCursor, type WCDatabases } from "../types";
 
 export interface ChatStatistics {
 	date_contact_added?: string;
@@ -475,12 +475,6 @@ export namespace StatisticController {
 				{
 					chat,
 					type: MessageTypeEnum.TEXT,
-					cursor: JSON.stringify({
-						// TODO
-						// @ts-ignore
-						value: cursor,
-						condition: "<",
-					} satisfies ControllerPaginatorCursor),
 					limit,
 				},
 				{
@@ -545,12 +539,6 @@ export namespace StatisticController {
 					chat,
 					type: MessageTypeEnum.APP,
 					type_app: AppMessageTypeEnum.REFER,
-					cursor: JSON.stringify({
-						// TODO
-						// @ts-ignore
-						value: cursor,
-						condition: "<",
-					} satisfies ControllerPaginatorCursor),
 					limit,
 				},
 				{
