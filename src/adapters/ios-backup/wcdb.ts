@@ -1,4 +1,4 @@
-import type { Database } from "sql.js";
+import type { Database, QueryExecResult } from "sql.js";
 // @ts-ignore
 import { ZstdCodec } from "zstd-codec";
 
@@ -59,7 +59,7 @@ interface WCDBType {
 	execAsync: (
 		sql: string,
 		options: { databaseName: string; database: Database; tableName: string },
-	) => Promise<any>;
+	) => Promise<QueryExecResult[]>;
 }
 
 const WCDB: WCDBType = {
@@ -146,6 +146,7 @@ const WCDB: WCDBType = {
 				pendindColumnName.push(columnName);
 
 				if (dictionaryId === undefined) {
+					//
 				} else {
 					for (const columnName of pendindColumnName) {
 						settledColumnConfig[columnName] = Number(
@@ -240,7 +241,6 @@ const WCDB: WCDBType = {
 										rawColumnValue,
 									);
 								}
-							} else {
 							}
 						}
 					}

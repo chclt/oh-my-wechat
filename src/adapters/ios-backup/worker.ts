@@ -17,8 +17,8 @@ import { VoiceController } from "./controllers/voice";
 import { AttachController } from "./controllers/attach";
 import { StatisticController } from "./controllers/statistic";
 import * as Comlink from "comlink";
-import { DataAdapterResponse } from "../adapter";
-import { WCDatabaseNames, WCDatabases } from "./types";
+import type { DataAdapterResponse } from "../adapter";
+import type { WCDatabaseNames, WCDatabases } from "./types";
 
 interface AdapterWorkerStore {
 	directory: FileSystemDirectoryHandle | FileList | undefined;
@@ -191,7 +191,7 @@ export const adapterWorker: AdapterWorkerType = {
 			new Uint8Array(databaseFileBuffer),
 		);
 
-		for (const fileItem of await await getFilesFromManifast(
+		for (const fileItem of await getFilesFromManifast(
 			storeDatabase.manifest,
 			storeDirectory,
 			`Documents/${accountIdMd5}/DB/message_%.sqlite`,

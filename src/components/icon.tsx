@@ -1,4 +1,6 @@
-interface IconProps extends React.HTMLAttributes<HTMLOrSVGElement> {}
+import type React from "react";
+
+type IconProps = React.HTMLAttributes<HTMLOrSVGElement>;
 
 export function LoaderIcon(props: IconProps) {
 	return (

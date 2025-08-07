@@ -18,7 +18,6 @@ export interface MusicRecordEntity extends RecordType {
 export default function MusicRecord({
 	message,
 	record,
-
 	...props
 }: MusicRecordProps) {
 	return (

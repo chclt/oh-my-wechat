@@ -16,7 +16,7 @@ import type { VoipMessageEntity } from "@/components/message/voip-message.tsx";
 import type { WeComContactMessageEntity } from "@/components/message/wecom-contact-message.tsx";
 import { ChatController } from "./chat.ts";
 import { ContactController } from "./contact.ts";
-import { _store, adapterWorker } from "../worker.ts";
+import { adapterWorker } from "../worker.ts";
 import {
 	type AppMessageType,
 	AppMessageTypeEnum,
@@ -290,7 +290,9 @@ export namespace MessageController {
 							).msg.appmsg.refermsg.svrid;
 							replyMessageIds.push(replyMessageId);
 						}
-					} catch (error) {}
+					} catch (error) {
+						//
+					}
 
 					return {
 						...message,
@@ -623,6 +625,7 @@ export namespace MessageController {
 						);
 					} catch (e) {
 						if (e instanceof Error && e.message.startsWith("no such table")) {
+							//
 						} else {
 							console.error(e);
 						}
@@ -934,7 +937,7 @@ export namespace MessageController {
 							`,
 							{ databaseName, database, tableName },
 						);
-					} catch (e) {
+					} catch (error) {
 						return [];
 					}
 				}),
@@ -1035,7 +1038,7 @@ export namespace MessageController {
                 ${tableNames[0].values[0][0]} 
             ORDER BY CreateTime DESC;
           `);
-				} catch (e) {
+				} catch (error) {
 					return [];
 				}
 			}),

@@ -2,6 +2,7 @@ import type { MessageType, RecordTypeEnum } from "@/schema";
 import Image from "../image";
 import { LinkCard } from "../link-card";
 import type { RecordType } from "./record";
+import type React from "react";
 
 interface LinkRecordProps extends React.HTMLAttributes<HTMLDivElement> {
 	message: MessageType;
