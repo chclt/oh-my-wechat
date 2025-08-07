@@ -1,8 +1,10 @@
 import type { AppMessageProps } from "@/components/message/app-message.tsx";
 import { FormatTextMessageContent } from "@/components/message/text-message.tsx";
 import User from "@/components/user.tsx";
-import type { AppMessageTypeEnum, UserType } from "@/schema";
-import { useEffect, useRef, useState } from "react";
+import type { AppMessageTypeEnum } from "@/schema";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { UserListQueryOptions } from "@/lib/fetchers/user.ts";
 
 export interface PatMessageEntity {
 	type: AppMessageTypeEnum.PAT;
@@ -28,19 +30,14 @@ type PatMessageProps = AppMessageProps<PatMessageEntity>;
 
 export default function PatMessage({ message, ...props }: PatMessageProps) {
 	const chat = message.chat;
+
 	// 在用户退群的情况下，chat信息中可能缺少用户信息，需额外查询
-	const queryFlag = useRef(false);
+	const [missingUserIds, setMissingUserIds] = useState<string[]>([]);
 
-	// const [query, isQuerying, result, error] = useQuery<
-	//   ControllerResult<UserType[]>
-	// >({ data: [] });
-
-	const result = {
-		data: [],
-	};
-
-	const missingUserIds = useRef<string[]>([]);
-	const [missingUser, setMissingUser] = useState<UserType[]>([]);
+	const { data: foundMissingUser = [] } = useQuery({
+		...UserListQueryOptions(missingUserIds),
+		enabled: missingUserIds.length > 0,
+	});
 
 	const records = (
 		Array.isArray(message.message_entity.msg.appmsg.patMsg.records.record)
@@ -57,12 +54,12 @@ export default function PatMessage({ message, ...props }: PatMessageProps) {
 			if (new RegExp(`^\\\${${record.fromUser}}$`).test(s)) {
 				const user =
 					chat?.members.find((member) => member.id === record.fromUser) ??
-					missingUser.find((user) => user.id === record.fromUser);
+					foundMissingUser.find((user) => user.id === record.fromUser);
 
 				if (user) {
 					return <User user={user} variant={"inline"} />;
 				}
-				missingUserIds.current.push(record.fromUser);
+				setMissingUserIds((prev) => [...prev, record.fromUser]);
 				return record.fromUser;
 			}
 
@@ -72,12 +69,12 @@ export default function PatMessage({ message, ...props }: PatMessageProps) {
 			if (new RegExp(`^\\\${${record.pattedUser}}$`).test(s)) {
 				const user =
 					chat?.members.find((member) => member.id === record.pattedUser) ??
-					missingUser.find((user) => user.id === record.pattedUser);
+					foundMissingUser.find((user) => user.id === record.pattedUser);
 
 				if (user) {
 					return <User user={user} variant={"inline"} />;
 				}
-				missingUserIds.current.push(record.pattedUser);
+				setMissingUserIds((prev) => [...prev, record.pattedUser]);
 				return record.pattedUser;
 			}
 
@@ -91,17 +88,6 @@ export default function PatMessage({ message, ...props }: PatMessageProps) {
 
 		return segments;
 	});
-
-	if (!queryFlag.current) {
-		queryFlag.current = true;
-
-		//TODO
-		// query("/contacts/in", { ids: missingUserIds.current });
-	}
-
-	useEffect(() => {
-		setMissingUser(result.data);
-	}, [result]);
 
 	return (
 		<>

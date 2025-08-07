@@ -1,14 +1,18 @@
 import * as Comlink from "comlink";
 import AdapterWorker from "./worker.ts?worker";
 import type { AdapterWorkerType } from "./worker.ts";
-import type {ChatType, UserType} from "@/schema";
-import {
-	DataAdapter, DataAdapterResponse,
+import type { ChatType, UserType } from "@/schema";
+import type {
+	DataAdapter,
+	DataAdapterResponse,
 	GetAttachRequest,
-	GetChatListRequest, GetChatRequest,
+	GetChatListRequest,
+	GetChatRequest,
 	GetImageRequest,
 	GetMessageListRequest,
 	GetStatisticRequest,
+	GetUserListRequest,
+	GetUserRequest,
 	GetVideoRequest,
 	GetVoiceRequest,
 } from "../adapter.ts";
@@ -64,6 +68,35 @@ export default class IosBackupAdapter implements DataAdapter {
 		return data;
 	}
 
+	async getUserList(input: GetUserListRequest) {
+		const data = (await this._workerAdapter.getContactList(
+			input,
+		)) as DataAdapterResponse<UserType[]>;
+
+		if (import.meta.env.DEV) {
+			console.groupCollapsed("getUserList");
+			console.log(data);
+			console.groupEnd();
+		}
+
+		return data;
+	}
+
+	async getUser(input: GetUserRequest) {
+		const temp = (await this._workerAdapter.getContactList({
+			userIds: [input.userId],
+		})) as DataAdapterResponse<UserType[]>;
+		const data = { data: temp.data[0] } satisfies DataAdapterResponse<UserType>;
+
+		if (import.meta.env.DEV) {
+			console.groupCollapsed("getUser");
+			console.log(data);
+			console.groupEnd();
+		}
+
+		return data;
+	}
+
 	async getChatList(input: GetChatListRequest) {
 		const data = await this._workerAdapter.getChatList(input);
 
@@ -77,8 +110,10 @@ export default class IosBackupAdapter implements DataAdapter {
 	}
 
 	async getChat(input: GetChatRequest) {
-		const temp = await this._workerAdapter.getChatList({ userIds: [input.chatId] });
-		const data = { data: temp.data[0] } satisfies DataAdapterResponse<ChatType>
+		const temp = await this._workerAdapter.getChatList({
+			userIds: [input.chatId],
+		});
+		const data = { data: temp.data[0] } satisfies DataAdapterResponse<ChatType>;
 
 		if (import.meta.env.DEV) {
 			console.groupCollapsed("getChatList");

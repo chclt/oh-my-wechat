@@ -4,12 +4,21 @@ import type {
 	FileInfo,
 	MessageTypeEnum,
 	PhotpSize,
+	UserType,
 	VideoInfo,
 	VoiceInfo,
 } from "@/schema";
 import type { ChatType, MessageType } from "@/schema";
 import type { ChatStatistics } from "./ios-backup/controllers/statistic";
-import { RecordType } from "@/components/record/record";
+import type { RecordType } from "@/components/record/record";
+
+export interface GetUserRequest {
+	userId: string;
+}
+
+export interface GetUserListRequest {
+	userIds: string[];
+}
 
 export interface GetMessageListRequest {
 	chat: ChatType;
@@ -68,6 +77,14 @@ export interface DataAdapter {
 
 	getAccount: (accountId: string) => Promise<DataAdapterResponse<AccountType>>;
 
+	getUser: (
+		requestData: GetUserRequest,
+	) => Promise<DataAdapterResponse<UserType>>;
+
+	getUserList: (
+		requestData: GetUserListRequest,
+	) => Promise<DataAdapterResponse<UserType[]>>;
+
 	getChat: (
 		requestData: GetChatRequest,
 	) => Promise<DataAdapterResponse<ChatType>>;
@@ -114,4 +131,3 @@ export interface DataAdapterCursorPagination<DataType>
 		next_cursor?: string;
 	};
 }
- 
