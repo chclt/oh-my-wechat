@@ -163,7 +163,7 @@ export namespace StatisticController {
           SELECT
             CASE 
               WHEN Des = 0 
-              THEN '${_store.account.id}'
+              THEN '${adapterWorker._getStoreItem("account").id}'
               ELSE '${chat.user.id}'
               END 
             AS user_id, -- 这里需要一个真实的换行符，所以不要对齐代码了
@@ -179,7 +179,7 @@ export namespace StatisticController {
           SELECT
             CASE 
               WHEN Des = 0 
-              THEN '${_store.account.id}'
+              THEN '${adapterWorker._getStoreItem("account").id}'
               ELSE SUBSTR(Message, 1, INSTR(Message, ':
 ') - 1 ) 
               END 

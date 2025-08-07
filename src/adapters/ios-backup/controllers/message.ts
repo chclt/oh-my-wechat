@@ -16,7 +16,7 @@ import type { VoipMessageEntity } from "@/components/message/voip-message.tsx";
 import type { WeComContactMessageEntity } from "@/components/message/wecom-contact-message.tsx";
 import { ChatController } from "./chat.ts";
 import { ContactController } from "./contact.ts";
-import { _store } from "../worker.ts";
+import { _store, adapterWorker } from "../worker.ts";
 import {
 	type AppMessageType,
 	AppMessageTypeEnum,
@@ -95,7 +95,7 @@ export namespace MessageController {
 
 					if (raw_message_row.Des === MessageDirection.outgoing) {
 						rawMessageContent = raw_message_row.Message;
-						senderId = _store.account.id;
+						senderId = adapterWorker._getStoreItem("account").id;
 					} else if (
 						raw_message_row.Type === MessageTypeEnum.SYSTEM ||
 						raw_message_row.Message.startsWith("<") ||
@@ -132,7 +132,7 @@ export namespace MessageController {
 				if (chat && chat.type === "private") {
 					return raw_message_row.Des === MessageDirection.incoming
 						? chat.id
-						: _store.account.id;
+						: adapterWorker._getStoreItem("account").id;
 				}
 			})
 			.filter((i) => i !== undefined);
@@ -156,7 +156,8 @@ export namespace MessageController {
 				direction:
 					// 有些消息比如通话记录的发消息的人，但是记录消息方向不是想要的，可能因为这算系统消息
 					(messageSenderIds[index]
-						? messageSenderIds[index] === _store.account.id
+						? messageSenderIds[index] ===
+							adapterWorker._getStoreItem("account").id
 							? MessageDirection.outgoing
 							: MessageDirection.incoming
 						: undefined) ?? raw_message_row.Des,

@@ -21,7 +21,7 @@ import { DataAdapterResponse } from "../adapter";
 import { WCDatabaseNames, WCDatabases } from "./types";
 
 interface AdapterWorkerStore {
-	directory: FileSystemDirectoryHandle | FileList;
+	directory: FileSystemDirectoryHandle | FileList | undefined;
 	databases: WCDatabases;
 	wcdbDicts: {
 		1?: { url: string; data: Uint8Array };
@@ -30,8 +30,8 @@ interface AdapterWorkerStore {
 		4?: { url: string; data: Uint8Array };
 		5?: { url: string; data: Uint8Array };
 	};
-	accountList: AccountType[];
-	account: AccountType;
+	accountList: AccountType[] | undefined;
+	account: AccountType | undefined;
 }
 
 export interface AdapterWorkerType {
@@ -42,6 +42,10 @@ export interface AdapterWorkerType {
 	_loadAccountDatabase: (account: AccountType) => Promise<void>;
 
 	_unloadAccountDatabase: () => void;
+
+	_getStoreItem: <T extends keyof AdapterWorkerStore>(
+		storeKey: T,
+	) => NonNullable<AdapterWorkerStore[T]>;
 
 	getAccountList: () => Promise<DataAdapterResponse<AccountType[]>>;
 
@@ -84,26 +88,27 @@ export interface AdapterWorkerType {
 	) => StatisticController.GetOutput;
 }
 
-export const _store: AdapterWorkerStore = {
-	// TODO
-	// @ts-ignore
+export const _store: Partial<AdapterWorkerStore> = {
 	directory: undefined,
-	databases: {},
-	wcdbDicts: {},
+	databases: undefined,
+	wcdbDicts: undefined,
 
-	accountList: [],
-	// @ts-ignore
+	accountList: undefined,
 	account: undefined,
 };
 
-const adapterWorker: AdapterWorkerType = {
+export const adapterWorker: AdapterWorkerType = {
 	_loadDirectory: async (directory) => {
 		_store.directory = directory;
+
+		const storeDirectory = adapterWorker._getStoreItem("directory");
+
+		const storeDatabase = adapterWorker._getStoreItem("databases");
 
 		const SQL = await initSqlJs({ locateFile: () => sqliteUrl });
 
 		const manifestDatabaseFile = await getFileFromDirectory(
-			_store.directory,
+			storeDirectory,
 			"Manifest.db",
 		);
 		if (!manifestDatabaseFile) throw new Error("Manifest.db not found");
@@ -112,12 +117,12 @@ const adapterWorker: AdapterWorkerType = {
 			new Uint8Array(manifestDatabaseFileBuffer),
 		);
 
-		_store.databases.manifest = manifestDatabase;
+		storeDatabase.manifest = manifestDatabase;
 
 		const localInfoBuffer = (
 			await getFilesFromManifast(
 				manifestDatabase,
-				_store.directory,
+				storeDirectory,
 				"Documents/LocalInfo.data",
 			)
 		)[0].file;
@@ -128,7 +133,7 @@ const adapterWorker: AdapterWorkerType = {
 
 		const mmsettingFiles = await getFilesFromManifast(
 			manifestDatabase,
-			_store.directory,
+			storeDirectory,
 			"Documents/MMappedKV/mmsetting.archive.%",
 		);
 
@@ -148,11 +153,10 @@ const adapterWorker: AdapterWorkerType = {
 	},
 
 	_loadAccountDatabase: async (account: UserType) => {
-		if (_store.directory === undefined) {
-			throw Error("IosBackupAdapter: _store.directory is not loaded");
-		}
+		const storeDirectory = adapterWorker._getStoreItem("directory");
+		const storeDatabase = adapterWorker._getStoreItem("databases");
 
-		if (!_store.databases.manifest) {
+		if (!storeDatabase.manifest) {
 			throw Error("IosBackupAdapter: Manifest.db is not loaded");
 		}
 
@@ -164,37 +168,37 @@ const adapterWorker: AdapterWorkerType = {
 
 		databaseFileBuffer = await (
 			await getFilesFromManifast(
-				_store.databases.manifest,
-				_store.directory,
+				storeDatabase.manifest,
+				storeDirectory,
 				`Documents/${accountIdMd5}/session/session.db`,
 			)
 		)[0].file.arrayBuffer();
-		_store.databases.session = new SQL.Database(
+		storeDatabase.session = new SQL.Database(
 			new Uint8Array(databaseFileBuffer),
 		);
 
 		databaseFileBuffer = await (
 			await getFilesFromManifast(
-				_store.databases.manifest,
-				_store.directory,
+				storeDatabase.manifest,
+				storeDirectory,
 				`Documents/${accountIdMd5}/DB/WCDB_Contact.sqlite`,
 			)
 		)[0].file.arrayBuffer();
 
-		_store.databases.WCDB_Contact = new SQL.Database(
+		storeDatabase.WCDB_Contact = new SQL.Database(
 			new Uint8Array(databaseFileBuffer),
 		);
 
 		for (const fileItem of await await getFilesFromManifast(
-			_store.databases.manifest,
-			_store.directory,
+			storeDatabase.manifest,
+			storeDirectory,
 			`Documents/${accountIdMd5}/DB/message_%.sqlite`,
 		)) {
 			const databaseFileBuffer = await fileItem.file.arrayBuffer();
 
-			if (_store.databases.message === undefined) _store.databases.message = [];
+			if (storeDatabase.message === undefined) storeDatabase.message = [];
 
-			_store.databases.message.push(
+			storeDatabase.message.push(
 				new SQL.Database(new Uint8Array(databaseFileBuffer)),
 			);
 		}
@@ -215,19 +219,24 @@ const adapterWorker: AdapterWorkerType = {
 			}
 		}
 
-		// TODO
-		// @ts-ignore
 		_store.account = undefined;
 	},
 
+	_getStoreItem: (storeKey) => {
+		if (_store[storeKey] === undefined) {
+			throw Error(`IosBackupAdapter: _store.${storeKey} is not loaded`);
+		}
+		return _store[storeKey];
+	},
+
 	getAccountList: async () => {
-		return { data: _store.accountList };
+		return { data: adapterWorker._getStoreItem("accountList") };
 	},
 
 	getAccount: async (accountId) => {
-		const account = _store.accountList.find(
-			(account) => account.id === accountId,
-		);
+		const account = adapterWorker
+			._getStoreItem("accountList")
+			?.find((account) => account.id === accountId);
 
 		if (!account) {
 			throw new Error("Account not found");
@@ -245,12 +254,14 @@ const adapterWorker: AdapterWorkerType = {
 					ids: userIds,
 				},
 				{
-					databases: _store.databases,
+					databases: this._getStoreItem("databases"),
 				},
 			);
 		}
 
-		return await ChatController.all({ databases: _store.databases });
+		return await ChatController.all({
+			databases: this._getStoreItem("databases"),
+		});
 	},
 
 	getContactList: async (input) => {
@@ -259,60 +270,64 @@ const adapterWorker: AdapterWorkerType = {
 		if (userIds) {
 			return await ContactController.findAll(
 				{ ids: userIds },
-				{ databases: _store.databases },
+				{ databases: adapterWorker._getStoreItem("databases") },
 			);
 		}
 
-		return await ContactController.all({ databases: _store.databases });
+		return await ContactController.all({
+			databases: adapterWorker._getStoreItem("databases"),
+		});
 	},
 
 	getMessageList: async (controllerInput) => {
 		return await MessageController.all(controllerInput, {
-			databases: _store.databases,
+			databases: adapterWorker._getStoreItem("databases"),
 		});
 	},
 
 	getAllMessageList: async (controllerInput) => {
 		return await MessageController.allFromAll(controllerInput, {
-			databases: _store.databases,
+			databases: adapterWorker._getStoreItem("databases"),
 		});
 	},
 
 	getVerifyMessageList: async () => {
-		return await MessageController.allVerify({ databases: _store.databases });
+		return await MessageController.allVerify({
+			databases: adapterWorker._getStoreItem("databases"),
+		});
 	},
 
 	getImage: async (controllerInput) => {
 		return await ImageController.get(controllerInput, {
-			directory: _store.directory,
-			databases: _store.databases,
+			directory: adapterWorker._getStoreItem("directory"),
+			databases: adapterWorker._getStoreItem("databases"),
 		});
 	},
 
 	getVideo: async (controllerInput) => {
 		return await VideoController.get(controllerInput, {
-			directory: _store.directory,
-			databases: _store.databases,
+			directory: adapterWorker._getStoreItem("directory"),
+			databases: adapterWorker._getStoreItem("databases"),
 		});
 	},
 
 	getVoice: async (controllerInput) => {
 		return await VoiceController.get(controllerInput, {
-			directory: _store.directory,
-			databases: _store.databases,
+			directory: adapterWorker._getStoreItem("directory"),
+			databases: adapterWorker._getStoreItem("databases"),
 		});
 	},
 
 	getAttach: async (controllerInput) => {
 		return await AttachController.get(controllerInput, {
-			directory: _store.directory,
-			databases: _store.databases,
+			directory: adapterWorker._getStoreItem("directory"),
+			databases: adapterWorker._getStoreItem("databases"),
 		});
 	},
 
 	getStatistic: async (controllerInput) => {
 		return await StatisticController.get(controllerInput, {
-			databases: _store.databases,
+			databases: adapterWorker._getStoreItem("databases"),
 		});
 	},
 };
