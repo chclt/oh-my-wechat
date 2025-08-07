@@ -10,7 +10,7 @@ import IosBackupAdapter from "@/adapters/ios-backup";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { AccountListSuspenseQueryOptions } from "@/lib/fetchers/account";
 import queryClient from "@/lib/query-client";
-import { setDataAdapter } from "@/lib/adapter";
+import { setDataAdapter } from "@/lib/data-adapter.ts";
 import {
 	LoadAccountDatabaseMutationOptions,
 	LoadDirectoryMutationOptions,

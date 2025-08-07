@@ -2,7 +2,7 @@ import { FileBendSolid } from "@/components/central-icon.tsx";
 import FileTypeIcon from "@/components/filetype-icon.tsx";
 import type { AppMessageProps } from "@/components/message/app-message.tsx";
 import MessageInlineWrapper from "@/components/message/message-inline.tsx";
-import { getDataAdapter } from "@/lib/adapter";
+import { getDataAdapter } from "@/lib/data-adapter.ts";
 import type { AppMessageTypeEnum, FileInfo } from "@/schema";
 import { cn, decodeUnicodeReferences } from "@/lib/utils.ts";
 import { useMutation } from "@tanstack/react-query";

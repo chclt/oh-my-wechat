@@ -7,7 +7,7 @@ import type {
 } from "@tanstack/react-query";
 import type { ControllerPaginatorResult, MessageType } from "@/schema";
 import type { MessageController } from "@/adapters/ios-backup/controllers/message";
-import { getDataAdapter } from "../adapter";
+import { getDataAdapter } from "../data-adapter.ts";
 
 export function MessageListInfiniteQueryOptions(
 	accountId: string,

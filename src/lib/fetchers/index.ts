@@ -1,6 +1,6 @@
 import type { UseSuspenseQueryOptions } from "@tanstack/react-query";
 import type { FileInfo, PhotpSize, VideoInfo, VoiceInfo } from "@/schema";
-import { getDataAdapter } from "../adapter";
+import { getDataAdapter } from "../data-adapter.ts";
 import type { ImageController } from "@/adapters/ios-backup/controllers/image";
 import type { VideoController } from "@/adapters/ios-backup/controllers/video";
 import type { VoiceController } from "@/adapters/ios-backup/controllers/voice";
