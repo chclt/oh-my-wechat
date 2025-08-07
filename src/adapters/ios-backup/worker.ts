@@ -100,6 +100,8 @@ export const _store: Partial<AdapterWorkerStore> = {
 export const adapterWorker: AdapterWorkerType = {
 	_loadDirectory: async (directory) => {
 		_store.directory = directory;
+		_store.databases = {};
+		_store.wcdbDicts = {};
 
 		const storeDirectory = adapterWorker._getStoreItem("directory");
 
