@@ -18,7 +18,7 @@ import type {
 	DataAdapterResponse,
 	GetStatisticRequest,
 } from "@/adapters/adapter";
-import { ControllerPaginatorCursor, type WCDatabases } from "../types";
+import type { WCDatabases } from "../types";
 
 export interface ChatStatistics {
 	date_contact_added?: string;

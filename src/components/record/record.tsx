@@ -21,6 +21,7 @@ import MusicRecord, { type MusicRecordEntity } from "./music-record";
 import NoteRecord, { type NoteRecordEntity } from "./note-record";
 import TextRecord, { type TextRecordEntity } from "./text-record";
 import TingRecord, { type TingRecordEntity } from "./ting-record";
+import type React from "react";
 
 /**
  * 合并转发的消息内容、笔记中的内容，都是一个 Record 资源

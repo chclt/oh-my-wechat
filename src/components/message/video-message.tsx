@@ -4,6 +4,7 @@ import MessageInlineWrapper from "@/components/message/message-inline.tsx";
 import type { MessageProp } from "@/components/message/message.tsx";
 import type { VideoMessageType } from "@/schema";
 import { cn } from "@/lib/utils.ts";
+import type React from "react";
 
 type VideoMessageProps = MessageProp<
 	VideoMessageType,

@@ -407,8 +407,7 @@ export namespace ContactController {
 			data: await parseDatabaseContactRows(
 				databases,
 				dbFriendRows.filter((row) => {
-					if (row.userName.startsWith("gh_")) return false;
-					return true;
+					return !row.userName.startsWith("gh_");
 				}),
 			),
 		};
@@ -462,8 +461,7 @@ export namespace ContactController {
 				...(await parseDatabaseContactRows(
 					databases,
 					dbFriendRows.filter((row) => {
-						if (ids.includes(row.userName)) return true;
-						return false;
+						return ids.includes(row.userName);
 					}),
 				)),
 			],

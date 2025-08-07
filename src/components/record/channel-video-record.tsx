@@ -2,6 +2,7 @@ import Image from "@/components/image.tsx";
 import type { MessageType, RecordTypeEnum } from "@/schema";
 import type { RecordType } from "./record";
 import { cn } from "@/lib/utils.ts";
+import type React from "react";
 
 interface ChannelVideoRecordProps extends React.HTMLAttributes<HTMLDivElement> {
 	message: MessageType;

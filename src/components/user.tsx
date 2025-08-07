@@ -1,6 +1,7 @@
 import Image from "@/components/image.tsx";
 import type { UserType } from "@/schema";
 import { cn } from "@/lib/utils.ts";
+import type React from "react";
 
 interface UserProps extends React.HTMLProps<HTMLDivElement> {
 	user: UserType;

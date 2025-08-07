@@ -21,6 +21,7 @@ import { decodeUnicodeReferences } from "@/lib/utils.ts";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { cva } from "class-variance-authority";
 import { XMLParser } from "fast-xml-parser";
+import type React from "react";
 
 export interface ForwardMessageEntity {
 	type: AppMessageTypeEnum.FORWARD_MESSAGE;

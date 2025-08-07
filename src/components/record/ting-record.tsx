@@ -3,6 +3,7 @@ import Link from "@/components/link.tsx";
 import type { MessageType, RecordTypeEnum } from "@/schema";
 import { cn } from "@/lib/utils";
 import type { RecordType } from "./record";
+import type React from "react";
 interface TingRecordProps extends React.HTMLAttributes<HTMLDivElement> {
 	message: MessageType;
 	record: TingRecordEntity;
