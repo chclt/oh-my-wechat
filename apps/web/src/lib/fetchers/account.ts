@@ -10,7 +10,10 @@ export function AccountSuspenseQueryOptions(
 		queryFn: () =>
 			getDataAdapter()
 				.getAccount(accountId)
-				.then((res) => res.data),
+				.then((res) => res.data)
+				.catch((e) => {
+					throw e;
+				}),
 	};
 }
 
@@ -22,6 +25,9 @@ export function AccountListSuspenseQueryOptions(): UseSuspenseQueryOptions<
 		queryFn: () =>
 			getDataAdapter()
 				.getAccountList()
-				.then((res) => res.data),
+				.then((res) => res.data)
+				.catch((e) => {
+					throw e;
+				}),
 	};
 }

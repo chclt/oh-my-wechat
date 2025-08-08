@@ -11,10 +11,13 @@ export function ImageSuspenseQueryOptions(
 ): UseSuspenseQueryOptions<ImageInfo> {
 	return {
 		queryKey: ["image", requestData.chat.id, requestData.message.id],
-		queryFn: () =>
-			getDataAdapter()
+		queryFn: async () =>
+			await getDataAdapter()
 				.getImage(requestData)
-				.then((res) => res.data),
+				.then((res) => res.data)
+				.catch((e) => {
+					throw e;
+				}),
 	};
 }
 
@@ -26,7 +29,10 @@ export function VideoSuspenseQueryOptions(
 		queryFn: () =>
 			getDataAdapter()
 				.getVideo(requestData)
-				.then((res) => res.data),
+				.then((res) => res.data)
+				.catch((e) => {
+					throw e;
+				}),
 	};
 }
 
@@ -38,7 +44,10 @@ export function VoiceSuspenseQueryOptions(
 		queryFn: () =>
 			getDataAdapter()
 				.getVoice(requestData)
-				.then((res) => res.data),
+				.then((res) => res.data)
+				.catch((e) => {
+					throw e;
+				}),
 	};
 }
 
@@ -50,6 +59,9 @@ export function AttacheSuspenseQueryOptions(
 		queryFn: () =>
 			getDataAdapter()
 				.getAttach(requestData)
-				.then((res) => res.data),
+				.then((res) => res.data)
+				.catch((e) => {
+					throw e;
+				}),
 	};
 }
