@@ -66,13 +66,13 @@ export interface GroupChatType extends BasicChatType {
 
 export type ChatType = PrivateChatType | GroupChatType;
 
-export interface PhotpSize {
+export type ImageInfo = {
 	src: string;
-	size: "origin" | "thumb";
+	size: "origin" | "thumb"; // planned to be deprecated
 	width?: number;
 	height?: number;
 	file_size?: number;
-}
+}[];
 
 export interface VideoInfo {
 	src?: string;

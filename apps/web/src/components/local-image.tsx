@@ -2,8 +2,9 @@ import type { RecordType } from "@/components/record/record.tsx";
 import { useQuery } from "@tanstack/react-query";
 import type { ChatType, MessageType } from "@/schema";
 import type React from "react";
-import { useInViewport, useMergedRef } from "@mantine/hooks";
+import { useInViewport, useMergedRef, useToggle } from "@mantine/hooks";
 import { ImageSuspenseQueryOptions } from "@/lib/fetchers";
+import { useState } from "react";
 
 type LocalImageProps = React.ImgHTMLAttributes<HTMLImageElement> & {
 	chat: ChatType;
@@ -30,7 +31,7 @@ export default function LocalImage({
 	const { ref: imgRef, inViewport } = useInViewport();
 	const mergedRef = useMergedRef(ref, imgRef);
 
-	const { data } = useQuery({
+	const { data: imageInfo, isFetching } = useQuery({
 		...ImageSuspenseQueryOptions({
 			chat,
 			message,
@@ -41,16 +42,51 @@ export default function LocalImage({
 		enabled: inViewport,
 	});
 
+	const [displayImageIndex, setDisplayImageIndex] = useState(0);
+	const [imageErrorMessages, setImageErrorMessages] = useState<string[]>([]);
+
+	const onImageError = (
+		error: React.SyntheticEvent<HTMLImageElement, Event>,
+	) => {
+		if (!imageInfo) return;
+
+		setImageErrorMessages((prev) => {
+			const newMessages = [...prev];
+			newMessages[displayImageIndex] = "错误";
+			return newMessages;
+		});
+
+		if (displayImageIndex === imageInfo.length - 1) {
+			setDisplayImageIndex(0);
+		} else {
+			setDisplayImageIndex(displayImageIndex + 1);
+		}
+	};
+
 	return (
-		<img
-			ref={mergedRef}
-			src={data?.[0]?.src}
-			width={data?.[0]?.width}
-			height={data?.[0]?.height}
-			alt={alt}
-			loading="lazy"
-			className={className}
-			{...props}
-		/>
+		<div
+			className="relative"
+			onDoubleClick={() => {
+				if (import.meta.env.DEV) {
+					console.log(imageInfo);
+				}
+			}}
+		>
+			<img
+				ref={mergedRef}
+				src={imageInfo?.[displayImageIndex]?.src}
+				width={imageInfo?.[displayImageIndex]?.width}
+				height={imageInfo?.[displayImageIndex]?.height}
+				alt={alt}
+				loading="lazy"
+				className={className}
+				onError={onImageError}
+				{...props}
+			/>
+			{(displayImageIndex === 0 && imageErrorMessages[displayImageIndex]) ||
+				(displayImageIndex > 0 && imageErrorMessages[displayImageIndex - 1] && (
+					<span className="absolute end-1 bottom-1 text-sm">图片解析错误</span>
+				))}
+		</div>
 	);
 }

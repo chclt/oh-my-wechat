@@ -16,6 +16,8 @@ export async function getFilesFromManifast(
 		`SELECT * FROM "Files" WHERE "domain" = "AppDomain-com.tencent.xin" AND "relativePath" LIKE "${fileNamePattern}" AND "flags" = 1 ORDER BY relativePath`,
 	);
 
+	if (rows.length === 0) return [];
+
 	const fileList = [];
 
 	for (const row of rows[0].values) {
