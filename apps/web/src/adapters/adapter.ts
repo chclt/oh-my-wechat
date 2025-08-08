@@ -3,7 +3,7 @@ import type {
 	AppMessageTypeEnum,
 	FileInfo,
 	MessageTypeEnum,
-	PhotpSize,
+	ImageInfo,
 	UserType,
 	VideoInfo,
 	VoiceInfo,
@@ -99,7 +99,7 @@ export interface DataAdapter {
 
 	getImage: (
 		requestData: GetImageRequest,
-	) => Promise<DataAdapterResponse<PhotpSize[]>>;
+	) => Promise<DataAdapterResponse<ImageInfo>>;
 
 	getVideo: (
 		requestData: GetVideoRequest,
