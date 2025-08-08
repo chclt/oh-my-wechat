@@ -15,7 +15,7 @@ export interface LinkCardProps
 	extends React.AnchorHTMLAttributes<HTMLDivElement> {
 	heading?: string;
 	abstract?: string | React.ReactNode;
-	preview?: React.ReactElement<HTMLImageElement>;
+	preview?: React.ReactNode;
 	from?: string;
 	icon?: React.ReactNode;
 }
