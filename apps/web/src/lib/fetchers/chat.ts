@@ -11,7 +11,10 @@ export function ChatListSuspenseQueryOptions(
 		queryFn: () =>
 			getDataAdapter()
 				.getChatList({})
-				.then((res) => res.data),
+				.then((res) => res.data)
+				.catch((e) => {
+					throw e;
+				}),
 	};
 }
 
