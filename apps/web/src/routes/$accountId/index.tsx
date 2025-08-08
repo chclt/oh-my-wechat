@@ -1,11 +1,11 @@
 import { createFileRoute, Navigate } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/$accountId/")({
-  component: RouteComponent,
+	component: RouteComponent,
 });
 
 function RouteComponent() {
-  const { accountId } = Route.useParams();
+	const { accountId } = Route.useParams();
 
-  return <Navigate to="/$accountId/chat" params={{ accountId }} />;
+	return <Navigate to="/$accountId/chat" params={{ accountId }} />;
 }
