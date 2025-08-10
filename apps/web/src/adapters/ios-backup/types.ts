@@ -21,8 +21,8 @@ export type DatabaseSessionAbstractRow = DatabaseRow<{
 }>;
 
 export type DatabaseFriendRow = DatabaseRow<{
-	userName: string;
-	certificationFlag: number; // 0: 个人
+	username: string;
+	// certificationFlag: number; // 0: 个人
 	// dbContactBrand BLOB,
 	dbContactChatRoom: Uint8Array;
 	// dbContactEncryptSecret BLOB,
@@ -33,12 +33,12 @@ export type DatabaseFriendRow = DatabaseRow<{
 	dbContactProfile: Uint8Array;
 	dbContactRemark: Uint8Array;
 	dbContactSocial: Uint8Array;
-	encodeUserName: string;
-	extFlag: number;
-	imgStatus: number;
-	openIMAppid: string;
+	// encodeUserName: string;
+	// extFlag: number;
+	// imgStatus: number;
+	// openIMAppid: string;
 	type: number;
-	typeExt: number;
+	// typeExt: number;
 }>;
 
 export type DatabaseMessageRow = DatabaseRow<{

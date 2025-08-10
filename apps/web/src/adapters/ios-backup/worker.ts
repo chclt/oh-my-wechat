@@ -9,7 +9,7 @@ import {
 	parseUserFromMmsetting,
 } from "./utils";
 import { ChatController } from "./controllers/chat";
-import { ContactController } from "./controllers/contact";
+import { UserController } from "./controllers/contact";
 import { MessageController } from "./controllers/message";
 import { ImageController } from "./controllers/image";
 import { VideoController } from "./controllers/video";
@@ -53,9 +53,9 @@ export interface AdapterWorkerType {
 
 	getChatList: (input?: { userIds?: string[] }) => ChatController.AllOutput;
 
-	getContactList: (input?: {
-		userIds?: string[];
-	}) => ContactController.AllOutput;
+	getAccountContactList: () => UserController.ContactListOutput;
+
+	getUserList: (input?: { userIds?: string[] }) => UserController.AllOutput;
 
 	getMessageList: (
 		controllerInput: MessageController.AllInput[0],
@@ -266,17 +266,23 @@ export const adapterWorker: AdapterWorkerType = {
 		});
 	},
 
-	getContactList: async (input) => {
+	getAccountContactList: async () => {
+		return await UserController.contactList({
+			databases: adapterWorker._getStoreItem("databases"),
+		});
+	},
+
+	getUserList: async (input) => {
 		const { userIds } = input ?? {};
 
 		if (userIds) {
-			return await ContactController.findAll(
+			return await UserController.findAll(
 				{ ids: userIds },
 				{ databases: adapterWorker._getStoreItem("databases") },
 			);
 		}
 
-		return await ContactController.all({
+		return await UserController.all({
 			databases: adapterWorker._getStoreItem("databases"),
 		});
 	},
