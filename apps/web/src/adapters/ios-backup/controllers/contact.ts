@@ -1,6 +1,6 @@
 import type { DataAdapterResponse } from "@/adapters/adapter";
 import { adapterWorker } from "../worker";
-import type { ChatroomType, UserType } from "@/schema";
+import type { ChatroomType, ContactType, UserType } from "@/schema";
 import protobuf from "protobufjs";
 import type { DatabaseFriendRow, WCDatabases } from "../types";
 
@@ -174,7 +174,8 @@ const dbContactProtobufRoot = protobuf.Root.fromJSON({
 	},
 });
 
-export namespace ContactController {
+// eslint-disable-next-line @typescript-eslint/no-namespace
+export namespace UserController {
 	async function parseDatabaseContactRows(
 		databases: WCDatabases,
 		raw_contact_rows: DatabaseFriendRow[],
@@ -239,7 +240,7 @@ export namespace ContactController {
 				{ id: "chatroom_session_box", username: "折叠的群聊" },
 			];
 
-			if (row.userName.endsWith("@chatroom")) {
+			if (row.username.endsWith("@chatroom")) {
 				let memberIds: string[] = [];
 
 				if (chatroomObj?.chatroomMemberIds) {
@@ -248,7 +249,7 @@ export namespace ContactController {
 				}
 
 				return {
-					id: row.userName,
+					id: row.username,
 					title: (remarkObj.nickname as string).length
 						? remarkObj.nickname
 						: "群聊",
@@ -287,7 +288,7 @@ export namespace ContactController {
 			}
 
 			return {
-				id: row.userName,
+				id: row.username,
 				user_id: remarkObj.id,
 				username: remarkObj.nickname,
 				...((remarkObj.remark as string).length
@@ -328,7 +329,7 @@ export namespace ContactController {
 		});
 
 		const allMembers: UserType[] = (
-			await ContactController.findAll(
+			await UserController.findAll(
 				{
 					ids: Array.from(new Set(allMemberIds)),
 				},
@@ -383,15 +384,15 @@ export namespace ContactController {
 		const dbFriendRows: DatabaseFriendRow[] = db
 			.exec(
 				`
-          SELECT rowid, userName, dbContactRemark, dbContactChatRoom, dbContactHeadImage, dbContactProfile, dbContactSocial, dbContactOpenIM, type FROM Friend WHERE (type & 1) != 0
-          UNION  ALL
-          SELECT rowid, userName, dbContactRemark, dbContactChatRoom, dbContactHeadImage, dbContactProfile, dbContactSocial, dbContactOpenIM, type FROM OpenIMContact WHERE (type & 1) != 0
-        `,
+					SELECT rowid, userName, dbContactRemark, dbContactChatRoom, dbContactHeadImage, dbContactProfile, dbContactSocial, dbContactOpenIM, type FROM Friend WHERE (type & 1) != 0
+					UNION  ALL
+					SELECT rowid, userName, dbContactRemark, dbContactChatRoom, dbContactHeadImage, dbContactProfile, dbContactSocial, dbContactOpenIM, type FROM OpenIMContact WHERE (type & 1) != 0
+				`,
 			)[0]
 			.values.reduce((acc, cur) => {
 				acc.push({
 					rowid: cur[0],
-					userName: cur[1],
+					username: cur[1],
 					dbContactRemark: cur[2],
 					dbContactChatRoom: cur[3],
 					dbContactHeadImage: cur[4],
@@ -407,7 +408,7 @@ export namespace ContactController {
 			data: await parseDatabaseContactRows(
 				databases,
 				dbFriendRows.filter((row) => {
-					return !row.userName.startsWith("gh_");
+					return !row.username.startsWith("gh_");
 				}),
 			),
 		};
@@ -441,7 +442,7 @@ export namespace ContactController {
 			.values.reduce((acc, cur) => {
 				acc.push({
 					rowid: cur[0],
-					userName: cur[1],
+					username: cur[1],
 					dbContactRemark: cur[2],
 					dbContactChatRoom: cur[3],
 					dbContactHeadImage: cur[4],
@@ -461,10 +462,138 @@ export namespace ContactController {
 				...(await parseDatabaseContactRows(
 					databases,
 					dbFriendRows.filter((row) => {
-						return ids.includes(row.userName);
+						return ids.includes(row.username);
 					}),
 				)),
 			],
+		};
+	}
+
+	/**
+	 * TODO: 上面的都可以重构了。。
+	 */
+
+	export type ContactListInput = [{ databases: WCDatabases }];
+	export type ContactListOutput = Promise<DataAdapterResponse<ContactType[]>>;
+
+	export async function contactList(
+		...inputs: ContactListInput
+	): ContactListOutput {
+		const [{ databases }] = inputs;
+
+		const db = databases.WCDB_Contact;
+		if (!db) {
+			throw new Error("WCDB_Contact database is not found");
+		}
+
+		const dbFriendRows: DatabaseFriendRow[] = db
+			.exec(
+				`
+					SELECT rowid, userName, dbContactRemark, dbContactChatRoom, dbContactHeadImage, dbContactProfile, dbContactSocial, dbContactOpenIM, type FROM Friend WHERE (type & 1) != 0
+					UNION  ALL
+					SELECT rowid, userName, dbContactRemark, dbContactChatRoom, dbContactHeadImage, dbContactProfile, dbContactSocial, dbContactOpenIM, type FROM OpenIMContact WHERE (type & 1) != 0
+				`,
+			)[0]
+			.values.reduce((acc, row) => {
+				if ((row[1] as string).startsWith("gh_")) {
+					return acc;
+				}
+
+				acc.push({
+					rowid: row[0] as number,
+					username: row[1] as string,
+					dbContactRemark: row[2] as Uint8Array,
+					dbContactChatRoom: row[3] as Uint8Array,
+					dbContactHeadImage: row[4] as Uint8Array,
+					dbContactProfile: row[5] as Uint8Array,
+					dbContactSocial: row[6] as Uint8Array,
+					dbContactOpenIM: row[7] as Uint8Array,
+					type: row[8] as number,
+				} satisfies DatabaseFriendRow);
+				return acc;
+			}, [] as DatabaseFriendRow[]);
+
+		const result = dbFriendRows.map((row) => {
+			const remarkObj = dbContactProtobufRoot
+				.lookupType("ContactRemark")
+				.decode(row.dbContactRemark) as unknown as Record<string, unknown>;
+
+			const headImageObj = dbContactProtobufRoot
+				.lookupType("HeadImage")
+				.decode(row.dbContactHeadImage) as unknown as Record<string, unknown>;
+
+			const profileObj = dbContactProtobufRoot
+				.lookupType("Profile")
+				.decode(row.dbContactProfile) as unknown as Record<string, unknown>;
+
+			const socialObj = dbContactProtobufRoot
+				.lookupType("Social")
+				.decode(row.dbContactSocial) as unknown as Record<string, unknown>;
+
+			const chatroomObj = row.dbContactChatRoom
+				? (dbContactProtobufRoot
+						.lookupType("Chatroom")
+						.decode(row.dbContactChatRoom) as unknown as Record<
+						string,
+						unknown
+					>)
+				: undefined;
+
+			const openIMObj = row.dbContactOpenIM
+				? (dbContactProtobufRoot
+						.lookupType("OpenIM")
+						.decode(row.dbContactOpenIM) as unknown as Record<string, unknown>)
+				: undefined;
+
+			if (openIMObj?.openIMContactInfo) {
+				openIMObj.openIMContactInfo = JSON.parse(
+					openIMObj.openIMContactInfo as string,
+				);
+			}
+
+			return {
+				id: row.username,
+				username: remarkObj.nickname as string,
+				usernamePinyin: remarkObj.nicknamePinyin as string,
+
+				...((remarkObj.remark as string).length
+					? {
+							remark: remarkObj.remark as string,
+						}
+					: {}),
+
+				...((remarkObj.remarkPinyin as string).length
+					? {
+							remarkPinyin: remarkObj.remarkPinyin as string,
+						}
+					: {}),
+
+				...((remarkObj.remarkPinyinInits as string).length
+					? {
+							remarkPinyinInits: remarkObj.remarkPinyinInits as string,
+						}
+					: {}),
+
+				...(headImageObj.headImageThumb
+					? {
+							photo: {
+								thumb: headImageObj.headImageThumb as string,
+							},
+						}
+					: {}),
+				is_openim: !!openIMObj,
+				// @ts-ignore
+				_raw: {
+					remarkObj,
+					headImageObj,
+					profileObj,
+					socialObj,
+				},
+			} satisfies ContactType;
+		});
+
+		return {
+			data: result,
 		};
 	}
 }

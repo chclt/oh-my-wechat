@@ -6,12 +6,13 @@ import type {
 	UserType,
 } from "@/schema";
 import CryptoJS from "crypto-js";
-import { ContactController } from "./contact";
+import { UserController } from "./contact";
 import specialBrandId from "@/assets/specialBrandUserNames.csv?raw";
 import { adapterWorker } from "../worker";
 import type { DataAdapterResponse } from "@/adapters/adapter";
 import type { DatabaseSessionAbstractRow, WCDatabases } from "../types";
 
+// eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace ChatController {
 	async function parseDatabaseChatRows(
 		databases: WCDatabases,
@@ -32,12 +33,13 @@ export namespace ChatController {
 						"notification_messages",
 						"brandsessionholder_weapp",
 						"opencustomerservicemsg",
+						"brandservicesessionholder",
 					].includes(row.UsrName)
 				),
 		);
 
 		const contactRows: (UserType | ChatroomType)[] = (
-			await ContactController.findAll(
+			await UserController.findAll(
 				{
 					ids: dbSessionAbstractRowsFiltered.map((row) => row.UsrName),
 				},

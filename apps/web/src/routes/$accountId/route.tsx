@@ -1,18 +1,66 @@
-import {
-	ChatIconFill,
-	ChatIconOutline,
-	ContactIconFill,
-	ContactIconOutline,
-} from "@/components/icon";
+import { ChatIconFill, ContactIconFill } from "@/components/icon";
 import { cn } from "@/lib/utils";
-import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
+import {
+	createFileRoute,
+	Link,
+	Outlet,
+	useNavigate,
+	useLocation,
+	useCanGoBack,
+	useRouter,
+} from "@tanstack/react-router";
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+} from "@/components/ui/dialog";
+import ContactList from "./contact/-components/contact-list";
+import { ScrollArea } from "@/components/ui/scroll-area";
+
+export enum AccountSearchModalOptions {
+	CONTACT = "contact",
+}
+
+interface AccountSearchProps {
+	modal: AccountSearchModalOptions;
+}
 
 export const Route = createFileRoute("/$accountId")({
 	component: RouteComponent,
+
+	validateSearch: (search) => {
+		const validatedSearch: Partial<AccountSearchProps> = {};
+
+		if (search.modal === AccountSearchModalOptions.CONTACT) {
+			validatedSearch.modal = AccountSearchModalOptions.CONTACT;
+		}
+
+		return validatedSearch;
+	},
 });
 
 function RouteComponent() {
+	const router = useRouter();
+
+	const canGoBack = useCanGoBack();
+	const { modal } = Route.useSearch();
+	const navigate = useNavigate();
+	const location = useLocation();
 	const { accountId } = Route.useParams();
+
+	const handleNavigateToContact = () => {
+		navigate({
+			to: location.pathname,
+			search: {
+				modal: AccountSearchModalOptions.CONTACT,
+			},
+			mask: {
+				to: "/$accountId/contact",
+				params: { accountId },
+			},
+		});
+	};
 
 	return (
 		<div className="h-full flex items-stretch">
@@ -23,16 +71,11 @@ function RouteComponent() {
 						params={{ accountId }}
 						className={cn(
 							"w-16 h-16 p-0 flex flex-col items-center justify-center text-sm ",
-							"group [&.active]:text-[#03C160] rounded-none after:content-none hover:bg-neutral-100",
+							"group text-neutral-500/80 [&.active]:text-[#03C160] rounded-none after:content-none hover:bg-neutral-100",
 						)}
 					>
-						<div className="mt-1 w-8 h-8">
-							<ChatIconOutline
-								className={"group-[&.active]:hidden size-full"}
-							/>
-							<ChatIconFill
-								className={"hidden group-[&.active]:block size-full"}
-							/>
+						<div className="mt-1 w-8 h-8 [&>svg]:size-full">
+							<ChatIconFill />
 						</div>
 						<span className="mt-0.5 text-xs">消息</span>
 					</Link>
@@ -41,18 +84,41 @@ function RouteComponent() {
 						type="button"
 						className={cn(
 							"w-16 h-16 p-0 flex flex-col items-center justify-center text-sm ",
-							"group hover:text-[#03C160] rounded-none after:content-none hover:bg-neutral-100",
+							"group text-neutral-500/80 hover:text-[#03C160] rounded-none after:content-none hover:bg-neutral-100",
 						)}
-						hidden
+						onClick={() => {
+							handleNavigateToContact();
+						}}
 					>
-						<div className="mt-1 w-8 h-8">
-							<ContactIconOutline className={"group-hover:hidden size-full"} />
-							<ContactIconFill
-								className={"hidden group-hover:block size-full"}
-							/>
+						<div className="mt-1 w-8 h-8 [&>svg]:size-full">
+							<ContactIconFill />
 						</div>
 						<span className="mt-0.5 text-xs">通讯录</span>
 					</button>
+
+					<Dialog
+						open={modal === AccountSearchModalOptions.CONTACT}
+						onOpenChange={(open) => {
+							if (!open && canGoBack) {
+								router.history.back();
+							} else {
+								navigate({
+									to: "/$accountId/chat",
+									params: { accountId },
+								});
+							}
+						}}
+					>
+						<DialogContent className="p-5 sm:max-w-sm">
+							<DialogHeader>
+								<DialogTitle>通讯录</DialogTitle>
+							</DialogHeader>
+
+							<ScrollArea className="-mx-5 -mb-5 h-[80vh]">
+								<ContactList />
+							</ScrollArea>
+						</DialogContent>
+					</Dialog>
 				</div>
 			</aside>
 

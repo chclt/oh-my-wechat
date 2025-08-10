@@ -7,6 +7,8 @@ import type {
 	UserType,
 	VideoInfo,
 	VoiceInfo,
+	ChatroomType,
+	ContactType,
 } from "@/schema";
 import type { ChatType, MessageType } from "@/schema";
 import type { ChatStatistics } from "./ios-backup/controllers/statistic";
@@ -18,6 +20,11 @@ export interface GetUserRequest {
 
 export interface GetUserListRequest {
 	userIds: string[];
+}
+
+export interface GetAccountContactListRequest {
+	// TODO: 其他接口也应该传 accountId
+	accountId: string;
 }
 
 export interface GetMessageListRequest {
@@ -84,6 +91,10 @@ export interface DataAdapter {
 	getUserList: (
 		requestData: GetUserListRequest,
 	) => Promise<DataAdapterResponse<UserType[]>>;
+
+	getAccountContactList: (
+		requestData: GetAccountContactListRequest,
+	) => Promise<DataAdapterResponse<ContactType[]>>;
 
 	getChat: (
 		requestData: GetChatRequest,

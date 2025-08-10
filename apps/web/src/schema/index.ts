@@ -2,14 +2,20 @@ export * from "./message";
 
 import { MessageType } from "./message";
 
-export interface Contact {
-	wxid: `wxid_${string}`;
+export interface ContactType {
 	id: string;
-	nickname: string;
-	nicknamePinyin: string;
-	remark: string;
-	remarkPinyin: string;
-	remarkPinyinInits: string;
+	username: string;
+	usernamePinyin: string;
+
+	remark?: string;
+	remarkPinyin?: string;
+	remarkPinyinInits?: string;
+
+	photo?: {
+		origin?: string;
+		thumb: string;
+	};
+	is_openim: boolean;
 }
 
 export interface UserType {

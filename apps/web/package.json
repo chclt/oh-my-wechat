@@ -38,6 +38,7 @@
     "date-fns": "^4.1.0",
     "embla-carousel-fade": "^8.6.0",
     "embla-carousel-react": "^8.6.0",
+    "es-toolkit": "^1.39.8",
     "fast-xml-parser": "^5.2.5",
     "lucide-react": "^0.536.0",
     "protobufjs": "^7.5.3",

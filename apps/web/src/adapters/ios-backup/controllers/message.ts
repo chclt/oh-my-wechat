@@ -15,7 +15,7 @@ import type { VoiceMessageEntity } from "@/components/message/voice-message.tsx"
 import type { VoipMessageEntity } from "@/components/message/voip-message.tsx";
 import type { WeComContactMessageEntity } from "@/components/message/wecom-contact-message.tsx";
 import { ChatController } from "./chat.ts";
-import { ContactController } from "./contact.ts";
+import { UserController } from "./contact.ts";
 import { adapterWorker } from "../worker.ts";
 import {
 	type AppMessageType,
@@ -137,7 +137,7 @@ export namespace MessageController {
 			})
 			.filter((i) => i !== undefined);
 		const usersArray = (
-			await ContactController.findAll({ ids: messageSenderIds }, { databases })
+			await UserController.findAll({ ids: messageSenderIds }, { databases })
 		).data;
 		const usersTable: { [key: string]: UserType | ChatroomType } = {};
 		usersArray.map((user) => {

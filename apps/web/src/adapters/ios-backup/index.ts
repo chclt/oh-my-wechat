@@ -8,6 +8,7 @@ import type {
 	GetAttachRequest,
 	GetChatListRequest,
 	GetChatRequest,
+	GetAccountContactListRequest,
 	GetImageRequest,
 	GetMessageListRequest,
 	GetStatisticRequest,
@@ -69,7 +70,7 @@ export default class IosBackupAdapter implements DataAdapter {
 	}
 
 	async getUserList(input: GetUserListRequest) {
-		const data = (await this._workerAdapter.getContactList(
+		const data = (await this._workerAdapter.getUserList(
 			input,
 		)) as DataAdapterResponse<UserType[]>;
 
@@ -83,13 +84,25 @@ export default class IosBackupAdapter implements DataAdapter {
 	}
 
 	async getUser(input: GetUserRequest) {
-		const temp = (await this._workerAdapter.getContactList({
+		const temp = (await this._workerAdapter.getUserList({
 			userIds: [input.userId],
 		})) as DataAdapterResponse<UserType[]>;
 		const data = { data: temp.data[0] } satisfies DataAdapterResponse<UserType>;
 
 		if (import.meta.env.DEV) {
 			console.groupCollapsed("getUser");
+			console.log(data);
+			console.groupEnd();
+		}
+
+		return data;
+	}
+
+	async getAccountContactList(input: GetAccountContactListRequest) {
+		const data = await this._workerAdapter.getAccountContactList();
+
+		if (import.meta.env.DEV) {
+			console.groupCollapsed("getAccountContactList");
 			console.log(data);
 			console.groupEnd();
 		}

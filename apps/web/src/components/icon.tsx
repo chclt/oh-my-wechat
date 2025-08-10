@@ -91,36 +91,32 @@ export function ChatIconOutline(props: IconProps) {
 export function ContactIconFill(props: IconProps) {
 	return (
 		<svg
-			width="24"
-			height="24"
-			viewBox="0 0 24 24"
+			width="32"
+			height="32"
+			viewBox="0 0 32 32"
 			fill="none"
 			xmlns="http://www.w3.org/2000/svg"
 			{...props}
 		>
-			<title>Contact</title>
 			<path
-				d="M3.5 21C3.5 21 2 21 2 19.4C2 17.8 4 13 9.5 13C15 13 17 17.8 17 19.4C17 21 15.5 21 15.5 21H3.5Z"
-				fill="#03C160"
-			/>
-			<circle cx="9.5" cy="7.5" r="4.5" fill="currentColor" />
-			<path
-				d="M15.5 9H21.5"
-				stroke="currentColor"
-				strokeWidth="1.25"
-				strokeLinecap="round"
+				d="M5 28C5 28 3 28 3 25.8666C3 23.7333 5.66667 17.3333 13 17.3333C20.3333 17.3333 23 23.7333 23 25.8666C23 28 21 28 21 28H5Z"
+				fill="currentColor"
 			/>
 			<path
-				d="M17 11.5781H21.5"
-				stroke="currentColor"
-				strokeWidth="1.25"
-				strokeLinecap="round"
+				d="M19 10C19 13.3137 16.3137 16 13 16C9.68629 16 7 13.3137 7 10C7 6.68629 9.68629 4 13 4C16.3137 4 19 6.68629 19 10Z"
+				fill="currentColor"
 			/>
 			<path
-				d="M18.5 14.1562H21.5"
-				stroke="currentColor"
-				strokeWidth="1.25"
-				strokeLinecap="round"
+				d="M22 12C22 11.4477 22.4477 11 23 11H28C28.5523 11 29 11.4477 29 12C29 12.5523 28.5523 13 28 13H23C22.4477 13 22 12.5523 22 12Z"
+				fill="currentColor"
+			/>
+			<path
+				d="M23.5 15.5C23.5 14.9477 23.9477 14.5 24.5 14.5H28C28.5523 14.5 29 14.9477 29 15.5C29 16.0523 28.5523 16.5 28 16.5H24.5C23.9477 16.5 23.5 16.0523 23.5 15.5Z"
+				fill="currentColor"
+			/>
+			<path
+				d="M25 19C25 18.4477 25.4477 18 26 18H28C28.5523 18 29 18.4477 29 19C29 19.5523 28.5523 20 28 20H26C25.4477 20 25 19.5523 25 19Z"
+				fill="currentColor"
 			/>
 		</svg>
 	);
@@ -129,44 +125,21 @@ export function ContactIconFill(props: IconProps) {
 export function ContactIconOutline(props: IconProps) {
 	return (
 		<svg
-			width="24"
-			height="24"
-			viewBox="0 0 24 24"
+			width="32"
+			height="32"
+			viewBox="0 0 32 32"
 			fill="none"
 			xmlns="http://www.w3.org/2000/svg"
 			{...props}
 		>
-			<title>Contact</title>
 			<path
-				d="M15.4922 20.25H3.50779C3.50499 20.2499 3.49981 20.2496 3.49252 20.249C3.47277 20.2475 3.43926 20.2441 3.3969 20.2366C3.30886 20.2209 3.20179 20.191 3.10294 20.1382C3.00797 20.0876 2.92862 20.0207 2.87037 19.9275C2.81365 19.8367 2.75 19.6783 2.75 19.4C2.75 18.8114 3.16303 17.3778 4.25946 16.0851C5.32307 14.8312 6.99753 13.75 9.5 13.75C12.0025 13.75 13.6769 14.8312 14.7405 16.0851C15.837 17.3778 16.25 18.8114 16.25 19.4C16.25 19.6783 16.1864 19.8367 16.1296 19.9275C16.0714 20.0207 15.992 20.0876 15.8971 20.1382C15.7982 20.191 15.6911 20.2209 15.6031 20.2366C15.5607 20.2441 15.5272 20.2475 15.5075 20.249C15.5002 20.2496 15.495 20.2499 15.4922 20.25Z"
+				d="M13 17.8333C16.5016 17.8333 18.8684 19.3541 20.3691 21.1234C21.8916 22.9183 22.4999 24.9408 22.5 25.8665C22.5 26.3187 22.3952 26.6248 22.2637 26.8353C22.1311 27.0473 21.9529 27.1919 21.7646 27.2923C21.5738 27.3941 21.377 27.4468 21.2246 27.4739C21.1496 27.4873 21.0883 27.4943 21.0479 27.4974C21.0279 27.4989 21.0133 27.499 21.0049 27.4993C21.0007 27.4995 20.9979 27.5003 20.9971 27.5003H5.00293C5.0021 27.5003 4.99929 27.4995 4.99512 27.4993C4.98674 27.499 4.9721 27.4989 4.95215 27.4974C4.91168 27.4943 4.85038 27.4873 4.77539 27.4739C4.62297 27.4468 4.42622 27.3941 4.23535 27.2923C4.04707 27.1919 3.8689 27.0473 3.73633 26.8353C3.60476 26.6248 3.5 26.3187 3.5 25.8665C3.50006 24.9408 4.10843 22.9183 5.63086 21.1234C7.1316 19.3541 9.49836 17.8333 13 17.8333Z"
 				stroke="currentColor"
-				strokeWidth="1"
 			/>
-			<circle
-				cx="9.5"
-				cy="7.5"
-				r="3.75"
-				stroke="currentColor"
-				strokeWidth="1"
-			/>
-			<path
-				d="M15.5 9H21.5"
-				stroke="currentColor"
-				strokeWidth="1"
-				strokeLinecap="round"
-			/>
-			<path
-				d="M17 11.5781H21.5"
-				stroke="currentColor"
-				strokeWidth="1"
-				strokeLinecap="round"
-			/>
-			<path
-				d="M18.5 14.1562H21.5"
-				stroke="currentColor"
-				strokeWidth="1"
-				strokeLinecap="round"
-			/>
+			<circle cx="13" cy="10" r="5.5" stroke="currentColor" />
+			<rect x="22" y="12" width="7" height="1" rx="0.5" fill="currentColor" />
+			<rect x="24" y="14.5" width="5" height="1" rx="0.5" fill="currentColor" />
+			<rect x="25" y="17" width="4" height="1" rx="0.5" fill="currentColor" />
 		</svg>
 	);
 }
