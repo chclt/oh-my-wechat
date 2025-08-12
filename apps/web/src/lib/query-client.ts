@@ -5,6 +5,7 @@ const queryClient = new QueryClient({
 		queries: {
 			networkMode: "always",
 			staleTime: Number.POSITIVE_INFINITY,
+			retry: false,
 			refetchOnWindowFocus: false,
 		},
 		mutations: {
