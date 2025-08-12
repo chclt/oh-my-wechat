@@ -495,10 +495,6 @@ export namespace UserController {
 				`,
 			)[0]
 			.values.reduce((acc, row) => {
-				if ((row[1] as string).startsWith("gh_")) {
-					return acc;
-				}
-
 				acc.push({
 					rowid: row[0] as number,
 					username: row[1] as string,
