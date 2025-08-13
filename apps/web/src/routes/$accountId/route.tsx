@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import ContactList from "./contact/-components/contact-list";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
 export enum AccountSearchModalOptions {
 	CONTACT = "contact",
@@ -109,14 +110,14 @@ function RouteComponent() {
 							}
 						}}
 					>
-						<DialogContent className="p-5 sm:max-w-sm">
-							<DialogHeader>
-								<DialogTitle>通讯录</DialogTitle>
-							</DialogHeader>
+						<DialogContent className="p-5 sm:max-w-sm rounded-xl overflow-hidden">
+							<VisuallyHidden>
+								<DialogHeader>
+									<DialogTitle>通讯录</DialogTitle>
+								</DialogHeader>
+							</VisuallyHidden>
 
-							<ScrollArea className="-mx-5 -mb-5 h-[calc(100dvh-10rem)]">
-								<ContactList />
-							</ScrollArea>
+							<ContactList className="-m-5 overflow-hidden" />
 						</DialogContent>
 					</Dialog>
 				</div>
