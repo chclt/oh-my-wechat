@@ -103,13 +103,22 @@ export default function ContactList({
 				<ScrollAreaPrimitive.Corner />
 			</ScrollAreaPrimitive.Root>
 
-			{scrollTarget && <AlphabetList scrollTarget={scrollTarget} />}
+			{scrollTarget && (
+				<AlphabetList
+					scrollTarget={scrollTarget}
+					className="z-20 absolute my-auto top-0 bottom-0 end-1.5"
+				/>
+			)}
 		</section>
 	);
 }
 
 // @mantine/hooks 8.2.3 useScrollSpy bug: 在 scrollHost 更新的时候无法重新绑定滚动监听时间
-function AlphabetList({ scrollTarget }: { scrollTarget: HTMLDivElement }) {
+function AlphabetList({
+	scrollTarget,
+	className,
+	...props
+}: { scrollTarget: HTMLDivElement } & React.ComponentProps<"div">) {
 	const alphabetListSpy = useScrollSpy({
 		selector: '[data-alphabet="root"] [data-alphabet]',
 		getDepth: () => 1,
@@ -118,24 +127,26 @@ function AlphabetList({ scrollTarget }: { scrollTarget: HTMLDivElement }) {
 	});
 
 	return (
-		<RadioGroup.Root
-			value={alphabetListSpy.active.toString()}
-			className="z-20 absolute my-auto top-0 bottom-0 w-5.5 end-1.5 flex flex-col justify-center items-center text-xs font-medium text-muted-foreground"
-		>
-			{alphabetListSpy.data.map((letter, index) => (
-				<RadioGroup.Item
-					key={letter.id}
-					value={index.toString()}
-					className={cn(
-						"w-full h-4 flex items-center justify-center cursor-pointer data-[state=checked]:text-[#03C160]",
-					)}
-					onClick={() => {
-						letter.getNode().scrollIntoView();
-					}}
-				>
-					{letter.value}
-				</RadioGroup.Item>
-			))}
-		</RadioGroup.Root>
+		<div className={cn("flex", className)} {...props}>
+			<RadioGroup.Root
+				value={alphabetListSpy.active.toString()}
+				className="w-5.5 flex flex-col justify-center items-center text-xs font-medium text-muted-foreground"
+			>
+				{alphabetListSpy.data.map((letter, index) => (
+					<RadioGroup.Item
+						key={letter.id}
+						value={index.toString()}
+						className={cn(
+							"w-full h-4 flex items-center justify-center cursor-pointer data-[state=checked]:text-[#03C160]",
+						)}
+						onClick={() => {
+							letter.getNode().scrollIntoView();
+						}}
+					>
+						{letter.value}
+					</RadioGroup.Item>
+				))}
+			</RadioGroup.Root>
+		</div>
 	);
 }
