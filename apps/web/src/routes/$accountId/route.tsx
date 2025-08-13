@@ -5,19 +5,19 @@ import {
 	Link,
 	Outlet,
 	useNavigate,
-	useLocation,
 	useCanGoBack,
 	useRouter,
 } from "@tanstack/react-router";
 import {
 	Dialog,
+	DialogClose,
 	DialogContent,
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
 import ContactList from "./contact/-components/contact-list";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import { CentralCrossLargeFilledOffStroke2Radius2 } from "@/components/central-icon";
 
 export enum AccountSearchModalOptions {
 	CONTACT = "contact",
@@ -47,12 +47,11 @@ function RouteComponent() {
 	const canGoBack = useCanGoBack();
 	const { modal } = Route.useSearch();
 	const navigate = useNavigate();
-	const location = useLocation();
 	const { accountId } = Route.useParams();
 
 	const handleNavigateToContact = () => {
 		navigate({
-			to: location.pathname,
+			to: ".",
 			search: {
 				modal: AccountSearchModalOptions.CONTACT,
 			},
@@ -110,7 +109,10 @@ function RouteComponent() {
 							}
 						}}
 					>
-						<DialogContent className="p-5 sm:max-w-sm rounded-xl overflow-hidden">
+						<DialogContent
+							showCloseButton={false}
+							className="p-5 sm:max-w-sm rounded-xl overflow-hidden"
+						>
 							<VisuallyHidden>
 								<DialogHeader>
 									<DialogTitle>通讯录</DialogTitle>
@@ -118,6 +120,18 @@ function RouteComponent() {
 							</VisuallyHidden>
 
 							<ContactList className="-m-5 overflow-hidden" />
+
+							<DialogClose
+								data-slot="dialog-close"
+								className={cn(
+									"z-40 absolute top-5 right-5 size-6 rounded-xs cursor-pointer",
+									"data-[state=open]:bg-accent data-[state=open]:text-muted-foreground",
+									"ring-offset-background focus:ring-ring focus:ring-2 focus:ring-offset-2 focus:outline-hidden",
+									"[&_svg]:pointer-events-none [&_svg]:size-full",
+								)}
+							>
+								<CentralCrossLargeFilledOffStroke2Radius2 />
+							</DialogClose>
 						</DialogContent>
 					</Dialog>
 				</div>
