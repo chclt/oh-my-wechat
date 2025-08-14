@@ -34,7 +34,7 @@ export default function VoiceMessage({
 	if (variant === "default")
 		return (
 			<div className={cn("max-w-[20em]")} {...props}>
-				<LocalVoice chat={chat!} message={message} className={""} />
+				<LocalVoice chat={chat} message={message} />
 			</div>
 		);
 

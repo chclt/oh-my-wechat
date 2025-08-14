@@ -8,14 +8,15 @@ import { DataAdapterResponse, GetVoiceRequest } from "@/adapters/adapter";
 import { WCDatabases } from "../types";
 
 const ffmpegCoreURL =
-	"https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.js";
+	"https://unpkg.com/@ffmpeg/core@0.12.10/dist/esm/ffmpeg-core.js";
 const ffmpegWasmURL =
-	"https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm/ffmpeg-core.wasm";
+	"https://unpkg.com/@ffmpeg/core@0.12.10/dist/esm/ffmpeg-core.wasm";
 
 const ffmpeg = new FFmpeg();
 
 let isFFmpegLoading = false; // 防止重复加载, TODO: 更好应该是写一个事件广播
 
+// eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace VoiceController {
 	export type GetInput = [
 		GetVoiceRequest,
