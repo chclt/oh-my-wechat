@@ -14,35 +14,17 @@ type AlphabetList<DataType> = {
 	list: DataType[];
 }[];
 
-// 个人微信
-interface PersonalAccountContactGroup {
-	id: "PersonalAccount";
-	alphabetList: AlphabetList<ContactType>;
-}
-
-// 保存到通讯录的群聊
-interface GroupChatContactGroup {
-	id: "GroupChat";
-	list: ContactType[];
-}
-
-// 公众号
-interface OfficialAccountContactGroup {
-	id: "OfficialAccount";
-	alphabetList: AlphabetList<ContactType>;
-}
-
-// 服务号
-interface ServiceAccountContactGroup {
-	id: "ServiceAccount";
-	alphabetList: AlphabetList<ContactType>;
-}
-
 type UseContactListReturnValue = {
+	// 个人微信
 	personalAccountAlphabetList: AlphabetList<ContactType>;
-	// groupChatList: GroupChatContactGroup;
-	// officialAccountList: OfficialAccountContactGroup;
-	// serviceAccountList: ServiceAccountContactGroup;
+	// 保存到通讯录的群聊
+	groupChatAlphabetList: AlphabetList<ContactType>;
+	// 企业微信联系人
+	openIMAlphabetList: AlphabetList<ContactType>;
+	// 公众号
+	officialAccountAlphabetList: AlphabetList<ContactType>;
+	// 服务号
+	serviceAccountAlphabetList: AlphabetList<ContactType>;
 };
 
 const ContactListFilter = [
@@ -107,17 +89,21 @@ export default function useContactList(
 
 	const sortedPersonalAccountContactList: ContactTypeWithSortAndGroupCriteria[] =
 		[];
+	const sortedGroupChatContactList: ContactTypeWithSortAndGroupCriteria[] = [];
 	const sortedOpenIMContactList: ContactTypeWithSortAndGroupCriteria[] = [];
 	const sortedOfficialAccountContactList: ContactTypeWithSortAndGroupCriteria[] =
 		[];
 	const sortedServiceAccountContactList: ContactTypeWithSortAndGroupCriteria[] =
 		[];
-
 	sortedContactList.forEach((item) => {
 		if (item.is_openim) {
 			sortedOpenIMContactList.push(item);
+		} else if (item.id.endsWith("@chatroom")) {
+			sortedGroupChatContactList.push(item);
 		} else if (item.id.startsWith("gh_")) {
 			sortedOfficialAccountContactList.push(item);
+		} else if (item.id.startsWith("mp_")) {
+			sortedServiceAccountContactList.push(item);
 		} else {
 			sortedPersonalAccountContactList.push(item);
 		}
@@ -127,6 +113,7 @@ export default function useContactList(
 		personalAccountAlphabetList: groupByAlphabet(
 			sortedPersonalAccountContactList,
 		),
+		groupChatAlphabetList: groupByAlphabet(sortedGroupChatContactList),
 		openIMAlphabetList: groupByAlphabet(sortedOpenIMContactList),
 		officialAccountAlphabetList: groupByAlphabet(
 			sortedOfficialAccountContactList,
