@@ -2,7 +2,7 @@ import { AccountContactListSuspenseQueryOptions } from "@/lib/fetchers/contact";
 import { Route } from "../../route";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import useContactList from "./use-contact-list";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Image from "@/components/image";
 import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
@@ -16,14 +16,6 @@ export default function ContactList({
 	className,
 	...props
 }: React.ComponentProps<"div">) {
-	const { accountId } = Route.useParams();
-
-	const { data: contactData } = useSuspenseQuery(
-		AccountContactListSuspenseQueryOptions(accountId),
-	);
-
-	const { personalAccountAlphabetList } = useContactList(contactData);
-
 	const [scrollTarget, setScrollTarget] = useState<HTMLDivElement>();
 
 	return (
@@ -49,62 +41,17 @@ export default function ContactList({
 							<span className="font-medium">联系人</span>
 						</div>
 					</header>
-					<ul>
-						{personalAccountAlphabetList.map((alphabetLetter) => (
-							<div key={alphabetLetter.alphabet}>
-								<div
-									data-alphabet={alphabetLetter.alphabet}
-									className="sticky z-10 top-16 h-11 ps-5 flex items-center bg-background/80 backdrop-blur-xl"
-								>
-									<div className="h-full w-full ps-0.5 pe-5 flex items-center border-b border-muted">
-										{alphabetLetter.alphabet}
-									</div>
-								</div>
 
-								{alphabetLetter.list.map((item) => (
-									<li
-										key={item.id}
-										style={{
-											contentVisibility: "auto",
-											containIntrinsicSize: "calc(var(--spacing) * 11)",
-										}}
-									>
-										<Link
-											to="/$accountId/chat/$chatId"
-											params={{
-												accountId,
-												chatId: item.id,
-											}}
-											className="flex gap-2.5 hover:bg-muted"
-										>
-											<div className="shrink-0 py-2.5 ps-5">
-												<div className="w-9 h-9 clothoid-corner-[18.18%]">
-													<Image
-														src={item.photo?.thumb}
-														alt={item.username}
-														className="w-full h-full object-cover"
-													/>
-												</div>
-											</div>
-
-											<div className="flex-grow py-2.5 pe-5 flex flex-col justify-center border-b border-muted">
-												<span className="font-medium">
-													{item.remark ?? item.username ?? " "}
-												</span>
-											</div>
-										</Link>
-									</li>
-								))}
-							</div>
-						))}
-					</ul>
+					<Suspense>
+						<PersonalAccountAlphabetList />
+					</Suspense>
 				</ScrollAreaPrimitive.Viewport>
 				<ScrollBar className="z-30" />
 				<ScrollAreaPrimitive.Corner />
 			</ScrollAreaPrimitive.Root>
 
 			{scrollTarget && (
-				<AlphabetList
+				<AlphabetNavigator
 					scrollTarget={scrollTarget}
 					className="z-20 absolute my-auto top-0 bottom-0 end-1.5"
 				/>
@@ -113,8 +60,70 @@ export default function ContactList({
 	);
 }
 
+function PersonalAccountAlphabetList() {
+	const { accountId } = Route.useParams();
+
+	const { data: contactData } = useSuspenseQuery(
+		AccountContactListSuspenseQueryOptions(accountId),
+	);
+
+	const { personalAccountAlphabetList } = useContactList(contactData);
+
+	return (
+		<ul>
+			{personalAccountAlphabetList.map((alphabetLetter) => (
+				<div key={alphabetLetter.alphabet}>
+					<div
+						data-alphabet={alphabetLetter.alphabet}
+						className="sticky z-10 top-16 h-11 ps-5 flex items-center bg-background/80 backdrop-blur-xl"
+					>
+						<div className="h-full w-full ps-0.5 pe-5 flex items-center border-b border-muted">
+							{alphabetLetter.alphabet}
+						</div>
+					</div>
+
+					{alphabetLetter.list.map((item) => (
+						<li
+							key={item.id}
+							style={{
+								contentVisibility: "auto",
+								containIntrinsicSize: "calc(var(--spacing) * 11)",
+							}}
+						>
+							<Link
+								to="/$accountId/chat/$chatId"
+								params={{
+									accountId,
+									chatId: item.id,
+								}}
+								className="flex gap-2.5 hover:bg-muted"
+							>
+								<div className="shrink-0 py-2.5 ps-5">
+									<div className="w-9 h-9 clothoid-corner-[18.18%]">
+										<Image
+											src={item.photo?.thumb}
+											alt={item.username}
+											className="w-full h-full object-cover"
+										/>
+									</div>
+								</div>
+
+								<div className="flex-grow py-2.5 pe-5 flex flex-col justify-center border-b border-muted">
+									<span className="font-medium">
+										{item.remark ?? item.username ?? " "}
+									</span>
+								</div>
+							</Link>
+						</li>
+					))}
+				</div>
+			))}
+		</ul>
+	);
+}
+
 // @mantine/hooks 8.2.3 useScrollSpy bug: 在 scrollHost 更新的时候无法重新绑定滚动监听时间
-function AlphabetList({
+function AlphabetNavigator({
 	scrollTarget,
 	className,
 	...props
