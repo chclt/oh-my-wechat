@@ -2,7 +2,7 @@ import type { RecordType } from "@/components/record/record.tsx";
 import { useQuery } from "@tanstack/react-query";
 import type { ChatType, MessageType } from "@/schema";
 import type React from "react";
-import { useInViewport, useMergedRef, useToggle } from "@mantine/hooks";
+import { useInViewport, useMergedRef } from "@mantine/hooks";
 import { ImageSuspenseQueryOptions } from "@/lib/fetchers";
 import { useState } from "react";
 
@@ -83,10 +83,10 @@ export default function LocalImage({
 				onError={onImageError}
 				{...props}
 			/>
-			{(displayImageIndex === 0 && imageErrorMessages[displayImageIndex]) ||
+			{/* {(displayImageIndex === 0 && imageErrorMessages[displayImageIndex]) ||
 				(displayImageIndex > 0 && imageErrorMessages[displayImageIndex - 1] && (
 					<span className="absolute end-1 bottom-1 text-sm">图片解析错误</span>
-				))}
+				))} */}
 		</div>
 	);
 }
