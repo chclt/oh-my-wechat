@@ -51,6 +51,10 @@ function ChatItem({ chat, className, ...props }: ChatItemProps) {
 					"box-content p-2.5 h-11 flex items-center gap-4 hover:bg-black/5 [&.active]:bg-black/5",
 					className,
 				)}
+				style={{
+					contentVisibility: "auto",
+					containIntrinsicSize: "calc(var(--spacing) * 11)",
+				}}
 			>
 				{chat.photo ? (
 					<div
