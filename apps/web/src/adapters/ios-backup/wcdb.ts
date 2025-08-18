@@ -1,6 +1,7 @@
 import type { Database, QueryExecResult } from "sql.js";
 // @ts-ignore
 import { ZstdCodec } from "zstd-codec";
+import { chatTable } from "./database/message";
 
 /**
  * 实际发现从 wcdb_builtin_compression_record 表中获取的压缩配置大概率不完整
@@ -31,16 +32,6 @@ const WCDBCompressionDictionaryPath = {
 const wcdbCompressionDictionary: Partial<
 	Record<WCDBCompressionDictionaryName, Uint8Array>
 > = {};
-
-interface WCDBCompressionConfig {
-	[DatabaseName: string]: null | {
-		[TableName: string]: {
-			[ColumnName: string]: WCDBCompressionDictionaryName;
-		};
-	};
-}
-
-const wcdbCompressionConfig: WCDBCompressionConfig = {};
 
 export enum WCDBDatabaseSeriesName {
 	Message = "MessageDatabase",
@@ -75,24 +66,13 @@ interface WCDBType {
 		dictionaryName: WCDBCompressionDictionaryName,
 	) => Promise<Uint8Array>;
 
-	_parseDatabaseCompressionConfig: (databaseInfo: {
-		databaseName: string;
-		database: Database;
-	}) => WCDBCompressionConfig[string];
-
-	_getDatabaseCompressionConfig: (databaseInfo: {
-		databaseName: string;
-		database: Database;
-	}) => WCDBCompressionConfig[string];
-
-	execAsync: (
-		sql: string,
+	postProcess: <DataType extends Record<string, unknown>[]>(
+		rows: DataType,
 		options: {
-			database: Database;
 			databaseSeries: WCDBDatabaseSeriesName;
 			tableSeries: WCDBTableSeriesName;
 		},
-	) => Promise<QueryExecResult[]>;
+	) => Promise<DataType>;
 }
 
 const WCDB: WCDBType = {
@@ -120,161 +100,56 @@ const WCDB: WCDBType = {
 		return wcdbCompressionDictionary[dictionaryName];
 	},
 
-	_parseDatabaseCompressionConfig: ({ databaseName, database }) => {
-		if (wcdbCompressionConfig[databaseName] !== undefined) {
-			return wcdbCompressionConfig[databaseName];
-		}
-
-		const queryResult = database.exec(
-			`SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'wcdb_builtin_compression_record';`,
-		);
-
-		if (!queryResult[0] || queryResult[0].values.length === 0) {
-			wcdbCompressionConfig[databaseName] = null;
-			return wcdbCompressionConfig[databaseName];
-		}
-
-		const queryResult2 = database.exec(
-			`SELECT * FROM wcdb_builtin_compression_record;`,
-		);
-
-		if (!queryResult2[0] || queryResult2[0].values.length === 0) {
-			wcdbCompressionConfig[databaseName] = null;
-			return wcdbCompressionConfig[databaseName];
-		}
-
-		let tableNameIndex: number | undefined;
-		let columnNameIndex: number | undefined;
-		let rowidIndex: number | undefined;
-
-		queryResult2[0].columns.forEach((columnName, index) => {
-			if (columnName === "tableName") {
-				tableNameIndex = index;
-			} else if (columnName === "columns") {
-				columnNameIndex = index;
-			} else if (columnName === "rowid") {
-				rowidIndex = index;
-			}
-		});
-
-		if (
-			tableNameIndex === undefined ||
-			columnNameIndex === undefined /* || rowidIndex === undefined */
-		) {
-			wcdbCompressionConfig[databaseName] = null;
-			return wcdbCompressionConfig[databaseName];
-		}
-
-		queryResult2[0].values.forEach((row) => {
-			const tableName = row[tableNameIndex as number] as string;
-			const columnCompressionConfig = row[columnNameIndex as number] as string; // e.g. "Message:5", "content,msgSource:4,xml:3"
-
-			const stringConfigArray = columnCompressionConfig.split(",");
-			const settledColumnConfig: Record<string, WCDBCompressionDictionaryName> =
-				{};
-			const pendindColumnName: string[] = [];
-
-			for (const stringConfig of stringConfigArray) {
-				const [columnName, dictionaryId] = stringConfig.split(":");
-				pendindColumnName.push(columnName);
-
-				if (dictionaryId === undefined) {
-					//
-				} else {
-					for (const columnName of pendindColumnName) {
-						settledColumnConfig[columnName] = Number(
-							dictionaryId,
-						) as WCDBCompressionDictionaryName;
-					}
-					pendindColumnName.length = 0;
-				}
-			}
-
-			Object.entries(settledColumnConfig).forEach(
-				([columnName, dictionaryId]) => {
-					if (!wcdbCompressionConfig[databaseName]) {
-						wcdbCompressionConfig[databaseName] = {};
-					}
-					if (!wcdbCompressionConfig[databaseName][tableName]) {
-						wcdbCompressionConfig[databaseName][tableName] = {};
-					}
-					wcdbCompressionConfig[databaseName][tableName][columnName] =
-						dictionaryId;
-				},
-			);
-		});
-
-		return wcdbCompressionConfig[databaseName];
-	},
-
-	_getDatabaseCompressionConfig: ({ databaseName, database }) => {
-		if (wcdbCompressionConfig[databaseName] === undefined) {
-			WCDB._parseDatabaseCompressionConfig({ databaseName, database });
-		}
-
-		return wcdbCompressionConfig[databaseName];
-	},
-
-	execAsync: async (sql, { database, databaseSeries, tableSeries }) => {
+	postProcess: async (rows, { databaseSeries, tableSeries }) => {
 		const databaseCompressionConfig =
 			wcdbCompressionConfigConstant[databaseSeries];
-
 		if (!databaseCompressionConfig) {
-			return database.exec(sql);
+			return rows;
 		}
 
 		const tableCompressionConfig = databaseCompressionConfig[tableSeries];
 		if (!tableCompressionConfig) {
-			return database.exec(sql);
+			return rows;
 		}
-
-		const queryResult = database.exec(sql);
 
 		return new Promise((resolve, reject) => {
 			ZstdCodec.run(async (zstd: any) => {
-				for (const segmentResult of queryResult) {
-					const decompressedColumnIndex: Record<number, string> = {}; // 标记哪些列启用了压缩， columnIndex: columnName
-					segmentResult.columns.forEach((columnName, index) => {
-						decompressedColumnIndex[index] = columnName;
-					});
+				for (const row of rows) {
+					for (const [columnName, dictionaryName] of Object.entries(
+						tableCompressionConfig,
+					)) {
+						if (!Object.prototype.hasOwnProperty.call(row, columnName)) {
+							continue;
+						}
 
-					for (const row of segmentResult.values) {
-						for (const [columnIndexString, columnName] of Object.entries(
-							decompressedColumnIndex,
-						)) {
-							const columnIndex = Number(columnIndexString);
+						const rawColumnValue = row[columnName];
 
-							const rawColumnValue = row[columnIndex];
+						if (rawColumnValue instanceof Uint8Array) {
+							const zstdData = rawColumnValue;
+							const zstdSimple = new zstd.Simple();
+							const zstdDict = new zstd.Dict.Decompression(
+								await WCDB._getCompressionDictionary(dictionaryName),
+							);
 
-							if (rawColumnValue instanceof Uint8Array) {
-								const zstdData = rawColumnValue;
-								const zstdSimple = new zstd.Simple();
-								const zstdDict = new zstd.Dict.Decompression(
-									await WCDB._getCompressionDictionary(
-										tableCompressionConfig[columnName],
-									),
+							const decompressedData = zstdSimple.decompressUsingDict(
+								zstdData,
+								zstdDict,
+							) as Uint8Array | null;
+
+							if (decompressedData) {
+								row[columnName] = new TextDecoder("utf-8").decode(
+									decompressedData,
 								);
-
-								const decompressedData = zstdSimple.decompressUsingDict(
-									zstdData,
-									zstdDict,
-								) as Uint8Array | null;
-
-								if (decompressedData) {
-									row[columnIndex] = new TextDecoder("utf-8").decode(
-										decompressedData,
-									);
-								} else {
-									row[columnIndex] = new TextDecoder("utf-8").decode(
-										rawColumnValue,
-									);
-								}
+							} else {
+								row[columnName] = new TextDecoder("utf-8").decode(
+									rawColumnValue,
+								);
 							}
 						}
 					}
 				}
 
-				resolve(queryResult);
+				resolve(rows);
 			});
 		});
 	},

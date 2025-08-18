@@ -536,7 +536,7 @@ export namespace MessageController {
 
 		const rows = (
 			await Promise.allSettled(
-				dbs.map((database, index) => {
+				dbs.map(async (database, index) => {
 					try {
 						if (cursor_condition && cursor_value) {
 							if (cursor_condition === "<" || cursor_condition === "<=") {
@@ -553,7 +553,12 @@ export namespace MessageController {
 									.from(bastQuery)
 									.orderBy(asc(bastQuery.CreateTime));
 
-								return query.all();
+								const rows = query.all();
+
+								return await WCDB.postProcess(rows, {
+									databaseSeries: WCDBDatabaseSeriesName.Message,
+									tableSeries: WCDBTableSeriesName.Chat,
+								});
 							} else if (
 								cursor_condition === ">=" ||
 								cursor_condition === ">"
@@ -565,7 +570,12 @@ export namespace MessageController {
 									.orderBy(asc(chatTable.CreateTime))
 									.limit(query_limit);
 
-								return query.all();
+								const rows = query.all();
+
+								return await WCDB.postProcess(rows, {
+									databaseSeries: WCDBDatabaseSeriesName.Message,
+									tableSeries: WCDBTableSeriesName.Chat,
+								});
 							} else if (cursor_condition === "<>") {
 								const baseLeftQueryWhereSegmentConditions = [
 									sql`${chatTable.CreateTime} < ${cursor_value}`,
@@ -614,7 +624,12 @@ export namespace MessageController {
 									.from(baseQuery)
 									.orderBy(asc(baseQuery.CreateTime));
 
-								return query.all();
+								const rows = query.all();
+
+								return await WCDB.postProcess(rows, {
+									databaseSeries: WCDBDatabaseSeriesName.Message,
+									tableSeries: WCDBTableSeriesName.Chat,
+								});
 							}
 						} else {
 							// 没有游标的时候查询最新的数据但是按时间正序排列
@@ -635,7 +650,10 @@ export namespace MessageController {
 
 							const rows = query.all();
 
-							return rows;
+							return await WCDB.postProcess(rows, {
+								databaseSeries: WCDBDatabaseSeriesName.Message,
+								tableSeries: WCDBTableSeriesName.Chat,
+							});
 						}
 					} catch (e) {
 						if (e instanceof Error && e.message.startsWith("no such table")) {
@@ -896,9 +914,7 @@ export namespace MessageController {
 
 		const rows = (
 			await Promise.allSettled(
-				dbs.map((database, index) => {
-					const databaseName = `message_${index}`;
-
+				dbs.map(async (database) => {
 					try {
 						const query = database
 							.select({
@@ -915,13 +931,18 @@ export namespace MessageController {
 							.from(chatTable)
 							.where(inArray(chatTable.MesSvrID, messageIds));
 
-						return query.all();
+						const rows = query.all();
+
+						return await WCDB.postProcess(rows, {
+							databaseSeries: WCDBDatabaseSeriesName.Message,
+							tableSeries: WCDBTableSeriesName.Chat,
+						});
 					} catch (error) {
 						return [];
 					}
 				}),
 			)
-		).flatMap((promiseResult, index) => {
+		).flatMap((promiseResult) => {
 			if (
 				promiseResult.status === "fulfilled" &&
 				promiseResult.value.length > 0
