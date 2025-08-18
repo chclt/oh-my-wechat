@@ -90,6 +90,7 @@ export interface ChatStatistics {
 	}[];
 }
 
+// eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace StatisticController {
 	export type GetInput = [GetStatisticRequest, { databases: WCDatabases }];
 	export type GetOutput = Promise<DataAdapterResponse<ChatStatistics>>;

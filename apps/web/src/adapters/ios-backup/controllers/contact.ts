@@ -2,7 +2,10 @@ import type { DataAdapterResponse } from "@/adapters/adapter";
 import { adapterWorker } from "../worker";
 import type { ChatroomType, ContactType, UserType } from "@/schema";
 import protobuf from "protobufjs";
-import type { DatabaseFriendRow, WCDatabases } from "../types";
+import type { WCDatabases } from "../types";
+import { friendTable, openIMContactTable } from "../database/contact";
+import { inArray, sql } from "drizzle-orm";
+import { unionAll } from "drizzle-orm/mysql-core";
 
 const dbContactProtos = {
 	dbContactRemark: {
@@ -176,13 +179,16 @@ const dbContactProtobufRoot = protobuf.Root.fromJSON({
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace UserController {
-	async function parseDatabaseContactRows(
+	async function parseContactDatabaseFriendTableRowsRows(
 		databases: WCDatabases,
-		raw_contact_rows: DatabaseFriendRow[],
+		rows: (
+			| typeof friendTable.$inferSelect
+			| typeof openIMContactTable.$inferSelect
+		)[],
 	): Promise<(UserType | ChatroomType)[]> {
 		const allMemberIds: string[] = [];
 
-		const resultWithoutMembers = raw_contact_rows.map((row) => {
+		const resultWithoutMembers = rows.map((row) => {
 			const remarkObj = dbContactProtobufRoot
 				.lookupType("ContactRemark")
 				.decode(row.dbContactRemark) as unknown as Record<string, unknown>;
@@ -219,26 +225,6 @@ export namespace UserController {
 					openIMObj.openIMContactInfo as string,
 				);
 			}
-
-			const specialUser = [
-				{
-					id: "brandsessionholder",
-					username: "订阅号消息",
-				},
-				{
-					id: "notification_messages",
-					username: "服务消息",
-				},
-				{
-					id: "brandsessionholder_weapp",
-					username: "小程序客服消息",
-				},
-				{
-					id: "opencustomerservicemsg",
-					username: "小程序客服消息",
-				},
-				{ id: "chatroom_session_box", username: "折叠的群聊" },
-			];
 
 			if (row.username.endsWith("@chatroom")) {
 				let memberIds: string[] = [];
@@ -381,33 +367,21 @@ export namespace UserController {
 			throw new Error("WCDB_Contact database is not found");
 		}
 
-		const dbFriendRows: DatabaseFriendRow[] = db
-			.exec(
-				`
-					SELECT rowid, userName, dbContactRemark, dbContactChatRoom, dbContactHeadImage, dbContactProfile, dbContactSocial, dbContactOpenIM, type FROM Friend WHERE (type & 1) != 0
-					UNION  ALL
-					SELECT rowid, userName, dbContactRemark, dbContactChatRoom, dbContactHeadImage, dbContactProfile, dbContactSocial, dbContactOpenIM, type FROM OpenIMContact WHERE (type & 1) != 0
-				`,
-			)[0]
-			.values.reduce((acc, cur) => {
-				acc.push({
-					rowid: cur[0],
-					username: cur[1],
-					dbContactRemark: cur[2],
-					dbContactChatRoom: cur[3],
-					dbContactHeadImage: cur[4],
-					dbContactProfile: cur[5],
-					dbContactSocial: cur[6],
-					dbContactOpenIM: cur[7],
-					type: cur[8],
-				} as DatabaseFriendRow);
-				return acc;
-			}, [] as DatabaseFriendRow[]);
+		const rows = unionAll(
+			db
+				.select()
+				.from(friendTable)
+				.where(sql`(${friendTable.type} & 1) != 0`),
+			db
+				.select()
+				.from(openIMContactTable)
+				.where(sql`(${openIMContactTable.type} & 1) != 0`),
+		).all();
 
 		return {
-			data: await parseDatabaseContactRows(
+			data: await parseContactDatabaseFriendTableRowsRows(
 				databases,
-				dbFriendRows.filter((row) => {
+				rows.filter((row) => {
 					return !row.username.startsWith("gh_");
 				}),
 			),
@@ -422,8 +396,6 @@ export namespace UserController {
 	export async function findAll(...inputs: FindAllInput): FinfAllOutput {
 		const [{ ids }, { databases }] = inputs;
 
-		// 考虑到批量获取联系人可能很多，如果用 IN 查询，可能会导致 SQL 语句过长
-
 		const db = databases.WCDB_Contact;
 		if (!db) {
 			throw new Error("WCDB_Contact database is not found");
@@ -431,40 +403,22 @@ export namespace UserController {
 
 		if (ids.length === 0) return { data: [] };
 
-		const dbFriendRows: DatabaseFriendRow[] = db
-			.exec(
-				`
-          SELECT rowid, userName, dbContactRemark, dbContactChatRoom, dbContactHeadImage, dbContactProfile, dbContactSocial, dbContactOpenIM, type FROM Friend
-          UNION ALL
-          SELECT rowid, userName, dbContactRemark, dbContactChatRoom, dbContactHeadImage, dbContactProfile, dbContactSocial, dbContactOpenIM, type FROM OpenIMContact
-        `,
-			)[0]
-			.values.reduce((acc, cur) => {
-				acc.push({
-					rowid: cur[0],
-					username: cur[1],
-					dbContactRemark: cur[2],
-					dbContactChatRoom: cur[3],
-					dbContactHeadImage: cur[4],
-					dbContactProfile: cur[5],
-					dbContactSocial: cur[6],
-					dbContactOpenIM: cur[7],
-					type: cur[8],
-				} as DatabaseFriendRow);
-				return acc;
-			}, [] as DatabaseFriendRow[]);
+		// 现在用 IN 查询，但是可能会出现 SQL 语句过长的问题，暂时不知道限制是多少
+
+		const rows = unionAll(
+			db.select().from(friendTable).where(inArray(friendTable.username, ids)),
+			db
+				.select()
+				.from(openIMContactTable)
+				.where(inArray(openIMContactTable.username, ids)),
+		).all();
 
 		return {
 			data: [
 				...(ids.indexOf(adapterWorker._getStoreItem("account").id) > -1
 					? [adapterWorker._getStoreItem("account") as UserType]
 					: []),
-				...(await parseDatabaseContactRows(
-					databases,
-					dbFriendRows.filter((row) => {
-						return ids.includes(row.username);
-					}),
-				)),
+				...(await parseContactDatabaseFriendTableRowsRows(databases, rows)),
 			],
 		};
 	}
@@ -486,30 +440,18 @@ export namespace UserController {
 			throw new Error("WCDB_Contact database is not found");
 		}
 
-		const dbFriendRows: DatabaseFriendRow[] = db
-			.exec(
-				`
-					SELECT rowid, userName, dbContactRemark, dbContactChatRoom, dbContactHeadImage, dbContactProfile, dbContactSocial, dbContactOpenIM, type FROM Friend WHERE (type & 1) != 0
-					UNION  ALL
-					SELECT rowid, userName, dbContactRemark, dbContactChatRoom, dbContactHeadImage, dbContactProfile, dbContactSocial, dbContactOpenIM, type FROM OpenIMContact WHERE (type & 1) != 0
-				`,
-			)[0]
-			.values.reduce((acc, row) => {
-				acc.push({
-					rowid: row[0] as number,
-					username: row[1] as string,
-					dbContactRemark: row[2] as Uint8Array,
-					dbContactChatRoom: row[3] as Uint8Array,
-					dbContactHeadImage: row[4] as Uint8Array,
-					dbContactProfile: row[5] as Uint8Array,
-					dbContactSocial: row[6] as Uint8Array,
-					dbContactOpenIM: row[7] as Uint8Array,
-					type: row[8] as number,
-				} satisfies DatabaseFriendRow);
-				return acc;
-			}, [] as DatabaseFriendRow[]);
+		const rows = unionAll(
+			db
+				.select()
+				.from(friendTable)
+				.where(sql`(${friendTable.type} & 1) != 0`),
+			db
+				.select()
+				.from(openIMContactTable)
+				.where(sql`(${openIMContactTable.type} & 1) != 0`),
+		).all();
 
-		const result = dbFriendRows.map((row) => {
+		const result = rows.map((row) => {
 			const remarkObj = dbContactProtobufRoot
 				.lookupType("ContactRemark")
 				.decode(row.dbContactRemark) as unknown as Record<string, unknown>;

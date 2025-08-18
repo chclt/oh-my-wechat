@@ -7,19 +7,8 @@ import wasm from "vite-plugin-wasm";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-	server: {
-		headers: {
-			// 'Cross-Origin-Opener-Policy': 'same-origin',
-			// 'Cross-Origin-Embedder-Policy': 'require-corp',
-		},
-	},
 	optimizeDeps: {
-		exclude: [
-			"@sqlite.org/sqlite-wasm",
-			"@ffmpeg/ffmpeg",
-			"@ffmpeg/util",
-			"silk-wasm",
-		],
+		exclude: ["@ffmpeg/ffmpeg", "@ffmpeg/util", "silk-wasm"],
 	},
 	plugins: [
 		tanstackRouter({

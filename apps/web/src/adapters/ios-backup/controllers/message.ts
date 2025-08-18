@@ -50,15 +50,28 @@ import type {
 	DataAdapterResponse,
 	GetMessageListRequest,
 } from "@/adapters/adapter.ts";
-import type {
-	ControllerPaginatorCursor,
-	DatabaseMessageRow,
-	WCDatabases,
-} from "../types.ts";
+import type { ControllerPaginatorCursor, WCDatabases } from "../types.ts";
+import { chatTable, getChatTable, getHelloTable } from "../database/message.ts";
+import {
+	and,
+	asc,
+	desc,
+	eq,
+	gt,
+	gte,
+	inArray,
+	like,
+	lt,
+	lte,
+	or,
+	sql,
+} from "drizzle-orm";
+import { unionAll } from "drizzle-orm/sqlite-core";
 
+// eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace MessageController {
-	async function parseRawMessageRows(
-		raw_message_rows: DatabaseMessageRow[],
+	async function parseMessageDatabaseChatTableRows(
+		rows: (typeof chatTable.$inferSelect)[],
 		{
 			chat,
 			databases,
@@ -69,7 +82,7 @@ export namespace MessageController {
 			parseReplyMessage?: boolean;
 		},
 	): Promise<MessageType[]> {
-		const messageSenderIds = raw_message_rows
+		const messageSenderIds = rows
 			.map((raw_message_row) => {
 				if ((raw_message_row.Message as unknown) === null) {
 					raw_message_row.Message = "";
@@ -147,7 +160,7 @@ export namespace MessageController {
 		const messageIndexesHasReplyMessage: number[] = [];
 		const replyMessageIds: string[] = [];
 
-		const messages = raw_message_rows.map((raw_message_row, index) => {
+		const messages = rows.map((raw_message_row, index) => {
 			const message = {
 				id: raw_message_row.MesSvrID,
 				local_id: raw_message_row.MesLocalID,
@@ -446,199 +459,184 @@ export namespace MessageController {
 
 		const tableName = `Chat_${CryptoJS.MD5(chat.id).toString()}`;
 
+		const chatTable = getChatTable(tableName);
+
+		// SELECT
+		const querySelectSegment = {
+			[chatTable.MesLocalID.name]: chatTable.MesLocalID,
+			[chatTable.MesSvrID.name]:
+				sql<string>`CAST(${chatTable.MesSvrID} as TEXT)`.as(
+					chatTable.MesSvrID.name,
+				),
+			[chatTable.CreateTime.name]: chatTable.CreateTime,
+			[chatTable.Des.name]: chatTable.Des,
+			[chatTable.Message.name]: chatTable.Message,
+			[chatTable.Type.name]: chatTable.Type,
+		};
+
+		// cursor condition
+		// 不能直接把操作符放在模板字符串里面。比如 sql`${chatTable.CreateTime} ${cursor_condition} ${cursor_value}` 会报错
+		let cursorQueryWhereSegmentCondition: any = undefined;
+		if (cursor_value && cursor_condition) {
+			switch (cursor_condition) {
+				case "<":
+					cursorQueryWhereSegmentCondition = lt(
+						chatTable.CreateTime,
+						cursor_value,
+					);
+					break;
+				case "<=":
+					cursorQueryWhereSegmentCondition = lte(
+						chatTable.CreateTime,
+						cursor_value,
+					);
+					break;
+				case ">":
+					cursorQueryWhereSegmentCondition = gt(
+						chatTable.CreateTime,
+						cursor_value,
+					);
+					break;
+				case ">=":
+					cursorQueryWhereSegmentCondition = gte(
+						chatTable.CreateTime,
+						cursor_value,
+					);
+					break;
+				default:
+					break;
+			}
+		}
+
+		// type condition
+		const typeQueryWhereSegmentCondition = type
+			? inArray(chatTable.Type, Array.isArray(type) ? type : [type])
+			: undefined;
+
+		// type_app condition
+		const typeAppQueryWhereSegmentCondition = type_app
+			? or(
+					...(Array.isArray(type_app) ? type_app : [type_app]).map((i) =>
+						like(chatTable.Message, `%<type>${i}</type>%`),
+					),
+				)
+			: undefined;
+
+		// WHERE conditions
+		const baseQueryWhereSegmentConditions = [
+			cursorQueryWhereSegmentCondition,
+			typeQueryWhereSegmentCondition,
+			typeAppQueryWhereSegmentCondition,
+		].filter((i) => i);
+
+		// WHERE
+		const queryWhereSegment = baseQueryWhereSegmentConditions.length
+			? and(...baseQueryWhereSegmentConditions)
+			: undefined;
+
 		const rows = (
 			await Promise.allSettled(
 				dbs.map((database, index) => {
-					const databaseName = `message_${index}`;
-
 					try {
-						if (cursor_value) {
+						if (cursor_condition && cursor_value) {
 							if (cursor_condition === "<" || cursor_condition === "<=") {
-								return WCDB.execAsync(
-									`
-										SELECT 
-										* 
-										FROM (
-										SELECT
-											rowid, CreateTime, Des, ImgStatus, MesLocalID, Message, CAST(MesSvrID as TEXT) as MesSvrID, Status, TableVer, Type
-										FROM ${tableName}
-										WHERE
-											${[
-												`CreateTime ${cursor_condition} ${cursor_value}`,
-												type
-													? `Type IN (${
-															Array.isArray(type) ? type.join(", ") : type
-														})`
-													: undefined,
-												type === MessageTypeEnum.APP && type_app
-													? `(${(Array.isArray(type_app)
-															? type_app
-															: [type_app]
-														)
-															.map((i) => `Message like '%<type>${i}</type>%'`)
-															.join(" OR ")})`
-													: undefined,
-											]
-												.filter((i) => i)
-												.join(" AND ")}
-										ORDER BY CreateTime DESC
-										LIMIT ${query_limit}
-										) 
-										ORDER BY CreateTime ASC;
-									`,
-									{
-										database,
-										databaseSeries: WCDBDatabaseSeriesName.Message,
-										tableSeries: WCDBTableSeriesName.Chat,
-									},
-								);
-							}
+								const bastQuery = database
+									.select(querySelectSegment)
+									.from(chatTable)
+									.where(queryWhereSegment)
+									.orderBy(desc(chatTable.CreateTime))
+									.limit(query_limit)
+									.as("baseQuery");
 
-							if (
+								const query = database
+									.select()
+									.from(bastQuery)
+									.orderBy(asc(bastQuery.CreateTime));
+
+								return query.all();
+							} else if (
 								cursor_condition === ">=" ||
-								cursor_condition === ">" ||
-								cursor_condition === undefined
+								cursor_condition === ">"
 							) {
-								return WCDB.execAsync(
-									`
-										SELECT 
-											rowid, CreateTime, Des, ImgStatus, MesLocalID, Message, CAST (MesSvrID as TEXT) as MesSvrID, Status, TableVer, Type 
-										FROM 
-											${tableName} 
-										WHERE 
-											${[
-												`CreateTime ${cursor_condition} ${cursor_value}`,
-												type
-													? `Type IN (${
-															Array.isArray(type) ? type.join(", ") : type
-														})`
-													: undefined,
-												type === MessageTypeEnum.APP && type_app
-													? `(${(Array.isArray(type_app)
-															? type_app
-															: [type_app]
-														)
-															.map((i) => `Message like '%<type>${i}</type>%'`)
-															.join(" OR ")})`
-													: undefined,
-											]
-												.filter((i) => i)
-												.join(" AND ")}
-										ORDER BY CreateTime ASC 
-										LIMIT ${query_limit};
-									`,
-									{
-										database,
-										databaseSeries: WCDBDatabaseSeriesName.Message,
-										tableSeries: WCDBTableSeriesName.Chat,
-									},
+								const query = database
+									.select(querySelectSegment)
+									.from(chatTable)
+									.where(queryWhereSegment)
+									.orderBy(asc(chatTable.CreateTime))
+									.limit(query_limit);
+
+								return query.all();
+							} else if (cursor_condition === "<>") {
+								const baseLeftQueryWhereSegmentConditions = [
+									sql`${chatTable.CreateTime} < ${cursor_value}`,
+									typeQueryWhereSegmentCondition,
+									typeAppQueryWhereSegmentCondition,
+								].filter((i) => i);
+
+								const baseLeftQueryWhereSegment =
+									baseLeftQueryWhereSegmentConditions.length
+										? and(...baseLeftQueryWhereSegmentConditions)
+										: undefined;
+
+								const baseRightQueryWhereSegmentConditions = [
+									sql`${chatTable.CreateTime} >= ${cursor_value}`,
+									typeQueryWhereSegmentCondition,
+									typeAppQueryWhereSegmentCondition,
+								].filter((i) => i);
+
+								const baseRightQueryWhereSegment =
+									baseRightQueryWhereSegmentConditions.length
+										? and(...baseRightQueryWhereSegmentConditions)
+										: undefined;
+
+								const baseLeftQuery = database
+									.select(querySelectSegment)
+									.from(chatTable)
+									.where(baseLeftQueryWhereSegment)
+									.orderBy(desc(chatTable.CreateTime))
+									.limit(query_limit)
+									.as("baseLeftQuery");
+
+								const baseRightQuery = database
+									.select(querySelectSegment)
+									.from(chatTable)
+									.where(baseRightQueryWhereSegment)
+									.orderBy(asc(chatTable.CreateTime))
+									.limit(query_limit)
+									.as("baseRightQuery");
+
+								const baseQuery = unionAll(baseLeftQuery, baseRightQuery).as(
+									"baseQuery",
 								);
+
+								const query = database
+									.select()
+									.from(baseQuery)
+									.orderBy(asc(baseQuery.CreateTime));
+
+								return query.all();
 							}
+						} else {
+							// 没有游标的时候查询最新的数据但是按时间正序排列
+							// 游标在第一行
 
-							return WCDB.execAsync(
-								`
-									SELECT * FROM (
-										SELECT * FROM (
-											SELECT 
-												rowid, CreateTime, Des, ImgStatus, MesLocalID, Message, CAST(MesSvrID as TEXT) as MesSvrID, Status, TableVer, Type
-											FROM ${tableName}
-											WHERE ${[
-												`CreateTime < ${cursor_value}`,
-												type
-													? `Type IN (${
-															Array.isArray(type) ? type.join(", ") : type
-														})`
-													: undefined,
-												type === MessageTypeEnum.APP && type_app
-													? `(${(Array.isArray(type_app)
-															? type_app
-															: [type_app]
-														)
-															.map((i) => `Message like '%<type>${i}</type>%'`)
-															.join(" OR ")})`
-													: undefined,
-											]
-												.filter((i) => i)
-												.join(" AND ")}
-											ORDER BY CreateTime DESC
-											LIMIT ${query_limit}
-										)
+							const baseQuery = database
+								.select(querySelectSegment)
+								.from(chatTable)
+								.where(queryWhereSegment)
+								.orderBy(desc(chatTable.CreateTime))
+								.limit(query_limit)
+								.as("baseQuery");
 
-										UNION ALL
+							const query = database
+								.select()
+								.from(baseQuery)
+								.orderBy(asc(baseQuery.CreateTime));
 
-										SELECT * FROM (
-											SELECT 
-											rowid, CreateTime, Des, ImgStatus, MesLocalID, Message, CAST(MesSvrID as TEXT) as MesSvrID, Status, TableVer, Type
-											FROM ${tableName}
-											WHERE ${[
-												`CreateTime >= ${cursor_value}`,
-												type
-													? `Type IN (${
-															Array.isArray(type) ? type.join(", ") : type
-														})`
-													: undefined,
-												type === MessageTypeEnum.APP && type_app
-													? `(${(Array.isArray(type_app)
-															? type_app
-															: [type_app]
-														)
-															.map((i) => `Message like '%<type>${i}</type>%'`)
-															.join(" OR ")})`
-													: undefined,
-											]
-												.filter((i) => i)
-												.join(" AND ")}
-											ORDER BY CreateTime ASC
-											LIMIT ${query_limit}
-										)
-									)
-									ORDER BY CreateTime ASC;
-								`,
-								{
-									database,
-									databaseSeries: WCDBDatabaseSeriesName.Message,
-									tableSeries: WCDBTableSeriesName.Chat,
-								},
-							);
+							const rows = query.all();
+
+							return rows;
 						}
-
-						// 没有游标的时候查询最新的数据但是按时间正序排列
-						// 游标在第一行
-						return WCDB.execAsync(
-							`
-            SELECT 
-              * 
-            FROM (
-              SELECT 
-                  rowid, CreateTime, Des, ImgStatus, MesLocalID, Message, CAST(MesSvrID as TEXT) as MesSvrID, Status, TableVer, Type
-              FROM ${tableName}
-              ${
-								type
-									? `WHERE ${[
-											`Type IN (${
-												Array.isArray(type) ? type.join(", ") : type
-											})`,
-											type === MessageTypeEnum.APP && type_app
-												? `(${(Array.isArray(type_app) ? type_app : [type_app])
-														.map((i) => `Message like '%<type>${i}</type>%'`)
-														.join(" OR ")})`
-												: undefined,
-										]
-											.filter((i) => i)
-											.join(" AND ")}`
-									: ""
-							}
-              ORDER BY CreateTime DESC
-              LIMIT ${query_limit}
-            ) 
-            ORDER BY CreateTime ASC;
-          `,
-							{
-								database,
-								databaseSeries: WCDBDatabaseSeriesName.Message,
-								tableSeries: WCDBTableSeriesName.Chat,
-							},
-						);
 					} catch (e) {
 						if (e instanceof Error && e.message.startsWith("no such table")) {
 							//
@@ -667,47 +665,6 @@ export namespace MessageController {
 				meta: {},
 			};
 
-		const raw_message_rows: DatabaseMessageRow[] = [];
-
-		for (const row of rows[0].values) {
-			const [
-				rowid,
-				CreateTime,
-				Des,
-				ImgStatus,
-				MesLocalID,
-				Message,
-				MesSvrID,
-				Status,
-				TableVer,
-				Type,
-			] = row as [
-				number,
-				number,
-				MessageDirection,
-				1 | 2,
-				string,
-				string,
-				string,
-				number,
-				number,
-				number,
-			];
-
-			raw_message_rows.push({
-				rowid,
-				CreateTime,
-				Des,
-				ImgStatus,
-				MesLocalID,
-				Message,
-				MesSvrID,
-				Status,
-				TableVer,
-				Type,
-			});
-		}
-
 		// 根据请求游标，和查出来的数据，构建前后的游标
 		const cursors: Partial<{
 			current: ControllerPaginatorCursor;
@@ -715,20 +672,20 @@ export namespace MessageController {
 			next: ControllerPaginatorCursor;
 		}> = {};
 		if (cursor_value === undefined && cursor_condition === undefined) {
-			if (raw_message_rows.length === query_limit) {
+			if (rows.length === query_limit) {
 				// 有前一页，[0] 是前一页的最后一条
 				cursors.current = {
-					value: raw_message_rows[1].CreateTime,
+					value: rows[1].CreateTime,
 					condition: ">=",
 				};
 
 				cursors.previous = {
-					value: raw_message_rows[0].CreateTime,
+					value: rows[0].CreateTime,
 					condition: "<=",
 					_hasPreviousPage: true,
 				};
 
-				raw_message_rows.shift(); // 移除第一条数据
+				rows.shift(); // 移除第一条数据
 
 				// //  因为是静态数据，后面不会有新数据了，所以其实不会有下一页
 				// cursors.next = {
@@ -738,7 +695,7 @@ export namespace MessageController {
 				// };
 			} else {
 				cursors.current = {
-					value: raw_message_rows[0].CreateTime,
+					value: rows[0].CreateTime,
 					condition: ">=",
 				};
 
@@ -762,14 +719,14 @@ export namespace MessageController {
 			};
 
 			if (cursor_condition === "<" || cursor_condition === "<=") {
-				if (raw_message_rows.length === query_limit) {
+				if (rows.length === query_limit) {
 					cursors.previous = {
-						value: raw_message_rows[0].CreateTime,
+						value: rows[0].CreateTime,
 						condition: "<=",
 						_hasPreviousPage: true,
 					};
 
-					raw_message_rows.shift(); // 移除第一条数据
+					rows.shift(); // 移除第一条数据
 				} else {
 					// 其实已经没有前一页了
 					// cursors.previous = {
@@ -780,14 +737,14 @@ export namespace MessageController {
 				}
 
 				cursors.next = {
-					value: raw_message_rows.at(-1)!.CreateTime,
+					value: rows.at(-1)!.CreateTime,
 					condition: ">",
 					_hasNextPage: "unknown",
 				};
 			} else if (cursor_condition === ">" || cursor_condition === ">=") {
-				if (raw_message_rows.length === query_limit) {
+				if (rows.length === query_limit) {
 					cursors.next = {
-						value: raw_message_rows.at(-1)!.CreateTime,
+						value: rows.at(-1)!.CreateTime,
 						condition: ">=",
 						hasNextPage: true,
 					};
@@ -801,22 +758,22 @@ export namespace MessageController {
 				}
 
 				cursors.previous = {
-					value: raw_message_rows[0].CreateTime,
+					value: rows[0].CreateTime,
 					condition: "<",
 					_hasPreviousPage: "unknown",
 				};
 			} else if (cursor_condition === "<>") {
 				if (
-					raw_message_rows.filter((row) => row.CreateTime < cursor_value)
-						.length === query_limit
+					rows.filter((row) => row.CreateTime < cursor_value).length ===
+					query_limit
 				) {
 					cursors.previous = {
-						value: raw_message_rows[0].CreateTime,
+						value: rows[0].CreateTime,
 						condition: "<=",
 						_hasPreviousPage: true,
 					};
 
-					raw_message_rows.shift(); // 移除第一条数据
+					rows.shift(); // 移除第一条数据
 				} else {
 					// 其实已经没有前一页了
 					// cursors.previous = {
@@ -827,16 +784,16 @@ export namespace MessageController {
 				}
 
 				if (
-					raw_message_rows.filter((row) => row.CreateTime >= cursor_value)
-						.length === query_limit
+					rows.filter((row) => row.CreateTime >= cursor_value).length ===
+					query_limit
 				) {
 					cursors.next = {
-						value: raw_message_rows.at(-1)!.CreateTime,
+						value: rows.at(-1)!.CreateTime,
 						condition: ">=",
 						_hasNextPage: true,
 					};
 
-					raw_message_rows.pop(); // 移除最后一条数据
+					rows.pop(); // 移除最后一条数据
 				} else {
 					// 其实已经没有下一页了
 					// cursors.next = {
@@ -851,7 +808,7 @@ export namespace MessageController {
 		}
 
 		return {
-			data: await parseRawMessageRows(raw_message_rows, {
+			data: await parseMessageDatabaseChatTableRows(rows, {
 				chat,
 				databases,
 			}),
@@ -935,28 +892,30 @@ export namespace MessageController {
 
 		const tableName = `Chat_${CryptoJS.MD5(chat.id).toString()}`;
 
+		const chatTable = getChatTable(tableName);
+
 		const rows = (
 			await Promise.allSettled(
 				dbs.map((database, index) => {
 					const databaseName = `message_${index}`;
 
 					try {
-						return WCDB.execAsync(
-							`
-								SELECT 
-									rowid, CreateTime, Des, ImgStatus, MesLocalID, Message, CAST (MesSvrID as TEXT) as MesSvrID, Status, TableVer, Type 
-								FROM 
-									${tableName} 
-								WHERE 
-									MesSvrID IN (${messageIds.map((id) => `'${id}'`).join(",")});
-								;
-							`,
-							{
-								database,
-								databaseSeries: WCDBDatabaseSeriesName.Message,
-								tableSeries: WCDBTableSeriesName.Chat,
-							},
-						);
+						const query = database
+							.select({
+								[chatTable.MesLocalID.name]: chatTable.MesLocalID,
+								[chatTable.MesSvrID.name]:
+									sql<string>`CAST(${chatTable.MesSvrID} as TEXT)`.as(
+										chatTable.MesSvrID.name,
+									),
+								[chatTable.CreateTime.name]: chatTable.CreateTime,
+								[chatTable.Des.name]: chatTable.Des,
+								[chatTable.Message.name]: chatTable.Message,
+								[chatTable.Type.name]: chatTable.Type,
+							})
+							.from(chatTable)
+							.where(inArray(chatTable.MesSvrID, messageIds));
+
+						return query.all();
 					} catch (error) {
 						return [];
 					}
@@ -972,55 +931,14 @@ export namespace MessageController {
 			return [];
 		});
 
-		const raw_message_rows: DatabaseMessageRow[] = [];
-
 		if (!rows) {
 			return {
 				data: [],
 			};
 		}
 
-		for (const row of rows[0].values) {
-			const [
-				rowid,
-				CreateTime,
-				Des,
-				ImgStatus,
-				MesLocalID,
-				Message,
-				MesSvrID,
-				Status,
-				TableVer,
-				Type,
-			] = row as [
-				number,
-				number,
-				MessageDirection,
-				1 | 2,
-				string,
-				string,
-				string,
-				number,
-				number,
-				number,
-			];
-
-			raw_message_rows.push({
-				rowid,
-				CreateTime,
-				Des,
-				ImgStatus,
-				MesLocalID,
-				Message,
-				MesSvrID,
-				Status,
-				TableVer,
-				Type,
-			});
-		}
-
 		return {
-			data: await parseRawMessageRows(raw_message_rows, {
+			data: await parseMessageDatabaseChatTableRows(rows, {
 				chat,
 				databases,
 				parseReplyMessage,
@@ -1047,66 +965,39 @@ export namespace MessageController {
 		const rows = [
 			...dbs.map((database) => {
 				try {
-					const tableNames = database.exec(
-						'SELECT name FROM sqlite_master WHERE type = "table" AND name LIKE "Hello_%";',
-					);
+					const databaseTables = database
+						.select({
+							name: sql<string>`name`,
+						})
+						.from(sql`sqlite_master`)
+						.where(and(eq(sql`type`, "table"), like(sql`name`, "Hello_%")))
+						.all();
 
-					return database.exec(`
-            SELECT 
-                rowid, CreateTime, Des, ImgStatus, MesLocalID, Message, CAST (MesSvrID as TEXT) as MesSvrID, Status, TableVer, Type 
-            FROM 
-                ${tableNames[0].values[0][0]} 
-            ORDER BY CreateTime DESC;
-          `);
+					const helloTable = getHelloTable(databaseTables[0].name);
+
+					return database
+						.select({
+							[chatTable.MesLocalID.name]: chatTable.MesLocalID,
+							[chatTable.MesSvrID.name]:
+								sql<string>`CAST(${chatTable.MesSvrID} as TEXT)`.as(
+									chatTable.MesSvrID.name,
+								),
+							[chatTable.CreateTime.name]: chatTable.CreateTime,
+							[chatTable.Des.name]: chatTable.Des,
+							[chatTable.Message.name]: chatTable.Message,
+							[chatTable.Type.name]: chatTable.Type,
+						})
+						.from(helloTable)
+						.orderBy(desc(helloTable.CreateTime))
+						.all();
 				} catch (error) {
 					return [];
 				}
 			}),
 		].filter((row) => row.length > 0)[0];
 
-		const raw_message_rows: DatabaseMessageRow[] = [];
-
-		for (const row of rows[0].values) {
-			const [
-				rowid,
-				CreateTime,
-				Des,
-				ImgStatus,
-				MesLocalID,
-				Message,
-				MesSvrID,
-				Status,
-				TableVer,
-				Type,
-			] = row as [
-				number,
-				number,
-				MessageDirection,
-				1 | 2,
-				string,
-				string,
-				string,
-				number,
-				number,
-				number,
-			];
-
-			raw_message_rows.push({
-				rowid,
-				CreateTime,
-				Des,
-				ImgStatus,
-				MesLocalID,
-				Message,
-				MesSvrID,
-				Status,
-				TableVer,
-				Type,
-			});
-		}
-
 		return {
-			data: await parseRawMessageRows(raw_message_rows, {
+			data: await parseMessageDatabaseChatTableRows(rows, {
 				databases,
 			}),
 		};
