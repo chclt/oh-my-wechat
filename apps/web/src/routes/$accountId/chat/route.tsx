@@ -1,4 +1,4 @@
-import ChatList from "@/components/chat-list";
+import ChatList from "./-components/chat-list";
 import {
 	ResizableHandle,
 	ResizablePanel,

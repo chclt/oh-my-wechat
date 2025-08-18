@@ -4,24 +4,25 @@ import { ChatListSuspenseQueryOptions } from "@/lib/fetchers/chat";
 import { LastMessageQueryOptions } from "@/lib/fetchers/message";
 import type { ChatType } from "@/schema";
 import { cn, formatDateTime } from "@/lib/utils.ts";
-import { Route } from "@/routes/$accountId/chat/route";
+import { Route } from "../route";
 import { useInViewport } from "@mantine/hooks";
 import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import type React from "react";
+import useChatList from "./use-chat-list";
 
 export default function ChatList() {
 	const { accountId } = Route.useParams();
 
 	const { data } = useSuspenseQuery(ChatListSuspenseQueryOptions(accountId));
 
+	const chatList = useChatList(data);
+
 	return (
 		<ul>
-			{data
-				.sort((i) => (i.is_pinned ? -1 : 1))
-				.map((chat) => (
-					<ChatItem key={chat.id} chat={chat} />
-				))}
+			{chatList.map((chat) => (
+				<ChatItem key={chat.id} chat={chat} />
+			))}
 		</ul>
 	);
 }
@@ -61,7 +62,7 @@ function ChatItem({ chat, className, ...props }: ChatItemProps) {
 						className={cn(
 							"shrink-0 w-12 h-12 clothoid-corner-2",
 							chat.type === "chatroom"
-								? "relative after:content-[''] after:absolute after:inset-0 after:rounded-lg after:border-2 after:border-[#DDDFE0]"
+								? "relative after:absolute after:inset-0 after:rounded-md after:border-2 after:border-[#DDDFE0]"
 								: "",
 						)}
 					>

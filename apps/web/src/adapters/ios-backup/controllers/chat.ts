@@ -19,26 +19,6 @@ export namespace ChatController {
 		databases: WCDatabases,
 		rows: (typeof sessionAbstractTable.$inferSelect)[],
 	): Promise<ChatType[]> {
-		// const specialBrandIds = specialBrandId.split("\n").map((i) => i.trim());
-
-		// const dbSessionAbstractRowsFiltered = rows.filter(
-		// 	(row) =>
-		// 		!(
-		// 			row.UsrName.startsWith("gh_") ||
-		// 			row.UsrName.endsWith("@openim") || // TODO
-		// 			specialBrandIds.includes(row.UsrName) ||
-		// 			[
-		// 				"chatroom_session_box",
-		// 				"newsapp",
-		// 				"brandsessionholder",
-		// 				"notification_messages",
-		// 				"brandsessionholder_weapp",
-		// 				"opencustomerservicemsg",
-		// 				"brandservicesessionholder",
-		// 			].includes(row.UsrName)
-		// 		),
-		// );
-
 		const contactRows: (UserType | ChatroomType)[] = (
 			await UserController.findAll(
 				{
