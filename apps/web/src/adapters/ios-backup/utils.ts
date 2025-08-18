@@ -1,9 +1,11 @@
 import type { UserType } from "@/schema";
+import { SQLJsDatabase } from "drizzle-orm/sql-js";
 import protobuf from "protobufjs";
-import type { Database } from "sql.js";
+import { filesTable } from "./database/_manifest";
+import { and, eq, like } from "drizzle-orm";
 
 export async function getFilesFromManifast(
-	manifestDatabase: Database,
+	manifestDatabase: SQLJsDatabase,
 	directory: FileSystemDirectoryHandle | FileList,
 	fileNamePattern: string,
 ): Promise<
@@ -12,17 +14,26 @@ export async function getFilesFromManifast(
 		file: File;
 	}[]
 > {
-	const rows = manifestDatabase.exec(
-		`SELECT * FROM "Files" WHERE "domain" = "AppDomain-com.tencent.xin" AND "relativePath" LIKE "${fileNamePattern}" AND "flags" = 1 ORDER BY relativePath`,
-	);
+	const rows = manifestDatabase
+		.select()
+		.from(filesTable)
+		.where(
+			and(
+				eq(filesTable.domain, "AppDomain-com.tencent.xin"),
+				like(filesTable.relativePath, fileNamePattern),
+				eq(filesTable.flags, 1),
+			),
+		)
+		.orderBy(filesTable.relativePath)
+		.all();
 
 	if (rows.length === 0) return [];
 
 	const fileList = [];
 
-	for (const row of rows[0].values) {
-		const manifestFileName = row[0] as string;
-		const fileFullName = row[2] as string;
+	for (const row of rows) {
+		const manifestFileName = row.fileID;
+		const fileFullName = row.relativePath!;
 		const fileName = fileFullName.split("/").pop() as string;
 		if (manifestFileName.length === 0) continue;
 		const filePrefix = manifestFileName.substring(0, 2);

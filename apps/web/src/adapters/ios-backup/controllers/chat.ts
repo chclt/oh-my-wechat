@@ -7,45 +7,47 @@ import type {
 } from "@/schema";
 import CryptoJS from "crypto-js";
 import { UserController } from "./contact";
-import specialBrandId from "@/assets/specialBrandUserNames.csv?raw";
 import { adapterWorker } from "../worker";
 import type { DataAdapterResponse } from "@/adapters/adapter";
-import type { DatabaseSessionAbstractRow, WCDatabases } from "../types";
+import type { WCDatabases } from "../types";
+import { sessionAbstractTable } from "../database/session";
+import { desc, inArray } from "drizzle-orm";
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace ChatController {
-	async function parseDatabaseChatRows(
+	async function parseSessionDatabaseSessionAbstractTableRows(
 		databases: WCDatabases,
-		dbSessionAbstractRows: DatabaseSessionAbstractRow[],
+		rows: (typeof sessionAbstractTable.$inferSelect)[],
 	): Promise<ChatType[]> {
-		const specialBrandIds = specialBrandId.split("\n").map((i) => i.trim());
+		// const specialBrandIds = specialBrandId.split("\n").map((i) => i.trim());
 
-		const dbSessionAbstractRowsFiltered = dbSessionAbstractRows.filter(
-			(row) =>
-				!(
-					row.UsrName.startsWith("gh_") ||
-					row.UsrName.endsWith("@openim") || // TODO
-					specialBrandIds.includes(row.UsrName) ||
-					[
-						"chatroom_session_box",
-						"newsapp",
-						"brandsessionholder",
-						"notification_messages",
-						"brandsessionholder_weapp",
-						"opencustomerservicemsg",
-						"brandservicesessionholder",
-					].includes(row.UsrName)
-				),
-		);
+		// const dbSessionAbstractRowsFiltered = rows.filter(
+		// 	(row) =>
+		// 		!(
+		// 			row.UsrName.startsWith("gh_") ||
+		// 			row.UsrName.endsWith("@openim") || // TODO
+		// 			specialBrandIds.includes(row.UsrName) ||
+		// 			[
+		// 				"chatroom_session_box",
+		// 				"newsapp",
+		// 				"brandsessionholder",
+		// 				"notification_messages",
+		// 				"brandsessionholder_weapp",
+		// 				"opencustomerservicemsg",
+		// 				"brandservicesessionholder",
+		// 			].includes(row.UsrName)
+		// 		),
+		// );
 
 		const contactRows: (UserType | ChatroomType)[] = (
 			await UserController.findAll(
 				{
-					ids: dbSessionAbstractRowsFiltered.map((row) => row.UsrName),
+					ids: rows.map((row) => row.UsrName),
 				},
 				{ databases },
 			)
 		).data;
+
 		const contacts: { [key: string]: UserType | ChatroomType } = {};
 		for (const contact of contactRows) {
 			contacts[contact.id] = contact;
@@ -53,7 +55,7 @@ export namespace ChatController {
 
 		const result: ChatType[] = [];
 
-		for (const row of dbSessionAbstractRowsFiltered) {
+		for (const row of rows) {
 			const contactInfo = contacts[row.UsrName];
 			const chat = row.UsrName.endsWith("@chatroom")
 				? ({
@@ -121,22 +123,14 @@ export namespace ChatController {
 			throw new Error("session database is not found");
 		}
 
-		const dbSessionAbstractRows: DatabaseSessionAbstractRow[] = db
-			.exec(
-				"SELECT rowid, CreateTime, UsrName, ConIntRes1 FROM SessionAbstract ORDER BY CreateTime Desc",
-			)[0]
-			.values.reduce((acc, cur) => {
-				acc.push({
-					rowid: cur[0],
-					CreateTime: cur[1],
-					UsrName: cur[2],
-					ConIntRes1: cur[3],
-				} as DatabaseSessionAbstractRow);
-				return acc;
-			}, [] as DatabaseSessionAbstractRow[]);
+		const rows = db
+			.select()
+			.from(sessionAbstractTable)
+			.orderBy(desc(sessionAbstractTable.CreateTime))
+			.all();
 
 		return {
-			data: await parseDatabaseChatRows(databases, dbSessionAbstractRows),
+			data: await parseSessionDatabaseSessionAbstractTableRows(databases, rows),
 		};
 	}
 
@@ -153,22 +147,15 @@ export namespace ChatController {
 
 		if (ids.length === 0) return { data: [] };
 
-		const dbSessionAbstractRows: DatabaseSessionAbstractRow[] = db
-			.exec(
-				`SELECT rowid, CreateTime, UsrName, ConIntRes1 FROM SessionAbstract WHERE UsrName IN (${ids.map((id) => `'${id}'`).join(",")}) ORDER BY CreateTime Desc`,
-			)[0]
-			.values.reduce((acc, cur) => {
-				acc.push({
-					rowid: cur[0],
-					CreateTime: cur[1],
-					UsrName: cur[2],
-					ConIntRes1: cur[3],
-				} as DatabaseSessionAbstractRow);
-				return acc;
-			}, [] as DatabaseSessionAbstractRow[]);
+		const rows = db
+			.select()
+			.from(sessionAbstractTable)
+			.where(inArray(sessionAbstractTable.UsrName, ids))
+			.orderBy(desc(sessionAbstractTable.CreateTime))
+			.all();
 
 		return {
-			data: await parseDatabaseChatRows(databases, dbSessionAbstractRows),
+			data: await parseSessionDatabaseSessionAbstractTableRows(databases, rows),
 		};
 	}
 }

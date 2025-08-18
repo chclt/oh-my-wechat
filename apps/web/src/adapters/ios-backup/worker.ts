@@ -1,4 +1,4 @@
-import initSqlJs, { type Database } from "sql.js";
+import initSqlJs from "sql.js";
 import sqliteUrl from "sql.js/dist/sql-wasm.wasm?url";
 import CryptoJS from "crypto-js";
 import type { AccountType, UserType } from "@/schema";
@@ -19,6 +19,11 @@ import { StatisticController } from "./controllers/statistic";
 import * as Comlink from "comlink";
 import type { DataAdapterResponse } from "../adapter";
 import type { WCDatabaseNames, WCDatabases } from "./types";
+import { drizzle } from "drizzle-orm/sql-js";
+import { filesTable } from "./database/_manifest";
+
+import { Buffer } from "buffer";
+globalThis.Buffer = Buffer;
 
 interface AdapterWorkerStore {
 	directory: FileSystemDirectoryHandle | FileList | undefined;
@@ -115,8 +120,9 @@ export const adapterWorker: AdapterWorkerType = {
 		);
 		if (!manifestDatabaseFile) throw new Error("Manifest.db not found");
 		const manifestDatabaseFileBuffer = await manifestDatabaseFile.arrayBuffer();
-		const manifestDatabase = new SQL.Database(
-			new Uint8Array(manifestDatabaseFileBuffer),
+
+		const manifestDatabase = drizzle(
+			new SQL.Database(new Uint8Array(manifestDatabaseFileBuffer)),
 		);
 
 		storeDatabase.manifest = manifestDatabase;
@@ -175,8 +181,8 @@ export const adapterWorker: AdapterWorkerType = {
 				`Documents/${accountIdMd5}/session/session.db`,
 			)
 		)[0].file.arrayBuffer();
-		storeDatabase.session = new SQL.Database(
-			new Uint8Array(databaseFileBuffer),
+		storeDatabase.session = drizzle(
+			new SQL.Database(new Uint8Array(databaseFileBuffer)),
 		);
 
 		databaseFileBuffer = await (
@@ -187,8 +193,8 @@ export const adapterWorker: AdapterWorkerType = {
 			)
 		)[0].file.arrayBuffer();
 
-		storeDatabase.WCDB_Contact = new SQL.Database(
-			new Uint8Array(databaseFileBuffer),
+		storeDatabase.WCDB_Contact = drizzle(
+			new SQL.Database(new Uint8Array(databaseFileBuffer)),
 		);
 
 		for (const fileItem of await getFilesFromManifast(
@@ -201,7 +207,7 @@ export const adapterWorker: AdapterWorkerType = {
 			if (storeDatabase.message === undefined) storeDatabase.message = [];
 
 			storeDatabase.message.push(
-				new SQL.Database(new Uint8Array(databaseFileBuffer)),
+				drizzle(new SQL.Database(new Uint8Array(databaseFileBuffer))),
 			);
 		}
 
@@ -209,15 +215,19 @@ export const adapterWorker: AdapterWorkerType = {
 	},
 
 	_unloadAccountDatabase: async () => {
-		for (const databaseName in _store.databases) {
-			if (Array.isArray(_store.databases[databaseName as WCDatabaseNames])) {
-				for (const db of _store.databases[
-					databaseName as WCDatabaseNames
-				] as Database[]) {
-					db.close();
+		const storeDatabases = adapterWorker._getStoreItem("databases");
+
+		for (const databaseName in storeDatabases) {
+			const values = storeDatabases[databaseName as WCDatabaseNames];
+
+			if (values === undefined) {
+				continue;
+			} else if (Array.isArray(values)) {
+				for (const database of values) {
+					// database.close();
 				}
 			} else {
-				(_store.databases[databaseName as WCDatabaseNames] as Database).close();
+				// values.close();
 			}
 		}
 

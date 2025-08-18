@@ -97,15 +97,18 @@ export enum RecordTypeEnum {
 	TING = 32,
 }
 
-export interface BasicMessageType<T extends MessageTypeEnum, S> {
+export interface BasicMessageType<
+	MessageTypeEnumType extends MessageTypeEnum | unknown,
+	MessageEntityType,
+> {
 	id: string; // Message server id
 	local_id: string;
-	type: T;
+	type: MessageTypeEnumType;
 	from: UserType;
 	date: number;
 	direction: MessageDirection;
 	chat: ChatType; // Chat the message belongs to
-	message_entity: S;
+	message_entity: MessageEntityType;
 	reply_to_message?: MessageType;
 	raw_message: string;
 }
@@ -147,10 +150,13 @@ export type LocationMessageType = BasicMessageType<
 	LocationMessageEntity
 >;
 export type AppMessageType<
-	T = {
+	AppMessageEntityType = {
 		type: unknown;
 	},
-> = BasicMessageType<MessageTypeEnum.APP, AppMessageEntity<T>>;
+> = BasicMessageType<
+	MessageTypeEnum.APP,
+	AppMessageEntity<AppMessageEntityType>
+>;
 export type VoipMessageType = BasicMessageType<
 	MessageTypeEnum.VOIP,
 	VoipMessageEntity

@@ -90,6 +90,7 @@ export interface ChatStatistics {
 	}[];
 }
 
+// eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace StatisticController {
 	export type GetInput = [GetStatisticRequest, { databases: WCDatabases }];
 	export type GetOutput = Promise<DataAdapterResponse<ChatStatistics>>;
@@ -106,6 +107,7 @@ export namespace StatisticController {
 
 		const statistics: ChatStatistics = {};
 
+		/*
 		dbs.map((database) => {
 			try {
 				let databaseQueryResult = [];
@@ -155,7 +157,7 @@ export namespace StatisticController {
 					);
 				}
 
-				/*
+				/!*
         // 统计聊天中每个用户的发言数量，因为数据格式，需要在查询数据库后额外处理，暂时注释
         databaseQueryResult = database.exec(
           chat.type === "private"
@@ -202,7 +204,7 @@ export namespace StatisticController {
             }),
           );
         }
-        */
+        *!/
 
 				databaseQueryResult = database.exec(
 					`
@@ -374,7 +376,7 @@ export namespace StatisticController {
 						}));
 				}
 
-				/*
+				/!*
         // 下面有新的更准确的方法了
         databaseQueryResult = database.exec(
           `
@@ -400,7 +402,7 @@ export namespace StatisticController {
             (databaseQueryResult[2].values[0][0] as number) +
             (databaseQueryResult[5].values[0][0] as number);
         }
-         */
+         *!/
 
 				databaseQueryResult = database.exec(
 					`
@@ -459,6 +461,7 @@ export namespace StatisticController {
 				return [];
 			}
 		});
+*/
 
 		/* 字数和微信表情使用统计 */
 

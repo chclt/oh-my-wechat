@@ -1,15 +1,3 @@
-import type { Database, QueryExecResult } from "sql.js";
-
-interface WCDBCompressionConfig {
-	[DatabaseName: string]: null | {
-		[TableName: string]: {
-			[ColumnName: string]: boolean;
-		};
-	};
-}
-
-const wcdbCompressionConfig: WCDBCompressionConfig = {};
-
 export enum WCDBDatabaseSeriesName {
 	Message = "MessageDatabase",
 }
@@ -35,161 +23,60 @@ const wcdbCompressionConfigConstant: WCDBCompressionConfigConstant = {
 };
 
 interface WCDBType {
-	_parseDatabaseCompressionConfig: (databaseInfo: {
-		databaseName: string;
-		database: Database;
-	}) => WCDBCompressionConfig[string];
-
-	_getDatabaseCompressionConfig: (databaseInfo: {
-		databaseName: string;
-		database: Database;
-	}) => WCDBCompressionConfig[string];
-
-	execAsync: (
-		sql: string,
+	postProcess: <DataType extends Record<string, unknown>[]>(
+		rows: DataType,
 		options: {
-			database: Database;
 			databaseSeries: WCDBDatabaseSeriesName;
 			tableSeries: WCDBTableSeriesName;
 		},
-	) => Promise<QueryExecResult[]>;
+	) => Promise<{
+		result: DataType;
+		errors: { rowIndex: number }[];
+	}>;
 }
 
 const WCDB: WCDBType = {
-	_parseDatabaseCompressionConfig: ({ databaseName, database }) => {
-		if (wcdbCompressionConfig[databaseName] !== undefined) {
-			return wcdbCompressionConfig[databaseName];
-		}
+	postProcess: async (rows, { databaseSeries, tableSeries }) => {
+		const errors: { rowIndex: number }[] = [];
 
-		const queryResult = database.exec(
-			`SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'wcdb_builtin_compression_record';`,
-		);
-
-		if (!queryResult[0] || queryResult[0].values.length === 0) {
-			wcdbCompressionConfig[databaseName] = null;
-			return wcdbCompressionConfig[databaseName];
-		}
-
-		const queryResult2 = database.exec(
-			`SELECT * FROM wcdb_builtin_compression_record;`,
-		);
-
-		if (!queryResult2[0] || queryResult2[0].values.length === 0) {
-			wcdbCompressionConfig[databaseName] = null;
-			return wcdbCompressionConfig[databaseName];
-		}
-
-		let tableNameIndex: number | undefined;
-		let columnNameIndex: number | undefined;
-		let rowidIndex: number | undefined;
-
-		queryResult2[0].columns.forEach((columnName, index) => {
-			if (columnName === "tableName") {
-				tableNameIndex = index;
-			} else if (columnName === "columns") {
-				columnNameIndex = index;
-			} else if (columnName === "rowid") {
-				rowidIndex = index;
-			}
-		});
-
-		if (
-			tableNameIndex === undefined ||
-			columnNameIndex === undefined /* || rowidIndex === undefined */
-		) {
-			wcdbCompressionConfig[databaseName] = null;
-			return wcdbCompressionConfig[databaseName];
-		}
-
-		queryResult2[0].values.forEach((row) => {
-			const tableName = row[tableNameIndex as number] as string;
-			const columnCompressionConfig = row[columnNameIndex as number] as string;
-
-			const stringConfigArray = columnCompressionConfig.split(",");
-			const settledColumnConfig: Record<string, boolean> = {};
-			const pendindColumnName: string[] = [];
-
-			for (const stringConfig of stringConfigArray) {
-				const [columnName, dictionaryId] = stringConfig.split(":");
-				pendindColumnName.push(columnName);
-
-				if (dictionaryId === undefined) {
-					//
-				} else {
-					for (const columnName of pendindColumnName) {
-						settledColumnConfig[columnName] = true;
-					}
-					pendindColumnName.length = 0;
-				}
-			}
-
-			Object.entries(settledColumnConfig).forEach(([columnName, enabled]) => {
-				if (!wcdbCompressionConfig[databaseName]) {
-					wcdbCompressionConfig[databaseName] = {};
-				}
-				if (!wcdbCompressionConfig[databaseName][tableName]) {
-					wcdbCompressionConfig[databaseName][tableName] = {};
-				}
-				wcdbCompressionConfig[databaseName][tableName][columnName] = enabled;
-			});
-		});
-
-		return wcdbCompressionConfig[databaseName];
-	},
-
-	_getDatabaseCompressionConfig: ({ databaseName, database }) => {
-		if (wcdbCompressionConfig[databaseName] === undefined) {
-			WCDB._parseDatabaseCompressionConfig({ databaseName, database });
-		}
-
-		return wcdbCompressionConfig[databaseName];
-	},
-
-	execAsync: async (sql, { database, databaseSeries, tableSeries }) => {
 		const databaseCompressionConfig =
 			wcdbCompressionConfigConstant[databaseSeries];
-
 		if (!databaseCompressionConfig) {
-			return database.exec(sql);
+			return { result: rows, errors };
 		}
 
 		const tableCompressionConfig = databaseCompressionConfig[tableSeries];
 		if (!tableCompressionConfig) {
-			return database.exec(sql);
+			return { result: rows, errors };
 		}
 
-		const queryResult = database.exec(sql);
+		for (let index = 0; index < rows.length; index++) {
+			const row = rows[index];
 
-		return new Promise((resolve) => {
-			for (const segmentResult of queryResult) {
-				const decompressedColumnIndex: Record<number, string> = {};
-				segmentResult.columns.forEach((columnName, index) => {
-					const columnCompressionConfig = tableCompressionConfig[columnName];
-					if (columnCompressionConfig) {
-						decompressedColumnIndex[index] = columnName;
-					}
-				});
+			for (const [columnName, compressionFlag] of Object.entries(
+				tableCompressionConfig,
+			)) {
+				if (!Object.prototype.hasOwnProperty.call(row, columnName)) {
+					continue;
+				}
 
-				for (const row of segmentResult.values) {
-					for (const [columnIndexString] of Object.entries(
-						decompressedColumnIndex,
-					)) {
-						const columnIndex = Number(columnIndexString);
+				const rawColumnValue = row[columnName];
 
-						const rawColumnValue = row[columnIndex];
-
-						if (rawColumnValue instanceof Uint8Array) {
-							row[columnIndex] = new TextDecoder("utf-8").decode(
-								rawColumnValue,
-							);
-						} else {
-						}
+				if (rawColumnValue instanceof Uint8Array) {
+					try {
+						// TODO: 无法支持被压缩的消息
+						throw new Error("Unsupported compressed column.");
+					} catch (error) {
+						row[columnName] = new TextDecoder("utf-8").decode(rawColumnValue);
+						errors.push({
+							rowIndex: index,
+						});
 					}
 				}
 			}
+		}
 
-			resolve(queryResult);
-		});
+		return { result: rows, errors };
 	},
 };
 
