@@ -1,20 +1,9 @@
 import type { VoiceInfo } from "@/schema";
-import { FFmpeg } from "@ffmpeg/ffmpeg";
-import { toBlobURL } from "@ffmpeg/util";
 import CryptoJS from "crypto-js";
-import { decode } from "silk-wasm";
 import { getFilesFromManifast } from "../utils";
 import { DataAdapterResponse, GetVoiceRequest } from "@/adapters/adapter";
 import { WCDatabases } from "../types";
-
-const ffmpegCoreURL =
-	"https://unpkg.com/@ffmpeg/core@0.12.10/dist/esm/ffmpeg-core.js";
-const ffmpegWasmURL =
-	"https://unpkg.com/@ffmpeg/core@0.12.10/dist/esm/ffmpeg-core.wasm";
-
-const ffmpeg = new FFmpeg();
-
-let isFFmpegLoading = false; // 防止重复加载, TODO: 更好应该是写一个事件广播
+import { convertSilk } from "../utils/silk";
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace VoiceController {
@@ -45,49 +34,7 @@ export namespace VoiceController {
 				result = {
 					...result,
 					raw_aud_src: URL.createObjectURL(file.file),
-					src: await (async () => {
-						const silk = await decode(await file.file.arrayBuffer(), 24000);
-
-						if (!ffmpeg.loaded) {
-							if (!isFFmpegLoading) {
-								isFFmpegLoading = true;
-								await ffmpeg.load({
-									coreURL: await toBlobURL(ffmpegCoreURL, "text/javascript"),
-									wasmURL: await toBlobURL(ffmpegWasmURL, "application/wasm"),
-								});
-							}
-
-							// TODO
-							while (!ffmpeg.loaded) {
-								await new Promise((resolve) => setTimeout(resolve, 200));
-							}
-						}
-
-						const ffmpegInputFilename = `${message.chat.id}|${message.local_id}.pcm`;
-						const ffmpegOutputFilename = `${message.chat.id}|${message.local_id}.wav`;
-
-						await ffmpeg.writeFile(ffmpegInputFilename, silk.data);
-						await ffmpeg.exec([
-							"-y",
-							"-f",
-							"s16le",
-							"-ar",
-							"24000",
-							"-ac",
-							"1",
-							"-i",
-							ffmpegInputFilename,
-							ffmpegOutputFilename,
-						]);
-						const wav = await ffmpeg.readFile(ffmpegOutputFilename);
-
-						ffmpeg.deleteFile(ffmpegInputFilename);
-						ffmpeg.deleteFile(ffmpegOutputFilename);
-
-						// TODO
-						// @ts-ignore
-						return URL.createObjectURL(new Blob([wav], { type: "audio/wav" }));
-					})(),
+					src: await convertSilk(await file.file.arrayBuffer()),
 				};
 			}
 
