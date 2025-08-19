@@ -25,7 +25,14 @@ export default function Configurer(
 ) {
 	const navigate = useNavigate();
 
-	const adapterRef = useRef(new IosBackupAdapter());
+	const adapterRef = useRef<IosBackupAdapter | null>(null);
+
+	function getAdapter() {
+		if (adapterRef.current === null) {
+			adapterRef.current = new IosBackupAdapter();
+		}
+		return adapterRef.current;
+	}
 
 	const [adapterInited, setAdapterInited] = useState(false);
 
@@ -33,18 +40,18 @@ export default function Configurer(
 		mutateAsync: loadDirectory,
 		isPending: isLoadingDirectory,
 		isSuccess: isLoadDirectorySuccess,
-	} = useMutation(LoadDirectoryMutationOptions(adapterRef.current));
+	} = useMutation(LoadDirectoryMutationOptions(getAdapter()));
 
 	const {
 		mutateAsync: loadAccountDatabase,
 		isPending: isLoadingAccountDatabase,
 		isSuccess: isLoadAccountDatabaseSuccess,
-	} = useMutation(LoadAccountDatabaseMutationOptions(adapterRef.current));
+	} = useMutation(LoadAccountDatabaseMutationOptions(getAdapter()));
 
 	const handleDirectorySelect = async (
 		directoryHandle: FileSystemDirectoryHandle | FileList,
 	) => {
-		setDataAdapter(adapterRef.current);
+		setDataAdapter(getAdapter());
 		loadDirectory(directoryHandle).then(() => {
 			setAdapterInited(true);
 		});
