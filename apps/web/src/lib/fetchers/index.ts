@@ -1,10 +1,10 @@
 import type { UseSuspenseQueryOptions } from "@tanstack/react-query";
 import type { FileInfo, ImageInfo, VideoInfo, VoiceInfo } from "@/schema";
 import { getDataAdapter } from "../data-adapter.ts";
-import type { ImageController } from "@/adapters/ios-backup/controllers/image";
-import type { VideoController } from "@/adapters/ios-backup/controllers/video";
-import type { VoiceController } from "@/adapters/ios-backup/controllers/voice";
-import type { AttachController } from "@/adapters/ios-backup/controllers/attach";
+import * as ImageController from "@/adapters/ios-backup/controllers/image";
+import * as VideoController from "@/adapters/ios-backup/controllers/video";
+import * as VoiceController from "@/adapters/ios-backup/controllers/voice";
+import * as AttachController from "@/adapters/ios-backup/controllers/attach";
 
 export function ImageSuspenseQueryOptions(
 	requestData: ImageController.GetInput[0],

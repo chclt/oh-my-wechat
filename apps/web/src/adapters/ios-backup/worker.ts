@@ -8,19 +8,18 @@ import {
 	parseLocalInfo,
 	parseUserFromMmsetting,
 } from "./utils";
-import { ChatController } from "./controllers/chat";
-import { UserController } from "./controllers/contact";
-import { MessageController } from "./controllers/message";
-import { ImageController } from "./controllers/image";
-import { VideoController } from "./controllers/video";
-import { VoiceController } from "./controllers/voice";
-import { AttachController } from "./controllers/attach";
-import { StatisticController } from "./controllers/statistic";
+import * as ChatController from "./controllers/chat";
+import * as UserController from "./controllers/contact";
+import * as MessageController from "./controllers/message";
+import * as ImageController from "./controllers/image";
+import * as VideoController from "./controllers/video";
+import * as VoiceController from "./controllers/voice";
+import * as AttachController from "./controllers/attach";
+import * as StatisticController from "./controllers/statistic";
 import * as Comlink from "comlink";
 import type { DataAdapterResponse } from "../adapter";
 import type { WCDatabaseNames, WCDatabases } from "./types";
 import { drizzle } from "drizzle-orm/sql-js";
-import { filesTable } from "./database/_manifest";
 
 import { Buffer } from "buffer";
 globalThis.Buffer = Buffer;
