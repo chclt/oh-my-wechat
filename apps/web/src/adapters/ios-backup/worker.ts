@@ -1,4 +1,4 @@
-import initSqlJs, { type Database } from "sql.js";
+import initSqlJs from "sql.js";
 import sqliteUrl from "sql.js/dist/sql-wasm.wasm?url";
 import CryptoJS from "crypto-js";
 import type { AccountType, UserType } from "@/schema";
@@ -8,19 +8,18 @@ import {
 	parseLocalInfo,
 	parseUserFromMmsetting,
 } from "./utils";
-import { ChatController } from "./controllers/chat";
-import { UserController } from "./controllers/contact";
-import { MessageController } from "./controllers/message";
-import { ImageController } from "./controllers/image";
-import { VideoController } from "./controllers/video";
-import { VoiceController } from "./controllers/voice";
-import { AttachController } from "./controllers/attach";
-import { StatisticController } from "./controllers/statistic";
+import * as ChatController from "./controllers/chat";
+import * as UserController from "./controllers/contact";
+import * as MessageController from "./controllers/message";
+import * as ImageController from "./controllers/image";
+import * as VideoController from "./controllers/video";
+import * as VoiceController from "./controllers/voice";
+import * as AttachController from "./controllers/attach";
+import * as StatisticController from "./controllers/statistic";
 import * as Comlink from "comlink";
 import type { DataAdapterResponse } from "../adapter";
 import type { WCDatabaseNames, WCDatabases } from "./types";
 import { drizzle } from "drizzle-orm/sql-js";
-import { filesTable } from "./database/_manifest";
 
 import { Buffer } from "buffer";
 globalThis.Buffer = Buffer;
@@ -215,15 +214,19 @@ export const adapterWorker: AdapterWorkerType = {
 	},
 
 	_unloadAccountDatabase: async () => {
-		for (const databaseName in _store.databases) {
-			if (Array.isArray(_store.databases[databaseName as WCDatabaseNames])) {
-				for (const db of _store.databases[
-					databaseName as WCDatabaseNames
-				] as Database[]) {
-					db.close();
+		const storeDatabases = adapterWorker._getStoreItem("databases");
+
+		for (const databaseName in storeDatabases) {
+			const values = storeDatabases[databaseName as WCDatabaseNames];
+
+			if (values === undefined) {
+				continue;
+			} else if (Array.isArray(values)) {
+				for (const database of values) {
+					// database.close();
 				}
 			} else {
-				(_store.databases[databaseName as WCDatabaseNames] as Database).close();
+				// values.close();
 			}
 		}
 

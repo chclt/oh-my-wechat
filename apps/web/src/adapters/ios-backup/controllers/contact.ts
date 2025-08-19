@@ -154,6 +154,7 @@ const dbContactProtos = {
 		},
 	},
 };
+
 const dbContactProtobufRoot = protobuf.Root.fromJSON({
 	nested: {
 		ContactRemark: {
@@ -177,113 +178,68 @@ const dbContactProtobufRoot = protobuf.Root.fromJSON({
 	},
 });
 
-// eslint-disable-next-line @typescript-eslint/no-namespace
-export namespace UserController {
-	async function parseContactDatabaseFriendTableRowsRows(
-		databases: WCDatabases,
-		rows: (
-			| typeof friendTable.$inferSelect
-			| typeof openIMContactTable.$inferSelect
-		)[],
-	): Promise<(UserType | ChatroomType)[]> {
-		const allMemberIds: string[] = [];
+async function parseContactDatabaseFriendTableRowsRows(
+	databases: WCDatabases,
+	rows: (
+		| typeof friendTable.$inferSelect
+		| typeof openIMContactTable.$inferSelect
+	)[],
+): Promise<(UserType | ChatroomType)[]> {
+	const allMemberIds: string[] = [];
 
-		const resultWithoutMembers = rows.map((row) => {
-			const remarkObj = dbContactProtobufRoot
-				.lookupType("ContactRemark")
-				.decode(row.dbContactRemark) as unknown as Record<string, unknown>;
+	const resultWithoutMembers = rows.map((row) => {
+		const remarkObj = dbContactProtobufRoot
+			.lookupType("ContactRemark")
+			.decode(row.dbContactRemark) as unknown as Record<string, unknown>;
 
-			const headImageObj = dbContactProtobufRoot
-				.lookupType("HeadImage")
-				.decode(row.dbContactHeadImage) as unknown as Record<string, unknown>;
+		const headImageObj = dbContactProtobufRoot
+			.lookupType("HeadImage")
+			.decode(row.dbContactHeadImage) as unknown as Record<string, unknown>;
 
-			const profileObj = dbContactProtobufRoot
-				.lookupType("Profile")
-				.decode(row.dbContactProfile) as unknown as Record<string, unknown>;
+		const profileObj = dbContactProtobufRoot
+			.lookupType("Profile")
+			.decode(row.dbContactProfile) as unknown as Record<string, unknown>;
 
-			const socialObj = dbContactProtobufRoot
-				.lookupType("Social")
-				.decode(row.dbContactSocial) as unknown as Record<string, unknown>;
+		const socialObj = dbContactProtobufRoot
+			.lookupType("Social")
+			.decode(row.dbContactSocial) as unknown as Record<string, unknown>;
 
-			const chatroomObj = row.dbContactChatRoom
-				? (dbContactProtobufRoot
-						.lookupType("Chatroom")
-						.decode(row.dbContactChatRoom) as unknown as Record<
-						string,
-						unknown
-					>)
-				: undefined;
+		const chatroomObj = row.dbContactChatRoom
+			? (dbContactProtobufRoot
+					.lookupType("Chatroom")
+					.decode(row.dbContactChatRoom) as unknown as Record<string, unknown>)
+			: undefined;
 
-			const openIMObj = row.dbContactOpenIM
-				? (dbContactProtobufRoot
-						.lookupType("OpenIM")
-						.decode(row.dbContactOpenIM) as unknown as Record<string, unknown>)
-				: undefined;
+		const openIMObj = row.dbContactOpenIM
+			? (dbContactProtobufRoot
+					.lookupType("OpenIM")
+					.decode(row.dbContactOpenIM) as unknown as Record<string, unknown>)
+			: undefined;
 
-			if (openIMObj?.openIMContactInfo) {
-				openIMObj.openIMContactInfo = JSON.parse(
-					openIMObj.openIMContactInfo as string,
-				);
-			}
+		if (openIMObj?.openIMContactInfo) {
+			openIMObj.openIMContactInfo = JSON.parse(
+				openIMObj.openIMContactInfo as string,
+			);
+		}
 
-			if (row.username.endsWith("@chatroom")) {
-				let memberIds: string[] = [];
+		if (row.username.endsWith("@chatroom")) {
+			let memberIds: string[] = [];
 
-				if (chatroomObj?.chatroomMemberIds) {
-					memberIds = (chatroomObj.chatroomMemberIds as string).split(";");
-					allMemberIds.push(...memberIds);
-				}
-
-				return {
-					id: row.username,
-					title: (remarkObj.nickname as string).length
-						? remarkObj.nickname
-						: "群聊",
-					...((remarkObj.remark as string).length
-						? {
-								remark: remarkObj.remark,
-							}
-						: {}),
-					...(headImageObj.headImageThumb
-						? {
-								photo: {
-									thumb: headImageObj.headImageThumb,
-								},
-							}
-						: {}),
-					is_openim: !!openIMObj,
-
-					_is_pinned: !!((row.type >> 11) & 1),
-					_is_collapsed: !!((row.type >> 28) & 1),
-					_member_ids: memberIds,
-
-					raw: {
-						...row,
-						...remarkObj,
-						...headImageObj,
-						...profileObj,
-						...socialObj,
-						...chatroomObj,
-						...openIMObj,
-					},
-				} as Omit<ChatroomType, "members"> & {
-					_is_pinned: boolean;
-					_is_collapsed: boolean;
-					_member_ids: string[];
-				};
+			if (chatroomObj?.chatroomMemberIds) {
+				memberIds = (chatroomObj.chatroomMemberIds as string).split(";");
+				allMemberIds.push(...memberIds);
 			}
 
 			return {
 				id: row.username,
-				user_id: remarkObj.id,
-				username: remarkObj.nickname,
+				title: (remarkObj.nickname as string).length
+					? remarkObj.nickname
+					: "群聊",
 				...((remarkObj.remark as string).length
 					? {
 							remark: remarkObj.remark,
 						}
 					: {}),
-				bio: profileObj.profileBio,
-
 				...(headImageObj.headImageThumb
 					? {
 							photo: {
@@ -291,17 +247,11 @@ export namespace UserController {
 							},
 						}
 					: {}),
-
-				background: socialObj.socialBackground,
-
-				...(socialObj.phone
-					? {
-							phone: socialObj.phone,
-						}
-					: {}),
 				is_openim: !!openIMObj,
 
 				_is_pinned: !!((row.type >> 11) & 1),
+				_is_collapsed: !!((row.type >> 28) & 1),
+				_member_ids: memberIds,
 
 				raw: {
 					...row,
@@ -309,229 +259,271 @@ export namespace UserController {
 					...headImageObj,
 					...profileObj,
 					...socialObj,
+					...chatroomObj,
 					...openIMObj,
 				},
-			} as UserType;
-		});
-
-		const allMembers: UserType[] = (
-			await UserController.findAll(
-				{
-					ids: Array.from(new Set(allMemberIds)),
-				},
-				{ databases },
-			)
-		).data as UserType[];
-
-		// 加入当前登录的微信账号数据
-		if (
-			adapterWorker._getStoreItem("account") &&
-			allMemberIds.indexOf(adapterWorker._getStoreItem("account").id) > -1
-		) {
-			allMembers.push(adapterWorker._getStoreItem("account"));
+			} as Omit<ChatroomType, "members"> & {
+				_is_pinned: boolean;
+				_is_collapsed: boolean;
+				_member_ids: string[];
+			};
 		}
 
-		const allMembersTable: { [key: string]: UserType } = {};
-		for (const member of allMembers) {
-			allMembersTable[member.id] = member;
-		}
+		return {
+			id: row.username,
+			user_id: remarkObj.id,
+			username: remarkObj.nickname,
+			...((remarkObj.remark as string).length
+				? {
+						remark: remarkObj.remark,
+					}
+				: {}),
+			bio: profileObj.profileBio,
 
-		const result: (UserType | ChatroomType)[] = resultWithoutMembers.map(
-			(item) => {
-				if (item.id.endsWith("@chatroom")) {
-					// @ts-ignore
-					item.members = (item as Omit<ChatroomType, "members">)._member_ids
-						.map((memberId: string) => allMembersTable[memberId])
-						.filter((member: UserType) => member);
+			...(headImageObj.headImageThumb
+				? {
+						photo: {
+							thumb: headImageObj.headImageThumb,
+						},
+					}
+				: {}),
 
-					return item as unknown as ChatroomType;
-				}
+			background: socialObj.socialBackground,
 
-				return item as UserType;
+			...(socialObj.phone
+				? {
+						phone: socialObj.phone,
+					}
+				: {}),
+			is_openim: !!openIMObj,
+
+			_is_pinned: !!((row.type >> 11) & 1),
+
+			raw: {
+				...row,
+				...remarkObj,
+				...headImageObj,
+				...profileObj,
+				...socialObj,
+				...openIMObj,
 			},
-		);
+		} as UserType;
+	});
 
-		return result;
+	const allMembers: UserType[] = (
+		await UserController.findAll(
+			{
+				ids: Array.from(new Set(allMemberIds)),
+			},
+			{ databases },
+		)
+	).data as UserType[];
+
+	// 加入当前登录的微信账号数据
+	if (
+		adapterWorker._getStoreItem("account") &&
+		allMemberIds.indexOf(adapterWorker._getStoreItem("account").id) > -1
+	) {
+		allMembers.push(adapterWorker._getStoreItem("account"));
 	}
 
-	export type AllInput = [{ databases: WCDatabases }];
-	export type AllOutput = Promise<
-		DataAdapterResponse<(UserType | ChatroomType)[]>
-	>;
-
-	export async function all(...inputs: AllInput): AllOutput {
-		const [{ databases }] = inputs;
-
-		const db = databases.WCDB_Contact;
-		if (!db) {
-			throw new Error("WCDB_Contact database is not found");
-		}
-
-		const rows = unionAll(
-			db
-				.select()
-				.from(friendTable)
-				.where(sql`(${friendTable.type} & 1) != 0`),
-			db
-				.select()
-				.from(openIMContactTable)
-				.where(sql`(${openIMContactTable.type} & 1) != 0`),
-		).all();
-
-		return {
-			data: await parseContactDatabaseFriendTableRowsRows(
-				databases,
-				rows.filter((row) => {
-					return !row.username.startsWith("gh_");
-				}),
-			),
-		};
+	const allMembersTable: { [key: string]: UserType } = {};
+	for (const member of allMembers) {
+		allMembersTable[member.id] = member;
 	}
 
-	export type FindAllInput = [{ ids: string[] }, { databases: WCDatabases }];
-	export type FinfAllOutput = Promise<
-		DataAdapterResponse<(UserType | ChatroomType)[]>
-	>;
+	const result: (UserType | ChatroomType)[] = resultWithoutMembers.map(
+		(item) => {
+			if (item.id.endsWith("@chatroom")) {
+				// @ts-ignore
+				item.members = (item as Omit<ChatroomType, "members">)._member_ids
+					.map((memberId: string) => allMembersTable[memberId])
+					.filter((member: UserType) => member);
 
-	export async function findAll(...inputs: FindAllInput): FinfAllOutput {
-		const [{ ids }, { databases }] = inputs;
-
-		const db = databases.WCDB_Contact;
-		if (!db) {
-			throw new Error("WCDB_Contact database is not found");
-		}
-
-		if (ids.length === 0) return { data: [] };
-
-		// 现在用 IN 查询，但是可能会出现 SQL 语句过长的问题，暂时不知道限制是多少
-
-		const rows = unionAll(
-			db.select().from(friendTable).where(inArray(friendTable.username, ids)),
-			db
-				.select()
-				.from(openIMContactTable)
-				.where(inArray(openIMContactTable.username, ids)),
-		).all();
-
-		return {
-			data: [
-				...(ids.indexOf(adapterWorker._getStoreItem("account").id) > -1
-					? [adapterWorker._getStoreItem("account") as UserType]
-					: []),
-				...(await parseContactDatabaseFriendTableRowsRows(databases, rows)),
-			],
-		};
-	}
-
-	/**
-	 * TODO: 上面的都可以重构了。。
-	 */
-
-	export type ContactListInput = [{ databases: WCDatabases }];
-	export type ContactListOutput = Promise<DataAdapterResponse<ContactType[]>>;
-
-	export async function contactList(
-		...inputs: ContactListInput
-	): ContactListOutput {
-		const [{ databases }] = inputs;
-
-		const db = databases.WCDB_Contact;
-		if (!db) {
-			throw new Error("WCDB_Contact database is not found");
-		}
-
-		const rows = unionAll(
-			db
-				.select()
-				.from(friendTable)
-				.where(sql`(${friendTable.type} & 1) != 0`),
-			db
-				.select()
-				.from(openIMContactTable)
-				.where(sql`(${openIMContactTable.type} & 1) != 0`),
-		).all();
-
-		const result = rows.map((row) => {
-			const remarkObj = dbContactProtobufRoot
-				.lookupType("ContactRemark")
-				.decode(row.dbContactRemark) as unknown as Record<string, unknown>;
-
-			const headImageObj = dbContactProtobufRoot
-				.lookupType("HeadImage")
-				.decode(row.dbContactHeadImage) as unknown as Record<string, unknown>;
-
-			const profileObj = dbContactProtobufRoot
-				.lookupType("Profile")
-				.decode(row.dbContactProfile) as unknown as Record<string, unknown>;
-
-			const socialObj = dbContactProtobufRoot
-				.lookupType("Social")
-				.decode(row.dbContactSocial) as unknown as Record<string, unknown>;
-
-			const chatroomObj = row.dbContactChatRoom
-				? (dbContactProtobufRoot
-						.lookupType("Chatroom")
-						.decode(row.dbContactChatRoom) as unknown as Record<
-						string,
-						unknown
-					>)
-				: undefined;
-
-			const openIMObj = row.dbContactOpenIM
-				? (dbContactProtobufRoot
-						.lookupType("OpenIM")
-						.decode(row.dbContactOpenIM) as unknown as Record<string, unknown>)
-				: undefined;
-
-			if (openIMObj?.openIMContactInfo) {
-				openIMObj.openIMContactInfo = JSON.parse(
-					openIMObj.openIMContactInfo as string,
-				);
+				return item as unknown as ChatroomType;
 			}
 
-			return {
-				id: row.username,
-				username: remarkObj.nickname as string,
-				usernamePinyin: remarkObj.nicknamePinyin as string,
+			return item as UserType;
+		},
+	);
 
-				...((remarkObj.remark as string).length
-					? {
-							remark: remarkObj.remark as string,
-						}
-					: {}),
+	return result;
+}
 
-				...((remarkObj.remarkPinyin as string).length
-					? {
-							remarkPinyin: remarkObj.remarkPinyin as string,
-						}
-					: {}),
+export type AllInput = [{ databases: WCDatabases }];
+export type AllOutput = Promise<
+	DataAdapterResponse<(UserType | ChatroomType)[]>
+>;
 
-				...((remarkObj.remarkPinyinInits as string).length
-					? {
-							remarkPinyinInits: remarkObj.remarkPinyinInits as string,
-						}
-					: {}),
+export async function all(...inputs: AllInput): AllOutput {
+	const [{ databases }] = inputs;
 
-				...(headImageObj.headImageThumb
-					? {
-							photo: {
-								thumb: headImageObj.headImageThumb as string,
-							},
-						}
-					: {}),
-				is_openim: !!openIMObj,
-				// @ts-ignore
-				_raw: {
-					remarkObj,
-					headImageObj,
-					profileObj,
-					socialObj,
-				},
-			} satisfies ContactType;
-		});
+	const db = databases.WCDB_Contact;
+	if (!db) {
+		throw new Error("WCDB_Contact database is not found");
+	}
+
+	const rows = unionAll(
+		db
+			.select()
+			.from(friendTable)
+			.where(sql`(${friendTable.type} & 1) != 0`),
+		db
+			.select()
+			.from(openIMContactTable)
+			.where(sql`(${openIMContactTable.type} & 1) != 0`),
+	).all();
+
+	return {
+		data: await parseContactDatabaseFriendTableRowsRows(
+			databases,
+			rows.filter((row) => {
+				return !row.username.startsWith("gh_");
+			}),
+		),
+	};
+}
+
+export type FindAllInput = [{ ids: string[] }, { databases: WCDatabases }];
+export type FinfAllOutput = Promise<
+	DataAdapterResponse<(UserType | ChatroomType)[]>
+>;
+
+export async function findAll(...inputs: FindAllInput): FinfAllOutput {
+	const [{ ids }, { databases }] = inputs;
+
+	const db = databases.WCDB_Contact;
+	if (!db) {
+		throw new Error("WCDB_Contact database is not found");
+	}
+
+	if (ids.length === 0) return { data: [] };
+
+	// 现在用 IN 查询，但是可能会出现 SQL 语句过长的问题，暂时不知道限制是多少
+
+	const rows = unionAll(
+		db.select().from(friendTable).where(inArray(friendTable.username, ids)),
+		db
+			.select()
+			.from(openIMContactTable)
+			.where(inArray(openIMContactTable.username, ids)),
+	).all();
+
+	return {
+		data: [
+			...(ids.indexOf(adapterWorker._getStoreItem("account").id) > -1
+				? [adapterWorker._getStoreItem("account") as UserType]
+				: []),
+			...(await parseContactDatabaseFriendTableRowsRows(databases, rows)),
+		],
+	};
+}
+
+/**
+ * TODO: 上面的都可以重构了。。
+ */
+
+export type ContactListInput = [{ databases: WCDatabases }];
+export type ContactListOutput = Promise<DataAdapterResponse<ContactType[]>>;
+
+export async function contactList(
+	...inputs: ContactListInput
+): ContactListOutput {
+	const [{ databases }] = inputs;
+
+	const db = databases.WCDB_Contact;
+	if (!db) {
+		throw new Error("WCDB_Contact database is not found");
+	}
+
+	const rows = unionAll(
+		db
+			.select()
+			.from(friendTable)
+			.where(sql`(${friendTable.type} & 1) != 0`),
+		db
+			.select()
+			.from(openIMContactTable)
+			.where(sql`(${openIMContactTable.type} & 1) != 0`),
+	).all();
+
+	const result = rows.map((row) => {
+		const remarkObj = dbContactProtobufRoot
+			.lookupType("ContactRemark")
+			.decode(row.dbContactRemark) as unknown as Record<string, unknown>;
+
+		const headImageObj = dbContactProtobufRoot
+			.lookupType("HeadImage")
+			.decode(row.dbContactHeadImage) as unknown as Record<string, unknown>;
+
+		const profileObj = dbContactProtobufRoot
+			.lookupType("Profile")
+			.decode(row.dbContactProfile) as unknown as Record<string, unknown>;
+
+		const socialObj = dbContactProtobufRoot
+			.lookupType("Social")
+			.decode(row.dbContactSocial) as unknown as Record<string, unknown>;
+
+		const chatroomObj = row.dbContactChatRoom
+			? (dbContactProtobufRoot
+					.lookupType("Chatroom")
+					.decode(row.dbContactChatRoom) as unknown as Record<string, unknown>)
+			: undefined;
+
+		const openIMObj = row.dbContactOpenIM
+			? (dbContactProtobufRoot
+					.lookupType("OpenIM")
+					.decode(row.dbContactOpenIM) as unknown as Record<string, unknown>)
+			: undefined;
+
+		if (openIMObj?.openIMContactInfo) {
+			openIMObj.openIMContactInfo = JSON.parse(
+				openIMObj.openIMContactInfo as string,
+			);
+		}
 
 		return {
-			data: result,
-		};
-	}
+			id: row.username,
+			username: remarkObj.nickname as string,
+			usernamePinyin: remarkObj.nicknamePinyin as string,
+
+			...((remarkObj.remark as string).length
+				? {
+						remark: remarkObj.remark as string,
+					}
+				: {}),
+
+			...((remarkObj.remarkPinyin as string).length
+				? {
+						remarkPinyin: remarkObj.remarkPinyin as string,
+					}
+				: {}),
+
+			...((remarkObj.remarkPinyinInits as string).length
+				? {
+						remarkPinyinInits: remarkObj.remarkPinyinInits as string,
+					}
+				: {}),
+
+			...(headImageObj.headImageThumb
+				? {
+						photo: {
+							thumb: headImageObj.headImageThumb as string,
+						},
+					}
+				: {}),
+			is_openim: !!openIMObj,
+			// @ts-ignore
+			_raw: {
+				remarkObj,
+				headImageObj,
+				profileObj,
+				socialObj,
+			},
+		} satisfies ContactType;
+	});
+
+	return {
+		data: result,
+	};
 }
