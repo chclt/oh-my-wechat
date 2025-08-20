@@ -44,7 +44,10 @@ import {
 } from "@/schema";
 import CryptoJS from "crypto-js";
 import { XMLParser } from "fast-xml-parser";
-import WCDB, { WCDBDatabaseSeriesName, WCDBTableSeriesName } from "../wcdb.ts";
+import WCDB, {
+	WCDBDatabaseSeriesName,
+	WCDBTableSeriesName,
+} from "../utils/wcdb.ts";
 import type {
 	DataAdapterCursorPagination,
 	DataAdapterResponse,

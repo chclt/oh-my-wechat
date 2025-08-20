@@ -1,7 +1,7 @@
 import type { UserType } from "@/schema";
 import { SQLJsDatabase } from "drizzle-orm/sql-js";
 import protobuf from "protobufjs";
-import { filesTable } from "./database/_manifest";
+import { filesTable } from "../database/_manifest.ts";
 import { and, eq, like } from "drizzle-orm";
 
 export async function getFilesFromManifast(

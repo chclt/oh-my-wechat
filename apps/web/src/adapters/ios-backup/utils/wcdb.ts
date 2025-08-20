@@ -1,7 +1,5 @@
-import type { Database, QueryExecResult } from "sql.js";
 // @ts-ignore
 import { ZstdCodec } from "zstd-codec";
-import { chatTable } from "./database/message";
 
 /**
  * 实际发现从 wcdb_builtin_compression_record 表中获取的压缩配置大概率不完整
