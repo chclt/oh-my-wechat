@@ -638,11 +638,11 @@ export async function all(...inputs: AllInput): AllOutput {
 								.from(chatTable)
 								.where(baseRightQueryWhereSegment)
 								.orderBy(asc(chatTable.CreateTime))
-							.limit(query_limit)
-							.as("baseRightQuery");
+								.limit(query_limit)
+								.as("baseRightQuery");
 
-						// @ts-expect-error
-						const baseQuery = unionAll(baseLeftQuery, baseRightQuery).as(
+							// @ts-expect-error
+							const baseQuery = unionAll(baseLeftQuery, baseRightQuery).as(
 								"baseQuery",
 							);
 
@@ -978,7 +978,6 @@ export async function find(...inputs: findInput): findOutput {
 	).flatMap((promiseResult) => {
 		if (
 			promiseResult.status === "fulfilled" &&
-			promiseResult.value &&
 			promiseResult.value.length > 0
 		) {
 			return promiseResult.value;
