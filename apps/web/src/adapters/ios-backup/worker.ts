@@ -9,7 +9,7 @@ import {
 	parseUserFromMmsetting,
 } from "./utils";
 import * as ChatController from "./controllers/chat";
-import * as UserController from "./controllers/contact";
+import * as UserController from "./controllers/user.ts";
 import * as MessageController from "./controllers/message";
 import * as ImageController from "./controllers/image";
 import * as VideoController from "./controllers/video";
