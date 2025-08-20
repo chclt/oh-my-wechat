@@ -19,8 +19,7 @@ import type {
 } from "../adapter.ts";
 
 export default class IosBackupAdapter implements DataAdapter {
-	// @ts-ignore
-	private _directory: FileSystemDirectoryHandle | FileList;
+	private _directory: FileSystemDirectoryHandle | FileList | undefined;
 
 	private _workerAdapter: Comlink.Remote<AdapterWorkerType>;
 
@@ -42,170 +41,128 @@ export default class IosBackupAdapter implements DataAdapter {
 	}
 
 	async init() {
+		if (!this._directory) {
+			throw new Error("Directory not loaded");
+		}
+
 		await this._workerAdapter._loadDirectory(this._directory);
 	}
 
 	async getAccountList() {
-		const data = await this._workerAdapter.getAccountList();
-
-		if (import.meta.env.DEV) {
-			console.groupCollapsed("getAccountList");
-			console.log(data);
-			console.groupEnd();
-		}
-
-		return data;
+		return withCommonWrapper(
+			() => this._workerAdapter.getAccountList(),
+			"getAccountList",
+		);
 	}
 
 	async getAccount(accountId: string) {
-		const data = await this._workerAdapter.getAccount(accountId);
-
-		if (import.meta.env.DEV) {
-			console.groupCollapsed("getAccount");
-			console.log(data);
-			console.groupEnd();
-		}
-
-		return data;
+		return withCommonWrapper(
+			() => this._workerAdapter.getAccount(accountId),
+			"getAccount",
+		);
 	}
 
 	async getUserList(input: GetUserListRequest) {
-		const data = (await this._workerAdapter.getUserList(
-			input,
-		)) as DataAdapterResponse<UserType[]>;
-
-		if (import.meta.env.DEV) {
-			console.groupCollapsed("getUserList");
-			console.log(data);
-			console.groupEnd();
-		}
-
-		return data;
+		return withCommonWrapper(
+			() =>
+				this._workerAdapter.getUserList(input) as Promise<
+					DataAdapterResponse<UserType[]>
+				>,
+			"getUserList",
+		);
 	}
 
 	async getUser(input: GetUserRequest) {
-		const temp = (await this._workerAdapter.getUserList({
-			userIds: [input.userId],
-		})) as DataAdapterResponse<UserType[]>;
-		const data = { data: temp.data[0] } satisfies DataAdapterResponse<UserType>;
+		return withCommonWrapper(async () => {
+			const temp = (await this._workerAdapter.getUserList({
+				userIds: [input.userId],
+			})) as DataAdapterResponse<UserType[]>;
 
-		if (import.meta.env.DEV) {
-			console.groupCollapsed("getUser");
-			console.log(data);
-			console.groupEnd();
-		}
+			const data = {
+				data: temp.data[0],
+			} satisfies DataAdapterResponse<UserType>;
 
-		return data;
+			return data;
+		}, "getUser");
 	}
 
 	async getAccountContactList(input: GetAccountContactListRequest) {
-		const data = await this._workerAdapter.getAccountContactList();
-
-		if (import.meta.env.DEV) {
-			console.groupCollapsed("getAccountContactList");
-			console.log(data);
-			console.groupEnd();
-		}
-
-		return data;
+		return withCommonWrapper(
+			() => this._workerAdapter.getAccountContactList(),
+			"getAccountContactList",
+		);
 	}
 
 	async getChatList(input: GetChatListRequest) {
-		const data = await this._workerAdapter.getChatList(input);
-
-		if (import.meta.env.DEV) {
-			console.groupCollapsed("getChatList");
-			console.log(data);
-			console.groupEnd();
-		}
-
-		return data;
+		return withCommonWrapper(
+			() => this._workerAdapter.getChatList(input),
+			"getChatList",
+		);
 	}
 
 	async getChat(input: GetChatRequest) {
-		const temp = await this._workerAdapter.getChatList({
-			userIds: [input.chatId],
-		});
-		const data = { data: temp.data[0] } satisfies DataAdapterResponse<ChatType>;
+		return withCommonWrapper(async () => {
+			const temp = await this._workerAdapter.getChatList({
+				userIds: [input.chatId],
+			});
 
-		if (import.meta.env.DEV) {
-			console.groupCollapsed("getChatList");
-			console.log(data);
-			console.groupEnd();
-		}
+			const data = {
+				data: temp.data[0],
+			} satisfies DataAdapterResponse<ChatType>;
 
-		return data;
+			return data;
+		}, "getChat");
 	}
 
 	async getMessageList(input: GetMessageListRequest) {
-		const data = await this._workerAdapter.getMessageList(input);
-
-		if (import.meta.env.DEV) {
-			console.groupCollapsed("getMessageList");
-			console.log(data);
-			console.groupEnd();
-		}
-
-		return data;
+		return withCommonWrapper(
+			() => this._workerAdapter.getMessageList(input),
+			"getMessageList",
+		);
 	}
 
 	async getImage(input: GetImageRequest) {
-		const data = await this._workerAdapter.getImage(input);
-
-		if (import.meta.env.DEV) {
-			console.groupCollapsed("getImage");
-			console.log(data);
-			console.groupEnd();
-		}
-
-		return data;
+		return withCommonWrapper(
+			() => this._workerAdapter.getImage(input),
+			"getImage",
+		);
 	}
 
 	async getVideo(input: GetVideoRequest) {
-		const data = await this._workerAdapter.getVideo(input);
-
-		if (import.meta.env.DEV) {
-			console.groupCollapsed("getVideo");
-			console.log(data);
-			console.groupEnd();
-		}
-
-		return data;
+		return withCommonWrapper(
+			() => this._workerAdapter.getVideo(input),
+			"getVideo",
+		);
 	}
 
 	async getVoice(input: GetVoiceRequest) {
-		const data = await this._workerAdapter.getVoice(input);
-
-		if (import.meta.env.DEV) {
-			console.groupCollapsed("getVoice");
-			console.log(data);
-			console.groupEnd();
-		}
-
-		return data;
+		return withCommonWrapper(
+			() => this._workerAdapter.getVoice(input),
+			"getVoice",
+		);
 	}
 
 	async getAttach(input: GetAttachRequest) {
-		const data = await this._workerAdapter.getAttach(input);
-
-		if (import.meta.env.DEV) {
-			console.groupCollapsed("getAttach");
-			console.log(data);
-			console.groupEnd();
-		}
-
-		return data;
+		return withCommonWrapper(
+			() => this._workerAdapter.getAttach(input),
+			"getAttach",
+		);
 	}
 
 	async getStatistic(input: GetStatisticRequest) {
-		const data = await this._workerAdapter.getStatistic(input);
-
-		if (import.meta.env.DEV) {
-			console.groupCollapsed("getStatistic");
-			console.log(data);
-			console.groupEnd();
-		}
-
-		return data;
+		return withCommonWrapper(
+			() => this._workerAdapter.getStatistic(input),
+			"getStatistic",
+		);
 	}
+}
+
+async function withCommonWrapper<T>(
+	fn: () => Promise<T>,
+	context: string,
+): Promise<T> {
+	return fn().catch((error) => {
+		console.error(`[IosBackupAdapter Error] ${context}:`, error);
+		throw error;
+	});
 }
