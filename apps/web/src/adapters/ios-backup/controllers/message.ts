@@ -41,6 +41,7 @@ import {
 	type VoipMessageType,
 	type WeComContactMessageType,
 	MessageDirection,
+	BasicMessageType,
 } from "@/schema";
 import CryptoJS from "crypto-js";
 import { XMLParser } from "fast-xml-parser";
@@ -54,7 +55,12 @@ import type {
 	GetMessageListRequest,
 } from "@/adapters/adapter.ts";
 import type { ControllerPaginatorCursor, WCDatabases } from "../types.ts";
-import { chatTable, getChatTable, getHelloTable } from "../database/message.ts";
+import {
+	chatTable,
+	ChatTableRowInfer,
+	getChatTable,
+	getHelloTable,
+} from "../database/message.ts";
 import {
 	and,
 	asc,
@@ -72,13 +78,13 @@ import {
 import { unionAll } from "drizzle-orm/sqlite-core";
 
 async function parseMessageDatabaseChatTableRows(
-	rows: (typeof chatTable.$inferSelect)[],
+	rows: ChatTableRowInfer[],
 	{
 		chat,
 		databases,
 		parseReplyMessage = true,
 	}: {
-		chat?: ChatType;
+		chat: ChatType;
 		databases: WCDatabases;
 		parseReplyMessage?: boolean;
 	},
@@ -88,10 +94,10 @@ async function parseMessageDatabaseChatTableRows(
 			if ((raw_message_row.Message as unknown) === null) {
 				raw_message_row.Message = "";
 				raw_message_row.Type = 1;
-				return chat?.id ?? undefined;
+				return chat.id ?? undefined;
 			}
 
-			// Message 字段依然可能是个二进制，暂时不解决
+			// Message 字段依然可能因为压缩是二进制，在这里只好报错
 			if (typeof (raw_message_row.Message as unknown) === "object") {
 				raw_message_row.Message = new TextDecoder("utf-8").decode(
 					new Uint8Array(
@@ -152,8 +158,8 @@ async function parseMessageDatabaseChatTableRows(
 		.filter((i) => i !== undefined);
 	const usersArray = (
 		await UserController.findAll({ ids: messageSenderIds }, { databases })
-	).data;
-	const usersTable: { [key: string]: UserType | ChatroomType } = {};
+	).data as UserType[];
+	const usersTable: Record<string, UserType> = {};
 	usersArray.map((user) => {
 		usersTable[user.id] = user;
 	});
@@ -162,7 +168,10 @@ async function parseMessageDatabaseChatTableRows(
 	const replyMessageIds: string[] = [];
 
 	const messages = rows.map((raw_message_row, index) => {
-		const message = {
+		const message: Omit<
+			BasicMessageType<unknown, unknown>,
+			"message_entity"
+		> = {
 			id: raw_message_row.MesSvrID,
 			local_id: raw_message_row.MesLocalID,
 			type: raw_message_row.Type,
@@ -185,7 +194,7 @@ async function parseMessageDatabaseChatTableRows(
 							// 好像一些群聊成员不会出现在数据库中
 						}
 					: undefined), // 有一些系统消息没有 from
-			...(chat ? { chat } : {}),
+			chat,
 
 			// message_entity,
 			// reply_to_message?: Message;
@@ -392,7 +401,7 @@ async function parseMessageDatabaseChatTableRows(
 
 	if (parseReplyMessage && chat && replyMessageIds.length) {
 		replyMessageArray = (
-			await MessageController.find(
+			await find(
 				{
 					chat,
 					messageIds: replyMessageIds,
@@ -407,7 +416,7 @@ async function parseMessageDatabaseChatTableRows(
 		});
 
 		for (const index of messageIndexesHasReplyMessage) {
-			(messages[index] as AppMessageType<ReferMessageEntity>).reply_to_message =
+			messages[index].reply_to_message =
 				replyMessageTable[
 					(
 						messages[index]
@@ -610,6 +619,7 @@ export async function all(...inputs: AllInput): AllOutput {
 								.limit(query_limit)
 								.as("baseRightQuery");
 
+							// @ts-expect-error
 							const baseQuery = unionAll(baseLeftQuery, baseRightQuery).as(
 								"baseQuery",
 							);
@@ -663,6 +673,7 @@ export async function all(...inputs: AllInput): AllOutput {
 	).flatMap((promiseResult, index) => {
 		if (
 			promiseResult.status === "fulfilled" &&
+			promiseResult.value &&
 			promiseResult.value.length > 0
 		) {
 			if (import.meta.env.DEV)
@@ -670,7 +681,7 @@ export async function all(...inputs: AllInput): AllOutput {
 			return promiseResult.value;
 		}
 		return [];
-	});
+	}) as ChatTableRowInfer[];
 
 	if (!rows || rows.length === 0)
 		return {
@@ -862,7 +873,7 @@ export async function allFromAll(...inputs: AllFromAllInput): AllFromAllOutput {
 	const chatMessagePromiseResults = (
 		await Promise.all(
 			chats.data.map((chat) => {
-				return MessageController.all(
+				return all(
 					{
 						chat,
 						type,
@@ -922,6 +933,7 @@ export async function find(...inputs: findInput): findOutput {
 							[chatTable.Type.name]: chatTable.Type,
 						})
 						.from(chatTable)
+						// @ts-ignore CAST 语句已经将 MesSvrID 转换为字符串
 						.where(inArray(chatTable.MesSvrID, messageIds));
 
 					const rows = query.all();
@@ -943,7 +955,7 @@ export async function find(...inputs: findInput): findOutput {
 			return promiseResult.value;
 		}
 		return [];
-	});
+	}) as ChatTableRowInfer[];
 
 	if (!rows) {
 		return {
@@ -1003,7 +1015,7 @@ export async function allVerify(...inputs: allVerifyInput): allVerifyOutput {
 					})
 					.from(helloTable)
 					.orderBy(desc(helloTable.CreateTime))
-					.all();
+					.all() as ChatTableRowInfer[];
 			} catch (error) {
 				return [];
 			}
@@ -1012,6 +1024,7 @@ export async function allVerify(...inputs: allVerifyInput): allVerifyOutput {
 
 	return {
 		data: await parseMessageDatabaseChatTableRows(rows, {
+			chat: {} as unknown as ChatType, // todo
 			databases,
 		}),
 	};

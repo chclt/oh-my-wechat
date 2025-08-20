@@ -5,7 +5,7 @@ import { blob, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 export const friendTable = sqliteTable("Friend", {
 	username: text().notNull(),
 	// encodeUserName: text(),
-	type: integer(),
+	type: integer().notNull(),
 	// typeExt: integer(),
 	// imgStatus: integer(),
 	// extFlag: integer(),
@@ -26,7 +26,7 @@ export const friendTable = sqliteTable("Friend", {
 export const openIMContactTable = sqliteTable("OpenIMContact", {
 	username: text().notNull(),
 	// encodeUserName: text(),
-	type: integer(),
+	type: integer().notNull(),
 	// typeExt: integer(),
 	// imgStatus: integer(),
 	// extFlag: integer(),

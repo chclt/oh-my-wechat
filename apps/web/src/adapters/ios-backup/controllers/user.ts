@@ -5,7 +5,7 @@ import protobuf from "protobufjs";
 import type { WCDatabases } from "../types";
 import { friendTable, openIMContactTable } from "../database/contact";
 import { inArray, sql } from "drizzle-orm";
-import { unionAll } from "drizzle-orm/mysql-core";
+import { unionAll } from "drizzle-orm/sqlite-core";
 
 const dbContactProtos = {
 	dbContactRemark: {
