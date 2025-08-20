@@ -14,10 +14,7 @@ export function ImageSuspenseQueryOptions(
 		queryFn: async () =>
 			await getDataAdapter()
 				.getImage(requestData)
-				.then((res) => res.data)
-				.catch((e) => {
-					throw e;
-				}),
+				.then((res) => res.data),
 	};
 }
 
@@ -29,10 +26,7 @@ export function VideoSuspenseQueryOptions(
 		queryFn: () =>
 			getDataAdapter()
 				.getVideo(requestData)
-				.then((res) => res.data)
-				.catch((e) => {
-					throw e;
-				}),
+				.then((res) => res.data),
 	};
 }
 
@@ -44,10 +38,7 @@ export function VoiceSuspenseQueryOptions(
 		queryFn: () =>
 			getDataAdapter()
 				.getVoice(requestData)
-				.then((res) => res.data)
-				.catch((e) => {
-					throw e;
-				}),
+				.then((res) => res.data),
 	};
 }
 
@@ -59,9 +50,6 @@ export function AttacheSuspenseQueryOptions(
 		queryFn: () =>
 			getDataAdapter()
 				.getAttach(requestData)
-				.then((res) => res.data)
-				.catch((e) => {
-					throw e;
-				}),
+				.then((res) => res.data),
 	};
 }

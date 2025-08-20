@@ -42,9 +42,6 @@ export function LastMessageQueryOptions(
 		queryFn: () =>
 			getDataAdapter()
 				.getMessageList({ ...requestData, limit: 1 })
-				.then((res) => res.data[0] ?? null)
-				.catch((e) => {
-					throw e;
-				}),
+				.then((res) => res.data[0] ?? null),
 	};
 }

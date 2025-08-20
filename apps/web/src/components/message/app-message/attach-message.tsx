@@ -47,10 +47,7 @@ export default function AttachMessage({
 		mutationFn: () => {
 			return getDataAdapter()
 				.getAttach({ chat, message })
-				.then((res) => res.data)
-				.catch((e) => {
-					throw e;
-				});
+				.then((res) => res.data);
 		},
 		onSuccess: (data) => {
 			const downlaodLink = document.createElement("a");
