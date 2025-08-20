@@ -1,0 +1,38 @@
+<msg>
+	<appmsg appid=""  sdkver="0">
+		<title>Your current Weixin version does not support this content. Update to the latest version.</title>
+		<type>62</type>
+		<url>https://support.weixin.qq.com/update/</url>
+		<appattach>
+			<cdnthumbaeskey></cdnthumbaeskey>
+			<aeskey></aeskey>
+		</appattach>
+		<patMsg>
+			<records>
+			<record>
+				<readStatus>1</readStatus>
+				<svrId>4372404782656774245</svrId>
+				<pattedUser>user_1</pattedUser>
+				<templete>${user_2} tickled ${user_1}</templete>
+				<fromUser>user_2</fromUser>
+				<createTime>0000000000000</createTime>
+			</record>
+			<recordNum>1</recordNum>
+			</records>
+			<chatUser>00000000000@chatroom</chatUser>
+		</patMsg>
+	</appmsg>
+	<fromusername>
+		<msg>
+		<appmsg appid=""  sdkver="0">
+		<title>Your current Weixin version does not support this content. Update to the latest version.</title>
+		<type>62</type>
+		<url>https
+	</fromusername>
+	<appinfo>
+		<version>0</version>
+		<appname></appname>
+		<isforceupdate>1</isforceupdate>
+	</appinfo>
+	<extcommoninfo></extcommoninfo>
+</msg>
