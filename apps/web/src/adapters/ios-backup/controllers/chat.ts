@@ -52,12 +52,16 @@ async function parseSessionDatabaseSessionAbstractTableRows(
 					members: (contactInfo as ChatroomType).members,
 
 					chatroom: contactInfo as ChatroomType,
-					raw: {
-						id_md5: CryptoJS.MD5(row.UsrName).toString(),
 
-						row,
-						contactInfo,
-					},
+					...(import.meta.env.DEV
+						? {
+								__dev: {
+									id_md5: CryptoJS.MD5(row.UsrName).toString(),
+									database_row: row,
+									contact: contactInfo,
+								},
+							}
+						: {}),
 				} as GroupChatType)
 			: ({
 					type: "private",
@@ -77,11 +81,15 @@ async function parseSessionDatabaseSessionAbstractTableRows(
 
 					user: contactInfo,
 
-					raw: {
-						id_md5: CryptoJS.MD5(row.UsrName).toString(),
-						row,
-						contactInfo,
-					},
+					...(import.meta.env.DEV
+						? {
+								__dev: {
+									id_md5: CryptoJS.MD5(row.UsrName).toString(),
+									database_row: row,
+									user: contactInfo,
+								},
+							}
+						: {}),
 				} as PrivateChatType);
 
 		result.push(chat);
