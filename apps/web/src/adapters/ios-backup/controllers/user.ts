@@ -178,6 +178,53 @@ const dbContactProtobufRoot = protobuf.Root.fromJSON({
 	},
 });
 
+function decodeUserTableRowProtobufData(
+	row: typeof friendTable.$inferSelect | typeof openIMContactTable.$inferSelect,
+) {
+	const remarkObj = dbContactProtobufRoot
+		.lookupType("ContactRemark")
+		.decode(row.dbContactRemark!) as unknown as Record<string, unknown>;
+
+	const headImageObj = dbContactProtobufRoot
+		.lookupType("HeadImage")
+		.decode(row.dbContactHeadImage!) as unknown as Record<string, unknown>;
+
+	const profileObj = dbContactProtobufRoot
+		.lookupType("Profile")
+		.decode(row.dbContactProfile!) as unknown as Record<string, unknown>;
+
+	const socialObj = dbContactProtobufRoot
+		.lookupType("Social")
+		.decode(row.dbContactSocial!) as unknown as Record<string, unknown>;
+
+	const chatroomObj = row.dbContactChatRoom
+		? (dbContactProtobufRoot
+				.lookupType("Chatroom")
+				.decode(row.dbContactChatRoom) as unknown as Record<string, unknown>)
+		: undefined;
+
+	const openIMObj = row.dbContactOpenIM
+		? (dbContactProtobufRoot
+				.lookupType("OpenIM")
+				.decode(row.dbContactOpenIM) as unknown as Record<string, unknown>)
+		: undefined;
+
+	if (openIMObj?.openIMContactInfo) {
+		openIMObj.openIMContactInfo = JSON.parse(
+			openIMObj.openIMContactInfo as string,
+		);
+	}
+
+	return {
+		remarkObj,
+		headImageObj,
+		profileObj,
+		socialObj,
+		chatroomObj,
+		openIMObj,
+	};
+}
+
 async function parseContactDatabaseFriendTableRowsRows(
 	databases: WCDatabases,
 	rows: (
@@ -188,39 +235,14 @@ async function parseContactDatabaseFriendTableRowsRows(
 	const allMemberIds: string[] = [];
 
 	const resultWithoutMembers = rows.map((row) => {
-		const remarkObj = dbContactProtobufRoot
-			.lookupType("ContactRemark")
-			.decode(row.dbContactRemark) as unknown as Record<string, unknown>;
-
-		const headImageObj = dbContactProtobufRoot
-			.lookupType("HeadImage")
-			.decode(row.dbContactHeadImage) as unknown as Record<string, unknown>;
-
-		const profileObj = dbContactProtobufRoot
-			.lookupType("Profile")
-			.decode(row.dbContactProfile) as unknown as Record<string, unknown>;
-
-		const socialObj = dbContactProtobufRoot
-			.lookupType("Social")
-			.decode(row.dbContactSocial) as unknown as Record<string, unknown>;
-
-		const chatroomObj = row.dbContactChatRoom
-			? (dbContactProtobufRoot
-					.lookupType("Chatroom")
-					.decode(row.dbContactChatRoom) as unknown as Record<string, unknown>)
-			: undefined;
-
-		const openIMObj = row.dbContactOpenIM
-			? (dbContactProtobufRoot
-					.lookupType("OpenIM")
-					.decode(row.dbContactOpenIM) as unknown as Record<string, unknown>)
-			: undefined;
-
-		if (openIMObj?.openIMContactInfo) {
-			openIMObj.openIMContactInfo = JSON.parse(
-				openIMObj.openIMContactInfo as string,
-			);
-		}
+		const {
+			remarkObj,
+			headImageObj,
+			profileObj,
+			socialObj,
+			chatroomObj,
+			openIMObj,
+		} = decodeUserTableRowProtobufData(row);
 
 		if (row.username.endsWith("@chatroom")) {
 			let memberIds: string[] = [];
@@ -448,39 +470,14 @@ export async function contactList(
 	).all();
 
 	const result = rows.map((row) => {
-		const remarkObj = dbContactProtobufRoot
-			.lookupType("ContactRemark")
-			.decode(row.dbContactRemark) as unknown as Record<string, unknown>;
-
-		const headImageObj = dbContactProtobufRoot
-			.lookupType("HeadImage")
-			.decode(row.dbContactHeadImage) as unknown as Record<string, unknown>;
-
-		const profileObj = dbContactProtobufRoot
-			.lookupType("Profile")
-			.decode(row.dbContactProfile) as unknown as Record<string, unknown>;
-
-		const socialObj = dbContactProtobufRoot
-			.lookupType("Social")
-			.decode(row.dbContactSocial) as unknown as Record<string, unknown>;
-
-		const chatroomObj = row.dbContactChatRoom
-			? (dbContactProtobufRoot
-					.lookupType("Chatroom")
-					.decode(row.dbContactChatRoom) as unknown as Record<string, unknown>)
-			: undefined;
-
-		const openIMObj = row.dbContactOpenIM
-			? (dbContactProtobufRoot
-					.lookupType("OpenIM")
-					.decode(row.dbContactOpenIM) as unknown as Record<string, unknown>)
-			: undefined;
-
-		if (openIMObj?.openIMContactInfo) {
-			openIMObj.openIMContactInfo = JSON.parse(
-				openIMObj.openIMContactInfo as string,
-			);
-		}
+		const {
+			remarkObj,
+			headImageObj,
+			profileObj,
+			socialObj,
+			chatroomObj,
+			openIMObj,
+		} = decodeUserTableRowProtobufData(row);
 
 		return {
 			id: row.username,

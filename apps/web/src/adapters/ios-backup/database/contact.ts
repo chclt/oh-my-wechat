@@ -20,7 +20,7 @@ export const friendTable = sqliteTable("Friend", {
 	dbContactBrand: blob({ mode: "buffer" }),
 	// dbContactEncryptSecret: blob({ mode: "buffer" }),
 	dbContactOpenIM: blob({ mode: "buffer" }),
-	// dbContactOther blob(),
+	// dbContactOther blob({ mode: "buffer" }),
 	// openIMAppid: text(),
 });
 
@@ -42,6 +42,6 @@ export const openIMContactTable = sqliteTable("OpenIMContact", {
 	dbContactBrand: blob({ mode: "buffer" }),
 	// dbContactEncryptSecret: blob({ mode: "buffer" }),
 	dbContactOpenIM: blob({ mode: "buffer" }),
-	// dbContactOther blob(),
+	// dbContactOther blob({ mode: "buffer" }),
 	// openIMAppid: text(),
 });
