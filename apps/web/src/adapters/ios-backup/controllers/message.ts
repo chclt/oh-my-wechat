@@ -15,7 +15,7 @@ import type { VoiceMessageEntity } from "@/components/message/voice-message.tsx"
 import type { VoipMessageEntity } from "@/components/message/voip-message.tsx";
 import type { WeComContactMessageEntity } from "@/components/message/wecom-contact-message.tsx";
 import * as ChatController from "./chat.ts";
-import * as UserController from "./contact.ts";
+import * as UserController from "./user.ts";
 import { adapterWorker } from "../worker.ts";
 import {
 	type AppMessageType,

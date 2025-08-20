@@ -311,7 +311,7 @@ async function parseContactDatabaseFriendTableRowsRows(
 	});
 
 	const allMembers: UserType[] = (
-		await UserController.findAll(
+		await findAll(
 			{
 				ids: Array.from(new Set(allMemberIds)),
 			},

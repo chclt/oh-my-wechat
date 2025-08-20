@@ -6,7 +6,7 @@ import type {
 	UserType,
 } from "@/schema";
 import CryptoJS from "crypto-js";
-import * as UserController from "./contact";
+import * as UserController from "./user.ts";
 import { adapterWorker } from "../worker";
 import type { DataAdapterResponse } from "@/adapters/adapter";
 import type { WCDatabases } from "../types";
