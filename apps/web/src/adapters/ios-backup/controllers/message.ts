@@ -127,7 +127,10 @@ async function parseMessageDatabaseChatTableRows(
 					const xmlParser = new XMLParser({ ignoreAttributes: false });
 					const messageXml = xmlParser.parse(raw_message_row.Message);
 
-					if (messageXml?.msg?.fromusername) {
+					if (
+						messageXml?.msg?.fromusername &&
+						typeof messageXml.msg.fromusername === "string"
+					) {
 						senderId = messageXml.msg.fromusername;
 					} else {
 						if (raw_message_row.Type === MessageTypeEnum.VIDEO) {
