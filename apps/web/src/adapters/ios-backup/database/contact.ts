@@ -10,16 +10,17 @@ export const friendTable = sqliteTable("Friend", {
 	// imgStatus: integer(),
 	// extFlag: integer(),
 
-	dbContactProfile: blob(),
-	dbContactHeadImage: blob(),
-	dbContactRemark: blob(),
-	dbContactSocial: blob(),
+	dbContactProfile: blob({ mode: "buffer" }),
+	dbContactHeadImage: blob({ mode: "buffer" }),
+	dbContactRemark: blob({ mode: "buffer" }),
+	dbContactSocial: blob({ mode: "buffer" }),
 
 	// certificationFlag: integer(), // 0: 个人
-	dbContactBrand: blob(),
-	// dbContactEncryptSecret: blob(),
-	dbContactOpenIM: blob(),
-	// dbContactOther blob(),
+	dbContactChatRoom: blob({ mode: "buffer" }),
+	dbContactBrand: blob({ mode: "buffer" }),
+	// dbContactEncryptSecret: blob({ mode: "buffer" }),
+	dbContactOpenIM: blob({ mode: "buffer" }),
+	// dbContactOther blob({ mode: "buffer" }),
 	// openIMAppid: text(),
 });
 
@@ -31,15 +32,16 @@ export const openIMContactTable = sqliteTable("OpenIMContact", {
 	// imgStatus: integer(),
 	// extFlag: integer(),
 
-	dbContactProfile: blob(),
-	dbContactHeadImage: blob(),
-	dbContactRemark: blob(),
-	dbContactSocial: blob(),
+	dbContactProfile: blob({ mode: "buffer" }),
+	dbContactHeadImage: blob({ mode: "buffer" }),
+	dbContactRemark: blob({ mode: "buffer" }),
+	dbContactSocial: blob({ mode: "buffer" }),
 
 	// certificationFlag: integer(),
-	dbContactBrand: blob(),
-	// dbContactEncryptSecret: blob(),
-	dbContactOpenIM: blob(),
-	// dbContactOther blob(),
+	dbContactChatRoom: blob({ mode: "buffer" }),
+	dbContactBrand: blob({ mode: "buffer" }),
+	// dbContactEncryptSecret: blob({ mode: "buffer" }),
+	dbContactOpenIM: blob({ mode: "buffer" }),
+	// dbContactOther blob({ mode: "buffer" }),
 	// openIMAppid: text(),
 });
