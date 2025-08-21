@@ -25,7 +25,7 @@ export default function useChatList(chatData: ChatType[]) {
 					ChatListFilter.includes(chat.id)
 				),
 		)
-		.sort((i) => (i.is_pinned ? -1 : 1));
+		.sort((i) => (i.is_pinned ? -1 : 0));
 
 	return data;
 }
