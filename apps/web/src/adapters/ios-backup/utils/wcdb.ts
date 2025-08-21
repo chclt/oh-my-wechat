@@ -128,7 +128,7 @@ const WCDB: WCDBType = {
 
 						const decompressedData = (await zstdDecompressWithDict(
 							compressedData,
-							dictData,
+							{ id: dictionaryName, data: dictData },
 						)) as Uint8Array | null;
 
 						if (decompressedData) {
