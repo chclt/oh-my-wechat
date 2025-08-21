@@ -15,10 +15,7 @@ export function UserListQueryOptions(
 				.getUserList({
 					userIds,
 				})
-				.then((res) => res.data)
-				.catch((e) => {
-					throw e;
-				}),
+				.then((res) => res.data),
 	};
 }
 
@@ -34,9 +31,6 @@ export function UserSuspenseQueryOptions(
 					accountId,
 					userId,
 				})
-				.then((res) => res.data)
-				.catch((e) => {
-					throw e;
-				}),
+				.then((res) => res.data),
 	};
 }

@@ -12,9 +12,6 @@ export function AccountContactListSuspenseQueryOptions(
 				.getAccountContactList({
 					accountId,
 				})
-				.then((res) => res.data)
-				.catch((e) => {
-					throw e;
-				}),
+				.then((res) => res.data),
 	};
 }

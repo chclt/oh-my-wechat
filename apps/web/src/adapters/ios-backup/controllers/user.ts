@@ -275,15 +275,21 @@ async function parseContactDatabaseFriendTableRowsRows(
 				_is_collapsed: !!((row.type >> 28) & 1),
 				_member_ids: memberIds,
 
-				raw: {
-					...row,
-					...remarkObj,
-					...headImageObj,
-					...profileObj,
-					...socialObj,
-					...chatroomObj,
-					...openIMObj,
-				},
+				...(import.meta.env.DEV
+					? {
+							__dev: {
+								database_row: row,
+								decoded_protobuf: {
+									remarkObj,
+									headImageObj,
+									profileObj,
+									socialObj,
+									chatroomObj,
+									openIMObj,
+								},
+							},
+						}
+					: {}),
 			} as Omit<ChatroomType, "members"> & {
 				_is_pinned: boolean;
 				_is_collapsed: boolean;
@@ -321,14 +327,21 @@ async function parseContactDatabaseFriendTableRowsRows(
 
 			_is_pinned: !!((row.type >> 11) & 1),
 
-			raw: {
-				...row,
-				...remarkObj,
-				...headImageObj,
-				...profileObj,
-				...socialObj,
-				...openIMObj,
-			},
+			...(import.meta.env.DEV
+				? {
+						__dev: {
+							database_row: row,
+							decoded_protobuf: {
+								remarkObj,
+								headImageObj,
+								profileObj,
+								socialObj,
+								chatroomObj,
+								openIMObj,
+							},
+						},
+					}
+				: {}),
 		} as UserType;
 	});
 
@@ -510,13 +523,19 @@ export async function contactList(
 					}
 				: {}),
 			is_openim: !!openIMObj,
-			// @ts-ignore
-			_raw: {
-				remarkObj,
-				headImageObj,
-				profileObj,
-				socialObj,
-			},
+
+			...(import.meta.env.DEV
+				? {
+						__dev: {
+							decoded_protobuf: {
+								remarkObj,
+								headImageObj,
+								profileObj,
+								socialObj,
+							},
+						},
+					}
+				: {}),
 		} satisfies ContactType;
 	});
 

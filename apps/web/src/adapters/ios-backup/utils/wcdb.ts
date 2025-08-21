@@ -1,5 +1,4 @@
-// @ts-ignore
-import { ZstdCodec } from "zstd-codec";
+import { zstdDecompressWithDict } from "./zstd";
 
 /**
  * 实际发现从 wcdb_builtin_compression_record 表中获取的压缩配置大概率不完整
@@ -110,46 +109,44 @@ const WCDB: WCDBType = {
 			return rows;
 		}
 
-		return new Promise((resolve, reject) => {
-			ZstdCodec.run(async (zstd: any) => {
-				for (const row of rows) {
-					for (const [columnName, dictionaryName] of Object.entries(
-						tableCompressionConfig,
-					)) {
-						if (!Object.prototype.hasOwnProperty.call(row, columnName)) {
-							continue;
-						}
-
-						const rawColumnValue = row[columnName];
-
-						if (rawColumnValue instanceof Uint8Array) {
-							const zstdData = rawColumnValue;
-							const zstdSimple = new zstd.Simple();
-							const zstdDict = new zstd.Dict.Decompression(
-								await WCDB._getCompressionDictionary(dictionaryName),
-							);
-
-							const decompressedData = zstdSimple.decompressUsingDict(
-								zstdData,
-								zstdDict,
-							) as Uint8Array | null;
-
-							if (decompressedData) {
-								row[columnName] = new TextDecoder("utf-8").decode(
-									decompressedData,
-								);
-							} else {
-								row[columnName] = new TextDecoder("utf-8").decode(
-									rawColumnValue,
-								);
-							}
-						}
-					}
+		for (const row of rows) {
+			for (const [columnName, dictionaryName] of Object.entries(
+				tableCompressionConfig,
+			)) {
+				if (!Object.prototype.hasOwnProperty.call(row, columnName)) {
+					continue;
 				}
 
-				resolve(rows);
-			});
-		});
+				const rawColumnValue = row[columnName];
+
+				if (rawColumnValue instanceof Uint8Array) {
+					try {
+						const compressedData = rawColumnValue;
+
+						const dictData =
+							await WCDB._getCompressionDictionary(dictionaryName);
+
+						const decompressedData = (await zstdDecompressWithDict(
+							compressedData,
+							{ id: dictionaryName, data: dictData },
+						)) as Uint8Array | null;
+
+						if (decompressedData) {
+							row[columnName] = new TextDecoder("utf-8").decode(
+								decompressedData,
+							);
+						} else {
+							row[columnName] = new TextDecoder("utf-8").decode(rawColumnValue);
+						}
+					} catch (error) {
+						console.error(error);
+						row[columnName] = new TextDecoder("utf-8").decode(rawColumnValue);
+					}
+				}
+			}
+		}
+
+		return rows;
 	},
 };
 
