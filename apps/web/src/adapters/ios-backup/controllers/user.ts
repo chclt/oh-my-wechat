@@ -1,275 +1,51 @@
 import type { DataAdapterResponse } from "@/adapters/adapter";
 import { adapterWorker } from "../worker";
 import type { ChatroomType, ContactType, UserType } from "@/schema";
-import protobuf from "protobufjs";
 import type { WCDatabases } from "../types";
-import { friendTable, openIMContactTable } from "../database/contact";
-import { inArray, sql } from "drizzle-orm";
+import {
+	friendTable,
+	friendTableSelect,
+	friendTableSelectInfer,
+	openIMContactTable,
+	openIMContactTableSelect,
+	openIMContactTableSelectInfer,
+} from "../database/contact";
+import { and, inArray, notLike, sql } from "drizzle-orm";
 import { unionAll } from "drizzle-orm/sqlite-core";
 
-const dbContactProtos = {
-	dbContactRemark: {
-		nickname: {
-			type: "string",
-			id: 1,
-		},
-		id: {
-			type: "string",
-			id: 2,
-		},
-		remark: {
-			type: "string",
-			id: 3,
-		},
-		remarkPinyin: {
-			type: "string",
-			id: 4,
-		},
-		remarkPinyinInits: {
-			type: "string",
-			id: 5,
-		},
-		nicknamePinyin: {
-			type: "string",
-			id: 6,
-		},
-		remarkField7: {
-			type: "string",
-			id: 7,
-		},
-		remarkField8: {
-			type: "string",
-			id: 8,
-		},
-	},
-	dbContactHeadImage: {
-		headImageFlag: {
-			type: "int32",
-			id: 1,
-		},
-		headImageThumb: {
-			type: "string",
-			id: 2,
-		},
-		headImage: {
-			type: "string",
-			id: 3,
-		},
-		headImageField4: {
-			type: "string",
-			id: 4,
-		},
-	},
-	dbContactProfile: {
-		profileFlag: {
-			type: "int32",
-			id: 1,
-		},
-		profileCountry: {
-			type: "string",
-			id: 2,
-		},
-		profileProvince: {
-			type: "string",
-			id: 3,
-		},
-		profileCity: {
-			type: "string",
-			id: 4,
-		},
-		profileBio: {
-			type: "string",
-			id: 5,
-		},
-	},
-	dbContactSocial: {
-		// socialField1: {
-		//   type: "string",
-		//   id: 1,
-		// },
-		// socialField2: {
-		//   type: "string",
-		//   id: 2,
-		// },
-		// socialField3: {
-		//   type: "int32",
-		//   id: 3,
-		// },
-		// socialField7: {
-		//   type: "int32",
-		//   id: 7,
-		// },
-
-		// socialField8: {
-		//   type: "int32",
-		//   id: 8,
-		// },
-		socialBackground: {
-			type: "string",
-			id: 9,
-		},
-		// socialField10: {
-		//   type: "string",
-		//   id: 10,
-		// },
-		socialPhone: {
-			type: "string",
-			id: 11,
-		},
-		// socialField12: {
-		//   type: "string",
-		//   id: 12,
-		// },
-	},
-	dbContactChatRoom: {
-		chatroomMemberIds: {
-			type: "string",
-			id: 1,
-		},
-		chatroomOwnerIds: {
-			type: "string",
-			id: 2,
-		},
-		chatroomaMaxCount: {
-			type: "uint32",
-			id: 4,
-		},
-		chatroomVersion: {
-			type: "uint32",
-			id: 5,
-		},
-		chatroomMember: {
-			type: "string", // xml
-			id: 6,
-		},
-	},
-	dbContactOpenIM: {
-		openIMContactInfo: {
-			type: "string", // json
-			id: 1,
-		},
-		openIMContactId: {
-			type: "string",
-			id: 2,
-		},
-	},
-};
-
-const dbContactProtobufRoot = protobuf.Root.fromJSON({
-	nested: {
-		ContactRemark: {
-			fields: dbContactProtos.dbContactRemark,
-		},
-		HeadImage: {
-			fields: dbContactProtos.dbContactHeadImage,
-		},
-		Profile: {
-			fields: dbContactProtos.dbContactProfile,
-		},
-		Social: {
-			fields: dbContactProtos.dbContactSocial,
-		},
-		Chatroom: {
-			fields: dbContactProtos.dbContactChatRoom,
-		},
-		OpenIM: {
-			fields: dbContactProtos.dbContactOpenIM,
-		},
-	},
-});
-
-function decodeUserTableRowProtobufData(
-	row: typeof friendTable.$inferSelect | typeof openIMContactTable.$inferSelect,
-) {
-	const remarkObj = dbContactProtobufRoot
-		.lookupType("ContactRemark")
-		.decode(row.dbContactRemark!) as unknown as Record<string, unknown>;
-
-	const headImageObj = dbContactProtobufRoot
-		.lookupType("HeadImage")
-		.decode(row.dbContactHeadImage!) as unknown as Record<string, unknown>;
-
-	const profileObj = dbContactProtobufRoot
-		.lookupType("Profile")
-		.decode(row.dbContactProfile!) as unknown as Record<string, unknown>;
-
-	const socialObj = dbContactProtobufRoot
-		.lookupType("Social")
-		.decode(row.dbContactSocial!) as unknown as Record<string, unknown>;
-
-	const chatroomObj = row.dbContactChatRoom
-		? (dbContactProtobufRoot
-				.lookupType("Chatroom")
-				.decode(row.dbContactChatRoom) as unknown as Record<string, unknown>)
-		: undefined;
-
-	const openIMObj = row.dbContactOpenIM
-		? (dbContactProtobufRoot
-				.lookupType("OpenIM")
-				.decode(row.dbContactOpenIM) as unknown as Record<string, unknown>)
-		: undefined;
-
-	if (openIMObj?.openIMContactInfo) {
-		openIMObj.openIMContactInfo = JSON.parse(
-			openIMObj.openIMContactInfo as string,
-		);
-	}
-
-	return {
-		remarkObj,
-		headImageObj,
-		profileObj,
-		socialObj,
-		chatroomObj,
-		openIMObj,
-	};
-}
-
-async function parseContactDatabaseFriendTableRowsRows(
-	databases: WCDatabases,
-	rows: (
-		| typeof friendTable.$inferSelect
-		| typeof openIMContactTable.$inferSelect
-	)[],
+async function parseContactDatabaseFriendTableRows(
+	rows: friendTableSelectInfer | openIMContactTableSelectInfer,
+	{ databases }: { databases: WCDatabases },
 ): Promise<(UserType | ChatroomType)[]> {
 	const allMemberIds: string[] = [];
 
 	const resultWithoutMembers = rows.map((row) => {
-		const {
-			remarkObj,
-			headImageObj,
-			profileObj,
-			socialObj,
-			chatroomObj,
-			openIMObj,
-		} = decodeUserTableRowProtobufData(row);
-
 		if (row.username.endsWith("@chatroom")) {
 			let memberIds: string[] = [];
 
-			if (chatroomObj?.chatroomMemberIds) {
-				memberIds = (chatroomObj.chatroomMemberIds as string).split(";");
+			if (row?.dbContactChatRoom) {
+				memberIds = row.dbContactChatRoom.chatroomMemberIds.split(";");
 				allMemberIds.push(...memberIds);
 			}
 
 			return {
 				id: row.username,
-				title: (remarkObj.nickname as string).length
-					? remarkObj.nickname
+				title: row.dbContactRemark.nickname
+					? row.dbContactRemark.nickname
 					: "群聊",
-				...((remarkObj.remark as string).length
+				...(row.dbContactRemark.remark
 					? {
-							remark: remarkObj.remark,
+							remark: row.dbContactRemark.remark,
 						}
 					: {}),
-				...(headImageObj.headImageThumb
+				...(row.dbContactHeadImage.headImageThumb
 					? {
 							photo: {
-								thumb: headImageObj.headImageThumb,
+								thumb: row.dbContactHeadImage.headImageThumb,
 							},
 						}
 					: {}),
-				is_openim: !!openIMObj,
+				is_openim: !!row.dbContactOpenIM,
 
 				_is_pinned: !!((row.type >> 11) & 1),
 				_is_collapsed: !!((row.type >> 28) & 1),
@@ -279,14 +55,6 @@ async function parseContactDatabaseFriendTableRowsRows(
 					? {
 							__dev: {
 								database_row: row,
-								decoded_protobuf: {
-									remarkObj,
-									headImageObj,
-									profileObj,
-									socialObj,
-									chatroomObj,
-									openIMObj,
-								},
 							},
 						}
 					: {}),
@@ -295,54 +63,47 @@ async function parseContactDatabaseFriendTableRowsRows(
 				_is_collapsed: boolean;
 				_member_ids: string[];
 			};
-		}
+		} else {
+			return {
+				id: row.username,
+				user_id: row.dbContactRemark.id,
+				username: row.dbContactRemark.nickname ?? "",
+				...(row.dbContactRemark.remark
+					? {
+							remark: row.dbContactRemark.remark,
+						}
+					: {}),
+				bio: row.dbContactProfile.profileBio,
 
-		return {
-			id: row.username,
-			user_id: remarkObj.id,
-			username: remarkObj.nickname,
-			...((remarkObj.remark as string).length
-				? {
-						remark: remarkObj.remark,
-					}
-				: {}),
-			bio: profileObj.profileBio,
-
-			...(headImageObj.headImageThumb
-				? {
-						photo: {
-							thumb: headImageObj.headImageThumb,
-						},
-					}
-				: {}),
-
-			background: socialObj.socialBackground,
-
-			...(socialObj.phone
-				? {
-						phone: socialObj.phone,
-					}
-				: {}),
-			is_openim: !!openIMObj,
-
-			_is_pinned: !!((row.type >> 11) & 1),
-
-			...(import.meta.env.DEV
-				? {
-						__dev: {
-							database_row: row,
-							decoded_protobuf: {
-								remarkObj,
-								headImageObj,
-								profileObj,
-								socialObj,
-								chatroomObj,
-								openIMObj,
+				...(row.dbContactHeadImage.headImageThumb
+					? {
+							photo: {
+								thumb: row.dbContactHeadImage.headImageThumb,
 							},
-						},
-					}
-				: {}),
-		} as UserType;
+						}
+					: {}),
+
+				background: row.dbContactSocial.socialBackground,
+
+				...(row.dbContactSocial.socialPhone
+					? {
+							phone: row.dbContactSocial.socialPhone,
+						}
+					: {}),
+				is_openim: !!row.dbContactOpenIM,
+
+				// @ts-ignore
+				_is_pinned: !!((row.type >> 11) & 1),
+
+				...(import.meta.env.DEV
+					? {
+							__dev: {
+								database_row: row,
+							},
+						}
+					: {}),
+			} satisfies UserType;
+		}
 	});
 
 	const allMembers: UserType[] = (
@@ -354,7 +115,7 @@ async function parseContactDatabaseFriendTableRowsRows(
 		)
 	).data as UserType[];
 
-	// 加入当前登录的微信账号数据
+	// 加入当前登录的微信账号数据 TODO:其实感觉应该有别的方法判断自己在不在这个群里
 	if (
 		adapterWorker._getStoreItem("account") &&
 		allMemberIds.indexOf(adapterWorker._getStoreItem("account").id) > -1
@@ -400,22 +161,27 @@ export async function all(...inputs: AllInput): AllOutput {
 
 	const rows = unionAll(
 		db
-			.select()
+			.select(friendTableSelect)
 			.from(friendTable)
-			.where(sql`(${friendTable.type} & 1) != 0`),
+			.where(
+				and(
+					notLike(friendTable.username, "gh_%"),
+					sql`(${friendTable.type} & 1) != 0`,
+				),
+			),
 		db
-			.select()
+			.select(openIMContactTableSelect)
 			.from(openIMContactTable)
-			.where(sql`(${openIMContactTable.type} & 1) != 0`),
+			.where(
+				and(
+					notLike(openIMContactTable.username, "gh_%"),
+					sql`(${openIMContactTable.type} & 1) != 0`,
+				),
+			),
 	).all();
 
 	return {
-		data: await parseContactDatabaseFriendTableRowsRows(
-			databases,
-			rows.filter((row) => {
-				return !row.username.startsWith("gh_");
-			}),
-		),
+		data: await parseContactDatabaseFriendTableRows(rows, { databases }),
 	};
 }
 
@@ -437,9 +203,12 @@ export async function findAll(...inputs: FindAllInput): FinfAllOutput {
 	// 现在用 IN 查询，但是可能会出现 SQL 语句过长的问题，暂时不知道限制是多少
 
 	const rows = unionAll(
-		db.select().from(friendTable).where(inArray(friendTable.username, ids)),
 		db
-			.select()
+			.select(friendTableSelect)
+			.from(friendTable)
+			.where(inArray(friendTable.username, ids)),
+		db
+			.select(openIMContactTableSelect)
 			.from(openIMContactTable)
 			.where(inArray(openIMContactTable.username, ids)),
 	).all();
@@ -449,7 +218,7 @@ export async function findAll(...inputs: FindAllInput): FinfAllOutput {
 			...(ids.indexOf(adapterWorker._getStoreItem("account").id) > -1
 				? [adapterWorker._getStoreItem("account") as UserType]
 				: []),
-			...(await parseContactDatabaseFriendTableRowsRows(databases, rows)),
+			...(await parseContactDatabaseFriendTableRows(rows, { databases })),
 		],
 	};
 }
@@ -473,66 +242,52 @@ export async function contactList(
 
 	const rows = unionAll(
 		db
-			.select()
+			.select(friendTableSelect)
 			.from(friendTable)
 			.where(sql`(${friendTable.type} & 1) != 0`),
 		db
-			.select()
+			.select(openIMContactTableSelect)
 			.from(openIMContactTable)
 			.where(sql`(${openIMContactTable.type} & 1) != 0`),
 	).all();
 
 	const result = rows.map((row) => {
-		const {
-			remarkObj,
-			headImageObj,
-			profileObj,
-			socialObj,
-			chatroomObj,
-			openIMObj,
-		} = decodeUserTableRowProtobufData(row);
-
 		return {
 			id: row.username,
-			username: remarkObj.nickname as string,
-			usernamePinyin: remarkObj.nicknamePinyin as string,
+			username: row.dbContactRemark.nickname ?? "",
+			usernamePinyin: row.dbContactRemark.nicknamePinyin ?? "",
 
-			...((remarkObj.remark as string).length
+			...(row.dbContactRemark.remark
 				? {
-						remark: remarkObj.remark as string,
+						remark: row.dbContactRemark.remark,
 					}
 				: {}),
 
-			...((remarkObj.remarkPinyin as string).length
+			...(row.dbContactRemark.remarkPinyin
 				? {
-						remarkPinyin: remarkObj.remarkPinyin as string,
+						remarkPinyin: row.dbContactRemark.remarkPinyin,
 					}
 				: {}),
 
-			...((remarkObj.remarkPinyinInits as string).length
+			...(row.dbContactRemark.remarkPinyinInits
 				? {
-						remarkPinyinInits: remarkObj.remarkPinyinInits as string,
+						remarkPinyinInits: row.dbContactRemark.remarkPinyinInits,
 					}
 				: {}),
 
-			...(headImageObj.headImageThumb
+			...(row.dbContactHeadImage.headImageThumb
 				? {
 						photo: {
-							thumb: headImageObj.headImageThumb as string,
+							thumb: row.dbContactHeadImage.headImageThumb,
 						},
 					}
 				: {}),
-			is_openim: !!openIMObj,
+			is_openim: !!row.dbContactOpenIM,
 
 			...(import.meta.env.DEV
 				? {
 						__dev: {
-							decoded_protobuf: {
-								remarkObj,
-								headImageObj,
-								profileObj,
-								socialObj,
-							},
+							database_row: row,
 						},
 					}
 				: {}),

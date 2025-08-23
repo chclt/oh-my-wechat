@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@bufbuild/protobuf": "^2.7.0",
     "@ffmpeg/core": "^0.12.10",
     "@ffmpeg/ffmpeg": "^0.12.15",
     "@ffmpeg/types": "^0.12.4",
@@ -59,6 +60,8 @@
     "zstd-codec": "^0.1.5"
   },
   "devDependencies": {
+    "@bufbuild/buf": "^1.56.0",
+    "@bufbuild/protoc-gen-es": "^2.7.0",
     "@eslint/js": "^9.32.0",
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
