@@ -21,7 +21,6 @@ import {
 	type AppMessageType,
 	AppMessageTypeEnum,
 	type ChatType,
-	type ChatroomType,
 	type ChatroomVoipMessageType,
 	type ContactMessageType,
 	type ImageMessageType,
@@ -56,8 +55,8 @@ import type {
 } from "@/adapters/adapter.ts";
 import type { ControllerPaginatorCursor, WCDatabases } from "../types.ts";
 import {
-	chatTable,
-	ChatTableRowInfer,
+	ChatTableSelectInfer,
+	chatTableSelect,
 	getChatTable,
 	getHelloTable,
 } from "../database/message.ts";
@@ -78,7 +77,7 @@ import {
 import { unionAll } from "drizzle-orm/sqlite-core";
 
 async function parseMessageDatabaseChatTableRows(
-	rows: ChatTableRowInfer[],
+	rows: ChatTableSelectInfer[],
 	{
 		chat,
 		databases,
@@ -471,19 +470,6 @@ export async function all(...inputs: AllInput): AllOutput {
 
 	const chatTable = getChatTable(tableName);
 
-	// SELECT
-	const querySelectSegment = {
-		[chatTable.MesLocalID.name]: chatTable.MesLocalID,
-		[chatTable.MesSvrID.name]:
-			sql<string>`CAST(${chatTable.MesSvrID} as TEXT)`.as(
-				chatTable.MesSvrID.name,
-			),
-		[chatTable.CreateTime.name]: chatTable.CreateTime,
-		[chatTable.Des.name]: chatTable.Des,
-		[chatTable.Message.name]: chatTable.Message,
-		[chatTable.Type.name]: chatTable.Type,
-	};
-
 	// cursor condition
 	// 不能直接把操作符放在模板字符串里面。比如 sql`${chatTable.CreateTime} ${cursor_condition} ${cursor_value}` 会报错
 	let cursorQueryWhereSegmentCondition: any = undefined;
@@ -551,7 +537,7 @@ export async function all(...inputs: AllInput): AllOutput {
 					if (cursor_condition && cursor_value) {
 						if (cursor_condition === "<" || cursor_condition === "<=") {
 							const bastQuery = database
-								.select(querySelectSegment)
+								.select(chatTableSelect)
 								.from(chatTable)
 								.where(queryWhereSegment)
 								.orderBy(desc(chatTable.CreateTime))
@@ -571,7 +557,7 @@ export async function all(...inputs: AllInput): AllOutput {
 							});
 						} else if (cursor_condition === ">=" || cursor_condition === ">") {
 							const query = database
-								.select(querySelectSegment)
+								.select(chatTableSelect)
 								.from(chatTable)
 								.where(queryWhereSegment)
 								.orderBy(asc(chatTable.CreateTime))
@@ -607,7 +593,7 @@ export async function all(...inputs: AllInput): AllOutput {
 									: undefined;
 
 							const baseLeftQuery = database
-								.select(querySelectSegment)
+								.select(chatTableSelect)
 								.from(chatTable)
 								.where(baseLeftQueryWhereSegment)
 								.orderBy(desc(chatTable.CreateTime))
@@ -615,14 +601,14 @@ export async function all(...inputs: AllInput): AllOutput {
 								.as("baseLeftQuery");
 
 							const baseRightQuery = database
-								.select(querySelectSegment)
+								.select(chatTableSelect)
 								.from(chatTable)
 								.where(baseRightQueryWhereSegment)
 								.orderBy(asc(chatTable.CreateTime))
 								.limit(query_limit)
 								.as("baseRightQuery");
 
-							// @ts-expect-error
+							// @ts-ignore
 							const baseQuery = unionAll(baseLeftQuery, baseRightQuery).as(
 								"baseQuery",
 							);
@@ -632,7 +618,7 @@ export async function all(...inputs: AllInput): AllOutput {
 								.from(baseQuery)
 								.orderBy(asc(baseQuery.CreateTime));
 
-							const rows = query.all();
+							const rows = query.all() as unknown as ChatTableSelectInfer[];
 
 							return await WCDB.postProcess(rows, {
 								databaseSeries: WCDBDatabaseSeriesName.Message,
@@ -644,7 +630,7 @@ export async function all(...inputs: AllInput): AllOutput {
 						// 游标在第一行
 
 						const baseQuery = database
-							.select(querySelectSegment)
+							.select(chatTableSelect)
 							.from(chatTable)
 							.where(queryWhereSegment)
 							.orderBy(desc(chatTable.CreateTime))
@@ -684,7 +670,7 @@ export async function all(...inputs: AllInput): AllOutput {
 			return promiseResult.value;
 		}
 		return [];
-	}) as ChatTableRowInfer[];
+	});
 
 	if (!rows || rows.length === 0)
 		return {
@@ -924,17 +910,7 @@ export async function find(...inputs: findInput): findOutput {
 			dbs.map(async (database) => {
 				try {
 					const query = database
-						.select({
-							[chatTable.MesLocalID.name]: chatTable.MesLocalID,
-							[chatTable.MesSvrID.name]:
-								sql<string>`CAST(${chatTable.MesSvrID} as TEXT)`.as(
-									chatTable.MesSvrID.name,
-								),
-							[chatTable.CreateTime.name]: chatTable.CreateTime,
-							[chatTable.Des.name]: chatTable.Des,
-							[chatTable.Message.name]: chatTable.Message,
-							[chatTable.Type.name]: chatTable.Type,
-						})
+						.select(chatTableSelect)
 						.from(chatTable)
 						// @ts-ignore CAST 语句已经将 MesSvrID 转换为字符串
 						.where(inArray(chatTable.MesSvrID, messageIds));
@@ -958,7 +934,7 @@ export async function find(...inputs: findInput): findOutput {
 			return promiseResult.value;
 		}
 		return [];
-	}) as ChatTableRowInfer[];
+	});
 
 	if (!rows) {
 		return {
@@ -1005,20 +981,10 @@ export async function allVerify(...inputs: allVerifyInput): allVerifyOutput {
 				const helloTable = getHelloTable(databaseTables[0].name);
 
 				return database
-					.select({
-						[chatTable.MesLocalID.name]: chatTable.MesLocalID,
-						[chatTable.MesSvrID.name]:
-							sql<string>`CAST(${chatTable.MesSvrID} as TEXT)`.as(
-								chatTable.MesSvrID.name,
-							),
-						[chatTable.CreateTime.name]: chatTable.CreateTime,
-						[chatTable.Des.name]: chatTable.Des,
-						[chatTable.Message.name]: chatTable.Message,
-						[chatTable.Type.name]: chatTable.Type,
-					})
+					.select(chatTableSelect)
 					.from(helloTable)
 					.orderBy(desc(helloTable.CreateTime))
-					.all() as ChatTableRowInfer[];
+					.all();
 			} catch (error) {
 				return [];
 			}

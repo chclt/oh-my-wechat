@@ -9,30 +9,29 @@ export const chatTableColumns = {
 	MesSvrID: integer().notNull(),
 	CreateTime: integer().notNull(),
 	Des: integer().notNull().$type<MessageDirection>(),
-	Message: text().notNull(),
+	Message: text().notNull(), // 可能是blob
 	Type: integer().notNull().$type<MessageTypeEnum>(),
 };
 
 export const chatTable = sqliteTable("Chat", chatTableColumns);
 
-const chatTableSelectSegment = {
-	[chatTable.MesLocalID.name]: chatTable.MesLocalID,
-	[chatTable.MesSvrID.name]:
-		sql<string>`CAST(${chatTable.MesSvrID} as TEXT)`.as(
-			chatTable.MesSvrID.name,
-		),
-	[chatTable.CreateTime.name]: chatTable.CreateTime,
-	[chatTable.Des.name]: chatTable.Des,
-	[chatTable.Message.name]: chatTable.Message,
-	[chatTable.Type.name]: chatTable.Type,
+export const chatTableSelect = {
+	MesLocalID: sql<string>`CAST(${chatTable.MesLocalID} as TEXT)`.as(
+		"MesLocalID",
+	),
+	MesSvrID: sql<string>`CAST(${chatTable.MesSvrID} as TEXT)`.as("MesSvrID"),
+	CreateTime: chatTable.CreateTime,
+	Des: chatTable.Des,
+	Message: chatTable.Message,
+	Type: chatTable.Type,
 };
 
-export type ChatTableRowInfer = Omit<
+export type ChatTableSelectInfer = Omit<
 	typeof chatTable.$inferSelect,
 	"MesSvrID" | "MesLocalID"
 > & {
 	MesSvrID: string;
-	MesLocalID: string; // TODO: not implemented in query
+	MesLocalID: string;
 };
 
 export function getChatTable(tableName: string) {
