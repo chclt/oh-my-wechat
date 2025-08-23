@@ -15,16 +15,14 @@ export const chatTableColumns = {
 
 export const chatTable = sqliteTable("Chat", chatTableColumns);
 
-export const chatTableSelect = {
-	MesLocalID: sql<string>`CAST(${chatTable.MesLocalID} as TEXT)`.as(
-		"MesLocalID",
-	),
-	MesSvrID: sql<string>`CAST(${chatTable.MesSvrID} as TEXT)`.as("MesSvrID"),
-	CreateTime: chatTable.CreateTime,
-	Des: chatTable.Des,
-	Message: chatTable.Message,
-	Type: chatTable.Type,
-};
+export const chatTableSelect = (table: typeof chatTable) => ({
+	MesLocalID: sql<string>`CAST(${table.MesLocalID} as TEXT)`.as("MesLocalID"),
+	MesSvrID: sql<string>`CAST(${table.MesSvrID} as TEXT)`.as("MesSvrID"),
+	CreateTime: table.CreateTime,
+	Des: table.Des,
+	Message: table.Message,
+	Type: table.Type,
+});
 
 export type ChatTableSelectInfer = Omit<
 	typeof chatTable.$inferSelect,

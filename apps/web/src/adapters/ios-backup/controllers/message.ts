@@ -537,7 +537,7 @@ export async function all(...inputs: AllInput): AllOutput {
 					if (cursor_condition && cursor_value) {
 						if (cursor_condition === "<" || cursor_condition === "<=") {
 							const bastQuery = database
-								.select(chatTableSelect)
+								.select(chatTableSelect(chatTable))
 								.from(chatTable)
 								.where(queryWhereSegment)
 								.orderBy(desc(chatTable.CreateTime))
@@ -557,7 +557,7 @@ export async function all(...inputs: AllInput): AllOutput {
 							});
 						} else if (cursor_condition === ">=" || cursor_condition === ">") {
 							const query = database
-								.select(chatTableSelect)
+								.select(chatTableSelect(chatTable))
 								.from(chatTable)
 								.where(queryWhereSegment)
 								.orderBy(asc(chatTable.CreateTime))
@@ -593,7 +593,7 @@ export async function all(...inputs: AllInput): AllOutput {
 									: undefined;
 
 							const baseLeftQuery = database
-								.select(chatTableSelect)
+								.select(chatTableSelect(chatTable))
 								.from(chatTable)
 								.where(baseLeftQueryWhereSegment)
 								.orderBy(desc(chatTable.CreateTime))
@@ -601,7 +601,7 @@ export async function all(...inputs: AllInput): AllOutput {
 								.as("baseLeftQuery");
 
 							const baseRightQuery = database
-								.select(chatTableSelect)
+								.select(chatTableSelect(chatTable))
 								.from(chatTable)
 								.where(baseRightQueryWhereSegment)
 								.orderBy(asc(chatTable.CreateTime))
@@ -630,7 +630,7 @@ export async function all(...inputs: AllInput): AllOutput {
 						// 游标在第一行
 
 						const baseQuery = database
-							.select(chatTableSelect)
+							.select(chatTableSelect(chatTable))
 							.from(chatTable)
 							.where(queryWhereSegment)
 							.orderBy(desc(chatTable.CreateTime))
@@ -910,7 +910,7 @@ export async function find(...inputs: findInput): findOutput {
 			dbs.map(async (database) => {
 				try {
 					const query = database
-						.select(chatTableSelect)
+						.select(chatTableSelect(chatTable))
 						.from(chatTable)
 						// @ts-ignore CAST 语句已经将 MesSvrID 转换为字符串
 						.where(inArray(chatTable.MesSvrID, messageIds));
@@ -981,7 +981,7 @@ export async function allVerify(...inputs: allVerifyInput): allVerifyOutput {
 				const helloTable = getHelloTable(databaseTables[0].name);
 
 				return database
-					.select(chatTableSelect)
+					.select(chatTableSelect(helloTable))
 					.from(helloTable)
 					.orderBy(desc(helloTable.CreateTime))
 					.all();
