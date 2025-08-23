@@ -46,7 +46,6 @@
     "es-toolkit": "^1.39.8",
     "fast-xml-parser": "^5.2.5",
     "lucide-react": "^0.536.0",
-    "protobufjs": "^7.5.3",
     "react": "^19.1.1",
     "react-day-picker": "^9.8.1",
     "react-dom": "^19.1.1",
