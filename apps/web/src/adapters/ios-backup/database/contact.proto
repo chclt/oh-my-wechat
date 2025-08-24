@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+message WCContactRemark {
+    optional string nickname = 1;
+    string id = 2;
+    optional string remark = 3;
+    optional string remarkPinyin = 4;
+    optional string remarkPinyinInits = 5;
+    optional string nicknamePinyin = 6;
+    // string field7 = 7;
+    // string field8 = 8;
+}
+
+message WCContactHeadImage {
+    // int32 headImageFlag = 1; // 我不知道我怎么知道这个字段叫 flag 以及有什么用
+    optional string headImageThumb = 2;
+    optional string headImage = 3;
+    // string field4 = 4;
+}
+
+message WCContactProfile {
+    int32 profileFlag = 1; // 我不知道我怎么知道这个字段叫 flag 以及有什么用
+    string profileCountry = 2;
+    string profileProvince = 3;
+    string profileCity = 4;
+    string profileBio = 5;
+}
+
+message WCContactSocial {
+    // string field1 = 1;
+    // string field2 = 2;
+    // int32 field3 = 3;
+    // int32 field7 = 7;
+    // int32 field8 = 8;
+    string socialBackground = 9;
+    // string field10 = 10;
+    optional string socialPhone = 11;
+    // string field12 = 12;
+}
+
+message WCContactChatRoom {
+    string chatroomMemberIds = 1;
+    string chatroomOwnerIds = 2;
+    uint32 chatroomaMaxCount = 4; // 这应该也是我猜的
+    uint32 chatroomVersion = 5; // 我不知道我为什么知道这个字段叫 version
+    string chatroomMember = 6; // xml
+}
+
+message WCContactOpenIM {
+    string openIMContactInfo = 1; // json
+    string openIMContactId = 2;
+} 

@@ -1,8 +1,9 @@
 import type { UserType } from "@/schema";
 import { SQLJsDatabase } from "drizzle-orm/sql-js";
-import protobuf from "protobufjs";
+
 import { filesTable } from "../database/_manifest.ts";
 import { and, eq, like } from "drizzle-orm";
+import { BinaryReader } from "@bufbuild/protobuf/wire";
 
 export async function getFilesFromManifast(
 	manifestDatabase: SQLJsDatabase,
@@ -174,20 +175,25 @@ export function parseUserFromMmsetting(buffer: Uint8Array): UserType {
 }
 
 export function parseLocalInfo(localInfoBuffer: Uint8Array): { id: string } {
-	const result = protobuf.Root.fromJSON({
-		nested: {
-			LocalInfo: {
-				fields: {
-					id: {
-						type: "string",
-						id: 1,
-					},
-				},
-			},
-		},
-	})
-		.lookupType("LocalInfo")
-		.decode(localInfoBuffer);
+	let id = "";
 
-	return result as unknown as { id: string };
+	const reader = new BinaryReader(localInfoBuffer);
+	while (reader.pos < reader.len) {
+		const tag = reader.uint32();
+		const wireType = tag & 7;
+		const fieldNumber = tag >> 3;
+
+		// uint32 id = 1;
+		if (fieldNumber === 1 && wireType === 2) {
+			// string field
+			id = reader.string();
+			break;
+		}
+	}
+
+	if (id) {
+		return { id };
+	} else {
+		throw new Error("Failed to parse Documents/LocalInfo.data");
+	}
 }
