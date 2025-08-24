@@ -15,7 +15,15 @@ export const chatTableColumns = {
 
 export const chatTable = sqliteTable("Chat", chatTableColumns);
 
-export const chatTableSelect = (table: typeof chatTable) => ({
+// table shoule be returned by getChatTable
+export const chatTableSelect = (table: {
+	MesLocalID: any;
+	MesSvrID: any;
+	CreateTime: any;
+	Des: any;
+	Message: any;
+	Type: any;
+}) => ({
 	MesLocalID: sql<string>`CAST(${table.MesLocalID} as TEXT)`.as("MesLocalID"),
 	MesSvrID: sql<string>`CAST(${table.MesSvrID} as TEXT)`.as("MesSvrID"),
 	CreateTime: table.CreateTime,
