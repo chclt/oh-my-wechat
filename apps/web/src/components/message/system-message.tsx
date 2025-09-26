@@ -10,20 +10,37 @@ export default function SystemMessage({
 	variant = "default",
 	...props
 }: SystemMessageProp) {
-	const content = message.message_entity
+	if (variant === "default") {
+		return <SystemMessageDefault message={message} {...props} />;
+	} else if (variant === "abstract") {
+		return <SystemMessageAbstract message={message} {...props} />;
+	}
+}
+
+function SystemMessageDefault({
+	message,
+	...props
+}: Omit<SystemMessageProp, "variant">) {
+	return (
+		<div
+			className="text-sm text-center text-pretty text-neutral-600"
+			{...props}
+		>
+			<p className="px-2 py-1 box-decoration-clone">{parseContent(message)}</p>
+		</div>
+	);
+}
+
+function SystemMessageAbstract({
+	message,
+	...props
+}: Omit<SystemMessageProp, "variant">) {
+	return <p>{parseContent(message)}</p>;
+}
+
+function parseContent(message: SystemMessageType) {
+	return message.message_entity
 		.split(/<[^>]+?>/)
 		.map((s) => s)
 		.join("");
-
-	if (variant === "default")
-		return (
-			<div
-				className="text-sm text-center text-pretty text-neutral-600"
-				{...props}
-			>
-				<p className="px-2 py-1 box-decoration-clone">{content}</p>
-			</div>
-		);
-
-	return <p>{content}</p>;
 }

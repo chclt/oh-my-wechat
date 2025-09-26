@@ -1,8 +1,8 @@
 import type { MessageType } from "@/schema";
-import User from "../user";
 import type React from "react";
+import User from "./user";
 
-interface MessageInlineProps
+interface MessageInlineWrapperProps
 	extends React.HTMLAttributes<HTMLParagraphElement> {
 	message: MessageType;
 
@@ -18,7 +18,7 @@ export default function MessageInlineWrapper({
 	children,
 	className,
 	...props
-}: MessageInlineProps) {
+}: MessageInlineWrapperProps) {
 	return (
 		<p className={className} {...props}>
 			{showUsername && (

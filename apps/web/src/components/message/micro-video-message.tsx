@@ -1,5 +1,5 @@
 import LocalVideo from "@/components/local-video.tsx";
-import MessageInlineWrapper from "@/components/message/message-inline.tsx";
+import MessageInlineWrapper from "@/components/message-inline-wrapper";
 import type { MessageProp } from "@/components/message/message.tsx";
 import type { MicroVideoMessageType } from "@/schema";
 
@@ -35,14 +35,30 @@ export default function MicroVideoMessage({
 	variant = "default",
 	...props
 }: MicroVideoMessageProps) {
-	const chat = message.chat;
-	if (variant === "default")
-		return (
-			<div className="" {...props}>
-				<LocalVideo chat={chat!} message={message} />
-			</div>
-		);
+	if (variant === "default") {
+		return <MicroVideoMessageDefault message={message} {...props} />;
+	} else if (variant === "referenced" || variant === "abstract") {
+		return <MicroVideoMessageAbstract message={message} {...props} />;
+	}
+}
 
+function MicroVideoMessageDefault({
+	message,
+	...props
+}: Omit<MicroVideoMessageProps, "variant">) {
+	const chat = message.chat;
+
+	return (
+		<div {...props}>
+			<LocalVideo chat={chat} message={message} />
+		</div>
+	);
+}
+
+function MicroVideoMessageAbstract({
+	message,
+	...props
+}: Omit<MicroVideoMessageProps, "variant">) {
 	return (
 		<MessageInlineWrapper message={message} {...props}>
 			[视频]

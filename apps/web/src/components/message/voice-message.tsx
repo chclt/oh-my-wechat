@@ -1,8 +1,8 @@
 import LocalVoice from "@/components/local-voice.tsx";
-import MessageInlineWrapper from "@/components/message/message-inline.tsx";
+import MessageInlineWrapper from "@/components/message-inline-wrapper";
 import type { MessageProp } from "@/components/message/message.tsx";
-import type { VoiceMessageType } from "@/schema";
 import { cn } from "@/lib/utils.ts";
+import type { VoiceMessageType } from "@/schema";
 
 type VoiceMessageProps = MessageProp<VoiceMessageType>;
 
@@ -30,14 +30,29 @@ export default function VoiceMessage({
 	variant = "default",
 	...props
 }: VoiceMessageProps) {
-	const chat = message.chat;
-	if (variant === "default")
-		return (
-			<div className={cn("max-w-[20em]")} {...props}>
-				<LocalVoice chat={chat} message={message} />
-			</div>
-		);
+	if (variant === "default") {
+		return <VoiceMessageDefault message={message} {...props} />;
+	} else if (variant === "referenced" || variant === "abstract") {
+		return <VoiceMessageAbstract message={message} {...props} />;
+	}
+}
 
+function VoiceMessageDefault({
+	message,
+	...props
+}: Omit<VoiceMessageProps, "variant">) {
+	const chat = message.chat;
+	return (
+		<div className={cn("max-w-[20em]")} {...props}>
+			<LocalVoice chat={chat} message={message} />
+		</div>
+	);
+}
+
+function VoiceMessageAbstract({
+	message,
+	...props
+}: Omit<VoiceMessageProps, "variant">) {
 	return (
 		<MessageInlineWrapper message={message} {...props}>
 			[语音]{" "}

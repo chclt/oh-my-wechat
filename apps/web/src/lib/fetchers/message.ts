@@ -1,14 +1,14 @@
-import type {
-	InfiniteData,
-	DefaultError,
-	QueryKey,
-	UseQueryOptions,
-	UndefinedInitialDataInfiniteOptions,
-} from "@tanstack/react-query";
-import type { MessageType } from "@/schema";
-import * as MessageController from "@/adapters/ios-backup/controllers/message";
-import { getDataAdapter } from "../data-adapter.ts";
 import { DataAdapterCursorPagination } from "@/adapters/adapter.ts";
+import * as MessageController from "@/adapters/ios-backup/controllers/message";
+import { type MessageType } from "@/schema";
+import type {
+	DefaultError,
+	InfiniteData,
+	QueryKey,
+	UndefinedInitialDataInfiniteOptions,
+	UseQueryOptions,
+} from "@tanstack/react-query";
+import { getDataAdapter } from "../data-adapter.ts";
 
 export function MessageListInfiniteQueryOptions(
 	accountId: string,

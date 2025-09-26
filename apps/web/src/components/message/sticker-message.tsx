@@ -1,5 +1,5 @@
 import Image from "@/components/image.tsx";
-import MessageInlineWrapper from "@/components/message/message-inline.tsx";
+import MessageInlineWrapper from "@/components/message-inline-wrapper";
 import type { MessageProp } from "@/components/message/message.tsx";
 import type { StickerMessageType } from "@/schema";
 
@@ -57,38 +57,52 @@ export default function StickerMessage({
 	variant = "default",
 	...props
 }: StickerMessageProps) {
-	if (variant === "default")
-		return (
-			<div className="" {...props}>
-				<Image
-					{...(message.message_entity.msg.emoji["@_width"]
-						? {
-								width:
-									Number.parseInt(message.message_entity.msg.emoji["@_width"]) /
-									2,
-							}
-						: {})}
-					{...(message.message_entity.msg.emoji["@_height"]
-						? {
-								height:
-									Number.parseInt(
-										message.message_entity.msg.emoji["@_height"],
-									) / 2,
-							}
-						: {})}
-					src={message.message_entity.msg.emoji["@_cdnurl"]}
-					alt={"表情"}
-					className={"min-w-11 min-h-11 max-w-32 max-h-32"}
-					style={
-						{
-							// width: message.message_entity.msg.emoji["@_width"],
-							// height: message.message_entity.msg.emoji["@_height"],
-						}
-					}
-				/>
-			</div>
-		);
+	if (variant === "default") {
+		return <StickerMessageDefault message={message} {...props} />;
+	} else if (variant === "referenced" || variant === "abstract") {
+		return <StickerMessageAbstract message={message} {...props} />;
+	}
+}
 
+function StickerMessageDefault({
+	message,
+	...props
+}: Omit<StickerMessageProps, "variant">) {
+	return (
+		<div className="" {...props}>
+			<Image
+				{...(message.message_entity.msg.emoji["@_width"]
+					? {
+							width:
+								Number.parseInt(message.message_entity.msg.emoji["@_width"]) /
+								2,
+						}
+					: {})}
+				{...(message.message_entity.msg.emoji["@_height"]
+					? {
+							height:
+								Number.parseInt(message.message_entity.msg.emoji["@_height"]) /
+								2,
+						}
+					: {})}
+				src={message.message_entity.msg.emoji["@_cdnurl"]}
+				alt={"表情"}
+				className={"min-w-11 min-h-11 max-w-32 max-h-32"}
+				style={
+					{
+						// width: message.message_entity.msg.emoji["@_width"],
+						// height: message.message_entity.msg.emoji["@_height"],
+					}
+				}
+			/>
+		</div>
+	);
+}
+
+function StickerMessageAbstract({
+	message,
+	...props
+}: Omit<StickerMessageProps, "variant">) {
 	return (
 		<MessageInlineWrapper message={message} {...props}>
 			[表情]

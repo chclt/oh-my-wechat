@@ -1,6 +1,6 @@
 import { MessageBubbleGroup } from "@/components/message-bubble-group";
+import MessageInlineWrapper from "@/components/message-inline-wrapper";
 import type { AppMessageProps } from "@/components/message/app-message.tsx";
-import MessageInlineWrapper from "@/components/message/message-inline.tsx";
 import Record from "@/components/record/record";
 import {
 	Dialog,
@@ -11,13 +11,13 @@ import {
 	DialogTrigger,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { decodeUnicodeReferences } from "@/lib/utils.ts";
 import {
 	type AppMessageTypeEnum,
 	MessageDirection,
 	type MessageType,
 	type RecordTypeEnum,
 } from "@/schema";
-import { decodeUnicodeReferences } from "@/lib/utils.ts";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { cva } from "class-variance-authority";
 import { XMLParser } from "fast-xml-parser";
@@ -122,6 +122,20 @@ export default function ForwardMessage({
 	className,
 	...props
 }: ForwardMessageProps) {
+	if (variant === "default") {
+		return <ForwardMessageDefault message={message} {...props} />;
+	} else if (variant === "referenced") {
+		return <ForwardMessageReferenced message={message} {...props} />;
+	} else if (variant === "abstract") {
+		return <ForwardMessageAbstract message={message} {...props} />;
+	}
+}
+
+function ForwardMessageDefault({
+	message,
+	className,
+	...props
+}: Omit<ForwardMessageProps, "variant">) {
 	const xmlParser = new XMLParser({
 		parseAttributeValue: true,
 		ignoreAttributes: false,
@@ -143,97 +157,120 @@ export default function ForwardMessage({
 		),
 	);
 
-	if (variant === "default")
-		return (
-			<div
-				className={forwardMessageVariants({
-					variant,
-					direction: message.direction,
-					className,
-				})}
-				{...props}
-			>
-				<h4 className="font-medium">{title}</h4>
-				{records && (
-					<div
-						className={forwardMessageRecordVariants({
-							variant,
-							direction: message.direction,
-							className,
-						})}
-						style={{
-							maskImage: "linear-gradient(to top, transparent 0%, black 2rem)",
-						}}
-					>
-						{(Array.isArray(records.recordinfo.datalist.dataitem)
-							? records.recordinfo.datalist.dataitem
-							: [records.recordinfo.datalist.dataitem]
-						).map((record) => (
-							<MessageInlineWrapper
-								key={record["@_dataid"]}
-								message={
-									{
-										from: {
-											id: record.sourcename,
-											user_id: record.sourcename,
-											username: record.sourcename,
-											photo: { thumb: record.sourceheadurl },
-											bio: "",
-										},
-									} as MessageType
-								}
-								className={"[&>img]:top-0"}
-							>
-								<Record message={message} record={record} variant="abstract" />
-							</MessageInlineWrapper>
-						))}
-					</div>
-				)}
-				<Dialog>
-					<DialogTrigger asChild>
-						<button className="absolute inset-0" type="button" />
-					</DialogTrigger>
-					<DialogContent
-						className={
-							"h-[calc(100dvh-6rem)] p-0 bg-neutral-100 overflow-hidden block"
-						}
-					>
-						<ScrollArea className="h-full">
-							<DialogHeader className="z-10 sticky top-0 p-4 bg-neutral-100">
-								<DialogTitle>{title}</DialogTitle>
-								<VisuallyHidden>
-									<DialogDescription>{title}</DialogDescription>
-								</VisuallyHidden>
-							</DialogHeader>
-							<div className="space-y-2 p-4 pt-0">
-								{(Array.isArray(records.recordinfo.datalist.dataitem)
-									? records.recordinfo.datalist.dataitem
-									: [records.recordinfo.datalist.dataitem]
-								).map((record) => (
-									<MessageBubbleGroup
-										key={record["@_dataid"]}
-										user={{
-											id: record.sourcename,
-											user_id: record.sourcename,
-											username: record.sourcename,
-											photo: { thumb: record.sourceheadurl },
-											is_openim: false,
-										}}
-										showUsername={true}
-										className="[&>img]:top-12.5"
-									>
-										<Record message={message} record={record} />
-									</MessageBubbleGroup>
-								))}
-							</div>
-						</ScrollArea>
-					</DialogContent>
-				</Dialog>
-			</div>
-		);
+	return (
+		<div
+			className={forwardMessageVariants({
+				variant: "default",
+				direction: message.direction,
+				className,
+			})}
+			{...props}
+		>
+			<h4 className="font-medium">{title}</h4>
+			{records && (
+				<div
+					className={forwardMessageRecordVariants({
+						variant: "default",
+						direction: message.direction,
+						className,
+					})}
+					style={{
+						maskImage: "linear-gradient(to top, transparent 0%, black 2rem)",
+					}}
+				>
+					{(Array.isArray(records.recordinfo.datalist.dataitem)
+						? records.recordinfo.datalist.dataitem
+						: [records.recordinfo.datalist.dataitem]
+					).map((record) => (
+						<MessageInlineWrapper
+							key={record["@_dataid"]}
+							message={
+								{
+									from: {
+										id: record.sourcename,
+										user_id: record.sourcename,
+										username: record.sourcename,
+										photo: { thumb: record.sourceheadurl },
+										bio: "",
+									},
+								} as MessageType
+							}
+							className={"[&>img]:top-0"}
+						>
+							<Record message={message} record={record} variant="abstract" />
+						</MessageInlineWrapper>
+					))}
+				</div>
+			)}
+			<Dialog>
+				<DialogTrigger asChild>
+					<button className="absolute inset-0" type="button" />
+				</DialogTrigger>
+				<DialogContent
+					className={
+						"h-[calc(100dvh-6rem)] p-0 bg-neutral-100 overflow-hidden block"
+					}
+				>
+					<ScrollArea className="h-full">
+						<DialogHeader className="z-10 sticky top-0 p-4 bg-neutral-100">
+							<DialogTitle>{title}</DialogTitle>
+							<VisuallyHidden>
+								<DialogDescription>{title}</DialogDescription>
+							</VisuallyHidden>
+						</DialogHeader>
+						<div className="space-y-2 p-4 pt-0">
+							{(Array.isArray(records.recordinfo.datalist.dataitem)
+								? records.recordinfo.datalist.dataitem
+								: [records.recordinfo.datalist.dataitem]
+							).map((record) => (
+								<MessageBubbleGroup
+									key={record["@_dataid"]}
+									user={{
+										id: record.sourcename,
+										user_id: record.sourcename,
+										username: record.sourcename,
+										photo: { thumb: record.sourceheadurl },
+										is_openim: false,
+									}}
+									showUsername={true}
+									className="[&>img]:top-12.5"
+								>
+									<Record message={message} record={record} />
+								</MessageBubbleGroup>
+							))}
+						</div>
+					</ScrollArea>
+				</DialogContent>
+			</Dialog>
+		</div>
+	);
+}
+
+function ForwardMessageReferenced({
+	message,
+	...props
+}: Omit<ForwardMessageProps, "variant">) {
+	const title = decodeUnicodeReferences(
+		message.message_entity.msg.appmsg.title,
+	);
 
 	return (
-		<MessageInlineWrapper message={message} className={className} {...props}>
+		<MessageInlineWrapper message={message} {...props}>
+			<span>{title}</span>
+		</MessageInlineWrapper>
+	);
+}
+
+function ForwardMessageAbstract({
+	message,
+	...props
+}: Omit<ForwardMessageProps, "variant">) {
+	const title = decodeUnicodeReferences(
+		message.message_entity.msg.appmsg.title,
+	);
+
+	return (
+		<MessageInlineWrapper message={message} {...props}>
 			<span>{title}</span>
 		</MessageInlineWrapper>
 	);

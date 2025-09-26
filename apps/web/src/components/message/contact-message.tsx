@@ -1,5 +1,5 @@
 import Image from "@/components/image.tsx";
-import MessageInlineWrapper from "@/components/message/message-inline.tsx";
+import MessageInlineWrapper from "@/components/message-inline-wrapper";
 import type { MessageProp } from "@/components/message/message.tsx";
 import {
 	Card,
@@ -8,7 +8,6 @@ import {
 	CardTitle,
 } from "@/components/ui/card.tsx";
 import type { ContactMessageType } from "@/schema";
-import type * as React from "react";
 
 type ContactMessageProps = MessageProp<ContactMessageType>;
 
@@ -49,62 +48,101 @@ export default function ContactMessage({
 }: ContactMessageProps) {
 	if (message.message_entity.msg["@_certflag"] === "0") {
 		// 个人名片
-		if (variant === "default")
+		if (variant === "default") {
 			return (
-				<div
-					className="w-48 flex flex-col bg-white rounded-xl overflow-hidden"
-					{...props}
-				>
-					{message.message_entity.msg["@_bigheadimgurl"] ? (
-						<Image
-							src={message.message_entity.msg["@_bigheadimgurl"]}
-							alt=""
-							className={"shrink-0 w-full rounded-lg"}
-						/>
-					) : (
-						<div
-							className={"shrink-0 w-full pb-[100%] rounded-lg bg-neutral-300"}
-						/>
-					)}
-
-					<h4 className="py-2.5 px-3 font-medium">
-						{message.message_entity.msg["@_nickname"]}
-					</h4>
-				</div>
+				<ContactMessagePersonalAccountDefault message={message} {...props} />
 			);
-
-		return (
-			<MessageInlineWrapper message={message} {...props}>
-				<span>[名片] {message.message_entity.msg["@_nickname"]}</span>
-			</MessageInlineWrapper>
-		);
+		} else if (variant === "referenced" || variant === "abstract") {
+			return (
+				<ContactMessagePersonalAccountAbstract message={message} {...props} />
+			);
+		}
+	} else {
+		// 公众号名片
+		if (variant === "default") {
+			return (
+				<ContactMessageOfficialAccountDefault message={message} {...props} />
+			);
+		} else if (variant === "referenced" || variant === "abstract") {
+			return (
+				<ContactMessageOfficialAccountAbstract message={message} {...props} />
+			);
+		}
 	}
+}
 
-	if (variant === "default")
-		return (
-			<Card className="max-w-[20em] w-fit" {...props}>
-				<CardContent className={"flex items-center p-2.5 pr-4"}>
-					<Image
-						src={
-							message.message_entity.msg["@_bigheadimgurl"] ??
-							message.message_entity.msg["@_brandIconUrl"]
-						}
-						alt={message.message_entity.msg["@_nickname"]}
-						className={"shrink-0 size-12 rounded-full"}
-					/>
-					<div className="ml-4 flex flex-col space-y-0.5">
-						<CardTitle className="line-clamp-1">
-							{message.message_entity.msg["@_nickname"]}
-						</CardTitle>
-						<p className={"text-sm line-clamp-1 text-muted-foreground"}>
-							{message.message_entity.msg["@_certinfo"]}
-						</p>
-					</div>
-				</CardContent>
-				<CardFooter>公众号名片</CardFooter>
-			</Card>
-		);
+function ContactMessagePersonalAccountDefault({
+	message,
+	...props
+}: Omit<ContactMessageProps, "variant">) {
+	return (
+		<div
+			className="w-48 flex flex-col bg-white rounded-xl overflow-hidden"
+			{...props}
+		>
+			{message.message_entity.msg["@_bigheadimgurl"] ? (
+				<Image
+					src={message.message_entity.msg["@_bigheadimgurl"]}
+					alt=""
+					className={"shrink-0 w-full rounded-lg"}
+				/>
+			) : (
+				<div
+					className={"shrink-0 w-full pb-[100%] rounded-lg bg-neutral-300"}
+				/>
+			)}
 
+			<h4 className="py-2.5 px-3 font-medium">
+				{message.message_entity.msg["@_nickname"]}
+			</h4>
+		</div>
+	);
+}
+
+function ContactMessagePersonalAccountAbstract({
+	message,
+	...props
+}: Omit<ContactMessageProps, "variant">) {
+	return (
+		<MessageInlineWrapper message={message} {...props}>
+			<span>[名片] {message.message_entity.msg["@_nickname"]}</span>
+		</MessageInlineWrapper>
+	);
+}
+
+function ContactMessageOfficialAccountDefault({
+	message,
+	...props
+}: Omit<ContactMessageProps, "variant">) {
+	return (
+		<Card className="max-w-[20em] w-fit" {...props}>
+			<CardContent className={"flex items-center p-2.5 pr-4"}>
+				<Image
+					src={
+						message.message_entity.msg["@_bigheadimgurl"] ??
+						message.message_entity.msg["@_brandIconUrl"]
+					}
+					alt={message.message_entity.msg["@_nickname"]}
+					className={"shrink-0 size-12 rounded-full"}
+				/>
+				<div className="ml-4 flex flex-col space-y-0.5">
+					<CardTitle className="line-clamp-1">
+						{message.message_entity.msg["@_nickname"]}
+					</CardTitle>
+					<p className={"text-sm line-clamp-1 text-muted-foreground"}>
+						{message.message_entity.msg["@_certinfo"]}
+					</p>
+				</div>
+			</CardContent>
+			<CardFooter>公众号名片</CardFooter>
+		</Card>
+	);
+}
+
+function ContactMessageOfficialAccountAbstract({
+	message,
+	...props
+}: Omit<ContactMessageProps, "variant">) {
 	return (
 		<MessageInlineWrapper message={message} {...props}>
 			<span>[公众号名片] {message.message_entity.msg["@_nickname"]}</span>

@@ -1,7 +1,7 @@
 import { LinkCard } from "@/components/link-card.tsx";
+import MessageInlineWrapper from "@/components/message-inline-wrapper.tsx";
 import type { MessageProp } from "@/components/message/message.tsx";
 import type { MailMessageType } from "@/schema";
-import MessageInlineWrapper from "./message-inline";
 
 type MailMessageProps = MessageProp<MailMessageType>;
 
@@ -43,16 +43,31 @@ export default function MailMessage({
 	variant = "default",
 	...props
 }: MailMessageProps) {
-	if (variant === "default")
-		return (
-			<LinkCard
-				href={message.message_entity.msg.pushmail.waplink}
-				heading={message.message_entity.msg.pushmail.content.subject}
-				abstract={message.message_entity.msg.pushmail.content.digest}
-				from={message.message_entity.msg.pushmail.content.sender}
-			/>
-		);
+	if (variant === "default") {
+		return <MailMessageDefault message={message} {...props} />;
+	} else if (variant === "abstract") {
+		return <MailMessageAbstract message={message} {...props} />;
+	}
+}
 
+function MailMessageDefault({
+	message,
+	...props
+}: Omit<MailMessageProps, "variant">) {
+	return (
+		<LinkCard
+			href={message.message_entity.msg.pushmail.waplink}
+			heading={message.message_entity.msg.pushmail.content.subject}
+			abstract={message.message_entity.msg.pushmail.content.digest}
+			from={message.message_entity.msg.pushmail.content.sender}
+		/>
+	);
+}
+
+function MailMessageAbstract({
+	message,
+	...props
+}: Omit<MailMessageProps, "variant">) {
 	return (
 		<MessageInlineWrapper message={message} {...props}>
 			[邮件] {message.message_entity.msg.pushmail.content.subject}

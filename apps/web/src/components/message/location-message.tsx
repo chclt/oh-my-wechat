@@ -1,9 +1,9 @@
+import MessageInlineWrapper from "@/components/message-inline-wrapper.tsx";
 import type { MessageProp } from "@/components/message/message.tsx";
-import type { LocationMessageType } from "@/schema";
 import { cn } from "@/lib/utils.ts";
+import type { LocationMessageType } from "@/schema";
 import { cva } from "class-variance-authority";
 import { LocationIcon } from "../icon";
-import MessageInlineWrapper from "./message-inline";
 
 type LocationMessageProps = MessageProp<LocationMessageType>;
 
@@ -40,20 +40,34 @@ export default function LocationMessage({
 	...props
 }: LocationMessageProps) {
 	if (variant === "default")
-		return (
-			<div className={cn(locationMessageVariants())} {...props}>
-				<LocationIcon />
-				<div>
-					<h4 className={"font-medium"}>
-						{message.message_entity.msg.location["@_poiname"]}
-					</h4>
-					<p className={"text-sm text-muted-foreground"}>
-						{message.message_entity.msg.location["@_label"]}
-					</p>
-				</div>
-			</div>
-		);
+		return <LocationMessageDefault message={message} {...props} />;
+	else if (variant === "referenced" || variant === "abstract")
+		return <LocationMessageAbstract message={message} {...props} />;
+}
 
+function LocationMessageDefault({
+	message,
+	...props
+}: Omit<LocationMessageProps, "variant">) {
+	return (
+		<div className={cn(locationMessageVariants())} {...props}>
+			<LocationIcon />
+			<div>
+				<h4 className={"font-medium"}>
+					{message.message_entity.msg.location["@_poiname"]}
+				</h4>
+				<p className={"text-sm text-muted-foreground"}>
+					{message.message_entity.msg.location["@_label"]}
+				</p>
+			</div>
+		</div>
+	);
+}
+
+function LocationMessageAbstract({
+	message,
+	...props
+}: Omit<LocationMessageProps, "variant">) {
 	return (
 		<MessageInlineWrapper message={message} {...props}>
 			[位置] {message.message_entity.msg.location["@_poiname"]}

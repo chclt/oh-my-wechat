@@ -1,10 +1,8 @@
+import MessageInlineWrapper from "@/components/message-inline-wrapper";
 import type { AppMessageProps } from "@/components/message/app-message.tsx";
-import MessageInlineWrapper from "@/components/message/message-inline.tsx";
 import type { RecordType } from "@/components/record/record.tsx";
-import type { AppMessageTypeEnum, FileInfo } from "@/schema";
 import { cn, decodeUnicodeReferences } from "@/lib/utils.ts";
-import { XMLParser } from "fast-xml-parser";
-import { useEffect } from "react";
+import type { AppMessageTypeEnum } from "@/schema";
 
 export interface NoteMessageEntity {
 	type: AppMessageTypeEnum.NOTE;
@@ -43,6 +41,17 @@ export default function NoteMessage({
 	variant = "default",
 	...props
 }: NoteMessageProps) {
+	if (variant === "default") {
+		return <NoteMessageDefault message={message} {...props} />;
+	} else if (variant === "referenced" || variant === "abstract") {
+		return <NoteMessageAbstract message={message} {...props} />;
+	}
+}
+
+function NoteMessageDefault({
+	message,
+	...props
+}: Omit<NoteMessageProps, "variant">) {
 	// const xmlParser = new XMLParser({
 	//   parseAttributeValue: true,
 	//   ignoreAttributes: false,
@@ -89,32 +98,34 @@ export default function NoteMessage({
 	//   query("/attaches", { chat, message, record: htmlFile, type: "text/html" });
 	// }, []);
 
-	if (variant === "default")
-		return (
-			<div
-				className={cn(
-					"relative max-w-[20em] flex flex-col rounded-lg bg-white",
-				)}
-				{...props}
-			>
-				<div className="p-3">
-					{decodeUnicodeReferences(message.message_entity.msg.appmsg.des)
-						.split("\n")
-						.map((segment, index) => (
-							<p key={index}>{segment}</p>
-						))}
-				</div>
-
-				<div
-					className={
-						"px-3 py-1.5 text-sm leading-normal text-neutral-500 border-t border-neutral-200"
-					}
-				>
-					笔记
-				</div>
+	return (
+		<div
+			className={cn("relative max-w-[20em] flex flex-col rounded-lg bg-white")}
+			{...props}
+		>
+			<div className="p-3">
+				{decodeUnicodeReferences(message.message_entity.msg.appmsg.des)
+					.split("\n")
+					.map((segment, index) => (
+						<p key={index}>{segment}</p>
+					))}
 			</div>
-		);
 
+			<div
+				className={
+					"px-3 py-1.5 text-sm leading-normal text-neutral-500 border-t border-neutral-200"
+				}
+			>
+				笔记
+			</div>
+		</div>
+	);
+}
+
+function NoteMessageAbstract({
+	message,
+	...props
+}: Omit<NoteMessageProps, "variant">) {
 	return (
 		<MessageInlineWrapper message={message} {...props}>
 			[笔记] {message.message_entity.msg.appmsg.des}
