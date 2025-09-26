@@ -52,7 +52,7 @@ export default function TextRecord({
 
 	return (
 		<p className="inline">
-			<TextPrettier text={record.datadesc} className={"inline"} />
+			<TextPrettier text={record.datadesc} inline />
 		</p>
 	);
 }
