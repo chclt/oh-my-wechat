@@ -127,7 +127,7 @@ function parseContent(message: AppMessageType<PatMessageEntity>) {
 			if (new RegExp(`^\\\${${record.pattedUser}@textstatusicon}$`).test(s))
 				return null; // statusicon
 
-			return <TextPrettier key={index} text={s} variant={"inline"} />;
+			return <TextPrettier key={index} text={s} inline />;
 		});
 
 		return segments;

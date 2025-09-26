@@ -34,7 +34,6 @@ export const textMessageVariants = cva(
 export default function TextMessage({
 	message,
 	variant = "default",
-	className,
 	...props
 }: TextMessageProps) {
 	if (variant === "default") {
@@ -73,7 +72,7 @@ function TextMessageReferenced({
 		<div className={"inline"} {...props}>
 			<User user={message.from} variant={"inline"} />
 			<span>: </span>
-			<TextPrettier text={message.message_entity} className={"inline"} />
+			<TextPrettier text={message.message_entity} inline />
 		</div>
 	);
 }
@@ -84,7 +83,7 @@ function TextMessageAbstract({
 }: Omit<TextMessageProps, "variant">) {
 	return (
 		<MessageInlineWrapper message={message} {...props}>
-			<TextPrettier text={message.message_entity} className={"inline"} />
+			<TextPrettier text={message.message_entity} inline formatLink={false} />
 		</MessageInlineWrapper>
 	);
 }

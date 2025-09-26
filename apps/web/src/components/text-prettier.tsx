@@ -6,13 +6,14 @@ import type { ReactNode } from "react";
 
 interface TextPrettierProps extends React.HTMLProps<HTMLParagraphElement> {
 	text: string;
-	variant?: "default" | "inline";
+	inline?: boolean;
+	formatLink?: boolean;
 }
 
 export default function TextPrettier({
 	text,
-	variant = "default",
-	className,
+	inline = false,
+	formatLink = true,
 	...props
 }: TextPrettierProps) {
 	const paragraphNodes = text.split("\n").map((paragraphString, index) => {
@@ -130,28 +131,30 @@ export default function TextPrettier({
 		});
 
 		// 链接
-		const urlRegex =
-			/((?:https?|ftp):\/\/[a-zA-Z0-9\-._~:/?#[\]@!$&'()*+,;=%]+)/is;
-		paragraphChildren = paragraphChildren.flatMap((segment, segmentIndex) => {
-			if (typeof segment === "string") {
-				return segment.split(urlRegex).map((s) => {
-					if (urlRegex.test(s)) {
-						return (
-							<Link href={s} className="break-all text-blue-500 underline">
-								{s}
-							</Link>
-						);
-					}
-					return s;
-				});
-			}
-			return segment;
-		});
+		if (formatLink) {
+			const urlRegex =
+				/((?:https?|ftp):\/\/[a-zA-Z0-9\-._~:/?#[\]@!$&'()*+,;=%]+)/is;
+			paragraphChildren = paragraphChildren.flatMap((segment, segmentIndex) => {
+				if (typeof segment === "string") {
+					return segment.split(urlRegex).map((s) => {
+						if (urlRegex.test(s)) {
+							return (
+								<Link href={s} className="break-all text-blue-500 underline">
+									{s}
+								</Link>
+							);
+						}
+						return s;
+					});
+				}
+				return segment;
+			});
+		}
 
-		const Container = variant === "default" ? "p" : "span";
+		const Container = inline ? "span" : "p";
 
 		return (
-			<Container key={index} className={className} {...props}>
+			<Container key={index} {...props}>
 				{...paragraphChildren}
 			</Container>
 		);

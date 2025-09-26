@@ -86,7 +86,7 @@ function ReferMessageReferenced({
 			<span>
 				<TextPrettier
 					text={message.message_entity.msg.appmsg.title}
-					className={"inline"}
+					inline
 				/>{" "}
 			</span>
 		</p>
@@ -99,10 +99,7 @@ function ReferMessageAbstract({
 }: Omit<ReferMessageProps, "variant">) {
 	return (
 		<MessageInlineWrapper message={message} {...props}>
-			<TextPrettier
-				text={message.message_entity.msg.appmsg.title}
-				className={"inline"}
-			/>
+			<TextPrettier text={message.message_entity.msg.appmsg.title} inline />
 		</MessageInlineWrapper>
 	);
 }
