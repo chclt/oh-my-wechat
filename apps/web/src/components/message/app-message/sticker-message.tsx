@@ -1,6 +1,6 @@
 import LocalImage from "@/components/local-image.tsx";
+import MessageInlineWrapper from "@/components/message-inline-wrapper";
 import type { AppMessageProps } from "@/components/message/app-message.tsx";
-import MessageInlineWrapper from "@/components/message/message-inline.tsx";
 import type { AppMessageTypeEnum } from "@/schema";
 
 export interface StickerMessageEntity {
@@ -31,19 +31,36 @@ export default function StickerMessage({
 	...props
 }: StickerMessageProps) {
 	const chat = message.chat;
-	if (variant === "default")
-		return (
-			<div {...props}>
-				<LocalImage
-					chat={chat!}
-					message={message}
-					size="origin"
-					domain="opendata"
-					className="max-w-32"
-				/>
-			</div>
-		);
+	if (variant === "default") {
+		return <StickerMessageDefault message={message} {...props} />;
+	} else if (variant === "referenced" || variant === "abstract") {
+		return <StickerMessageAbstract message={message} {...props} />;
+	}
+}
 
+function StickerMessageDefault({
+	message,
+	...props
+}: Omit<StickerMessageProps, "variant">) {
+	const chat = message.chat;
+
+	return (
+		<div {...props}>
+			<LocalImage
+				chat={chat!}
+				message={message}
+				size="origin"
+				domain="opendata"
+				className="max-w-32"
+			/>
+		</div>
+	);
+}
+
+function StickerMessageAbstract({
+	message,
+	...props
+}: Omit<StickerMessageProps, "variant">) {
 	return (
 		<MessageInlineWrapper message={message} {...props}>
 			[表情]

@@ -51,6 +51,15 @@ export default function VerityMessage({
 	variant = "default",
 	...props
 }: VerifyMessageProps) {
+	if (variant === "default") {
+		return <VerifyMessageDefault message={message} {...props} />;
+	}
+}
+
+function VerifyMessageDefault({
+	message,
+	...props
+}: Omit<VerifyMessageProps, "variant">) {
 	return (
 		<div className={"flex"}>
 			<User.Photo user={message.from} variant="default" />

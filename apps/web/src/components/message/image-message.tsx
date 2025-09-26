@@ -1,9 +1,9 @@
 import LocalImage from "@/components/local-image.tsx";
-import MessageInlineWrapper from "@/components/message/message-inline.tsx";
+import MessageInlineWrapper from "@/components/message-inline-wrapper";
 import type { MessageProp } from "@/components/message/message.tsx";
 import User from "@/components/user.tsx";
-import type { ImageMessageType } from "@/schema";
 import { cn } from "@/lib/utils.ts";
+import type { ImageMessageType } from "@/schema";
 import type React from "react";
 
 type ImageMessageProps = MessageProp<
@@ -59,87 +59,106 @@ export interface ImageMessageEntity {
 }
 
 export default function ImageMessage({
-	variant = "default",
 	message,
-	className,
+	variant = "default",
 	...props
 }: ImageMessageProps) {
 	const chat = message.chat;
 
-	switch (variant) {
-		case "default":
-			return (
-				<div
-					className={cn("rounded-lg overflow-hidden")}
-					onClick={() => {
-						//
-					}}
-					{...props}
-				>
-					<LocalImage
-						chat={chat}
-						message={message}
-						size="origin"
-						alt={"图片"}
-						className={
-							"max-w-[16em] max-h-128 min-w-32 min-h-16 object-contain bg-white"
-						}
-					/>
-				</div>
-			);
-
-		case "referenced":
-			return (
-				<div>
-					{message.from && (
-						<>
-							<User user={message.from} variant="inline" />
-							<span>: </span>
-						</>
-					)}
-					<LocalImage
-						chat={chat}
-						message={message}
-						size="origin"
-						alt={""}
-						className={
-							"inline mx-[0.2em] align-top max-w-16 max-h-16 rounded overflow-hidden"
-						}
-					/>
-				</div>
-			);
-
-		case "viewer_detail":
-		case "viewer_thumb":
-			return (
-				<div className={className} {...props}>
-					<LocalImage
-						chat={chat}
-						message={message}
-						size={variant === "viewer_thumb" ? "thumb" : "origin"}
-						alt={""}
-					/>
-				</div>
-			);
-
-		default:
-			return (
-				<MessageInlineWrapper
+	if (variant === "default") {
+		return <ImageMessageDefault message={message} {...props} />;
+	} else if (variant === "referenced") {
+		return <ImageMessageReferenced message={message} {...props} />;
+	} else if (variant === "viewer_detail") {
+		// TODO
+	} else if (variant === "viewer_thumb") {
+		return (
+			<div {...props}>
+				<LocalImage
+					chat={chat}
 					message={message}
-					className={className}
-					{...props}
-				>
-					<LocalImage
-						chat={chat}
-						message={message}
-						size="thumb"
-						alt={""}
-						className={
-							"me-1 inline align-middle min-w-4 min-h-4 size-4 object-cover rounded-[3px]"
-						}
-					/>
-					[图片]
-				</MessageInlineWrapper>
-			);
+					size={variant === "viewer_thumb" ? "thumb" : "origin"}
+					alt={""}
+				/>
+			</div>
+		);
+	} else if (variant === "abstract") {
+		return <ImageMessageAbstract message={message} {...props} />;
 	}
+}
+
+function ImageMessageDefault({
+	message,
+	...props
+}: Omit<ImageMessageProps, "variant">) {
+	const chat = message.chat;
+
+	return (
+		<div
+			className={cn("rounded-lg overflow-hidden")}
+			onClick={() => {
+				//
+			}}
+			{...props}
+		>
+			<LocalImage
+				chat={chat}
+				message={message}
+				size="origin"
+				alt={"图片"}
+				className={
+					"max-w-[16em] max-h-128 min-w-32 min-h-16 object-contain bg-white"
+				}
+			/>
+		</div>
+	);
+}
+
+function ImageMessageAbstract({
+	message,
+	...props
+}: Omit<ImageMessageProps, "variant">) {
+	const chat = message.chat;
+
+	return (
+		<MessageInlineWrapper message={message} {...props}>
+			<LocalImage
+				chat={chat}
+				message={message}
+				size="thumb"
+				alt={""}
+				className={
+					"me-1 inline align-middle min-w-4 min-h-4 size-4 object-cover rounded-[3px]"
+				}
+			/>
+			[图片]
+		</MessageInlineWrapper>
+	);
+}
+
+function ImageMessageReferenced({
+	message,
+	...props
+}: Omit<ImageMessageProps, "variant">) {
+	const chat = message.chat;
+
+	return (
+		<div {...props}>
+			{message.from && (
+				<>
+					<User user={message.from} variant="inline" />
+					<span>: </span>
+				</>
+			)}
+			<LocalImage
+				chat={chat}
+				message={message}
+				size="origin"
+				alt={""}
+				className={
+					"inline mx-[0.2em] align-top max-w-16 max-h-16 rounded overflow-hidden"
+				}
+			/>
+		</div>
+	);
 }

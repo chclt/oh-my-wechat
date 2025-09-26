@@ -1,9 +1,9 @@
 import { LinkCard } from "@/components/link-card.tsx";
 import LocalImage from "@/components/local-image.tsx";
+import MessageInlineWrapper from "@/components/message-inline-wrapper";
 import type { AppMessageProps } from "@/components/message/app-message.tsx";
-import MessageInlineWrapper from "@/components/message/message-inline.tsx";
-import type { AppMessageTypeEnum } from "@/schema";
 import { decodeUnicodeReferences } from "@/lib/utils.ts";
+import type { AppMessageTypeEnum } from "@/schema";
 
 export interface VideoMessageEntity {
 	type: AppMessageTypeEnum.VIDEO;
@@ -35,6 +35,17 @@ export default function VideoMessage({
 	variant = "default",
 	...props
 }: VideoMessageProps) {
+	if (variant === "default") {
+		return <VideoMessageDefault message={message} {...props} />;
+	} else if (variant === "referenced" || variant === "abstract") {
+		return <VideoMessageAbstract message={message} {...props} />;
+	}
+}
+
+function VideoMessageDefault({
+	message,
+	...props
+}: Omit<VideoMessageProps, "variant">) {
 	const chat = message.chat;
 	const heading = decodeUnicodeReferences(
 		message.message_entity.msg.appmsg.title,
@@ -48,20 +59,28 @@ export default function VideoMessage({
 		/>
 	) : undefined;
 
-	if (variant === "default")
-		return (
-			<LinkCard
-				href={message.message_entity.msg.appmsg.url}
-				heading={heading}
-				abstract={message.message_entity.msg.appmsg.des}
-				preview={preview}
-				from={
-					message.message_entity.msg.appinfo?.appname ??
-					message.message_entity.msg?.appinfo?.appname
-				}
-				{...props}
-			/>
-		);
+	return (
+		<LinkCard
+			href={message.message_entity.msg.appmsg.url}
+			heading={heading}
+			abstract={message.message_entity.msg.appmsg.des}
+			preview={preview}
+			from={
+				message.message_entity.msg.appinfo?.appname ??
+				message.message_entity.msg?.appinfo?.appname
+			}
+			{...props}
+		/>
+	);
+}
+
+function VideoMessageAbstract({
+	message,
+	...props
+}: Omit<VideoMessageProps, "variant">) {
+	const heading = decodeUnicodeReferences(
+		message.message_entity.msg.appmsg.title,
+	);
 
 	return (
 		<MessageInlineWrapper message={message} {...props}>
