@@ -1,16 +1,16 @@
-import { AccountContactListSuspenseQueryOptions } from "@/lib/fetchers/contact";
-import { Route } from "../../route";
-import { useSuspenseQuery } from "@tanstack/react-query";
-import useContactList from "./use-contact-list";
-import { Suspense, useState } from "react";
-import Image from "@/components/image";
-import { Link } from "@tanstack/react-router";
-import { cn } from "@/lib/utils";
-import * as ScrollAreaPrimitive from "@radix-ui/react-scroll-area";
-import { ScrollBar } from "@/components/ui/scroll-area";
 import { ContactIconFill } from "@/components/icon";
-import * as RadioGroup from "@radix-ui/react-radio-group";
+import Image from "@/components/image";
+import { ScrollBar } from "@/components/ui/scroll-area";
+import { AccountContactListSuspenseQueryOptions } from "@/lib/fetchers/contact";
+import { cn } from "@/lib/utils";
 import { useScrollSpy } from "@mantine/hooks";
+import * as RadioGroup from "@radix-ui/react-radio-group";
+import * as ScrollAreaPrimitive from "@radix-ui/react-scroll-area";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
+import { Suspense, useState } from "react";
+import { Route } from "../../route";
+import useContactList from "./use-contact-list";
 
 export default function ContactList({
 	className,

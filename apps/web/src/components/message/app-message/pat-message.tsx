@@ -71,7 +71,9 @@ function PatMessageAbstract({
 
 	const lastRecord = records.at(-1);
 
-	return <p>123</p>;
+	if (!lastRecord) return null;
+
+	return <p>{...lastRecord}</p>;
 }
 
 function parseContent(message: AppMessageType<PatMessageEntity>) {
