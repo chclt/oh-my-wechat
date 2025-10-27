@@ -3,23 +3,23 @@ import { useMiniRoute, useMiniRouter } from "@/components/mini-router";
 import { Button } from "@/components/ui/button";
 import { ScrollBar } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils.ts";
-import { ChatType } from "@/schema";
 import { useDisclosure } from "@mantine/hooks";
 import * as ScrollAreaPrimitive from "@radix-ui/react-scroll-area";
 import { XIcon } from "lucide-react";
-import ChatItem from "./chat-item";
+import ChatListItem from "./chat-item";
+import { ChatListChatGroupItem } from "./use-chat-list";
 
 export interface ChatGroupListMiniRouteState {
 	name: "chatGroupList";
 	data: {
-		chat: ChatType;
+		chatListItem: ChatListChatGroupItem;
 	};
 }
 
 export default function ChatGroupList() {
 	const { back } = useMiniRouter();
 	const {
-		data: { chat },
+		data: { chatListItem },
 	} = useMiniRoute() as ChatGroupListMiniRouteState;
 
 	const [isOpen, { close }] = useDisclosure(true);
@@ -73,22 +73,18 @@ export default function ChatGroupList() {
 									width={48}
 									height={48}
 									className={"w-full h-full bg-[#DDDFE0]"}
-									src={chat.photo}
+									src={chatListItem.photo}
 								/>
 							</div>
 
 							<div className="ms-3 font-semibold">
-								<span className="font-medium">{chat.title}</span>
+								<span className="font-medium">{chatListItem.title}</span>
 							</div>
 						</header>
 
 						<ul>
-							{chat.chats.map((chat) => (
-								<ChatItem
-									key={chat.id}
-									chat={chat}
-									onOpenChatGroup={() => {}}
-								/>
+							{chatListItem.value.map((chat) => (
+								<ChatListItem key={chat.id} chatListItem={chat} />
 							))}
 						</ul>
 					</ScrollAreaPrimitive.Viewport>
