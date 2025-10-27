@@ -1,37 +1,26 @@
 import Image from "@/components/image.tsx";
 import Message from "@/components/message/message.tsx";
-import { ChatListSuspenseQueryOptions } from "@/lib/fetchers/chat";
 import { LastMessageQueryOptions } from "@/lib/fetchers/message";
-import type { ChatType } from "@/schema";
 import { cn, formatDateTime } from "@/lib/utils.ts";
-import { Route } from "../route";
+import type { ChatType } from "@/schema";
 import { useInViewport } from "@mantine/hooks";
-import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import type React from "react";
-import useChatList from "./use-chat-list";
-
-export default function ChatList() {
-	const { accountId } = Route.useParams();
-
-	const { data } = useSuspenseQuery(ChatListSuspenseQueryOptions(accountId));
-
-	const chatList = useChatList(data);
-
-	return (
-		<ul>
-			{chatList.map((chat) => (
-				<ChatItem key={chat.id} chat={chat} />
-			))}
-		</ul>
-	);
-}
+import { Route } from "../../route";
 
 interface ChatItemProps extends React.HTMLAttributes<HTMLLIElement> {
 	chat: ChatType;
+
+	onOpenChatGroup: (chat: ChatType) => void;
 }
 
-function ChatItem({ chat, className, ...props }: ChatItemProps) {
+export default function ChatItem({
+	chat,
+	className,
+	onOpenChatGroup,
+	...props
+}: ChatItemProps) {
 	const { accountId } = Route.useParams();
 
 	const { ref: itemRef, inViewport } = useInViewport();
@@ -55,6 +44,13 @@ function ChatItem({ chat, className, ...props }: ChatItemProps) {
 				style={{
 					contentVisibility: "auto",
 					containIntrinsicSize: "calc(var(--spacing) * 11)",
+				}}
+				onClick={(event) => {
+					if (chat.type === "chatList") {
+						event.preventDefault();
+						event.stopPropagation();
+						onOpenChatGroup(chat);
+					}
 				}}
 			>
 				{chat.photo ? (
@@ -82,12 +78,12 @@ function ChatItem({ chat, className, ...props }: ChatItemProps) {
 						<h4 className={"grow font-medium break-all line-clamp-1"}>
 							{chat.title}
 							{/* {(chat.type === "private"
-                ? chat.user.is_openim
-                : chat.chatroom.is_openim) && (
-                <span className="ms-1 text-sm font-normal text-orange-400">
-                  @企业微信
-                </span>
-              )} */}
+                                ? chat.user.is_openim
+                                : chat.chatroom.is_openim) && (
+                                <span className="ms-1 text-sm font-normal text-orange-400">
+                                @企业微信
+                                </span>
+                            )} */}
 						</h4>
 						{last_message && (
 							<small className={"ms-2 text-xs text-neutral-400"}>

@@ -158,6 +158,7 @@ function parseXMLContent(message: SystemExtendedMessageType) {
 
 					switch (linkType) {
 						case "link_profile": {
+							// TODO: linkObj.memberlist.member 可能是数组
 							const user = chat
 								? chat.members.find(
 										(member) =>
