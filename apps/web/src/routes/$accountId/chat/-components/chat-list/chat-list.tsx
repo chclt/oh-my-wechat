@@ -39,7 +39,7 @@ export default function ChatList() {
 			<div
 				className={cn(
 					"absolute inset-0",
-					"has-[+[data-state=closed]]:translate-x-0 has-[+[data-state=closed]]:ease-in",
+					"has-[+[data-state=closed]]:translate-x-0 has-[+[data-state=closed]]:ease-out",
 					"has-[+[data-state=open]]:-translate-x-40 has-[+[data-state=open]]:ease-out",
 					"transition-transform duration-200",
 				)}

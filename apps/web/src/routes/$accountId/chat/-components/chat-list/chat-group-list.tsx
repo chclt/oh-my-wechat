@@ -37,8 +37,8 @@ export default function ChatGroupList() {
 				aria-hidden={true}
 				className={cn(
 					"absolute inset-0 bg-background",
-					"data-[state=open]:animate-in data-[state=open]:fade-in-0",
-					"data-[state=closed]:animate-out data-[state=closed]:fade-out-0",
+					"data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:ease-out",
+					"data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:ease-out",
 					"fill-mode-forwards duration-200",
 				)}
 			/>
@@ -47,7 +47,7 @@ export default function ChatGroupList() {
 				className={cn(
 					"absolute inset-0 bg-background",
 					"data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:slide-in-from-end-40 data-[state=open]:ease-out",
-					"data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:slide-out-to-end-40 data-[state=closed]:ease-in",
+					"data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:slide-out-to-end-40 data-[state=closed]:ease-out",
 					"fill-mode-forwards duration-200",
 				)}
 				onAnimationEnd={handleAnimationEnd}
