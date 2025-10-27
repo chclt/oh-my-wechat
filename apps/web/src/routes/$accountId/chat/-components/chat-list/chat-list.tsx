@@ -7,8 +7,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChatListSuspenseQueryOptions } from "@/lib/fetchers/chat";
 import { cn } from "@/lib/utils.ts";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { ChatGroupListMiniRouteState } from "./chat-group-list";
-import ChatItem from "./chat-item";
+import ChatListItem from "./chat-item";
 import useChatList from "./use-chat-list";
 
 export interface ChatListMiniRouteState {
@@ -35,7 +34,6 @@ export default function ChatList() {
 	const { data } = useSuspenseQuery(ChatListSuspenseQueryOptions(accountId));
 
 	const chatList = useChatList(data);
-
 	return (
 		<div className={cn("absolute inset-0")}>
 			<div
@@ -54,17 +52,8 @@ export default function ChatList() {
 					}}
 				>
 					<ul>
-						{chatList.map((chat) => (
-							<ChatItem
-								key={chat.id}
-								chat={chat}
-								onOpenChatGroup={(chat) => {
-									pushMiniRouterState({
-										name: "chatGroupList",
-										data: { chat },
-									} satisfies ChatGroupListMiniRouteState);
-								}}
-							/>
+						{chatList.map((chatListItem) => (
+							<ChatListItem key={chatListItem.id} chatListItem={chatListItem} />
 						))}
 					</ul>
 				</ScrollArea>

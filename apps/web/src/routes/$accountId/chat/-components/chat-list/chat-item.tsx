@@ -1,42 +1,55 @@
 import Image from "@/components/image.tsx";
 import Message from "@/components/message/message.tsx";
+import { useMiniRouter } from "@/components/mini-router";
 import { LastMessageQueryOptions } from "@/lib/fetchers/message";
 import { cn, formatDateTime } from "@/lib/utils.ts";
-import type { ChatType } from "@/schema";
 import { useInViewport } from "@mantine/hooks";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import type React from "react";
 import { Route } from "../../route";
+import { ChatGroupListMiniRouteState } from "./chat-group-list";
+import { ChatListChatGroupItem, ChatListChatItem } from "./use-chat-list";
 
 interface ChatItemProps extends React.HTMLAttributes<HTMLLIElement> {
-	chat: ChatType;
-
-	onOpenChatGroup: (chat: ChatType) => void;
+	chatListItem: ChatListChatItem | ChatListChatGroupItem;
 }
 
-export default function ChatItem({
-	chat,
+export default function ChatListItem({
+	chatListItem,
 	className,
-	onOpenChatGroup,
 	...props
 }: ChatItemProps) {
 	const { accountId } = Route.useParams();
+
+	const { states: miniRouterStates, pushState: pushMiniRouterState } =
+		useMiniRouter();
 
 	const { ref: itemRef, inViewport } = useInViewport();
 
 	const { data: last_message } = useQuery({
 		...LastMessageQueryOptions(accountId, {
-			chat,
+			chat: chatListItem.chat,
 		}),
 		enabled: inViewport,
 	});
 
+	const handleOpenChatGroup = (
+		chatListChatGroupItem: ChatListChatGroupItem,
+	) => {
+		pushMiniRouterState({
+			name: "chatGroupList",
+			data: {
+				chatListItem: chatListChatGroupItem,
+			},
+		} satisfies ChatGroupListMiniRouteState);
+	};
+
 	return (
-		<li key={chat.id} ref={itemRef} {...props}>
+		<li key={chatListItem.id} ref={itemRef} {...props}>
 			<Link
 				to="/$accountId/chat/$chatId"
-				params={{ accountId, chatId: chat.id }}
+				params={{ accountId, chatId: chatListItem.id }}
 				className={cn(
 					"box-content p-2.5 h-11 flex items-center gap-4 hover:bg-black/5 [&.active]:bg-black/5",
 					className,
@@ -46,18 +59,18 @@ export default function ChatItem({
 					containIntrinsicSize: "calc(var(--spacing) * 11)",
 				}}
 				onClick={(event) => {
-					if (chat.type === "chatList") {
+					if (chatListItem.type === "chatGroup") {
 						event.preventDefault();
 						event.stopPropagation();
-						onOpenChatGroup(chat);
+						handleOpenChatGroup(chatListItem);
 					}
 				}}
 			>
-				{chat.photo ? (
+				{chatListItem.photo ? (
 					<div
 						className={cn(
 							"shrink-0 w-12 h-12 clothoid-corner-2",
-							chat.type === "chatroom"
+							chatListItem.chat.type === "chatroom"
 								? "relative after:absolute after:inset-0 after:rounded-md after:border-2 after:border-[#DDDFE0]"
 								: "",
 						)}
@@ -66,7 +79,7 @@ export default function ChatItem({
 							width={48}
 							height={48}
 							className={"w-full h-full bg-[#DDDFE0]"}
-							src={chat.photo}
+							src={chatListItem.photo}
 						/>
 					</div>
 				) : (
@@ -76,7 +89,7 @@ export default function ChatItem({
 				<div className="grow flex flex-col items-stretch">
 					<div className="flex gap-2">
 						<h4 className={"grow font-medium break-all line-clamp-1"}>
-							{chat.title}
+							{chatListItem.title}
 							{/* {(chat.type === "private"
                                 ? chat.user.is_openim
                                 : chat.chatroom.is_openim) && (
@@ -102,7 +115,7 @@ export default function ChatItem({
 							<Message
 								variant="abstract"
 								message={last_message}
-								showUsername={chat.type === "chatroom"}
+								showUsername={chatListItem.chat.type === "chatroom"}
 								className={""}
 							/>
 						)}

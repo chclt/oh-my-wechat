@@ -18,7 +18,31 @@ const ChatListFilter = [
 	"masssendapp", // 群发助手
 ];
 
-export default function useChatList(chatData: ChatType[]) {
+export type ChatListChatItem = {
+	type: "chat";
+	id: ChatType["id"];
+	title: ChatType["title"];
+	photo: ChatType["photo"];
+	chat: ChatType;
+};
+
+export type ChatListChatGroupItem = {
+	type: "chatGroup";
+	id: ChatType["id"];
+	title: ChatType["title"];
+	photo: ChatType["photo"];
+	chat: ChatType;
+	value: ChatListChatItem[];
+};
+
+export type UseChatListReturnValue = (
+	| ChatListChatItem
+	| ChatListChatGroupItem
+)[];
+
+export default function useChatList(
+	chatData: ChatType[],
+): UseChatListReturnValue {
 	// 折叠的聊天
 	const collapsedChatGroup: ChatType[] = [];
 	let collapsedGroupIndex = -1;
@@ -32,7 +56,7 @@ export default function useChatList(chatData: ChatType[]) {
 	let serviceAccountChatGroupIndex = -1;
 
 	let filteredChatIndex = 0;
-	const data = chatData
+	const data: UseChatListReturnValue = chatData
 		.sort((i) => (i.is_pinned ? -1 : 0))
 		.filter((chat) => {
 			if (
@@ -67,35 +91,66 @@ export default function useChatList(chatData: ChatType[]) {
 
 				return false;
 			}
+		})
+		.map((chat, index) => {
+			switch (index) {
+				// 折叠的聊天
+				case collapsedGroupIndex: {
+					return {
+						type: "chatGroup",
+						id: chat.id,
+						title: chat.title,
+						photo: imageCollapsedChats,
+						chat: chat,
+						value: collapsedChatGroup.map(transformChatToChatListItem),
+					};
+				}
+
+				// 服务号消息
+				case serviceAccountChatGroupIndex: {
+					return {
+						type: "chatGroup",
+						id: chat.id,
+						title: chat.title,
+						photo: imageCollapsedChats,
+						chat: chat,
+						value: serviceAccountChats.map(transformChatToChatListItem),
+					};
+				}
+
+				default: {
+					return transformChatToChatListItem(chat);
+				}
+			}
 		});
 
-	// 折叠的聊天
-	if (collapsedGroupIndex !== -1) {
-		data.splice(collapsedGroupIndex, 1, {
-			...data[collapsedGroupIndex],
-			type: "chatList",
-			photo: imageCollapsedChats,
-			chats: collapsedChatGroup,
-		});
-	}
-
+	/* 
 	// 服务号消息 老版本的微信不对服务号进行分组，但是在这里我想要默认进行分组
 	// TODO: 服务号的消息还不支持，先不展示
-	/* if (serviceAccountChatGroupIndex === -1) {
+	if (serviceAccountChatGroupIndex === -1) {
 		data.splice(0, 0, {
+			type: "chatGroup",
 			id: "brandservicesessionholder",
 			title: "服务号",
-			type: "chatList",
-			chats: serviceAccountChats,
+			chat: {
+				id: "brandservicesessionholder",
+				title: "服务号",
+				photo: imageCollapsedChats,
+			},
+			value: serviceAccountChats.map(transformChatToChatListItem),
 		});
-	} else */
-	if (serviceAccountChatGroupIndex !== -1) {
-		data.splice(serviceAccountChatGroupIndex, 1, {
-			...data[serviceAccountChatGroupIndex],
-			type: "chatList",
-			chats: serviceAccountChats,
-		});
-	}
+	} 
+	*/
 
 	return data;
+}
+
+function transformChatToChatListItem(chat: ChatType): ChatListChatItem {
+	return {
+		type: "chat",
+		id: chat.id,
+		title: chat.title,
+		photo: chat.photo,
+		chat: chat,
+	};
 }
