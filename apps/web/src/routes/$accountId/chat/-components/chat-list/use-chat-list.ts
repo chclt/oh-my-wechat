@@ -5,7 +5,7 @@ import imageCollapsedChats from "/public/images/avatar/collapsed_chats.png";
 import specialBrandIdRaw from "@/assets/specialBrandUserNames.csv?raw";
 const specialBrandIds = specialBrandIdRaw.split("\n").map((i) => i.trim());
 
-const ChatListFilter = [
+const IgnoredChatIds = [
 	// "chatroom_session_box", // 折叠的聊天
 	"brandsessionholder", // 订阅号消息
 	"brandservicesessionholder", // 服务号消息
@@ -48,8 +48,8 @@ export default function useChatList(
 	let collapsedGroupIndex = -1;
 
 	// 公众号消息
-	const officalAccountChats: ChatType[] = [];
-	const officalAccountChatGroupIndex = -1;
+	const officialAccountChats: ChatType[] = [];
+	let officialAccountChatGroupIndex = -1;
 
 	// 服务号消息
 	const serviceAccountChats: ChatType[] = [];
@@ -63,7 +63,7 @@ export default function useChatList(
 				!(
 					chat.id.endsWith("@openim") || // TODO
 					specialBrandIds.includes(chat.id) ||
-					ChatListFilter.includes(chat.id) ||
+					IgnoredChatIds.includes(chat.id) ||
 					// 折叠的聊天
 					chat.is_collapsed ||
 					// 公众号消息
@@ -71,11 +71,14 @@ export default function useChatList(
 				)
 			) {
 				if (chat.id === "chatroom_session_box") {
-					// 折叠的聊天
+					// 折叠的聊天组
 					collapsedGroupIndex = filteredChatIndex;
 				} else if (chat.id === "brandservicesessionholder") {
-					// 订阅号消息
+					// 订阅号消息组
 					serviceAccountChatGroupIndex = filteredChatIndex;
+				} else if (chat.id === "brandsessionholder") {
+					// 订阅号消息组
+					officialAccountChatGroupIndex = filteredChatIndex;
 				}
 
 				filteredChatIndex++;
@@ -139,7 +142,7 @@ export default function useChatList(
 			},
 			value: serviceAccountChats.map(transformChatToChatListItem),
 		});
-	} 
+	}
 	*/
 
 	return data;
