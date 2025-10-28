@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, Suspense, useContext, useState } from "react";
 import MiniRoute from "./mini-route";
 import { TMiniRoute, TMiniRouteName, TMiniRouterState } from "./types";
 
@@ -42,7 +42,11 @@ export function MiniRouter({ routes, defaultState }: MiniRouterProps) {
 				pushState,
 			}}
 		>
-			{defaultState[0] && <MiniRoute state={defaultState[0]} />}
+			{defaultState[0] && (
+				<Suspense>
+					<MiniRoute state={defaultState[0]} />
+				</Suspense>
+			)}
 		</MiniRouterContext.Provider>
 	);
 }
