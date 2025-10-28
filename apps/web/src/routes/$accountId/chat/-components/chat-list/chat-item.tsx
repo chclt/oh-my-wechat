@@ -46,7 +46,7 @@ export default function ChatListItem({
 	};
 
 	return (
-		<li key={chatListItem.id} ref={itemRef} {...props}>
+		<li ref={itemRef} {...props}>
 			<Link
 				to="/$accountId/chat/$chatId"
 				params={{ accountId, chatId: chatListItem.id }}
