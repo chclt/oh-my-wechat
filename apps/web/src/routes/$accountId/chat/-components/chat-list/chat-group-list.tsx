@@ -9,7 +9,7 @@ import { ScrollAreaViewport, ScrollBar } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils.ts";
 import { useDisclosure } from "@mantine/hooks";
 import * as ScrollAreaPrimitive from "@radix-ui/react-scroll-area";
-import { XIcon } from "lucide-react";
+import { ChevronLeftIcon } from "lucide-react";
 import ChatListItem from "./chat-item";
 import { ChatListChatGroupItem } from "./use-chat-list";
 
@@ -65,7 +65,7 @@ export default function ChatGroupList() {
 									close();
 								}}
 							>
-								<XIcon />
+								<ChevronLeftIcon />
 							</Button>
 							<div className={cn("shrink-0 w-12 h-12 clothoid-corner-2")}>
 								<Image

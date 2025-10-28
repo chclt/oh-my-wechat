@@ -92,7 +92,6 @@ export default function ContactGroupList() {
 									alt={contctGroup.title}
 									className="size-full object-cover"
 								/>
-								{/* <ContactIconFill className="size-8" /> */}
 							</div>
 							<div className="ms-3 font-semibold">
 								<span className="font-medium">{contctGroup.title}</span>
