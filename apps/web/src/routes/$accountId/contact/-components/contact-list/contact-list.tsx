@@ -4,7 +4,8 @@ import {
 	useMiniRoute,
 	useMiniRouter,
 } from "@/components/mini-router";
-import { ScrollBar } from "@/components/ui/scroll-area";
+import { MiniRouteFirstPageContentClassName } from "@/components/mini-router/utils";
+import { ScrollAreaViewport, ScrollBar } from "@/components/ui/scroll-area";
 import { AccountContactListSuspenseQueryOptions } from "@/lib/fetchers/contact";
 import { cn } from "@/lib/utils";
 import * as ScrollAreaPrimitive from "@radix-ui/react-scroll-area";
@@ -30,8 +31,7 @@ export default function ContactList() {
 		data: { accountId },
 	} = useMiniRoute() as ContactListMiniRouteState;
 
-	const { states: miniRouterStates, pushState: pushMiniRouterState } =
-		useMiniRouter();
+	const { states: miniRouterStates } = useMiniRouter();
 	const thisMiniRouteState = useMiniRoute();
 	const thisMiniRoutePosition = miniRouterStates.findIndex((state) =>
 		Object.is(state, thisMiniRouteState),
@@ -55,25 +55,19 @@ export default function ContactList() {
 		<div className="relative">
 			<section
 				data-alphabet="root"
-				className={cn(
-					"relative",
-					"has-[+[data-state=closed]]:translate-x-0 has-[+[data-state=closed]]:ease-out",
-					"has-[+[data-state=open]]:-translate-x-[min(100%,40rem)] has-[+[data-state=open]]:ease-out",
-					"transition-transform duration-200",
-				)}
+				className={cn("relative", MiniRouteFirstPageContentClassName)}
 				aria-hidden={!isThisMiniRouteOnTop}
 				style={{
 					pointerEvents: isThisMiniRouteOnTop ? "auto" : "none",
 				}}
 			>
 				<ScrollAreaPrimitive.Root className="relative h-[calc(100dvh-10rem)]">
-					<ScrollAreaPrimitive.Viewport
+					<ScrollAreaViewport
 						ref={(node) => {
 							if (node) {
 								setScrollTarget(node);
 							}
 						}}
-						className="focus-visible:ring-ring/50 size-full rounded-[inherit] transition-[color,box-shadow] outline-none focus-visible:ring-[3px] focus-visible:outline-1"
 					>
 						<header className="sticky z-30 top-0 h-16 px-5 flex items-center bg-background/80 border-b border-muted backdrop-blur-xl">
 							<div className="size-11 flex items-center justify-center text-[#FF970A] bg-background clothoid-corner-[18.18%] shrink-0">
@@ -111,7 +105,7 @@ export default function ContactList() {
 							accountId={accountId}
 							contactAlphabetList={personalAccountAlphabetList}
 						/>
-					</ScrollAreaPrimitive.Viewport>
+					</ScrollAreaViewport>
 					<ScrollBar className="z-30" />
 					<ScrollAreaPrimitive.Corner />
 				</ScrollAreaPrimitive.Root>

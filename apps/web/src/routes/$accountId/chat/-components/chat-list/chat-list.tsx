@@ -3,6 +3,7 @@ import {
 	useMiniRoute,
 	useMiniRouter,
 } from "@/components/mini-router";
+import { MiniRouteFirstPageContentClassName } from "@/components/mini-router/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChatListSuspenseQueryOptions } from "@/lib/fetchers/chat";
 import { cn } from "@/lib/utils.ts";
@@ -22,8 +23,7 @@ export default function ChatList() {
 		data: { accountId },
 	} = useMiniRoute() as ChatListMiniRouteState;
 
-	const { states: miniRouterStates, pushState: pushMiniRouterState } =
-		useMiniRouter();
+	const { states: miniRouterStates } = useMiniRouter();
 	const thisMiniRouteState = useMiniRoute();
 	const thisMiniRoutePosition = miniRouterStates.findIndex((state) =>
 		Object.is(state, thisMiniRouteState),
@@ -37,12 +37,7 @@ export default function ChatList() {
 	return (
 		<div className={cn("absolute inset-0")}>
 			<div
-				className={cn(
-					"absolute inset-0",
-					"has-[+[data-state=closed]]:translate-x-0 has-[+[data-state=closed]]:ease-out",
-					"has-[+[data-state=open]]:-translate-x-40 has-[+[data-state=open]]:ease-out",
-					"transition-transform duration-200",
-				)}
+				className={cn("absolute inset-0", MiniRouteFirstPageContentClassName)}
 			>
 				<ScrollArea
 					className={"w-full h-full [&>div>div]:block!"}

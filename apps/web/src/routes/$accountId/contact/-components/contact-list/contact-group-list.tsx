@@ -1,7 +1,11 @@
 import Image from "@/components/image";
 import { useMiniRoute, useMiniRouter } from "@/components/mini-router";
+import {
+	MiniRoutePageContentClassName,
+	MiniRoutePageOverlayClassName,
+} from "@/components/mini-router/utils";
 import { Button } from "@/components/ui/button";
-import { ScrollBar } from "@/components/ui/scroll-area";
+import { ScrollAreaViewport, ScrollBar } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { useDisclosure } from "@mantine/hooks";
 import * as ScrollAreaPrimitive from "@radix-ui/react-scroll-area";
@@ -48,9 +52,7 @@ export default function ContactGroupList() {
 				aria-hidden={true}
 				className={cn(
 					"absolute inset-0 bg-background",
-					"data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:ease-out",
-					"data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:ease-out",
-					"fill-mode-forwards duration-200",
+					MiniRoutePageOverlayClassName,
 				)}
 			/>
 			<div
@@ -58,23 +60,20 @@ export default function ContactGroupList() {
 				data-state={isOpen ? "open" : "closed"}
 				className={cn(
 					"absolute inset-0 bg-background",
-					"data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:slide-in-from-end-40 data-[state=open]:ease-out",
-					"data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:slide-out-to-end-40 data-[state=closed]:ease-out",
-					"fill-mode-forwards duration-200",
+					MiniRoutePageContentClassName,
 				)}
 				onAnimationEnd={handleAnimationEnd}
 			>
 				<ScrollAreaPrimitive.Root
 					data-slot="scroll-area"
-					className={cn("relative w-full h-full")}
+					className="relative w-full h-full"
 				>
-					<ScrollAreaPrimitive.Viewport
+					<ScrollAreaViewport
 						ref={(node) => {
 							if (node) {
 								setScrollTarget(node);
 							}
 						}}
-						className="focus-visible:ring-ring/50 size-full rounded-[inherit] transition-[color,box-shadow] outline-none focus-visible:ring-[3px] focus-visible:outline-1"
 					>
 						<header className="sticky z-30 top-0 h-16 px-5 ps-2.5 flex items-center bg-background/80 border-b border-muted backdrop-blur-xl">
 							<Button
@@ -104,7 +103,7 @@ export default function ContactGroupList() {
 							accountId={accountId}
 							contactAlphabetList={contactAlphabetList}
 						/>
-					</ScrollAreaPrimitive.Viewport>
+					</ScrollAreaViewport>
 					<ScrollBar className="z-30" />
 					<ScrollAreaPrimitive.Corner />
 				</ScrollAreaPrimitive.Root>
