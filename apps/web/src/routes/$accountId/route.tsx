@@ -1,13 +1,5 @@
+import { CentralCrossLargeFilledOffStroke2Radius2 } from "@/components/central-icon";
 import { ChatIconFill, ContactIconFill } from "@/components/icon";
-import { cn } from "@/lib/utils";
-import {
-	createFileRoute,
-	Link,
-	Outlet,
-	useNavigate,
-	useCanGoBack,
-	useRouter,
-} from "@tanstack/react-router";
 import {
 	Dialog,
 	DialogClose,
@@ -15,9 +7,17 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
-import ContactList from "./contact/-components/contact-list";
+import { cn } from "@/lib/utils";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
-import { CentralCrossLargeFilledOffStroke2Radius2 } from "@/components/central-icon";
+import {
+	createFileRoute,
+	Link,
+	Outlet,
+	useCanGoBack,
+	useNavigate,
+	useRouter,
+} from "@tanstack/react-router";
+import ContactListMiniRouter from "./contact/-components/contact-list/contact-list-mini-router";
 
 export enum AccountSearchModalOptions {
 	CONTACT = "contact",
@@ -111,7 +111,7 @@ function RouteComponent() {
 					>
 						<DialogContent
 							showCloseButton={false}
-							className="p-5 sm:max-w-sm rounded-xl overflow-hidden"
+							className="p-0 sm:max-w-sm rounded-xl overflow-hidden h-[calc(100dvh-10rem)]"
 						>
 							<VisuallyHidden>
 								<DialogHeader>
@@ -119,7 +119,9 @@ function RouteComponent() {
 								</DialogHeader>
 							</VisuallyHidden>
 
-							<ContactList className="-m-5 overflow-hidden" />
+							<div className="relative w-full h-full overflow-hidden">
+								<ContactListMiniRouter />
+							</div>
 
 							<DialogClose
 								data-slot="dialog-close"

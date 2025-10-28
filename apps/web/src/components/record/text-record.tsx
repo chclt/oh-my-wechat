@@ -1,15 +1,13 @@
-import {
-	FormatTextMessageContent,
-	textMessageVariants,
-} from "@/components/message/text-message.tsx";
+import { textMessageVariants } from "@/components/message/text-message.tsx";
+import { cn } from "@/lib/utils.ts";
 import {
 	MessageDirection,
 	type MessageType,
 	type RecordTypeEnum,
 } from "@/schema";
-import { cn } from "@/lib/utils.ts";
-import type { RecordType } from "./record";
 import type React from "react";
+import TextPrettier from "../text-prettier.tsx";
+import type { RecordType } from "./record";
 
 interface TextRecordProps extends React.HTMLAttributes<HTMLDivElement> {
 	message: MessageType;
@@ -41,20 +39,20 @@ export default function TextRecord({
 				)}
 				{...props}
 			>
-				<FormatTextMessageContent text={record.datadesc} />
+				<TextPrettier text={record.datadesc} />
 			</div>
 		);
 
 	if (variant === "note")
 		return (
 			<div className="">
-				<FormatTextMessageContent text={record.datadesc} />
+				<TextPrettier text={record.datadesc} />
 			</div>
 		);
 
 	return (
 		<p className="inline">
-			<FormatTextMessageContent text={record.datadesc} className={"inline"} />
+			<TextPrettier text={record.datadesc} inline />
 		</p>
 	);
 }

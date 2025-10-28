@@ -1,10 +1,10 @@
+import MessageInlineWrapper from "@/components/message-inline-wrapper";
 import type { AppMessageProps } from "@/components/message/app-message.tsx";
 import UrlMessage, {
 	type UrlMessageEntity,
 } from "@/components/message/app-message/url-message.tsx";
-import MessageInlineWrapper from "@/components/message/message-inline.tsx";
-import type { AppMessageTypeEnum, AppMessageType } from "@/schema";
 import { decodeUnicodeReferences } from "@/lib/utils.ts";
+import type { AppMessageType, AppMessageTypeEnum } from "@/schema";
 
 export interface VoiceMessageEntity {
 	type: AppMessageTypeEnum.VOICE;
@@ -34,14 +34,29 @@ export default function VoiceMessage({
 	...props
 }: VoiceMessageProps) {
 	if (variant === "default") {
-		return (
-			<UrlMessage
-				message={message as unknown as AppMessageType<UrlMessageEntity>}
-				variant={variant}
-				{...props}
-			/>
-		);
+		return <VoiceMessageDefault message={message} {...props} />;
+	} else if (variant === "referenced" || variant === "abstract") {
+		return <VoiceMessageAbstract message={message} {...props} />;
 	}
+}
+
+function VoiceMessageDefault({
+	message,
+	...props
+}: Omit<VoiceMessageProps, "variant">) {
+	return (
+		<UrlMessage
+			message={message as unknown as AppMessageType<UrlMessageEntity>}
+			variant="default"
+			{...props}
+		/>
+	);
+}
+
+function VoiceMessageAbstract({
+	message,
+	...props
+}: Omit<VoiceMessageProps, "variant">) {
 	return (
 		<MessageInlineWrapper message={message} {...props}>
 			[音频] {decodeUnicodeReferences(message.message_entity.msg.appmsg.title)}

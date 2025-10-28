@@ -15,16 +15,16 @@ import {
 
 import { MessageBubbleGroup } from "@/components/message-bubble-group";
 
+import MessageInlineWrapper from "@/components/message-inline-wrapper";
 import {
 	type ForwardMessageRecord as ForwardMessageRecordType,
 	forwardMessageRecordVariants,
 	forwardMessageVariants,
 } from "@/components/message/app-message/forward-message";
-import MessageInlineWrapper from "@/components/message/message-inline";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import type React from "react";
 import { ScrollArea } from "../ui/scroll-area";
 import Record, { type RecordType } from "./record";
-import type React from "react";
 
 interface ForwardMessageRecordProps
 	extends React.HTMLAttributes<HTMLDivElement> {

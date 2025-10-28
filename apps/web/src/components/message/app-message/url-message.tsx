@@ -1,10 +1,10 @@
 import Image from "@/components/image.tsx";
 import { LinkCard } from "@/components/link-card";
 import LocalImage from "@/components/local-image.tsx";
+import MessageInlineWrapper from "@/components/message-inline-wrapper";
 import type { AppMessageProps } from "@/components/message/app-message.tsx";
-import MessageInlineWrapper from "@/components/message/message-inline.tsx";
-import type { AppMessageTypeEnum } from "@/schema";
 import { decodeUnicodeReferences } from "@/lib/utils.ts";
+import type { AppMessageTypeEnum } from "@/schema";
 
 export interface UrlMessageEntity {
 	type: AppMessageTypeEnum.URL;
@@ -90,6 +90,20 @@ export default function UrlMessage({
 	...props
 }: UrlMessageProps) {
 	const { chat } = message;
+
+	if (variant === "default") {
+		return <UrlMessageDefault message={message} {...props} />;
+	} else if (variant === "referenced" || variant === "abstract") {
+		return <UrlMessageAbstract message={message} {...props} />;
+	}
+}
+
+function UrlMessageDefault({
+	message,
+	...props
+}: Omit<UrlMessageProps, "variant">) {
+	const { chat } = message;
+
 	const heading = decodeUnicodeReferences(
 		message.message_entity.msg.appmsg.title,
 	);
@@ -107,21 +121,29 @@ export default function UrlMessage({
 			/>
 		) : undefined);
 
-	if (variant === "default")
-		return (
-			<LinkCard
-				href={message.message_entity.msg.appmsg.url}
-				heading={heading}
-				abstract={message.message_entity.msg.appmsg.des}
-				preview={preview}
-				from={
-					// 偶尔 sourcedisplayname 是一个空字符串，会被 ?? 判定为有效，目前发现这种情况在“服务消息”里出现，但是服务消息本来就应该是另一个 UI，所以暂时先不处理了
-					message.message_entity.msg.appmsg.sourcedisplayname ??
-					message.message_entity.msg?.appinfo?.appname
-				}
-				{...props}
-			/>
-		);
+	return (
+		<LinkCard
+			href={message.message_entity.msg.appmsg.url}
+			heading={heading}
+			abstract={message.message_entity.msg.appmsg.des}
+			preview={preview}
+			from={
+				// 偶尔 sourcedisplayname 是一个空字符串，会被 ?? 判定为有效，目前发现这种情况在“服务消息”里出现，但是服务消息本来就应该是另一个 UI，所以暂时先不处理了
+				message.message_entity.msg.appmsg.sourcedisplayname ??
+				message.message_entity.msg?.appinfo?.appname
+			}
+			{...props}
+		/>
+	);
+}
+
+function UrlMessageAbstract({
+	message,
+	...props
+}: Omit<UrlMessageProps, "variant">) {
+	const heading = decodeUnicodeReferences(
+		message.message_entity.msg.appmsg.title,
+	);
 
 	return (
 		<MessageInlineWrapper message={message} {...props}>

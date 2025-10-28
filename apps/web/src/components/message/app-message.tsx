@@ -1,3 +1,5 @@
+import { CircleQuestionmarkSolid } from "@/components/icon";
+import { LinkCard } from "@/components/link-card";
 import AnnouncementMessage, {
 	type AnnouncementMessageEntity,
 } from "@/components/message/app-message/announcement-message.tsx";
@@ -92,11 +94,9 @@ import VoiceMessage, {
 	type VoiceMessageEntity,
 } from "@/components/message/app-message/voice-message.tsx";
 import type { MessageProp } from "@/components/message/message.tsx";
-import { AppMessageTypeEnum, type AppMessageType } from "@/schema";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { LinkCard } from "@/components/link-card";
-import { CircleQuestionmarkSolid } from "@/components/icon";
+import { AppMessageTypeEnum, type AppMessageType } from "@/schema";
 
 export type AppMessageProps<
 	T = {

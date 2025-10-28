@@ -1,12 +1,11 @@
-import ChatList from "./-components/chat-list";
 import {
 	ResizableHandle,
 	ResizablePanel,
 	ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 import { Suspense } from "react";
+import ChatListMiniRouter from "./-components/chat-list/chat-list-mini-router";
 
 export const Route = createFileRoute("/$accountId/chat")({
 	component: RouteComponent,
@@ -26,11 +25,7 @@ function RouteComponent() {
 			>
 				<Suspense>
 					<div className={"relative w-full h-full"}>
-						<div className={"absolute inset-0"}>
-							<ScrollArea className={"w-full h-full [&>div>div]:block!"}>
-								<ChatList />
-							</ScrollArea>
-						</div>
+						<ChatListMiniRouter />
 					</div>
 				</Suspense>
 			</ResizablePanel>

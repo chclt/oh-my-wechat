@@ -1,9 +1,9 @@
 import Link from "@/components/link.tsx";
 import LocalImage from "@/components/local-image.tsx";
+import MessageInlineWrapper from "@/components/message-inline-wrapper";
 import type { AppMessageProps } from "@/components/message/app-message.tsx";
-import MessageInlineWrapper from "@/components/message/message-inline.tsx";
-import type { AppMessageTypeEnum } from "@/schema";
 import { cn, decodeUnicodeReferences } from "@/lib/utils.ts";
+import type { AppMessageTypeEnum } from "@/schema";
 
 export interface MusicMessageEntity {
 	type: AppMessageTypeEnum.MUSIC;
@@ -52,59 +52,74 @@ export default function MusicMessage({
 	variant = "default",
 	...props
 }: MusicMessageProps) {
+	if (variant === "default") {
+		return <MusicMessageDefault message={message} {...props} />;
+	} else if (variant === "referenced" || variant === "abstract") {
+		return <MusicMessageAbstract message={message} {...props} />;
+	}
+}
+
+function MusicMessageDefault({
+	message,
+	...props
+}: Omit<MusicMessageProps, "variant">) {
 	const { chat } = message;
-	if (variant === "default")
-		return (
-			<Link href={message.message_entity.msg.appmsg.url}>
+
+	return (
+		<Link href={message.message_entity.msg.appmsg.url}>
+			<div
+				className={cn(
+					"relative max-w-[20em] rounded-2xl overflow-hidden bg-white",
+				)}
+				{...props}
+			>
+				<LocalImage
+					chat={chat}
+					message={message}
+					size="origin"
+					domain="opendata"
+					className={"absolute inset-0 w-full h-full object-cover"}
+				/>
 				<div
-					className={cn(
-						"relative max-w-[20em] rounded-2xl overflow-hidden bg-white",
-					)}
-					{...props}
+					className={
+						"relative p-4 flex items-center bg-white/60 backdrop-blur-xl"
+					}
 				>
-					<LocalImage
-						chat={chat}
-						message={message}
-						size="origin"
-						domain="opendata"
-						className={"absolute inset-0 w-full h-full object-cover"}
-					/>
 					<div
 						className={
-							"relative p-4 flex items-center bg-white/60 backdrop-blur-xl"
+							"relative shrink-0 size-16 before:content-[''] before:absolute before:-inset-8 before:rounded-full before:bg-black"
 						}
 					>
-						<div
+						<LocalImage
+							chat={chat}
+							message={message}
+							size="origin"
+							domain="opendata"
+							className={"relative rounded-full"}
+						/>
+					</div>
+					<div className={"ml-12 mr-6 flex flex-col"}>
+						<h4 className="break-words font-medium line-clamp-2">
+							{decodeUnicodeReferences(message.message_entity.msg.appmsg.title)}
+						</h4>
+						<p
 							className={
-								"relative shrink-0 size-16 before:content-[''] before:absolute before:-inset-8 before:rounded-full before:bg-black"
+								"mt-1 text-sm text-secondary-foreground line-clamp-1 break-all"
 							}
 						>
-							<LocalImage
-								chat={chat}
-								message={message}
-								size="origin"
-								domain="opendata"
-								className={"relative rounded-full"}
-							/>
-						</div>
-						<div className={"ml-12 mr-6 flex flex-col"}>
-							<h4 className="break-words font-medium line-clamp-2">
-								{decodeUnicodeReferences(
-									message.message_entity.msg.appmsg.title,
-								)}
-							</h4>
-							<p
-								className={
-									"mt-1 text-sm text-secondary-foreground line-clamp-1 break-all"
-								}
-							>
-								{decodeUnicodeReferences(message.message_entity.msg.appmsg.des)}
-							</p>
-						</div>
+							{decodeUnicodeReferences(message.message_entity.msg.appmsg.des)}
+						</p>
 					</div>
 				</div>
-			</Link>
-		);
+			</div>
+		</Link>
+	);
+}
+
+function MusicMessageAbstract({
+	message,
+	...props
+}: Omit<MusicMessageProps, "variant">) {
 	return (
 		<MessageInlineWrapper message={message} {...props}>
 			[音乐] {decodeUnicodeReferences(message.message_entity.msg.appmsg.title)}
