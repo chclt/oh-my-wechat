@@ -55,7 +55,7 @@ export default function ContactGroupList() {
 					MiniRoutePageOverlayClassName,
 				)}
 			/>
-			<div
+			<section
 				data-alphabet="root"
 				data-state={isOpen ? "open" : "closed"}
 				className={cn(
@@ -115,7 +115,7 @@ export default function ContactGroupList() {
 						className="z-20 absolute my-auto top-0 bottom-0 end-1.5"
 					/>
 				)}
-			</div>
+			</section>
 		</>
 	);
 }

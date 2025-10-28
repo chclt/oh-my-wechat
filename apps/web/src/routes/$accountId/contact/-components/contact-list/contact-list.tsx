@@ -52,16 +52,16 @@ export default function ContactList() {
 	);
 
 	return (
-		<div className="relative">
+		<div className="absolute inset-0">
 			<section
 				data-alphabet="root"
-				className={cn("relative", MiniRouteFirstPageContentClassName)}
+				className={cn("absolute inset-0", MiniRouteFirstPageContentClassName)}
 				aria-hidden={!isThisMiniRouteOnTop}
 				style={{
 					pointerEvents: isThisMiniRouteOnTop ? "auto" : "none",
 				}}
 			>
-				<ScrollAreaPrimitive.Root className="relative h-[calc(100dvh-10rem)]">
+				<ScrollAreaPrimitive.Root className="relative w-full h-full">
 					<ScrollAreaViewport
 						ref={(node) => {
 							if (node) {

@@ -43,7 +43,7 @@ export default function ChatGroupList() {
 					MiniRoutePageOverlayClassName,
 				)}
 			/>
-			<div
+			<section
 				data-state={isOpen ? "open" : "closed"}
 				className={cn(
 					"absolute inset-0 bg-background",
@@ -90,7 +90,7 @@ export default function ChatGroupList() {
 					<ScrollBar className="z-30" />
 					<ScrollAreaPrimitive.Corner />
 				</ScrollAreaPrimitive.Root>
-			</div>
+			</section>
 		</>
 	);
 }
