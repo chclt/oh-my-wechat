@@ -111,7 +111,7 @@ function RouteComponent() {
 					>
 						<DialogContent
 							showCloseButton={false}
-							className="p-5 sm:max-w-sm rounded-xl overflow-hidden"
+							className="p-0 sm:max-w-sm rounded-xl overflow-hidden h-[calc(100dvh-10rem)]"
 						>
 							<VisuallyHidden>
 								<DialogHeader>
@@ -119,7 +119,7 @@ function RouteComponent() {
 								</DialogHeader>
 							</VisuallyHidden>
 
-							<div className="relative -m-5 overflow-hidden">
+							<div className="relative w-full h-full overflow-hidden">
 								<ContactListMiniRouter />
 							</div>
 

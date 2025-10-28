@@ -25,9 +25,7 @@ function RouteComponent() {
 			>
 				<Suspense>
 					<div className={"relative w-full h-full"}>
-						<div className={"absolute inset-0"}>
-							<ChatListMiniRouter />
-						</div>
+						<ChatListMiniRouter />
 					</div>
 				</Suspense>
 			</ResizablePanel>
