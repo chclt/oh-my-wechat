@@ -103,7 +103,7 @@ export default function ContactGroupList() {
 							contactAlphabetList={contactAlphabetList}
 						/>
 					</ScrollAreaViewport>
-					<ScrollBar className="z-30" />
+					<ScrollBar className="z-30 !top-16" />
 					<ScrollAreaPrimitive.Corner />
 				</ScrollAreaPrimitive.Root>
 
