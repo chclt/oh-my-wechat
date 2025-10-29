@@ -87,7 +87,7 @@ export default function ChatGroupList() {
 							))}
 						</ul>
 					</ScrollAreaViewport>
-					<ScrollBar className="z-30" />
+					<ScrollBar className="z-30 !top-16" />
 					<ScrollAreaPrimitive.Corner />
 				</ScrollAreaPrimitive.Root>
 			</section>
