@@ -184,10 +184,12 @@ export function parseLocalInfo(localInfoBuffer: Uint8Array): { id: string } {
 		const fieldNumber = tag >> 3;
 
 		// uint32 id = 1;
-		if (fieldNumber === 1 && wireType === 2) {
+		if ((fieldNumber === 1 || fieldNumber === 2) && wireType === 2) {
 			// string field
 			id = reader.string();
-			break;
+			if (id) {
+				break;
+			}
 		}
 	}
 
