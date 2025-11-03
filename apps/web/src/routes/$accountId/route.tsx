@@ -111,7 +111,7 @@ function RouteComponent() {
 					>
 						<DialogContent
 							showCloseButton={false}
-							className="p-0 sm:max-w-sm rounded-xl overflow-hidden h-[calc(100dvh-10rem)]"
+							className="p-0 max-w-sm sm:max-w-sm h-[calc(100dvh-10rem)] rounded-xl overflow-hidden"
 						>
 							<VisuallyHidden>
 								<DialogHeader>
