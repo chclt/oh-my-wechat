@@ -138,9 +138,20 @@ export default function useChatList(
 				title: "服务号",
 				photo: photoServiceAccount,
 				chat: {
+					type: "private",
 					id: "brandservicesessionholder",
 					title: "服务号",
 					photo: photoServiceAccount,
+					is_muted: true,
+					is_pinned: false,
+					is_collapsed: false,
+					user: {
+						id: "brandservicesessionholder",
+						user_id: "brandservicesessionholder",
+						username: "服务号",
+						is_openim: false,
+					},
+					members: [],
 				},
 				value: serviceAccountChats.map(transformChatToChatListItem),
 			});
