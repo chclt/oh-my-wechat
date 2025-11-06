@@ -1,6 +1,7 @@
 import { ChatType } from "@/schema";
 
-import imageCollapsedChats from "/public/images/avatar/collapsed_chats.png";
+import photoCollapsedChats from "/public/images/avatar/collapsed_chats.png";
+import photoServiceAccount from "/public/images/avatar/brandservicesessionholder.png";
 
 import specialBrandIdRaw from "@/assets/specialBrandUserNames.csv?raw";
 const specialBrandIds = specialBrandIdRaw.split("\n").map((i) => i.trim());
@@ -103,7 +104,7 @@ export default function useChatList(
 						type: "chatGroup",
 						id: chat.id,
 						title: chat.title,
-						photo: imageCollapsedChats,
+						photo: photoCollapsedChats,
 						chat: chat,
 						value: collapsedChatGroup.map(transformChatToChatListItem),
 					};
@@ -115,7 +116,7 @@ export default function useChatList(
 						type: "chatGroup",
 						id: chat.id,
 						title: chat.title,
-						photo: imageCollapsedChats,
+						photo: photoCollapsedChats,
 						chat: chat,
 						value: serviceAccountChats.map(transformChatToChatListItem),
 					};
@@ -127,23 +128,35 @@ export default function useChatList(
 			}
 		});
 
-	/* 
 	// 服务号消息 老版本的微信不对服务号进行分组，但是在这里我想要默认进行分组
 	// TODO: 服务号的消息还不支持，先不展示
-	if (serviceAccountChatGroupIndex === -1) {
-		data.splice(0, 0, {
-			type: "chatGroup",
-			id: "brandservicesessionholder",
-			title: "服务号",
-			chat: {
+	if (import.meta.env.DEV) {
+		if (serviceAccountChatGroupIndex === -1) {
+			data.splice(0, 0, {
+				type: "chatGroup",
 				id: "brandservicesessionholder",
 				title: "服务号",
-				photo: imageCollapsedChats,
-			},
-			value: serviceAccountChats.map(transformChatToChatListItem),
-		});
+				photo: photoServiceAccount,
+				chat: {
+					type: "private",
+					id: "brandservicesessionholder",
+					title: "服务号",
+					photo: photoServiceAccount,
+					is_muted: true,
+					is_pinned: false,
+					is_collapsed: false,
+					user: {
+						id: "brandservicesessionholder",
+						user_id: "brandservicesessionholder",
+						username: "服务号",
+						is_openim: false,
+					},
+					members: [],
+				},
+				value: serviceAccountChats.map(transformChatToChatListItem),
+			});
+		}
 	}
-	*/
 
 	return data;
 }
