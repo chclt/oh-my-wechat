@@ -34,7 +34,7 @@ async function parseSessionDatabaseSessionAbstractTableRows(
 	const result: ChatType[] = [];
 
 	for (const row of rows) {
-		const contactInfo = contacts[row.UsrName];
+		const contactInfo = contacts[row.UsrName]; // FIXME: A user encountered an issue where contactInfo was undefined.
 		const chat = row.UsrName.endsWith("@chatroom")
 			? ({
 					type: "chatroom",
@@ -45,11 +45,11 @@ async function parseSessionDatabaseSessionAbstractTableRows(
 						: "-",
 					is_muted: !!row.ConIntRes1,
 					// @ts-ignore
-					is_pinned: (contactInfo as ChatroomType)._is_pinned,
+					is_pinned: (contactInfo as ChatroomType)?._is_pinned ?? false,
 					// @ts-ignore
-					is_collapsed: (contactInfo as ChatroomType)._is_collapsed,
+					is_collapsed: (contactInfo as ChatroomType)?._is_collapsed ?? false,
 					...(contactInfo?.photo ? { photo: contactInfo.photo.thumb } : {}),
-					members: (contactInfo as ChatroomType).members,
+					members: (contactInfo as ChatroomType)?.members ?? [],
 
 					chatroom: contactInfo as ChatroomType,
 
