@@ -1,4 +1,3 @@
-import Image from "@/components/image.tsx";
 import { useMiniRoute, useMiniRouter } from "@/components/mini-router";
 import {
 	MiniRoutePageContentClassName,
@@ -12,6 +11,7 @@ import * as ScrollAreaPrimitive from "@radix-ui/react-scroll-area";
 import { ChevronLeftIcon } from "lucide-react";
 import ChatListItem from "./chat-item";
 import { ChatListChatGroupItem } from "./use-chat-list";
+import { Avatar } from "@/components/ui/avatar.tsx";
 
 export interface ChatGroupListMiniRouteState {
 	name: "chatGroupList";
@@ -67,14 +67,11 @@ export default function ChatGroupList() {
 							>
 								<ChevronLeftIcon />
 							</Button>
-							<div className={cn("shrink-0 w-12 h-12 clothoid-corner-2")}>
-								<Image
-									width={48}
-									height={48}
-									className={"w-full h-full bg-[#DDDFE0]"}
-									src={chatListItem.photo}
-								/>
-							</div>
+
+							<Avatar
+								src={chatListItem.photo}
+								className="shrink-0 w-12 h-12 clothoid-corner-2"
+							/>
 
 							<div className="ms-3 font-semibold">
 								<span className="font-medium">{chatListItem.title}</span>

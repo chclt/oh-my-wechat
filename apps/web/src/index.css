@@ -131,10 +131,12 @@
 
 @layer components {
   .clothoid-corner-unset {
+    border-radius: unset;
     clip-path: unset;
   }
 
   .clothoid-corner-2 {
+    border-radius: 0.5rem;
     clip-path: polygon(
       0.694506rem 0rem,
       calc(100% - 0.694506rem) 0rem,
@@ -205,6 +207,7 @@
   }
 
   .clothoid-corner-6 {
+    border-radius: 1.5rem;
     clip-path: polygon(
       2.083518rem 0rem,
       calc(100% - 2.083518rem) 0rem,
@@ -275,6 +278,7 @@
   }
 
   .clothoid-corner-\[18\.18\%\] {
+    border-radius: 18.18%;
     clip-path: polygon(
       25.252243% 0%,
       calc(100% - 25.252243%) 0%,
