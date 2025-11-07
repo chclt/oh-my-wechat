@@ -81,27 +81,29 @@ export default function ContactList() {
 							</div>
 						</header>
 
-						<ContactItem
-							accountId={accountId}
-							contactItem={{
-								title: "新的朋友",
-								photo: imageGreetingMessages,
-							}}
-							onClick={(event) => {
-								event.preventDefault();
-								event.stopPropagation();
-								pushMiniRouterStates({
-									name: "greetingMessageList",
-									data: {
-										accountId,
-										contactItem: {
-											title: "新的朋友",
-											photo: imageGreetingMessages,
+						{import.meta.env.DEV && (
+							<ContactItem
+								accountId={accountId}
+								contactItem={{
+									title: "新的朋友",
+									photo: imageGreetingMessages,
+								}}
+								onClick={(event) => {
+									event.preventDefault();
+									event.stopPropagation();
+									pushMiniRouterStates({
+										name: "greetingMessageList",
+										data: {
+											accountId,
+											contactItem: {
+												title: "新的朋友",
+												photo: imageGreetingMessages,
+											},
 										},
-									},
-								} satisfies GreetingMessageListMiniRouteState);
-							}}
-						/>
+									} satisfies GreetingMessageListMiniRouteState);
+								}}
+							/>
+						)}
 
 						<ContactItem
 							accountId={accountId}
