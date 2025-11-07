@@ -9,7 +9,6 @@ import StickerMessage from "@/components/message/sticker-message.tsx";
 import SystemExtendedMessage from "@/components/message/system-extended-message.tsx";
 import SystemMessage from "@/components/message/system-message.tsx";
 import TextMessage from "@/components/message/text-message.tsx";
-import VerityMessage from "@/components/message/verify-message.tsx";
 import VideoMessage from "@/components/message/video-message.tsx";
 import VoiceMessage from "@/components/message/voice-message.tsx";
 import VoipMessage from "@/components/message/voip-message.tsx";
@@ -86,9 +85,6 @@ function MessageComponent({ message, variant, ...props }: MessageProp) {
 
 		case MessageTypeEnum.MAIL:
 			return <MailMessage message={message} variant={variant} {...props} />;
-
-		case MessageTypeEnum.VERITY:
-			return <VerityMessage message={message} variant={variant} {...props} />;
 
 		case MessageTypeEnum.CONTACT:
 			return <ContactMessage message={message} variant={variant} {...props} />;

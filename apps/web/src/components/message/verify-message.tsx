@@ -1,9 +1,3 @@
-import type { MessageProp } from "@/components/message/message.tsx";
-import User from "@/components/user.tsx";
-import type { VerityMessageType } from "@/schema";
-
-type VerifyMessageProps = MessageProp<VerityMessageType>;
-
 export interface VerityMessageEntity {
 	msg: {
 		"@_fromusername": "wxid";
@@ -44,32 +38,4 @@ export interface VerityMessageEntity {
 		"@_cardversion": "0";
 		"@_extflag": "0";
 	};
-}
-
-export default function VerityMessage({
-	message,
-	variant = "default",
-	...props
-}: VerifyMessageProps) {
-	if (variant === "default") {
-		return <VerifyMessageDefault message={message} {...props} />;
-	}
-}
-
-function VerifyMessageDefault({
-	message,
-	...props
-}: Omit<VerifyMessageProps, "variant">) {
-	return (
-		<div className={"flex"}>
-			<User.Photo user={message.from} variant="default" />
-			<div
-				className="max-w-80 flex items-center p-2.5 pr-3 rounded-lg bg-white"
-				{...props}
-			>
-				{message.message_entity.msg["@_fromnickname"]}:{" "}
-				{message.message_entity.msg["@_content"]}
-			</div>
-		</div>
-	);
 }

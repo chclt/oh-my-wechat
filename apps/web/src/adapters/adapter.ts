@@ -8,6 +8,7 @@ import type {
 	VideoInfo,
 	VoiceInfo,
 	ContactType,
+	VerityMessageType,
 } from "@/schema";
 import type { ChatType, MessageType } from "@/schema";
 import type { ChatStatistics } from "./ios-backup/controllers/statistic";
@@ -33,6 +34,10 @@ export interface GetMessageListRequest {
 	type_app?: AppMessageTypeEnum | AppMessageTypeEnum[]; // 有 bug
 	cursor?: string;
 	limit: number;
+}
+
+export interface GetGreetingMessageListRequest {
+	accountId: string;
 }
 
 export interface GetChatRequest {
@@ -107,6 +112,10 @@ export interface DataAdapter {
 	getMessageList: (
 		requestData: GetMessageListRequest,
 	) => Promise<DataAdapterCursorPagination<MessageType[]>>;
+
+	getGreetingMessageList: (
+		requestData: GetGreetingMessageListRequest,
+	) => Promise<DataAdapterResponse<VerityMessageType[]>>;
 
 	getImage: (
 		requestData: GetImageRequest,

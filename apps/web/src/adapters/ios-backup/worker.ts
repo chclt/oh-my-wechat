@@ -69,7 +69,9 @@ export interface AdapterWorkerType {
 		controllerInput: MessageController.AllFromAllInput[0],
 	) => MessageController.AllFromAllOutput;
 
-	getVerifyMessageList: () => MessageController.allVerifyOutput;
+	getGreetingMessageList: (
+		controllerInput: MessageController.allVerifyInput[0],
+	) => MessageController.allVerifyOutput;
 
 	getImage: (
 		controllerInput: ImageController.GetInput[0],
@@ -308,8 +310,8 @@ export const adapterWorker: AdapterWorkerType = {
 		});
 	},
 
-	getVerifyMessageList: async () => {
-		return await MessageController.allVerify({
+	getGreetingMessageList: async (controllerInput) => {
+		return await MessageController.allVerify(controllerInput, {
 			databases: adapterWorker._getStoreItem("databases"),
 		});
 	},
