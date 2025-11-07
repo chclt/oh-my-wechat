@@ -2,7 +2,7 @@ import * as Comlink from "comlink";
 import AdapterWorker from "./worker.ts?worker";
 import type { AdapterWorkerType } from "./worker.ts";
 import type { ChatType, UserType } from "@/schema";
-import type {
+import {
 	DataAdapter,
 	DataAdapterResponse,
 	GetAttachRequest,
@@ -16,6 +16,7 @@ import type {
 	GetUserRequest,
 	GetVideoRequest,
 	GetVoiceRequest,
+	GetGreetingMessageListRequest,
 } from "../adapter.ts";
 
 export default class IosBackupAdapter implements DataAdapter {
@@ -118,6 +119,13 @@ export default class IosBackupAdapter implements DataAdapter {
 		return withCommonWrapper(
 			() => this._workerAdapter.getMessageList(input),
 			"getMessageList",
+		);
+	}
+
+	async getGreetingMessageList(input: GetGreetingMessageListRequest) {
+		return withCommonWrapper(
+			() => this._workerAdapter.getGreetingMessageList(input),
+			"getGreetingMessageList",
 		);
 	}
 

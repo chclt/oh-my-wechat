@@ -20,14 +20,16 @@ import { adapterWorker } from "../worker.ts";
 import {
 	type AppMessageType,
 	AppMessageTypeEnum,
-	type ChatType,
+	BasicMessageType,
 	type ChatroomVoipMessageType,
+	type ChatType,
 	type ContactMessageType,
 	type ImageMessageType,
 	type LocationMessageType,
 	type MailMessageType,
-	MessageTypeEnum,
+	MessageDirection,
 	type MessageType,
+	MessageTypeEnum,
 	type MicroVideoMessageType,
 	type StickerMessageType,
 	type SystemExtendedMessageType,
@@ -39,8 +41,6 @@ import {
 	type VoiceMessageType,
 	type VoipMessageType,
 	type WeComContactMessageType,
-	MessageDirection,
-	BasicMessageType,
 } from "@/schema";
 import CryptoJS from "crypto-js";
 import { XMLParser } from "fast-xml-parser";
@@ -55,10 +55,12 @@ import type {
 } from "@/adapters/adapter.ts";
 import type { ControllerPaginatorCursor, WCDatabases } from "../types.ts";
 import {
-	ChatTableSelectInfer,
 	chatTableSelect,
+	ChatTableSelectInfer,
 	getChatTable,
 	getHelloTable,
+	helloTableSelect,
+	HelloTableSelectInfer,
 } from "../database/message.ts";
 import {
 	and,
@@ -952,15 +954,16 @@ export async function find(...inputs: findInput): findOutput {
 }
 
 export type allVerifyInput = [
+	{ accountId: string },
 	{
 		databases: WCDatabases;
 	},
 ];
 
-export type allVerifyOutput = Promise<DataAdapterResponse<MessageType[]>>;
+export type allVerifyOutput = Promise<DataAdapterResponse<VerityMessageType[]>>;
 
 export async function allVerify(...inputs: allVerifyInput): allVerifyOutput {
-	const [{ databases }] = inputs;
+	const [_, { databases }] = inputs;
 
 	const dbs = databases.message;
 	if (!dbs) {
@@ -981,7 +984,7 @@ export async function allVerify(...inputs: allVerifyInput): allVerifyOutput {
 				const helloTable = getHelloTable(databaseTables[0].name);
 
 				return database
-					.select(chatTableSelect(helloTable))
+					.select(helloTableSelect(helloTable))
 					.from(helloTable)
 					.orderBy(desc(helloTable.CreateTime))
 					.all();
@@ -992,9 +995,42 @@ export async function allVerify(...inputs: allVerifyInput): allVerifyOutput {
 	].filter((row) => row.length > 0)[0];
 
 	return {
-		data: await parseMessageDatabaseChatTableRows(rows, {
-			chat: {} as unknown as ChatType, // todo
-			databases,
-		}),
+		data: transformHelloTableRowToMessage(rows),
 	};
+}
+
+function transformHelloTableRowToMessage(
+	raws: HelloTableSelectInfer[],
+): VerityMessageType[] {
+	const result: VerityMessageType[] = [];
+
+	raws.forEach((helloTableRow) => {
+		if (helloTableRow.Type === MessageTypeEnum.VERITY) {
+			const xmlParser = new XMLParser({ ignoreAttributes: false });
+			const messageEntity: VerityMessageEntity = xmlParser.parse(
+				helloTableRow.Message,
+			);
+			result.push({
+				id: helloTableRow.MesSvrID,
+				local_id: helloTableRow.MesLocalID,
+				date: helloTableRow.CreateTime,
+				direction: helloTableRow.Des,
+				type: MessageTypeEnum.VERITY,
+				message_entity: messageEntity,
+				raw_message: helloTableRow.Message,
+				...(import.meta.env.DEV
+					? {
+							__Dev: { ConIntRes1: helloTableRow.ConIntRes1 },
+						}
+					: {}),
+			});
+		} else {
+			console.error(
+				"Unsupported message type in greeting message database:",
+				helloTableRow,
+			);
+		}
+	});
+
+	return result;
 }

@@ -129,10 +129,6 @@ export type MailMessageType = BasicMessageType<
 	MessageTypeEnum.MAIL,
 	MailMessageEntity
 >;
-export type VerityMessageType = BasicMessageType<
-	MessageTypeEnum.VERITY,
-	VerityMessageEntity
->;
 export type ContactMessageType = BasicMessageType<
 	MessageTypeEnum.CONTACT,
 	ContactMessageEntity
@@ -181,6 +177,11 @@ export type SystemExtendedMessageType = BasicMessageType<
 	MessageTypeEnum.SYSTEM_EXTENDED,
 	SystemExtendedMessageEntity
 >;
+// Special Message Type
+export type VerityMessageType = Omit<
+	BasicMessageType<MessageTypeEnum.VERITY, VerityMessageEntity>,
+	"from" | "chat"
+>;
 export type OMWErrorMessageType = BasicMessageType<
 	MessageTypeEnum.OMW_ERROR,
 	TextMessageEntity
@@ -191,7 +192,6 @@ export type MessageType =
 	| ImageMessageType
 	| VoiceMessageType
 	| MailMessageType
-	| VerityMessageType
 	| ContactMessageType
 	| VideoMessageType
 	| StickerMessageType
