@@ -8,7 +8,16 @@ export interface TransferMessageEntity {
 	des: string;
 
 	wcpayinfo: {
-		paysubtype: number; // 3: 发 8: 收
+		/**
+		 * paysubtype
+		 * 1: 不清楚1的意义，在数据迁移后看到了 1 的类型，微信客户端里面好像还能像没点击过一样能点击
+		 * 3: 发
+		 * 8: 收
+		 * 4: 对方退回给你
+		 * 9: 被对方退回
+		 * 10: 过期退回给自己了
+		 */
+		paysubtype: number;
 		feedesc: string; // eg. "¥23.00"
 		transcationid: number;
 		transferid: number;
@@ -127,11 +136,23 @@ function TransferMessageDefault({
 						message.message_entity.msg.appmsg.wcpayinfo.pay_memo
 					) : (
 						<>
+							{message.message_entity.msg.appmsg.wcpayinfo.paysubtype === 1 &&
+								"转账"}
+
 							{message.message_entity.msg.appmsg.wcpayinfo.paysubtype === 3 &&
 								"接收转账"}
 
 							{message.message_entity.msg.appmsg.wcpayinfo.paysubtype === 8 &&
 								"发起转账"}
+
+							{message.message_entity.msg.appmsg.wcpayinfo.paysubtype === 4 &&
+								"已退回"}
+
+							{message.message_entity.msg.appmsg.wcpayinfo.paysubtype === 9 &&
+								"被退回"}
+
+							{message.message_entity.msg.appmsg.wcpayinfo.paysubtype === 10 &&
+								"已过期"}
 						</>
 					)}
 				</h4>
