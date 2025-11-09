@@ -7,7 +7,7 @@ export function ChatListSuspenseQueryOptions(
 	accountId: string,
 ): UseSuspenseQueryOptions<ChatType[]> {
 	return {
-		queryKey: ["chats", accountId],
+		queryKey: [`account: ${accountId}`, "chatList"],
 		queryFn: () =>
 			getDataAdapter()
 				.getChatList({})
@@ -20,7 +20,7 @@ export function ChatSuspenseQueryOptions(
 	chatId: string,
 ): UseSuspenseQueryOptions<ChatType> {
 	return {
-		queryKey: ["chat", accountId, chatId],
+		queryKey: [`account: ${accountId}`, `chat: ${chatId}`],
 		queryFn: () => {
 			const chatList = queryClient.getQueryData<ChatType[]>(
 				ChatListSuspenseQueryOptions(accountId).queryKey,
