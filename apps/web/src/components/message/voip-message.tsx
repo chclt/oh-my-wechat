@@ -8,7 +8,7 @@ export interface VoipMessageEntity {
 		"@_type": "VoIPBubbleMsg" | string; // eg. VoIPBubbleMsg
 		VoIPBubbleMsg: {
 			msg: string; // eg. 通话时长 00:31
-			room_type: string; // unknown eg. 1
+			room_type: number; // 0: 视频通话, 1: 语音通话
 			red_dot: "true" | "false";
 			roomid: string;
 			roomkey: string;
@@ -61,7 +61,18 @@ function VoipMessageDefault({
 					)}
 					<div>
 						<h4 className={"font-medium text-pretty"}>
-							{message.from.remark ?? message.from.username}发起了语音通话
+							{message.from.remark ?? message.from.username}发起了
+							{message.message_entity.voipmsg["@_type"] === "VoIPBubbleMsg" && (
+								<>
+									{message.message_entity.voipmsg[
+										message.message_entity.voipmsg["@_type"]
+									].room_type === 0 && "视频通话"}
+
+									{message.message_entity.voipmsg[
+										message.message_entity.voipmsg["@_type"]
+									].room_type === 1 && "语音通话"}
+								</>
+							)}
 						</h4>
 						<p className={"text-sm text-neutral-600"}>
 							{message.message_entity.voipmsg["@_type"] === "VoIPBubbleMsg" &&
