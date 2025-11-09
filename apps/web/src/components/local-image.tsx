@@ -1,6 +1,6 @@
 import type { RecordType } from "@/components/record/record.tsx";
 import { ImageSuspenseQueryOptions } from "@/lib/fetchers";
-import type { ChatType, MessageType } from "@/schema";
+import type { MessageType } from "@/schema";
 import { useInViewport, useMergedRef } from "@mantine/hooks";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
