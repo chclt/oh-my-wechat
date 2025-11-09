@@ -6,7 +6,7 @@ export function AccountSuspenseQueryOptions(
 	accountId: string,
 ): UseSuspenseQueryOptions<AccountType> {
 	return {
-		queryKey: ["account", accountId],
+		queryKey: [`account: ${accountId}`],
 		queryFn: () =>
 			getDataAdapter()
 				.getAccount(accountId)

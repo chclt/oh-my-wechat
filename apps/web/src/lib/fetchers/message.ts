@@ -21,7 +21,11 @@ export function MessageListInfiniteQueryOptions(
 	string | undefined
 > {
 	return {
-		queryKey: ["messages", accountId, requestData.chatId, requestData.limit],
+		queryKey: [
+			`account: ${accountId}`,
+			`chat: ${requestData.chatId}`,
+			`messageList:${requestData.limit}`,
+		],
 		queryFn: ({ pageParam }) =>
 			getDataAdapter().getMessageList({
 				...requestData,
@@ -38,7 +42,11 @@ export function LastMessageQueryOptions(
 	requestData: Omit<MessageController.AllInput[0], "limit">,
 ): UseQueryOptions<MessageType | null> {
 	return {
-		queryKey: ["lastMessage", accountId, requestData.chatId],
+		queryKey: [
+			`account: ${accountId}`,
+			`chat: ${requestData.chatId}`,
+			"lastMessage",
+		],
 		queryFn: () =>
 			getDataAdapter()
 				.getMessageList({ ...requestData, limit: 1 })
@@ -50,7 +58,7 @@ export function GreetingMessageListQueryOptions(
 	accountId: string,
 ): UseQueryOptions<VerityMessageType[]> {
 	return {
-		queryKey: ["greetingMessageList", accountId],
+		queryKey: [`account: ${accountId}`, "greetingMessageList"],
 		queryFn: () =>
 			getDataAdapter()
 				.getGreetingMessageList({ accountId })
