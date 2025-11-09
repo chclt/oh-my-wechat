@@ -89,8 +89,6 @@ export default function UrlMessage({
 	variant = "default",
 	...props
 }: UrlMessageProps) {
-	const { chat } = message;
-
 	if (variant === "default") {
 		return <UrlMessageDefault message={message} {...props} />;
 	} else if (variant === "referenced" || variant === "abstract") {
@@ -102,8 +100,6 @@ function UrlMessageDefault({
 	message,
 	...props
 }: Omit<UrlMessageProps, "variant">) {
-	const { chat } = message;
-
 	const heading = decodeUnicodeReferences(
 		message.message_entity.msg.appmsg.title,
 	);
@@ -113,12 +109,7 @@ function UrlMessageDefault({
 			<Image src={message.message_entity.msg.appmsg.thumburl} alt={heading} />
 		) : undefined) ??
 		(message.message_entity.msg.appmsg.appattach.cdnthumbmd5 ? (
-			<LocalImage
-				chat={chat}
-				message={message}
-				domain="opendata"
-				alt={heading}
-			/>
+			<LocalImage message={message} domain="opendata" alt={heading} />
 		) : undefined);
 
 	return (

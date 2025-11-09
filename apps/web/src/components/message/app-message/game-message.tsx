@@ -51,7 +51,6 @@ export default function GameMessage({
 	variant = "default",
 	...props
 }: GameMessageProps) {
-	const chat = message.chat;
 	if (variant === "default") {
 		return <GameMessageDefault message={message} {...props} />;
 	} else if (variant === "referenced" || variant === "abstract") {
@@ -63,7 +62,6 @@ function GameMessageDefault({
 	message,
 	...props
 }: Omit<GameMessageProps, "variant">) {
-	const { chat } = message;
 	return (
 		<div
 			className={cn("relative max-w-[20em] flex flex-col rounded-lg bg-white")}
@@ -76,7 +74,6 @@ function GameMessageDefault({
 				<div className={"mt-1 text-pretty line-clamp-5 text-neutral-500"}>
 					{message.message_entity.msg.appmsg.appattach.cdnthumbmd5 && (
 						<LocalImage
-							chat={chat!}
 							message={message}
 							domain="opendata"
 							className={"float-end ms-2 h-12 w-auto rounded"}
