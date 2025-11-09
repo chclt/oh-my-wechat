@@ -12,7 +12,7 @@ export type GetOutput = Promise<DataAdapterResponse<ImageInfo>>;
 
 export async function get(...inputs: GetInput): GetOutput {
 	const [
-		{ chat, message, record, size = "origin", domain = "image" },
+		{ message, record, size = "origin", domain = "image" },
 		{ directory, databases },
 	] = inputs;
 
@@ -23,21 +23,21 @@ export async function get(...inputs: GetInput): GetOutput {
 		db,
 		directory,
 		record
-			? `%/OpenData/${CryptoJS.MD5(chat.id).toString()}/${message.local_id}/${record["@_dataid"]}.%`
+			? `%/OpenData/${CryptoJS.MD5(message.chat_id).toString()}/${message.local_id}/${record["@_dataid"]}.%`
 			: `%/${
 					{
 						image: "Img",
 						opendata: "OpenData",
 						video: "Video",
 					}[domain]
-				}/${CryptoJS.MD5(chat.id).toString()}/${message.local_id}.%`,
+				}/${CryptoJS.MD5(message.chat_id).toString()}/${message.local_id}.%`,
 	);
 
 	if (!record && domain === "image") {
 		const appendFiles = await getFilesFromManifast(
 			db,
 			directory,
-			`%/ImgV2/${CryptoJS.MD5(chat.id).toString()}/${message.local_id}.%`,
+			`%/ImgV2/${CryptoJS.MD5(message.chat_id).toString()}/${message.local_id}.%`,
 		);
 
 		files.push(...appendFiles);

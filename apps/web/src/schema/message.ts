@@ -107,9 +107,9 @@ export interface BasicMessageType<
 	from: UserType;
 	date: number;
 	direction: MessageDirection;
-	chat: ChatType; // Chat the message belongs to
 	message_entity: MessageEntityType;
 	reply_to_message?: MessageType;
+	chat_id: ChatType["id"]; // Chat the message belongs to
 	raw_message: string;
 }
 
@@ -180,7 +180,7 @@ export type SystemExtendedMessageType = BasicMessageType<
 // Special Message Type
 export type VerityMessageType = Omit<
 	BasicMessageType<MessageTypeEnum.VERITY, VerityMessageEntity>,
-	"from" | "chat"
+	"from" | "chat_id"
 >;
 export type OMWErrorMessageType = BasicMessageType<
 	MessageTypeEnum.OMW_ERROR,

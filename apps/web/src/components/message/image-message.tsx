@@ -63,8 +63,6 @@ export default function ImageMessage({
 	variant = "default",
 	...props
 }: ImageMessageProps) {
-	const chat = message.chat;
-
 	if (variant === "default") {
 		return <ImageMessageDefault message={message} {...props} />;
 	} else if (variant === "referenced") {
@@ -75,7 +73,6 @@ export default function ImageMessage({
 		return (
 			<div {...props}>
 				<LocalImage
-					chat={chat}
 					message={message}
 					size={variant === "viewer_thumb" ? "thumb" : "origin"}
 					alt={""}
@@ -91,8 +88,6 @@ function ImageMessageDefault({
 	message,
 	...props
 }: Omit<ImageMessageProps, "variant">) {
-	const chat = message.chat;
-
 	return (
 		<div
 			className={cn("rounded-lg overflow-hidden")}
@@ -102,7 +97,6 @@ function ImageMessageDefault({
 			{...props}
 		>
 			<LocalImage
-				chat={chat}
 				message={message}
 				size="origin"
 				alt={"图片"}
@@ -118,12 +112,9 @@ function ImageMessageAbstract({
 	message,
 	...props
 }: Omit<ImageMessageProps, "variant">) {
-	const chat = message.chat;
-
 	return (
 		<MessageInlineWrapper message={message} {...props}>
 			<LocalImage
-				chat={chat}
 				message={message}
 				size="thumb"
 				alt={""}
@@ -140,8 +131,6 @@ function ImageMessageReferenced({
 	message,
 	...props
 }: Omit<ImageMessageProps, "variant">) {
-	const chat = message.chat;
-
 	return (
 		<div {...props}>
 			{message.from && (
@@ -151,7 +140,6 @@ function ImageMessageReferenced({
 				</>
 			)}
 			<LocalImage
-				chat={chat}
 				message={message}
 				size="origin"
 				alt={""}

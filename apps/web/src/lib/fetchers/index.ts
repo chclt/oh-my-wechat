@@ -10,7 +10,7 @@ export function ImageSuspenseQueryOptions(
 	requestData: ImageController.GetInput[0],
 ): UseSuspenseQueryOptions<ImageInfo> {
 	return {
-		queryKey: ["image", requestData.chat.id, requestData.message.id],
+		queryKey: ["image", requestData.message.chat_id, requestData.message.id],
 		queryFn: async () =>
 			await getDataAdapter()
 				.getImage(requestData)
@@ -22,7 +22,7 @@ export function VideoSuspenseQueryOptions(
 	requestData: VideoController.GetInput[0],
 ): UseSuspenseQueryOptions<VideoInfo> {
 	return {
-		queryKey: ["video", requestData.chat.id, requestData.message.id],
+		queryKey: ["video", requestData.message.chat_id, requestData.message.id],
 		queryFn: () =>
 			getDataAdapter()
 				.getVideo(requestData)
@@ -34,7 +34,7 @@ export function VoiceSuspenseQueryOptions(
 	requestData: VoiceController.GetInput[0],
 ): UseSuspenseQueryOptions<VoiceInfo> {
 	return {
-		queryKey: ["voice", requestData.chat.id, requestData.message.id],
+		queryKey: ["voice", requestData.message.chat_id, requestData.message.id],
 		queryFn: () =>
 			getDataAdapter()
 				.getVoice(requestData)
@@ -46,7 +46,7 @@ export function AttacheSuspenseQueryOptions(
 	requestData: AttachController.GetInput[0],
 ): UseSuspenseQueryOptions<FileInfo[]> {
 	return {
-		queryKey: ["attache", requestData.chat.id, requestData.message.id],
+		queryKey: ["attache", requestData.message.chat_id, requestData.message.id],
 		queryFn: () =>
 			getDataAdapter()
 				.getAttach(requestData)

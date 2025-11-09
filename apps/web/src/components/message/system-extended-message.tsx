@@ -3,6 +3,9 @@ import User from "@/components/user.tsx";
 import type { SystemExtendedMessageType } from "@/schema";
 import { XMLParser } from "fast-xml-parser";
 import type { ReactNode } from "react";
+import { Route } from "@/routes/$accountId/route.tsx";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { ChatSuspenseQueryOptions } from "@/lib/fetchers/chat.ts";
 
 type SystemExtendedMessageProps = MessageProp<SystemExtendedMessageType>;
 
@@ -94,7 +97,7 @@ function SystemExtendedMessageDefault({
 			</div>
 		);
 	} else {
-		const content = parsePlainTextContent(message);
+		const content = usePlainTextContentParser(message);
 
 		return (
 			<div
@@ -122,7 +125,7 @@ function SystemExtendedMessageAbstract({
 			</p>
 		);
 	} else {
-		const content = parsePlainTextContent(message);
+		const content = usePlainTextContentParser(message); // TODO
 		// TODO
 		return (
 			<div {...props}>
@@ -133,7 +136,11 @@ function SystemExtendedMessageAbstract({
 }
 
 function parseXMLContent(message: SystemExtendedMessageType) {
-	const chat = message.chat;
+	const { accountId } = Route.useParams();
+	const { data: chat } = useSuspenseQuery(
+		ChatSuspenseQueryOptions(accountId, message.chat_id),
+	);
+
 	let content: ReactNode[] = [];
 	switch (message.message_entity.sysmsg["@_type"]) {
 		case "sysmsgtemplate": {
@@ -203,9 +210,13 @@ function parseXMLContent(message: SystemExtendedMessageType) {
 	return content;
 }
 
-function parsePlainTextContent(message: SystemExtendedMessageType) {
-	// 部分系统消息不是XML，如："<a href="weixin://contacts/profile/wxid/"><![CDATA[username]]></a>" stickied a message on top
-	const chat = message.chat;
+// 部分系统消息不是XML，如："<a href="weixin://contacts/profile/wxid/"><![CDATA[username]]></a>" stickied a message on top
+function usePlainTextContentParser(message: SystemExtendedMessageType) {
+	const { accountId } = Route.useParams();
+	const { data: chat } = useSuspenseQuery(
+		ChatSuspenseQueryOptions(accountId, message.chat_id),
+	);
+
 	const userLinkReg = /("<a.+<\/a>")/;
 
 	return (

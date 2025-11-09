@@ -29,7 +29,7 @@ export default function ChatListItem({
 
 	const { data: last_message } = useQuery({
 		...LastMessageQueryOptions(accountId, {
-			chat: chatListItem.chat,
+			chatId: chatListItem.chat.id,
 		}),
 		enabled: inViewport,
 	});

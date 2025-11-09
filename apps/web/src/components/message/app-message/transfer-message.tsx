@@ -1,6 +1,9 @@
 import MessageInlineWrapper from "@/components/message-inline-wrapper";
 import type { AppMessageProps } from "@/components/message/app-message.tsx";
 import type { AppMessageTypeEnum } from "@/schema";
+import { Route } from "@/routes/$accountId/route.tsx";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { ChatSuspenseQueryOptions } from "@/lib/fetchers/chat.ts";
 
 export interface TransferMessageEntity {
 	type: AppMessageTypeEnum.TRANSFER;
@@ -98,7 +101,11 @@ function TransferMessageDefault({
 	message,
 	...props
 }: Omit<TransferMessageProps, "variant">) {
-	const chat = message.chat;
+	const { accountId } = Route.useParams();
+	const { data: chat } = useSuspenseQuery(
+		ChatSuspenseQueryOptions(accountId, message.chat_id),
+	);
+
 	const payerId = message.message_entity.msg.appmsg.wcpayinfo.payer_username;
 	const payer = chat?.members.find((member) => member.id === payerId);
 	if (payer && message.from === undefined) message.from = payer;

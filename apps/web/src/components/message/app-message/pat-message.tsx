@@ -3,8 +3,10 @@ import TextPrettier from "@/components/text-prettier.tsx";
 import User from "@/components/user.tsx";
 import { UserListQueryOptions } from "@/lib/fetchers/user.ts";
 import type { AppMessageType, AppMessageTypeEnum } from "@/schema";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import { ChatSuspenseQueryOptions } from "@/lib/fetchers/chat.ts";
+import { Route } from "@/routes/$accountId/route.tsx";
 
 export interface PatMessageEntity {
 	type: AppMessageTypeEnum.PAT;
@@ -44,7 +46,7 @@ function PatMessageDefault({
 	message,
 	...props
 }: Omit<PatMessageProps, "variant">) {
-	const records = parseContent(message);
+	const records = useContentParser(message);
 
 	return (
 		<>
@@ -67,7 +69,7 @@ function PatMessageAbstract({
 	message,
 	...props
 }: Omit<PatMessageProps, "variant">) {
-	const records = parseContent(message);
+	const records = useContentParser(message);
 
 	const lastRecord = records.at(-1);
 
@@ -76,8 +78,11 @@ function PatMessageAbstract({
 	return <p>{...lastRecord}</p>;
 }
 
-function parseContent(message: AppMessageType<PatMessageEntity>) {
-	const chat = message.chat;
+function useContentParser(message: AppMessageType<PatMessageEntity>) {
+	const { accountId } = Route.useParams();
+	const { data: chat } = useSuspenseQuery(
+		ChatSuspenseQueryOptions(accountId, message.chat_id),
+	);
 
 	// 在用户退群的情况下，chat信息中可能缺少用户信息，需额外查询
 	const [missingUserIds, setMissingUserIds] = useState<string[]>([]);

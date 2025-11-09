@@ -49,15 +49,13 @@ function AttachMessageDefault({
 	message,
 	...props
 }: Omit<AttachMessageProps, "variant">) {
-	const chat = message.chat;
-
 	const [isAttachmentNotFound, setIsAttachmentNotFound] = useState(false);
 
 	const { mutateAsync: download, data } = useMutation<FileInfo[]>({
-		mutationKey: ["attache", chat.id, message.id],
+		mutationKey: ["attache", message.chat_id, message.id],
 		mutationFn: () => {
 			return getDataAdapter()
-				.getAttach({ chat, message })
+				.getAttach({ message })
 				.then((res) => res.data);
 		},
 		onSuccess: (data) => {

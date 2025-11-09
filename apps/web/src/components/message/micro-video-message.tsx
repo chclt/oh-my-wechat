@@ -46,11 +46,9 @@ function MicroVideoMessageDefault({
 	message,
 	...props
 }: Omit<MicroVideoMessageProps, "variant">) {
-	const chat = message.chat;
-
 	return (
 		<div {...props}>
-			<LocalVideo chat={chat} message={message} />
+			<LocalVideo message={message} />
 		</div>
 	);
 }

@@ -60,20 +60,18 @@ export default function VideoMessage({
 	variant = "default",
 	...props
 }: VideoMessageProps) {
-	const chat = message.chat;
 	if (variant === "default") {
 		return <VideoMessageDefault message={message} {...props} />;
 	} else if (variant === "viewer_detail") {
 		return (
 			<div {...props}>
-				<LocalVideo chat={chat!} message={message} className={""} />
+				<LocalVideo message={message} className={""} />
 			</div>
 		);
 	} else if (variant === "viewer_thumb") {
 		return (
 			<div {...props}>
 				<LocalImage
-					chat={chat!}
 					message={message}
 					domain="video"
 					size="thumb"
@@ -91,8 +89,6 @@ function VideoMessageDefault({
 	message,
 	...props
 }: Omit<VideoMessageProps, "variant">) {
-	const chat = message.chat;
-
 	return (
 		<div
 			className={cn(
@@ -108,7 +104,6 @@ function VideoMessageDefault({
 		>
 			<div className={"relative"}>
 				<LocalVideo
-					chat={chat!}
 					message={message}
 					controls
 					className={"min-w-32 min-h-32 object-contain bg-white"}

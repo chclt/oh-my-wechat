@@ -67,7 +67,6 @@ function MiniappMessageDefault({
 	message,
 	...props
 }: Omit<MiniappMessageProps, "variant">) {
-	const { chat } = message;
 	return (
 		<div
 			className={cn("relative w-52 bg-white rounded-lg overflow-hidden")}
@@ -95,7 +94,6 @@ function MiniappMessageDefault({
 			</div>
 
 			<LocalImage
-				chat={chat}
 				message={message}
 				size="origin"
 				domain="opendata"

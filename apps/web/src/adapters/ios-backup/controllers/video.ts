@@ -11,7 +11,7 @@ export type GetInput = [
 export type GetOutput = Promise<DataAdapterResponse<VideoInfo>>;
 
 export async function get(...inputs: GetInput): GetOutput {
-	const [{ chat, message }, { directory, databases }] = inputs;
+	const [{ message }, { directory, databases }] = inputs;
 
 	const db = databases.manifest;
 	if (!db) throw new Error("manifest database is not found");
@@ -19,7 +19,7 @@ export async function get(...inputs: GetInput): GetOutput {
 	const files = await getFilesFromManifast(
 		db,
 		directory,
-		`%/Video/${CryptoJS.MD5(chat.id).toString()}/${message.local_id}.%`,
+		`%/Video/${CryptoJS.MD5(message.chat_id).toString()}/${message.local_id}.%`,
 	);
 
 	let result: VideoInfo = {

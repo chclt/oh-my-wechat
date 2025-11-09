@@ -21,7 +21,7 @@ export function MessageListInfiniteQueryOptions(
 	string | undefined
 > {
 	return {
-		queryKey: ["messages", accountId, requestData.chat.id, requestData.limit],
+		queryKey: ["messages", accountId, requestData.chatId, requestData.limit],
 		queryFn: ({ pageParam }) =>
 			getDataAdapter().getMessageList({
 				...requestData,
@@ -38,7 +38,7 @@ export function LastMessageQueryOptions(
 	requestData: Omit<MessageController.AllInput[0], "limit">,
 ): UseQueryOptions<MessageType | null> {
 	return {
-		queryKey: ["lastMessage", accountId, requestData.chat.id],
+		queryKey: ["lastMessage", accountId, requestData.chatId],
 		queryFn: () =>
 			getDataAdapter()
 				.getMessageList({ ...requestData, limit: 1 })

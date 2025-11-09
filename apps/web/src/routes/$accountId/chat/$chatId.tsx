@@ -70,7 +70,7 @@ function RouteComponent() {
 		isFetchingNextPage,
 	} = useInfiniteQuery(
 		MessageListInfiniteQueryOptions(accountId, {
-			chat,
+			chatId: chat.id,
 			limit: 20,
 		}),
 	);

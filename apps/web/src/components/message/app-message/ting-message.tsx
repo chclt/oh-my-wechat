@@ -49,7 +49,6 @@ export default function TingMessage({
 	variant = "default",
 	...props
 }: TingMessageProps) {
-	const { chat } = message;
 	if (variant === "default") {
 		return <TingMessageDefault message={message} {...props} />;
 	} else if (variant === "referenced" || variant === "abstract") {
@@ -61,8 +60,6 @@ function TingMessageDefault({
 	message,
 	...props
 }: Omit<TingMessageProps, "variant">) {
-	const chat = message.chat;
-
 	return (
 		<Link href={message.message_entity.msg.appmsg.url}>
 			<div
@@ -73,7 +70,6 @@ function TingMessageDefault({
 			>
 				{message.message_entity.msg.appmsg.appattach.filekey ? (
 					<LocalImage
-						chat={chat}
 						message={message}
 						size="origin"
 						domain="opendata"
@@ -93,7 +89,6 @@ function TingMessageDefault({
 				>
 					{message.message_entity.msg.appmsg.appattach.filekey ? (
 						<LocalImage
-							chat={chat}
 							message={message}
 							size="origin"
 							domain="opendata"

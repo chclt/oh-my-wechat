@@ -41,10 +41,9 @@ function VoiceMessageDefault({
 	message,
 	...props
 }: Omit<VoiceMessageProps, "variant">) {
-	const chat = message.chat;
 	return (
 		<div className={cn("max-w-[20em]")} {...props}>
-			<LocalVoice chat={chat} message={message} />
+			<LocalVoice message={message} />
 		</div>
 	);
 }

@@ -30,7 +30,6 @@ export default function StickerMessage({
 	variant = "default",
 	...props
 }: StickerMessageProps) {
-	const chat = message.chat;
 	if (variant === "default") {
 		return <StickerMessageDefault message={message} {...props} />;
 	} else if (variant === "referenced" || variant === "abstract") {
@@ -42,12 +41,9 @@ function StickerMessageDefault({
 	message,
 	...props
 }: Omit<StickerMessageProps, "variant">) {
-	const chat = message.chat;
-
 	return (
 		<div {...props}>
 			<LocalImage
-				chat={chat!}
 				message={message}
 				size="origin"
 				domain="opendata"

@@ -63,8 +63,6 @@ function MusicMessageDefault({
 	message,
 	...props
 }: Omit<MusicMessageProps, "variant">) {
-	const { chat } = message;
-
 	return (
 		<Link href={message.message_entity.msg.appmsg.url}>
 			<div
@@ -74,7 +72,6 @@ function MusicMessageDefault({
 				{...props}
 			>
 				<LocalImage
-					chat={chat}
 					message={message}
 					size="origin"
 					domain="opendata"
@@ -91,7 +88,6 @@ function MusicMessageDefault({
 						}
 					>
 						<LocalImage
-							chat={chat}
 							message={message}
 							size="origin"
 							domain="opendata"
