@@ -1,9 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import type {
-	ChatType,
-	MicroVideoMessageType,
-	VideoMessageType,
-} from "@/schema";
+import type { MicroVideoMessageType, VideoMessageType } from "@/schema";
 import type React from "react";
 import { VideoSuspenseQueryOptions } from "@/lib/fetchers";
 import { useInViewport } from "@mantine/hooks";
