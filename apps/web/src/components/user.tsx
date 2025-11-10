@@ -1,7 +1,7 @@
-import Image from "@/components/image.tsx";
 import type { UserType } from "@/schema";
 import { cn } from "@/lib/utils.ts";
 import type React from "react";
+import { Avatar } from "@/components/ui/avatar.tsx";
 
 interface UserProps extends React.HTMLProps<HTMLDivElement> {
 	user: UserType;
@@ -14,12 +14,6 @@ const userVariants = {
 	container: {
 		default: "",
 		inline: "inline font-medium cursor-pointer hover:underline",
-	},
-	photo: {
-		default:
-			"shrink-0 size-11 aspect-square rounded-[18.18%] clothoid-corner-[18.18%] bg-neutral-200",
-		inline:
-			"relative inline-block size-[1.5em] align-top [&_img]:inline [&_img]:absolute [&_img]:inset-0 [&_img]:m-auto [&_img]:size-[1.25em] [&_img]:rounded-[3px]",
 	},
 	username: {
 		default: "",
@@ -44,11 +38,7 @@ export default function User({
 			{...props}
 		>
 			{showPhoto && (
-				<Photo
-					user={user}
-					variant={variant}
-					className={cn(userVariants.photo[variant], "me-[0.15em]")}
-				/>
+				<Photo user={user} variant={variant} className="me-[0.15em]" />
 			)}
 			{showUsername && (
 				<Username
@@ -66,27 +56,13 @@ interface UserPhotoProps extends React.HTMLAttributes<unknown> {
 	variant: "default" | "inline";
 }
 
-function Photo({
-	user,
-	variant = "default",
-	className,
-	...props
-}: UserPhotoProps) {
-	if (variant === "inline") {
-		return (
-			<span className={cn(userVariants.photo[variant], className)}>
-				{user.photo && <Image src={user.photo.thumb ?? user.photo?.origin} />}
-			</span>
-		);
-	}
-	return user.photo ? (
-		<Image
-			src={user.photo.thumb ?? user.photo?.origin}
-			className={cn(userVariants.photo[variant], className)}
+function Photo({ user, variant = "default", ...props }: UserPhotoProps) {
+	return (
+		<Avatar
+			src={user?.photo?.thumb ?? user?.photo?.origin}
+			variant={variant}
 			{...props}
 		/>
-	) : (
-		<div className={cn(userVariants.photo[variant], className)} />
 	);
 }
 

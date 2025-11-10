@@ -20,14 +20,16 @@ import { adapterWorker } from "../worker.ts";
 import {
 	type AppMessageType,
 	AppMessageTypeEnum,
-	type ChatType,
+	BasicMessageType,
 	type ChatroomVoipMessageType,
+	type ChatType,
 	type ContactMessageType,
 	type ImageMessageType,
 	type LocationMessageType,
 	type MailMessageType,
-	MessageTypeEnum,
+	MessageDirection,
 	type MessageType,
+	MessageTypeEnum,
 	type MicroVideoMessageType,
 	type StickerMessageType,
 	type SystemExtendedMessageType,
@@ -39,8 +41,6 @@ import {
 	type VoiceMessageType,
 	type VoipMessageType,
 	type WeComContactMessageType,
-	MessageDirection,
-	BasicMessageType,
 } from "@/schema";
 import CryptoJS from "crypto-js";
 import { XMLParser } from "fast-xml-parser";
@@ -55,10 +55,12 @@ import type {
 } from "@/adapters/adapter.ts";
 import type { ControllerPaginatorCursor, WCDatabases } from "../types.ts";
 import {
-	ChatTableSelectInfer,
 	chatTableSelect,
+	ChatTableSelectInfer,
 	getChatTable,
 	getHelloTable,
+	helloTableSelect,
+	HelloTableSelectInfer,
 } from "../database/message.ts";
 import {
 	and,
@@ -196,7 +198,7 @@ async function parseMessageDatabaseChatTableRows(
 							// 好像一些群聊成员不会出现在数据库中
 						}
 					: undefined), // 有一些系统消息没有 from
-			chat,
+			chat_id: chat.id,
 
 			// message_entity,
 			// reply_to_message?: Message;
@@ -249,16 +251,6 @@ async function parseMessageDatabaseChatTableRows(
 					...message,
 					message_entity: messageEntity,
 				} as MailMessageType;
-			}
-
-			case MessageTypeEnum.VERITY: {
-				const messageEntity: VerityMessageEntity = xmlParser.parse(
-					raw_message_row.Message,
-				);
-				return {
-					...message,
-					message_entity: messageEntity,
-				} as VerityMessageType;
 			}
 
 			case MessageTypeEnum.CONTACT: {
@@ -441,7 +433,8 @@ export type AllInput = [
 export type AllOutput = Promise<DataAdapterCursorPagination<MessageType[]>>;
 
 export async function all(...inputs: AllInput): AllOutput {
-	const [{ chat, type, type_app, cursor, limit = 50 }, { databases }] = inputs;
+	const [{ chatId, type, type_app, cursor, limit = 50 }, { databases }] =
+		inputs;
 
 	const cursorObject: Partial<ControllerPaginatorCursor> = {};
 
@@ -466,7 +459,7 @@ export async function all(...inputs: AllInput): AllOutput {
 	const dbs = databases.message;
 	if (!dbs) throw new Error("message databases are not found");
 
-	const tableName = `Chat_${CryptoJS.MD5(chat.id).toString()}`;
+	const tableName = `Chat_${CryptoJS.MD5(chatId).toString()}`;
 
 	const chatTable = getChatTable(tableName);
 
@@ -529,6 +522,8 @@ export async function all(...inputs: AllInput): AllOutput {
 	const queryWhereSegment = baseQueryWhereSegmentConditions.length
 		? and(...baseQueryWhereSegmentConditions)
 		: undefined;
+
+	let _chatTableIndex = undefined; // 当前聊天所在的数据库次序
 
 	const rows = (
 		await Promise.allSettled(
@@ -665,8 +660,7 @@ export async function all(...inputs: AllInput): AllOutput {
 			promiseResult.value &&
 			promiseResult.value.length > 0
 		) {
-			if (import.meta.env.DEV)
-				console.log(chat.title, tableName, `message_${index + 1}.sqlite`);
+			_chatTableIndex = index;
 			return promiseResult.value;
 		}
 		return [];
@@ -820,6 +814,9 @@ export async function all(...inputs: AllInput): AllOutput {
 		console.error("cursor_value and cursor_condition are not set correctly");
 	}
 
+	const chats = await ChatController.find({ ids: [chatId] }, { databases });
+	const chat = chats.data[0];
+
 	return {
 		data: await parseMessageDatabaseChatTableRows(rows, {
 			chat,
@@ -832,6 +829,16 @@ export async function all(...inputs: AllInput): AllOutput {
 				: {}),
 			...(cursors.next ? { next_cursor: JSON.stringify(cursors.next) } : {}),
 		},
+		...(import.meta.env.DEV
+			? {
+					__dev: {
+						database: _chatTableIndex
+							? `message_${_chatTableIndex + 1}.sqlite`
+							: undefined,
+						table: tableName,
+					},
+				}
+			: {}),
 	};
 }
 
@@ -864,7 +871,7 @@ export async function allFromAll(...inputs: AllFromAllInput): AllFromAllOutput {
 			chats.data.map((chat) => {
 				return all(
 					{
-						chat,
+						chatId: chat.id,
 						type,
 						type_app,
 						limit,
@@ -952,15 +959,16 @@ export async function find(...inputs: findInput): findOutput {
 }
 
 export type allVerifyInput = [
+	{ accountId: string },
 	{
 		databases: WCDatabases;
 	},
 ];
 
-export type allVerifyOutput = Promise<DataAdapterResponse<MessageType[]>>;
+export type allVerifyOutput = Promise<DataAdapterResponse<VerityMessageType[]>>;
 
 export async function allVerify(...inputs: allVerifyInput): allVerifyOutput {
-	const [{ databases }] = inputs;
+	const [_, { databases }] = inputs;
 
 	const dbs = databases.message;
 	if (!dbs) {
@@ -981,7 +989,7 @@ export async function allVerify(...inputs: allVerifyInput): allVerifyOutput {
 				const helloTable = getHelloTable(databaseTables[0].name);
 
 				return database
-					.select(chatTableSelect(helloTable))
+					.select(helloTableSelect(helloTable))
 					.from(helloTable)
 					.orderBy(desc(helloTable.CreateTime))
 					.all();
@@ -992,9 +1000,42 @@ export async function allVerify(...inputs: allVerifyInput): allVerifyOutput {
 	].filter((row) => row.length > 0)[0];
 
 	return {
-		data: await parseMessageDatabaseChatTableRows(rows, {
-			chat: {} as unknown as ChatType, // todo
-			databases,
-		}),
+		data: transformHelloTableRowToMessage(rows),
 	};
+}
+
+function transformHelloTableRowToMessage(
+	raws: HelloTableSelectInfer[],
+): VerityMessageType[] {
+	const result: VerityMessageType[] = [];
+
+	raws.forEach((helloTableRow) => {
+		if (helloTableRow.Type === MessageTypeEnum.VERITY) {
+			const xmlParser = new XMLParser({ ignoreAttributes: false });
+			const messageEntity: VerityMessageEntity = xmlParser.parse(
+				helloTableRow.Message,
+			);
+			result.push({
+				id: helloTableRow.MesSvrID,
+				local_id: helloTableRow.MesLocalID,
+				date: helloTableRow.CreateTime,
+				direction: helloTableRow.Des,
+				type: MessageTypeEnum.VERITY,
+				message_entity: messageEntity,
+				raw_message: helloTableRow.Message,
+				...(import.meta.env.DEV
+					? {
+							__Dev: { ConIntRes1: helloTableRow.ConIntRes1 },
+						}
+					: {}),
+			});
+		} else {
+			console.error(
+				"Unsupported message type in greeting message database:",
+				helloTableRow,
+			);
+		}
+	});
+
+	return result;
 }

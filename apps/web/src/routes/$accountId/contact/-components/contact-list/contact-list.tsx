@@ -18,6 +18,8 @@ import ContactItem from "./contact-item";
 import useContactAlphabetList from "./use-contact-alphabet-list";
 import useContactList, { ContactListContctGroupItem } from "./use-contact-list";
 import imageGroupChats from "/public/images/avatar/group_chats.png";
+import imageGreetingMessages from "/public/images/avatar/greeting_messages.png";
+import { GreetingMessageListMiniRouteState } from "@/routes/$accountId/contact/-components/contact-list/greeting-message-list.tsx";
 
 export interface ContactListMiniRouteState {
 	name: "root";
@@ -31,7 +33,8 @@ export default function ContactList() {
 		data: { accountId },
 	} = useMiniRoute() as ContactListMiniRouteState;
 
-	const { states: miniRouterStates } = useMiniRouter();
+	const { states: miniRouterStates, pushState: pushMiniRouterStates } =
+		useMiniRouter();
 	const thisMiniRouteState = useMiniRoute();
 	const thisMiniRoutePosition = miniRouterStates.findIndex((state) =>
 		Object.is(state, thisMiniRouteState),
@@ -78,15 +81,29 @@ export default function ContactList() {
 							</div>
 						</header>
 
-						{/* 
-							新朋友
-							仅聊天的联系人	
-							群聊
-							标签
-							公众号
-							服务号
-							企业微信联系人
-						*/}
+						{import.meta.env.DEV && (
+							<ContactItem
+								accountId={accountId}
+								contactItem={{
+									title: "新的朋友",
+									photo: imageGreetingMessages,
+								}}
+								onClick={(event) => {
+									event.preventDefault();
+									event.stopPropagation();
+									pushMiniRouterStates({
+										name: "greetingMessageList",
+										data: {
+											accountId,
+											contactItem: {
+												title: "新的朋友",
+												photo: imageGreetingMessages,
+											},
+										},
+									} satisfies GreetingMessageListMiniRouteState);
+								}}
+							/>
+						)}
 
 						<ContactItem
 							accountId={accountId}

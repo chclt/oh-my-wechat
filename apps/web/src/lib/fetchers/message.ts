@@ -1,6 +1,6 @@
 import { DataAdapterCursorPagination } from "@/adapters/adapter.ts";
 import * as MessageController from "@/adapters/ios-backup/controllers/message";
-import { type MessageType } from "@/schema";
+import { type MessageType, VerityMessageType } from "@/schema";
 import type {
 	DefaultError,
 	InfiniteData,
@@ -21,7 +21,11 @@ export function MessageListInfiniteQueryOptions(
 	string | undefined
 > {
 	return {
-		queryKey: ["messages", accountId, requestData.chat.id, requestData.limit],
+		queryKey: [
+			`account: ${accountId}`,
+			`chat: ${requestData.chatId}`,
+			`messageList:${requestData.limit}`,
+		],
 		queryFn: ({ pageParam }) =>
 			getDataAdapter().getMessageList({
 				...requestData,
@@ -38,10 +42,26 @@ export function LastMessageQueryOptions(
 	requestData: Omit<MessageController.AllInput[0], "limit">,
 ): UseQueryOptions<MessageType | null> {
 	return {
-		queryKey: ["lastMessage", accountId, requestData.chat.id],
+		queryKey: [
+			`account: ${accountId}`,
+			`chat: ${requestData.chatId}`,
+			"lastMessage",
+		],
 		queryFn: () =>
 			getDataAdapter()
 				.getMessageList({ ...requestData, limit: 1 })
 				.then((res) => res.data[0] ?? null),
+	};
+}
+
+export function GreetingMessageListQueryOptions(
+	accountId: string,
+): UseQueryOptions<VerityMessageType[]> {
+	return {
+		queryKey: [`account: ${accountId}`, "greetingMessageList"],
+		queryFn: () =>
+			getDataAdapter()
+				.getGreetingMessageList({ accountId })
+				.then((res) => res.data),
 	};
 }

@@ -1,8 +1,11 @@
 import type { MessageProp } from "@/components/message/message.tsx";
 import User from "@/components/user.tsx";
-import type { SystemExtendedMessageType } from "@/schema";
+import type { ChatType, SystemExtendedMessageType } from "@/schema";
 import { XMLParser } from "fast-xml-parser";
 import type { ReactNode } from "react";
+import { Route } from "@/routes/$accountId/route.tsx";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { ChatSuspenseQueryOptions } from "@/lib/fetchers/chat.ts";
 
 type SystemExtendedMessageProps = MessageProp<SystemExtendedMessageType>;
 
@@ -75,8 +78,13 @@ function SystemExtendedMessageDefault({
 	message,
 	...props
 }: Omit<SystemExtendedMessageProps, "variant">) {
+	const { accountId } = Route.useParams();
+	const { data: chat } = useSuspenseQuery(
+		ChatSuspenseQueryOptions(accountId, message.chat_id),
+	);
+
 	if (message.message_entity.sysmsg) {
-		const content = parseXMLContent(message);
+		const content = parseXMLContent(message, chat);
 
 		return (
 			<div
@@ -94,7 +102,7 @@ function SystemExtendedMessageDefault({
 			</div>
 		);
 	} else {
-		const content = parsePlainTextContent(message);
+		const content = parsePlainTextContent(message, chat);
 
 		return (
 			<div
@@ -111,8 +119,13 @@ function SystemExtendedMessageAbstract({
 	message,
 	...props
 }: Omit<SystemExtendedMessageProps, "variant">) {
+	const { accountId } = Route.useParams();
+	const { data: chat } = useSuspenseQuery(
+		ChatSuspenseQueryOptions(accountId, message.chat_id),
+	);
+
 	if (message.message_entity.sysmsg) {
-		const content = parseXMLContent(message);
+		const content = parseXMLContent(message, chat);
 		return (
 			<p>
 				{message.message_entity.sysmsg["@_type"] === "editrevokecontent" &&
@@ -122,7 +135,7 @@ function SystemExtendedMessageAbstract({
 			</p>
 		);
 	} else {
-		const content = parsePlainTextContent(message);
+		const content = parsePlainTextContent(message, chat);
 		// TODO
 		return (
 			<div {...props}>
@@ -132,8 +145,7 @@ function SystemExtendedMessageAbstract({
 	}
 }
 
-function parseXMLContent(message: SystemExtendedMessageType) {
-	const chat = message.chat;
+function parseXMLContent(message: SystemExtendedMessageType, chat: ChatType) {
 	let content: ReactNode[] = [];
 	switch (message.message_entity.sysmsg["@_type"]) {
 		case "sysmsgtemplate": {
@@ -203,9 +215,11 @@ function parseXMLContent(message: SystemExtendedMessageType) {
 	return content;
 }
 
-function parsePlainTextContent(message: SystemExtendedMessageType) {
-	// 部分系统消息不是XML，如："<a href="weixin://contacts/profile/wxid/"><![CDATA[username]]></a>" stickied a message on top
-	const chat = message.chat;
+// 部分系统消息不是XML，如："<a href="weixin://contacts/profile/wxid/"><![CDATA[username]]></a>" stickied a message on top
+function parsePlainTextContent(
+	message: SystemExtendedMessageType,
+	chat: ChatType,
+) {
 	const userLinkReg = /("<a.+<\/a>")/;
 
 	return (

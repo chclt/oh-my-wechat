@@ -38,7 +38,7 @@ function RoutePlaceholderComponent({ message }: { message?: string }) {
 
 	return (
 		<div className="w-full h-full flex items-center justify-center bg-neutral-100">
-			<div className="absolute top-0 w-full h-18 px-6 flex items-center bg-white/80 backdrop-blur">
+			<div className="absolute top-0 w-full h-16 px-6 flex items-center bg-white/80 backdrop-blur">
 				<h2 className={"font-medium text-lg"}>
 					{user.remark ?? user.username}
 				</h2>
@@ -70,7 +70,7 @@ function RouteComponent() {
 		isFetchingNextPage,
 	} = useInfiniteQuery(
 		MessageListInfiniteQueryOptions(accountId, {
-			chat,
+			chatId: chat.id,
 			limit: 20,
 		}),
 	);
@@ -133,7 +133,7 @@ function RouteComponent() {
 				ref={scrollAreaViewportRef}
 				onScroll={onScroll}
 			>
-				<div className="z-20 sticky top-0 w-full h-18 px-6 flex items-center bg-white/80 backdrop-blur">
+				<div className="z-20 sticky top-0 w-full h-16 px-6 flex items-center bg-white/80 backdrop-blur">
 					<h2 className={"font-medium text-lg"}>{chat.title}</h2>
 				</div>
 

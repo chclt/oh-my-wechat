@@ -46,17 +46,11 @@ function VideoMessageDefault({
 	message,
 	...props
 }: Omit<VideoMessageProps, "variant">) {
-	const chat = message.chat;
 	const heading = decodeUnicodeReferences(
 		message.message_entity.msg.appmsg.title,
 	);
 	const preview = message.message_entity.msg.appmsg.appattach.cdnthumbmd5 ? (
-		<LocalImage
-			chat={chat!}
-			message={message}
-			domain="opendata"
-			alt={heading}
-		/>
+		<LocalImage message={message} domain="opendata" alt={heading} />
 	) : undefined;
 
 	return (

@@ -107,9 +107,9 @@ export interface BasicMessageType<
 	from: UserType;
 	date: number;
 	direction: MessageDirection;
-	chat: ChatType; // Chat the message belongs to
 	message_entity: MessageEntityType;
 	reply_to_message?: MessageType;
+	chat_id: ChatType["id"]; // Chat the message belongs to
 	raw_message: string;
 }
 
@@ -128,10 +128,6 @@ export type VoiceMessageType = BasicMessageType<
 export type MailMessageType = BasicMessageType<
 	MessageTypeEnum.MAIL,
 	MailMessageEntity
->;
-export type VerityMessageType = BasicMessageType<
-	MessageTypeEnum.VERITY,
-	VerityMessageEntity
 >;
 export type ContactMessageType = BasicMessageType<
 	MessageTypeEnum.CONTACT,
@@ -181,6 +177,11 @@ export type SystemExtendedMessageType = BasicMessageType<
 	MessageTypeEnum.SYSTEM_EXTENDED,
 	SystemExtendedMessageEntity
 >;
+// Special Message Type
+export type VerityMessageType = Omit<
+	BasicMessageType<MessageTypeEnum.VERITY, VerityMessageEntity>,
+	"from" | "chat_id"
+>;
 export type OMWErrorMessageType = BasicMessageType<
 	MessageTypeEnum.OMW_ERROR,
 	TextMessageEntity
@@ -191,7 +192,6 @@ export type MessageType =
 	| ImageMessageType
 	| VoiceMessageType
 	| MailMessageType
-	| VerityMessageType
 	| ContactMessageType
 	| VideoMessageType
 	| StickerMessageType

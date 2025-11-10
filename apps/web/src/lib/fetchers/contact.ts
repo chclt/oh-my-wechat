@@ -1,12 +1,12 @@
 import { UseSuspenseQueryOptions } from "@tanstack/react-query";
 import { getDataAdapter } from "../data-adapter";
-import { ChatroomType, ContactType, UserType } from "@/schema";
+import { ContactType } from "@/schema";
 
 export function AccountContactListSuspenseQueryOptions(
 	accountId: string,
 ): UseSuspenseQueryOptions<ContactType[]> {
 	return {
-		queryKey: ["accountContactList", accountId],
+		queryKey: [`account: ${accountId}`, "ContactList"],
 		queryFn: () =>
 			getDataAdapter()
 				.getAccountContactList({

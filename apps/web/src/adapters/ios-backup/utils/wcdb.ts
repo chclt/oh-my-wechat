@@ -1,4 +1,9 @@
 import { zstdDecompressWithDict } from "./zstd";
+import wcdbCompressionDictionaryUrlNewBrandDict from "../assets/wcdb-compression-dicts/NewBrandDict.dict?url";
+import wcdbCompressionDictionaryUrlNewBrandExtDic from "../assets/wcdb-compression-dicts/NewBrandExtDict.dict?url";
+import wcdbCompressionDictionaryUrlBrandDict from "../assets/wcdb-compression-dicts/BrandDict.dict?url";
+import wcdbCompressionDictionaryUrlBrandExtDict from "../assets/wcdb-compression-dicts/BrandExtDict.dict?url";
+import wcdbCompressionDictionaryUrlMsgDict from "../assets/wcdb-compression-dicts/MsgDict.dict?url";
 
 /**
  * 实际发现从 wcdb_builtin_compression_record 表中获取的压缩配置大概率不完整
@@ -13,17 +18,16 @@ enum WCDBCompressionDictionaryName {
 	MsgDict = 5,
 }
 
-const WCDBCompressionDictionaryPath = {
+const WCDBCompressionDictionaryUrl = {
 	[WCDBCompressionDictionaryName.NewBrandDict]:
-		"/wcdb-compression-dicts/NewBrandDict.dict",
+		wcdbCompressionDictionaryUrlNewBrandDict,
 	[WCDBCompressionDictionaryName.NewBrandExtDic]:
-		"/wcdb-compression-dicts/NewBrandExtDic.dict",
+		wcdbCompressionDictionaryUrlNewBrandExtDic,
 	[WCDBCompressionDictionaryName.BrandDict]:
-		"/wcdb-compression-dicts/BrandDict.dict",
+		wcdbCompressionDictionaryUrlBrandDict,
 	[WCDBCompressionDictionaryName.BrandExtDic]:
-		"/wcdb-compression-dicts/BrandExtDic.dict",
-	[WCDBCompressionDictionaryName.MsgDict]:
-		"/wcdb-compression-dicts/MsgDict.dict",
+		wcdbCompressionDictionaryUrlBrandExtDict,
+	[WCDBCompressionDictionaryName.MsgDict]: wcdbCompressionDictionaryUrlMsgDict,
 };
 
 const wcdbCompressionDictionary: Partial<
@@ -76,7 +80,7 @@ const WCDB: WCDBType = {
 	_loadCompressionDictionary: async (dictionaryName) => {
 		if (wcdbCompressionDictionary[dictionaryName]) return;
 
-		const dictionaryPath = WCDBCompressionDictionaryPath[dictionaryName];
+		const dictionaryPath = WCDBCompressionDictionaryUrl[dictionaryName];
 		const dictionaryBuffer = await fetch(dictionaryPath).then((res) =>
 			res.arrayBuffer(),
 		);

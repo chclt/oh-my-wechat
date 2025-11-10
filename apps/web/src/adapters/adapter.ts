@@ -8,6 +8,7 @@ import type {
 	VideoInfo,
 	VoiceInfo,
 	ContactType,
+	VerityMessageType,
 } from "@/schema";
 import type { ChatType, MessageType } from "@/schema";
 import type { ChatStatistics } from "./ios-backup/controllers/statistic";
@@ -28,11 +29,15 @@ export interface GetAccountContactListRequest {
 }
 
 export interface GetMessageListRequest {
-	chat: ChatType;
+	chatId: ChatType["id"];
 	type?: MessageTypeEnum | MessageTypeEnum[];
 	type_app?: AppMessageTypeEnum | AppMessageTypeEnum[]; // 有 bug
 	cursor?: string;
 	limit: number;
+}
+
+export interface GetGreetingMessageListRequest {
+	accountId: string;
 }
 
 export interface GetChatRequest {
@@ -44,7 +49,6 @@ export interface GetChatListRequest {
 }
 
 export interface GetImageRequest {
-	chat: ChatType;
 	message: MessageType;
 	record?: RecordType;
 	size?: "origin" | "thumb";
@@ -52,25 +56,22 @@ export interface GetImageRequest {
 }
 
 export interface GetVideoRequest {
-	chat: ChatType;
 	message: MessageType;
 }
 
 export interface GetVoiceRequest {
-	chat: ChatType;
 	message: MessageType;
 	scope?: "all" | "transcription";
 }
 
 export interface GetAttachRequest {
-	chat: ChatType;
 	message: MessageType;
 	record?: RecordType;
 	type?: string;
 }
 
 export interface GetStatisticRequest {
-	chat: ChatType;
+	chatId: ChatType["id"];
 	startTime: Date;
 	endTime: Date;
 }
@@ -107,6 +108,10 @@ export interface DataAdapter {
 	getMessageList: (
 		requestData: GetMessageListRequest,
 	) => Promise<DataAdapterCursorPagination<MessageType[]>>;
+
+	getGreetingMessageList: (
+		requestData: GetGreetingMessageListRequest,
+	) => Promise<DataAdapterResponse<VerityMessageType[]>>;
 
 	getImage: (
 		requestData: GetImageRequest,

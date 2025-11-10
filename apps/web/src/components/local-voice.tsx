@@ -1,26 +1,19 @@
 import { VoiceSuspenseQueryOptions } from "@/lib/fetchers";
-import type { ChatType, VoiceMessageType } from "@/schema";
+import type { VoiceMessageType } from "@/schema";
 import { useInViewport } from "@mantine/hooks";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 
 interface LocalVoiceProps extends React.ImgHTMLAttributes<HTMLAudioElement> {
-	chat: ChatType;
 	message: VoiceMessageType;
 }
 
-export default function LocalVoice({
-	chat,
-	message,
-	...props
-}: LocalVoiceProps) {
+export default function LocalVoice({ message, ...props }: LocalVoiceProps) {
 	const { ref: voiceRef, inViewport } = useInViewport();
 
 	const { data } = useQuery({
 		...VoiceSuspenseQueryOptions({
-			chat,
 			message,
-
 			scope: "transcription",
 		}),
 		enabled: inViewport,

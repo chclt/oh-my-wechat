@@ -6,10 +6,11 @@ import type { UserType } from "@/schema";
 import { getDataAdapter } from "@/lib/data-adapter.ts";
 
 export function UserListQueryOptions(
+	accountId: string,
 	userIds: string[],
 ): UseQueryOptions<UserType[]> {
 	return {
-		queryKey: ["users", userIds],
+		queryKey: [`account: ${accountId}`, `userList: ${userIds.join(",")}`],
 		queryFn: () =>
 			getDataAdapter()
 				.getUserList({
@@ -24,13 +25,13 @@ export function UserSuspenseQueryOptions(
 	userId: string,
 ): UseSuspenseQueryOptions<UserType> {
 	return {
-		queryKey: ["user", accountId, userId],
+		queryKey: [`account: ${accountId}`, `user: ${userId}`],
 		queryFn: () =>
 			getDataAdapter()
 				.getUser({
 					accountId,
 					userId,
 				})
-				.then((res) => res.data),
+				.then((res) => res.data ?? null),
 	};
 }

@@ -1,4 +1,3 @@
-import Image from "@/components/image.tsx";
 import Message from "@/components/message/message.tsx";
 import { useMiniRouter } from "@/components/mini-router";
 import { LastMessageQueryOptions } from "@/lib/fetchers/message";
@@ -10,6 +9,7 @@ import type React from "react";
 import { Route } from "../../route";
 import { ChatGroupListMiniRouteState } from "./chat-group-list";
 import { ChatListChatGroupItem, ChatListChatItem } from "./use-chat-list";
+import { Avatar } from "@/components/ui/avatar.tsx";
 
 interface ChatItemProps extends React.HTMLAttributes<HTMLLIElement> {
 	chatListItem: ChatListChatItem | ChatListChatGroupItem;
@@ -29,7 +29,7 @@ export default function ChatListItem({
 
 	const { data: last_message } = useQuery({
 		...LastMessageQueryOptions(accountId, {
-			chat: chatListItem.chat,
+			chatId: chatListItem.chat.id,
 		}),
 		enabled: inViewport,
 	});
@@ -67,23 +67,19 @@ export default function ChatListItem({
 				}}
 			>
 				{chatListItem.photo ? (
-					<div
+					<Avatar
+						src={chatListItem.photo}
 						className={cn(
-							"shrink-0 w-12 h-12 clothoid-corner-2",
+							"shrink-0 w-12 h-12 clothoid-corner-2 bg-[#DDDFE0]",
 							chatListItem.chat.type === "chatroom"
-								? "relative after:absolute after:inset-0 after:rounded-md after:border-2 after:border-[#DDDFE0]"
+								? "relative after:absolute after:inset-0 after:rounded-[inherit] after:border-2 after:border-[#DDDFE0]"
 								: "",
 						)}
-					>
-						<Image
-							width={48}
-							height={48}
-							className={"w-full h-full bg-[#DDDFE0]"}
-							src={chatListItem.photo}
-						/>
-					</div>
+					/>
 				) : (
-					<div className={"shrink-0 w-12 h-12 rounded-lg bg-neutral-300"} />
+					<div
+						className={"shrink-0 w-12 h-12 clothoid-corner-2 bg-[#DDDFE0]"}
+					/>
 				)}
 
 				<div className="grow flex flex-col items-stretch">

@@ -1,4 +1,3 @@
-import Image from "@/components/image";
 import { useMiniRoute, useMiniRouter } from "@/components/mini-router";
 import {
 	MiniRoutePageContentClassName,
@@ -16,6 +15,7 @@ import ContactAlphabetList, {
 } from "./contact-alphabet-list";
 import useContactAlphabetList from "./use-contact-alphabet-list";
 import { ContactListContctGroupItem } from "./use-contact-list";
+import { Avatar } from "@/components/ui/avatar.tsx";
 
 export interface ContactGroupListMiniRouteState {
 	name: "contactGroupList";
@@ -86,13 +86,9 @@ export default function ContactGroupList() {
 							>
 								<ChevronLeftIcon />
 							</Button>
-							<div className="size-11 flex items-center justify-center text-[#FF970A] bg-background clothoid-corner-[18.18%] shrink-0">
-								<Image
-									src={contctGroup.photo}
-									alt={contctGroup.title}
-									className="size-full object-cover"
-								/>
-							</div>
+
+							<Avatar src={contctGroup.photo} className="shrink-0" />
+
 							<div className="ms-3 font-semibold">
 								<span className="font-medium">{contctGroup.title}</span>
 							</div>

@@ -32,8 +32,6 @@ export default function MiniAppRecord({
 	className,
 	...props
 }: MiniAppRecordProps) {
-	const { chat } = message;
-
 	if (variant === "default")
 		return (
 			<div
@@ -66,7 +64,6 @@ export default function MiniAppRecord({
 
 				<LocalImage
 					domain="opendata"
-					chat={chat}
 					message={message}
 					record={record}
 					size="origin"

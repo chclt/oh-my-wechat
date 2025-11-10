@@ -29,14 +29,11 @@ export default function ImageRecord({
 	className,
 	...props
 }: ImageRecordProps) {
-	const { chat } = message;
-
 	if (variant === "default")
 		return (
 			<div className={cn("rounded-lg overflow-hidden", className)} {...props}>
 				<LocalImage
 					domain="opendata"
-					chat={chat}
 					message={message}
 					record={record}
 					size="origin"
@@ -52,7 +49,6 @@ export default function ImageRecord({
 		<p className="inline">
 			<LocalImage
 				domain="opendata"
-				chat={chat}
 				message={message}
 				record={record}
 				size="origin"

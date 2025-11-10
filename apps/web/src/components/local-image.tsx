@@ -1,13 +1,12 @@
 import type { RecordType } from "@/components/record/record.tsx";
 import { ImageSuspenseQueryOptions } from "@/lib/fetchers";
-import type { ChatType, MessageType } from "@/schema";
+import type { MessageType } from "@/schema";
 import { useInViewport, useMergedRef } from "@mantine/hooks";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { useState } from "react";
 
 type LocalImageProps = React.ImgHTMLAttributes<HTMLImageElement> & {
-	chat: ChatType;
 	message: MessageType;
 	record?: RecordType;
 	size?: "origin" | "thumb"; // 期望的尺寸，可能因为没有指定尺寸而使用另一尺寸
@@ -17,7 +16,6 @@ type LocalImageProps = React.ImgHTMLAttributes<HTMLImageElement> & {
 };
 
 export default function LocalImage({
-	chat,
 	message,
 	record,
 	size = "origin",
@@ -33,7 +31,6 @@ export default function LocalImage({
 
 	const { data: imageInfo, isFetching } = useQuery({
 		...ImageSuspenseQueryOptions({
-			chat,
 			message,
 			record,
 			size,

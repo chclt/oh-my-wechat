@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import { Route } from "../../../route";
 import ContactGroupList from "./contact-group-list";
 import ContactList, { ContactListMiniRouteState } from "./contact-list";
+import GreetingMessageList from "@/routes/$accountId/contact/-components/contact-list/greeting-message-list.tsx";
 
 export default function ContactListMiniRouter() {
 	const { accountId } = Route.useParams();
@@ -15,6 +16,10 @@ export default function ContactListMiniRouter() {
 		contactGroupList: {
 			name: "contactGroupList",
 			routeComponent: <ContactGroupList />,
+		},
+		greetingMessageList: {
+			name: "greetingMessageList",
+			routeComponent: <GreetingMessageList />,
 		},
 	};
 
