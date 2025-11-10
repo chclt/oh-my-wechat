@@ -43,7 +43,7 @@ export interface StickerMessageEntity {
 			"@_lensid": string;
 			"@_emojiattr": string;
 			"@_linkid": string;
-			"@_desc": string;
+			"@_desc": string; // base64 编码后的 protobuf 数据，包含表情描述等等
 		};
 
 		gameext: {
