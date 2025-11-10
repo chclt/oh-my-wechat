@@ -72,20 +72,6 @@ function StickerMessageDefault({
 	return (
 		<div className="" {...props}>
 			<Image
-				{...(message.message_entity.msg.emoji["@_width"]
-					? {
-							width:
-								Number.parseInt(message.message_entity.msg.emoji["@_width"]) /
-								2,
-						}
-					: {})}
-				{...(message.message_entity.msg.emoji["@_height"]
-					? {
-							height:
-								Number.parseInt(message.message_entity.msg.emoji["@_height"]) /
-								2,
-						}
-					: {})}
 				src={message.message_entity.msg.emoji["@_cdnurl"]}
 				alt={"表情"}
 				className={cn(
@@ -95,10 +81,19 @@ function StickerMessageDefault({
 					"[&:not([src]),&[data-state='error']]:after:text-center [&:not([src]),&[data-state='error']]:after:text-xs [&:not([src]),&[data-state='error']]:after:text-muted-foreground/50 [&:not([src]),&[data-state='error']]:after:content-['无法加载的表情'] [&:not([src]),&[data-state='error']]:after:bg-black/5",
 				)}
 				style={{
-					...(Number(message.message_entity.msg.emoji["@_width"])
+					...(message.message_entity.msg.emoji["@_width"]
 						? {
-								width: message.message_entity.msg.emoji["@_width"],
-								height: message.message_entity.msg.emoji["@_height"],
+								width:
+									Number.parseInt(message.message_entity.msg.emoji["@_width"]) /
+									2,
+							}
+						: {}),
+					...(message.message_entity.msg.emoji["@_height"]
+						? {
+								height:
+									Number.parseInt(
+										message.message_entity.msg.emoji["@_height"],
+									) / 2,
 							}
 						: {}),
 				}}
