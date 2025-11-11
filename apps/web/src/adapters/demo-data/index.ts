@@ -3,7 +3,7 @@ import {
 	user_0,
 	UserList,
 } from "@/adapters/demo-data/dataset/user.ts";
-import type { AccountType, ContactType, UserType } from "@/schema";
+import type { AccountType, ChatType, ContactType, UserType } from "@/schema";
 import {
 	DataAdapter,
 	DataAdapterResponse,
@@ -57,7 +57,11 @@ export default class DemoDataAdapter implements DataAdapter {
 		} satisfies DataAdapterResponse<ContactType[]>;
 	}
 
-	async getChatList(input: GetChatListRequest) {}
+	async getChatList(input: GetChatListRequest) {
+		return {
+			data: [],
+		} satisfies DataAdapterResponse<ChatType[]>;
+	}
 
 	async getChat(input: GetChatRequest) {}
 

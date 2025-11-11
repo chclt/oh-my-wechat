@@ -5,11 +5,13 @@ import {
 } from "@/components/central-icon.tsx";
 import Image from "@/components/image.tsx";
 import Link from "@/components/link.tsx";
+import { Button } from "@/components/ui/button";
 import { createFileRoute } from "@tanstack/react-router";
 import { ErrorBoundary } from "react-error-boundary";
 import Configurer from "./-components/Configurer";
 import ConfigurerErrorFallback from "./-components/ConfigurerErrorFallback";
 import logo from "/images/logo.svg?url";
+import DemoDataConfigurer from "./-components/DemoDataConfigurer";
 
 export const Route = createFileRoute("/")({
 	component: RouteComponent,
@@ -30,6 +32,13 @@ function RouteComponent() {
 					/>
 
 					<Configurer className="mt-5 w-full" />
+
+					<p className={"mt-7 flex items-center text-sm text-muted-foreground"}>
+						还没有准备好备份文件？
+						<Button asChild variant="link" className="ml-1 p-0 text-inherit">
+							<DemoDataConfigurer>使用演示数据先体验。</DemoDataConfigurer>
+						</Button>
+					</p>
 
 					<p className={"mt-7 flex items-center text-sm text-muted-foreground"}>
 						<span
