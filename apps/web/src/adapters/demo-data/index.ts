@@ -3,12 +3,18 @@ import {
 	user_0,
 	UserList,
 } from "@/adapters/demo-data/dataset/user.ts";
-import type { AccountType, ChatType, ContactType, UserType } from "@/schema";
+import type {
+	AccountType,
+	ChatType,
+	ContactType,
+	MessageType,
+	UserType,
+} from "@/schema";
 import {
 	DataAdapter,
+	DataAdapterCursorPagination,
 	DataAdapterResponse,
 	GetAttachRequest,
-	GetChatListRequest,
 	GetChatRequest,
 	GetGreetingMessageListRequest,
 	GetImageRequest,
@@ -19,6 +25,8 @@ import {
 	GetVideoRequest,
 	GetVoiceRequest,
 } from "../adapter.ts";
+import { ChatList } from "./dataset/chat.ts";
+import { user_1_message } from "./dataset/message.ts";
 
 export default class DemoDataAdapter implements DataAdapter {
 	constructor() {}
@@ -57,15 +65,24 @@ export default class DemoDataAdapter implements DataAdapter {
 		} satisfies DataAdapterResponse<ContactType[]>;
 	}
 
-	async getChatList(input: GetChatListRequest) {
+	async getChatList() {
 		return {
-			data: [],
+			data: ChatList,
 		} satisfies DataAdapterResponse<ChatType[]>;
 	}
 
 	async getChat(input: GetChatRequest) {}
 
-	async getMessageList(input: GetMessageListRequest) {}
+	async getMessageList(input: GetMessageListRequest) {
+		return {
+			data: user_1_message,
+			meta: {
+				cursor: undefined,
+				previous_cursor: undefined,
+				next_cursor: undefined,
+			},
+		} satisfies DataAdapterCursorPagination<MessageType[]>;
+	}
 
 	async getGreetingMessageList(input: GetGreetingMessageListRequest) {}
 
