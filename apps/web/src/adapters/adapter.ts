@@ -1,18 +1,19 @@
+import type { RecordType } from "@/components/record/record";
 import type {
 	AccountType,
 	AppMessageTypeEnum,
+	ChatType,
+	ContactType,
 	FileInfo,
-	MessageTypeEnum,
 	ImageInfo,
+	MessageType,
+	MessageTypeEnum,
 	UserType,
+	VerityMessageType,
 	VideoInfo,
 	VoiceInfo,
-	ContactType,
-	VerityMessageType,
 } from "@/schema";
-import type { ChatType, MessageType } from "@/schema";
 import type { ChatStatistics } from "./ios-backup/controllers/statistic";
-import type { RecordType } from "@/components/record/record";
 
 export interface GetUserRequest {
 	accountId: string;
