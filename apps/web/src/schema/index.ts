@@ -80,12 +80,30 @@ export type ImageInfo = {
 	file_size?: number;
 }[];
 
+export type ImageInfoNext = Partial<
+	Record<
+		"regular" | "thumbnail",
+		{
+			src: string;
+			width?: number;
+			height?: number;
+		}
+	>
+>;
+
 export interface VideoInfo {
 	src?: string;
 	poster: string;
 	poster_width?: number;
 	poster_height?: number;
 	file_size?: number;
+}
+
+export interface VideoInfoNext {
+	src: string;
+	width?: number;
+	height?: number;
+	poster?: ImageInfoNext[keyof ImageInfoNext];
 }
 
 export interface VoiceInfo {
