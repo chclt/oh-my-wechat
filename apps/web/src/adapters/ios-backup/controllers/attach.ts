@@ -1,8 +1,8 @@
+import { DataAdapterResponse, GetAttachRequest } from "@/adapters/adapter";
 import type { FileInfo } from "@/schema";
 import CryptoJS from "crypto-js";
-import { getFilesFromManifast } from "../utils";
-import { DataAdapterResponse, GetAttachRequest } from "@/adapters/adapter";
 import { WCDatabases } from "../types";
+import { getFilesFromManifast } from "../utils";
 
 export type GetInput = [
 	GetAttachRequest,

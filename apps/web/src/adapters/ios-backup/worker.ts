@@ -1,25 +1,28 @@
+import type { AccountType, UserType } from "@/schema";
+import * as Comlink from "comlink";
+import CryptoJS from "crypto-js";
+import { drizzle } from "drizzle-orm/sql-js";
 import initSqlJs from "sql.js";
 import sqliteUrl from "sql.js/dist/sql-wasm.wasm?url";
-import CryptoJS from "crypto-js";
-import type { AccountType, UserType } from "@/schema";
+import type { DataAdapterResponse } from "../adapter";
+import * as AttachController from "./controllers/attach";
+import * as ChatController from "./controllers/chat";
+import * as ImageController from "./controllers/image";
+import * as MessageController from "./controllers/message";
+import * as NoteMessageFileController from "./controllers/note-message-file";
+import * as NoteMessageImageController from "./controllers/note-message-image";
+import * as NoteMessageVideoController from "./controllers/note-message-video";
+import * as StatisticController from "./controllers/statistic";
+import * as UserController from "./controllers/user.ts";
+import * as VideoController from "./controllers/video";
+import * as VoiceController from "./controllers/voice";
+import type { WCDatabaseNames, WCDatabases } from "./types";
 import {
 	getFileFromDirectory,
 	getFilesFromManifast,
 	parseLocalInfo,
 	parseUserFromMmsetting,
 } from "./utils";
-import * as ChatController from "./controllers/chat";
-import * as UserController from "./controllers/user.ts";
-import * as MessageController from "./controllers/message";
-import * as ImageController from "./controllers/image";
-import * as VideoController from "./controllers/video";
-import * as VoiceController from "./controllers/voice";
-import * as AttachController from "./controllers/attach";
-import * as StatisticController from "./controllers/statistic";
-import * as Comlink from "comlink";
-import type { DataAdapterResponse } from "../adapter";
-import type { WCDatabaseNames, WCDatabases } from "./types";
-import { drizzle } from "drizzle-orm/sql-js";
 
 import { Buffer } from "buffer";
 globalThis.Buffer = Buffer;
@@ -88,6 +91,18 @@ export interface AdapterWorkerType {
 	getAttach: (
 		controllerInput: AttachController.GetInput[0],
 	) => AttachController.GetOutput;
+
+	getNoteMessageImage: (
+		controllerInput: NoteMessageImageController.GetInput[0],
+	) => NoteMessageImageController.GetOutput;
+
+	getNoteMessageVideo: (
+		controllerInput: NoteMessageVideoController.GetInput[0],
+	) => NoteMessageVideoController.GetOutput;
+
+	getNoteMessageFile: (
+		controllerInput: NoteMessageFileController.GetInput[0],
+	) => NoteMessageFileController.GetOutput;
 
 	getStatistic: (
 		controllerInput: StatisticController.GetInput[0],
@@ -339,6 +354,27 @@ export const adapterWorker: AdapterWorkerType = {
 
 	getAttach: async (controllerInput) => {
 		return await AttachController.get(controllerInput, {
+			directory: adapterWorker._getStoreItem("directory"),
+			databases: adapterWorker._getStoreItem("databases"),
+		});
+	},
+
+	getNoteMessageImage: async (controllerInput) => {
+		return await NoteMessageImageController.get(controllerInput, {
+			directory: adapterWorker._getStoreItem("directory"),
+			databases: adapterWorker._getStoreItem("databases"),
+		});
+	},
+
+	getNoteMessageVideo: async (controllerInput) => {
+		return await NoteMessageVideoController.get(controllerInput, {
+			directory: adapterWorker._getStoreItem("directory"),
+			databases: adapterWorker._getStoreItem("databases"),
+		});
+	},
+
+	getNoteMessageFile: async (controllerInput) => {
+		return await NoteMessageFileController.get(controllerInput, {
 			directory: adapterWorker._getStoreItem("directory"),
 			databases: adapterWorker._getStoreItem("databases"),
 		});

@@ -1,18 +1,21 @@
+import type { RecordType } from "@/components/record/record";
 import type {
 	AccountType,
 	AppMessageTypeEnum,
-	FileInfo,
-	MessageTypeEnum,
-	ImageInfo,
-	UserType,
-	VideoInfo,
-	VoiceInfo,
+	ChatType,
 	ContactType,
+	FileInfo,
+	ImageInfo,
+	ImageInfoNext,
+	MessageType,
+	MessageTypeEnum,
+	UserType,
 	VerityMessageType,
+	VideoInfo,
+	VideoInfoNext,
+	VoiceInfo,
 } from "@/schema";
-import type { ChatType, MessageType } from "@/schema";
 import type { ChatStatistics } from "./ios-backup/controllers/statistic";
-import type { RecordType } from "@/components/record/record";
 
 export interface GetUserRequest {
 	accountId: string;
@@ -68,6 +71,24 @@ export interface GetAttachRequest {
 	message: MessageType;
 	record?: RecordType;
 	type?: string;
+}
+
+export interface GetNoteMessageImageRequest {
+	accountId: string;
+	message: MessageType;
+	record: RecordType;
+}
+
+export interface GetNoteMessageVideoRequest {
+	accountId: string;
+	message: MessageType;
+	record: RecordType;
+}
+
+export interface GetNoteMessageFileRequest {
+	accountId: string;
+	message: MessageType;
+	record: RecordType;
 }
 
 export interface GetStatisticRequest {
@@ -128,6 +149,18 @@ export interface DataAdapter {
 	getAttach: (
 		requestData: GetAttachRequest,
 	) => Promise<DataAdapterResponse<FileInfo[]>>;
+
+	getNoteMessageImage: (
+		requestData: GetNoteMessageImageRequest,
+	) => Promise<DataAdapterResponse<ImageInfoNext>>;
+
+	getNoteMessageVideo: (
+		requestData: GetNoteMessageVideoRequest,
+	) => Promise<DataAdapterResponse<VideoInfoNext>>;
+
+	getNoteMessageFile: (
+		requestData: GetNoteMessageFileRequest,
+	) => Promise<DataAdapterResponse<FileInfo | undefined>>;
 
 	getStatistic: (
 		requestData: GetStatisticRequest,

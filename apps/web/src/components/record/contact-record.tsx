@@ -7,8 +7,8 @@ import {
 } from "@/components/ui/card.tsx";
 import type { MessageType, RecordTypeEnum } from "@/schema";
 import { XMLParser } from "fast-xml-parser";
-import type { RecordType } from "./record";
 import type React from "react";
+import type { RecordType } from "./record";
 
 interface ContactRecordProps extends React.HTMLAttributes<HTMLDivElement> {
 	message: MessageType;
@@ -32,7 +32,6 @@ export default function ContactRecord({
 		ignoreAttributes: false,
 	});
 	const dataEntity = xmlParser.parse(record.datadesc);
-	console.log(dataEntity);
 
 	if (dataEntity.msg["@_certflag"] === "0") {
 		return <p>[名片] {dataEntity.msg["@_nickname"]}</p>;
