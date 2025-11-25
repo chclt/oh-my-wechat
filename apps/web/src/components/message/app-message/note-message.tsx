@@ -1,9 +1,6 @@
 import MessageInlineWrapper from "@/components/message-inline-wrapper";
 import type { AppMessageProps } from "@/components/message/app-message.tsx";
-import NoteDocument, {
-	NoteInfoEntity,
-} from "@/components/note-document/note-document";
-import type { RecordType } from "@/components/record/record.tsx";
+import NoteDocument from "@/components/note-document/note-document";
 import {
 	Dialog,
 	DialogContent,
@@ -15,7 +12,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { AttacheSuspenseQueryOptions } from "@/lib/fetchers";
 import { cn, decodeUnicodeReferences } from "@/lib/utils.ts";
-import type { AppMessageTypeEnum } from "@/schema";
+import { AppMessageTypeEnum, NoteEntity } from "@/schema";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { XMLParser } from "fast-xml-parser";
@@ -47,12 +44,6 @@ export interface NoteMessageEntity {
  * 一个笔记是一个 htm 文件，文件内除了文本，还包括 <object> 标签，
  * 标签内是图片、视频、音频等富媒体内容，
  */
-interface NoteRecordEntity extends RecordType {
-	"@_dataid": string;
-	"@_datatype": number;
-	"@_htmlid": "WeNoteHtmlFile" | string;
-	datafmt: string;
-}
 
 type NoteMessageProps = AppMessageProps<NoteMessageEntity>;
 
@@ -90,9 +81,7 @@ function NoteMessageDefault({
 		decodeUnicodeReferences(
 			message.message_entity.msg.appmsg.recorditem.replace(/&#x20;/g, " "), // 有些时候标签和属性之间的空格编码过
 		),
-	) as {
-		recordinfo: NoteInfoEntity;
-	};
+	) as NoteEntity;
 
 	const htmlFile = noteContent.recordinfo.datalist.dataitem.find(
 		(item) => item["@_htmlid"] === "WeNoteHtmlFile",
@@ -152,7 +141,7 @@ function NoteMessageDefault({
 							<NoteDocument
 								message={message}
 								docUrl={files[0].src}
-								noteInfo={noteContent.recordinfo}
+								noteEntity={noteContent}
 								className="w-full max-w-full"
 							/>
 						),

@@ -1,19 +1,19 @@
-import type { TextMessageEntity } from "@/components/message/text-message.tsx";
-import type { ImageMessageEntity } from "@/components/message/image-message.tsx";
-import type { VoiceMessageEntity } from "@/components/message/voice-message.tsx";
-import type { MailMessageEntity } from "@/components/message/mail-message.tsx";
-import type { VerityMessageEntity } from "@/components/message/verify-message.tsx";
-import type { ContactMessageEntity } from "@/components/message/contact-message.tsx";
-import type { VideoMessageEntity } from "@/components/message/video-message.tsx";
-import type { StickerMessageEntity } from "@/components/message/sticker-message.tsx";
-import type { LocationMessageEntity } from "@/components/message/location-message.tsx";
 import type { AppMessageEntity } from "@/components/message/app-message.tsx";
-import type { VoipMessageEntity } from "@/components/message/voip-message.tsx";
-import type { MicroVideoMessageEntity } from "@/components/message/micro-video-message.tsx";
 import type { ChatroomVoipMessageEntity } from "@/components/message/chatroom-voip-message.tsx";
-import type { WeComContactMessageEntity } from "@/components/message/wecom-contact-message.tsx";
-import type { SystemMessageEntity } from "@/components/message/system-message.tsx";
+import type { ContactMessageEntity } from "@/components/message/contact-message.tsx";
+import type { ImageMessageEntity } from "@/components/message/image-message.tsx";
+import type { LocationMessageEntity } from "@/components/message/location-message.tsx";
+import type { MailMessageEntity } from "@/components/message/mail-message.tsx";
+import type { MicroVideoMessageEntity } from "@/components/message/micro-video-message.tsx";
+import type { StickerMessageEntity } from "@/components/message/sticker-message.tsx";
 import type { SystemExtendedMessageEntity } from "@/components/message/system-extended-message.tsx";
+import type { SystemMessageEntity } from "@/components/message/system-message.tsx";
+import type { TextMessageEntity } from "@/components/message/text-message.tsx";
+import type { VerityMessageEntity } from "@/components/message/verify-message.tsx";
+import type { VideoMessageEntity } from "@/components/message/video-message.tsx";
+import type { VoiceMessageEntity } from "@/components/message/voice-message.tsx";
+import type { VoipMessageEntity } from "@/components/message/voip-message.tsx";
+import type { WeComContactMessageEntity } from "@/components/message/wecom-contact-message.tsx";
 import type { ChatType, UserType } from "@/schema/index.ts";
 
 export enum MessageDirection {
@@ -76,25 +76,6 @@ export enum AppMessageTypeEnum {
 	TRANSFER = 2000, // 转账
 	RED_ENVELOPE = 2001, // 红包、AA 收款
 	RED_ENVELOPE_COVER = 2003, // 红包封面
-}
-
-export enum RecordTypeEnum {
-	TEXT = 1,
-	IMAGE = 2,
-	AUDIO = 3,
-	VIDEO = 4,
-	LINK = 5,
-	LOCATION = 6,
-	ATTACH = 8,
-	CONTACT = 16,
-	FORWARD_MESSAGE = 17,
-	MINIAPP = 19,
-	NOTE = 21,
-	CHANNEL_VIDEO = 22,
-	LIVE = 23,
-	CHANNEL = 26,
-	MUSIC = 29,
-	TING = 32,
 }
 
 export interface BasicMessageType<
