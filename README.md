@@ -12,6 +12,7 @@
 - [ ] OhMyWeChat 仍处于测试阶段，欢迎关注，也感谢宽容。
 
 ## 特性
+
 - （几乎）完整的消息类型支持
 
     - [x] 文本、微信表情、~~图片~~（支持有限，详见[已知问题](#已知问题)）、视频、语音、回复消息
@@ -28,6 +29,8 @@
     - [x] 等等近 50 种消息类型……
   
 - 熟悉但焕然一新的 UI 界面
+
+  ![Oh My WeChat Preview](https://github.com/user-attachments/assets/6b3dac37-44eb-4013-8c2d-4311a73daa52)
 
   ![Oh My WeChat Components](https://github.com/user-attachments/assets/e46e4db9-5cd3-4a5a-952e-320044b8630e)
 

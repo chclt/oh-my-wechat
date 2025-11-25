@@ -1,23 +1,26 @@
-import * as Comlink from "comlink";
-import AdapterWorker from "./worker.ts?worker";
-import type { AdapterWorkerType } from "./worker.ts";
 import type { ChatType, UserType } from "@/schema";
+import * as Comlink from "comlink";
 import {
 	DataAdapter,
 	DataAdapterResponse,
+	GetAccountContactListRequest,
 	GetAttachRequest,
 	GetChatListRequest,
 	GetChatRequest,
-	GetAccountContactListRequest,
+	GetGreetingMessageListRequest,
 	GetImageRequest,
 	GetMessageListRequest,
+	GetNoteMessageFileRequest,
+	GetNoteMessageImageRequest,
+	GetNoteMessageVideoRequest,
 	GetStatisticRequest,
 	GetUserListRequest,
 	GetUserRequest,
 	GetVideoRequest,
 	GetVoiceRequest,
-	GetGreetingMessageListRequest,
 } from "../adapter.ts";
+import type { AdapterWorkerType } from "./worker.ts";
+import AdapterWorker from "./worker.ts?worker";
 
 export default class IosBackupAdapter implements DataAdapter {
 	private _directory: FileSystemDirectoryHandle | FileList | undefined;
@@ -154,6 +157,27 @@ export default class IosBackupAdapter implements DataAdapter {
 		return withCommonWrapper(
 			() => this._workerAdapter.getAttach(input),
 			"getAttach",
+		);
+	}
+
+	async getNoteMessageImage(input: GetNoteMessageImageRequest) {
+		return withCommonWrapper(
+			() => this._workerAdapter.getNoteMessageImage(input),
+			"getNoteMessageImage",
+		);
+	}
+
+	async getNoteMessageVideo(input: GetNoteMessageVideoRequest) {
+		return withCommonWrapper(
+			() => this._workerAdapter.getNoteMessageVideo(input),
+			"getNoteMessageVideo",
+		);
+	}
+
+	async getNoteMessageFile(input: GetNoteMessageFileRequest) {
+		return withCommonWrapper(
+			() => this._workerAdapter.getNoteMessageFile(input),
+			"getNoteMessageFile",
 		);
 	}
 
