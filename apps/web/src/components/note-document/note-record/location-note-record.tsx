@@ -1,25 +1,9 @@
 import { LocationIcon } from "@/components/icon";
 import { cn } from "@/lib/utils";
-import { RecordTypeEnum } from "@/schema";
-
-export interface LocationNoteRecordEntity {
-	"@_datatype": RecordTypeEnum.LOCATION;
-	"@_dataid": string;
-	"@_htmlid": string;
-
-	locitem: {
-		poiname: string;
-		label: string;
-		isfrompoilist: number;
-		poiid: string;
-		lng: number;
-		lat: number;
-		scale: number;
-	};
-}
+import { NoteLocationRecordEntity } from "@/schema";
 
 interface LocationNoteRecordProps extends React.HTMLAttributes<HTMLElement> {
-	recordEntity: LocationNoteRecordEntity;
+	recordEntity: NoteLocationRecordEntity;
 }
 
 export default function LocationNoteRecord({

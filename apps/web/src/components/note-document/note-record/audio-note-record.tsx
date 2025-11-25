@@ -1,24 +1,10 @@
 import type { NoteMessageEntity } from "@/components/message/app-message/note-message";
 import { cn } from "@/lib/utils";
-import { AppMessageType, RecordTypeEnum } from "@/schema";
-
-export interface AudioNoteRecordEntity {
-	"@_datatype": RecordTypeEnum.AUDIO;
-	"@_dataid": string;
-	"@_htmlid": string;
-
-	cdndataurl: string;
-	cdndatakey: string;
-	fullmd5: string;
-	datafmt: "speex"; // 暂时只见过 speex 格式
-	datasize: number;
-	duration: number;
-	head256md5: string;
-}
+import { AppMessageType, NoteAudioRecordEntity } from "@/schema";
 
 interface AudioNoteRecordProps extends React.HTMLAttributes<HTMLElement> {
 	message: AppMessageType<NoteMessageEntity>;
-	recordEntity: AudioNoteRecordEntity;
+	recordEntity: NoteAudioRecordEntity;
 }
 
 export default function AudioNoteRecord({

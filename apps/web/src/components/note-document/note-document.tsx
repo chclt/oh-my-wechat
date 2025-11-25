@@ -1,53 +1,32 @@
 import { cn } from "@/lib/utils";
-import { AppMessageType, RecordTypeEnum } from "@/schema";
+import {
+	AppMessageType,
+	NoteAttachRecordEntity,
+	NoteAudioRecordEntity,
+	NoteEntity,
+	NoteImageRecordEntity,
+	NoteLocationRecordEntity,
+	NoteVideoRecordEntity,
+	RecordTypeEnum,
+} from "@/schema";
 import { useQuery } from "@tanstack/react-query";
 import parse, { DOMNode, domToReact, Element } from "html-react-parser";
 import { NoteMessageEntity } from "../message/app-message/note-message";
-import AttatchNoteRecord, {
-	AttatchNoteRecordEntity,
-} from "./note-record/attatch-note-record";
-import AudioNoteRecord, {
-	AudioNoteRecordEntity,
-} from "./note-record/audio-note-record";
-import ImageNoteRecord, {
-	ImageNoteRecordEntity,
-} from "./note-record/image-note-record";
-import LocationNoteRecord, {
-	LocationNoteRecordEntity,
-} from "./note-record/location-note-record";
-import VideoNoteRecord, {
-	VideoNoteRecordEntity,
-} from "./note-record/video-note-record";
-
-export interface NoteInfoEntity {
-	desc: string;
-	editTime: number;
-	editusr: string;
-	noteinfo: {
-		noteauthor: string;
-		noteeditor: string;
-	};
-	datalist: {
-		"@_count": number;
-		dataitem: (
-			| ImageNoteRecordEntity
-			| AudioNoteRecordEntity
-			| VideoNoteRecordEntity
-			| LocationNoteRecordEntity
-			| AttatchNoteRecordEntity
-		)[];
-	};
-}
+import AttatchNoteRecord from "./note-record/attatch-note-record";
+import AudioNoteRecord from "./note-record/audio-note-record";
+import ImageNoteRecord from "./note-record/image-note-record";
+import LocationNoteRecord from "./note-record/location-note-record";
+import VideoNoteRecord from "./note-record/video-note-record";
 
 interface NoteDocumentProps extends React.HTMLAttributes<HTMLElement> {
 	docUrl: string;
-	noteInfo: NoteInfoEntity;
+	noteEntity: NoteEntity;
 	message: AppMessageType<NoteMessageEntity>;
 }
 
 export default function NoteDocument({
 	docUrl,
-	noteInfo,
+	noteEntity,
 	message,
 	className,
 	...props
@@ -75,7 +54,7 @@ export default function NoteDocument({
 						);
 					} else if (domNode instanceof Element && domNode.name === "object") {
 						// Object 上标记的 data-type 不是 Record 的类型， dataitem 里面的才是正确的，原因未知
-						const recordInfo = noteInfo.datalist.dataitem.find(
+						const recordInfo = noteEntity.recordinfo.datalist.dataitem.find(
 							(item) => item["@_htmlid"] === domNode.attribs["id"],
 						);
 
@@ -83,7 +62,7 @@ export default function NoteDocument({
 							return <>加载失败</>;
 						}
 
-						const recordEntity = noteInfo.datalist.dataitem.find(
+						const recordEntity = noteEntity.recordinfo.datalist.dataitem.find(
 							(item) => item["@_htmlid"] === domNode.attribs["id"],
 						);
 
@@ -95,7 +74,7 @@ export default function NoteDocument({
 							return (
 								<ImageNoteRecord
 									message={message}
-									recordEntity={recordEntity as ImageNoteRecordEntity}
+									recordEntity={recordEntity as NoteImageRecordEntity}
 									className="not-prose my-4"
 								/>
 							);
@@ -103,7 +82,7 @@ export default function NoteDocument({
 							return (
 								<AudioNoteRecord
 									message={message}
-									recordEntity={recordEntity as AudioNoteRecordEntity}
+									recordEntity={recordEntity as NoteAudioRecordEntity}
 									className="not-prose my-4"
 								/>
 							);
@@ -111,7 +90,7 @@ export default function NoteDocument({
 							return (
 								<AttatchNoteRecord
 									message={message}
-									recordEntity={recordEntity as AttatchNoteRecordEntity}
+									recordEntity={recordEntity as NoteAttachRecordEntity}
 									className="not-prose my-4"
 								/>
 							);
@@ -119,14 +98,14 @@ export default function NoteDocument({
 							return (
 								<VideoNoteRecord
 									message={message}
-									recordEntity={recordEntity as VideoNoteRecordEntity}
+									recordEntity={recordEntity as NoteVideoRecordEntity}
 									className="not-prose my-4"
 								/>
 							);
 						} else if (recordInfo["@_datatype"] === RecordTypeEnum.LOCATION) {
 							return (
 								<LocationNoteRecord
-									recordEntity={recordEntity as LocationNoteRecordEntity}
+									recordEntity={recordEntity as NoteLocationRecordEntity}
 									className="not-prose my-4"
 								/>
 							);
