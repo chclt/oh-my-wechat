@@ -22,6 +22,7 @@ export async function get(...inputs: GetInput): GetOutput {
 	const files = await getFilesFromManifast(
 		db,
 		directory,
+		// @ts-expect-error FIXME
 		`%/OpenData/${CryptoJS.MD5(message.chat_id).toString()}/${message.local_id}/${record["@_dataid"]}.${record["datafmt"]}`,
 	);
 
