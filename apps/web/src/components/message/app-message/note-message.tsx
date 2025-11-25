@@ -100,8 +100,10 @@ function NoteMessageDefault({
 	return (
 		<Dialog>
 			<DialogTrigger asChild>
-				<div
+				<button
+					type="button"
 					className={cn(
+						"appearance-none text-start cursor-pointer",
 						"relative max-w-[20em] flex flex-col rounded-lg bg-white",
 					)}
 					{...props}
@@ -121,7 +123,7 @@ function NoteMessageDefault({
 					>
 						笔记
 					</div>
-				</div>
+				</button>
 			</DialogTrigger>
 
 			<DialogContent
