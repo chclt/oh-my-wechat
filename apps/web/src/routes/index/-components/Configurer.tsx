@@ -1,24 +1,25 @@
-import { useNavigate } from "@tanstack/react-router";
 import { ChevronRightSmallLine } from "@/components/central-icon.tsx";
 import Image from "@/components/image.tsx";
 import { Button, buttonVariants } from "@/components/ui/button.tsx";
-import { Label } from "@/components/ui/label.tsx";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group.tsx";
-import { cn } from "@/lib/utils.ts";
-import type React from "react";
-import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
+// import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group.tsx";
 import IosBackupAdapter from "@/adapters/ios-backup";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { AccountListSuspenseQueryOptions } from "@/lib/fetchers/account";
-import queryClient from "@/lib/query-client";
-import { setDataAdapter } from "@/lib/data-adapter.ts";
 import {
 	LoadAccountDatabaseMutationOptions,
 	LoadDirectoryMutationOptions,
 } from "@/adapters/ios-backup/fetchers";
-import type { AccountType } from "@/schema";
 import { LoaderIcon } from "@/components/icon.tsx";
+import { RadioGroupItem } from "@/components/ui/radio-group";
+import { setDataAdapter } from "@/lib/data-adapter.ts";
+import { AccountListSuspenseQueryOptions } from "@/lib/fetchers/account";
+import queryClient from "@/lib/query-client";
+import { cn } from "@/lib/utils.ts";
+import type { AccountType } from "@/schema";
+import { RadioGroup } from "@base-ui-components/react";
 import { useToggle } from "@mantine/hooks";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import type React from "react";
+import { useEffect, useRef, useState } from "react";
 
 export default function Configurer(
 	props: React.HTMLAttributes<HTMLDivElement>,
@@ -185,31 +186,27 @@ export default function Configurer(
 
 					<RadioGroup
 						className={"flex flex-wrap gap-2.5"}
-						onValueChange={setSelectedAccountId}
+						onValueChange={(value) => setSelectedAccountId(value as string)}
 					>
 						{accountList.map((account) => (
-							<div
+							<label
 								key={account.id}
 								className="grow basis-40 relative after:content-[''] after:block after:w-full after:pb-[62.5%]"
 							>
 								<RadioGroupItem
 									value={account.id}
-									id={account.id}
 									className={
-										"peer z-20 absolute bottom-2 right-2 data-[state=checked]:border-foreground"
+										"peer z-20 absolute bottom-2 right-2 data-[checked]:border-foreground"
 									}
 								/>
-								<Label
-									htmlFor={account.id}
+								<div
 									className={
-										"z-10 absolute size-full pt-4 pb-3 px-5 flex flex-col justify-center items-center gap-2.5 hover:bg-accent rounded-xl border border-input peer-data-[state=checked]:border-primary"
+										"z-10 absolute size-full pt-4 pb-3 px-5 flex flex-col justify-center items-center gap-2.5 hover:bg-accent rounded-xl border border-input peer-data-[checked]:border-primary"
 									}
 								>
 									<div
 										className={
 											"relative min-w-11 w-[27.5%] after:content-[''] after:block after:w-full after:pb-[100%]"
-
-											// className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-transparent p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
 										}
 									>
 										<Image
@@ -221,8 +218,8 @@ export default function Configurer(
 										/>
 									</div>
 									{account.username}
-								</Label>
-							</div>
+								</div>
+							</label>
 						))}
 					</RadioGroup>
 					<Button

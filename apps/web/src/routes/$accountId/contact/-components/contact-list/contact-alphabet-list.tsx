@@ -1,6 +1,9 @@
 import { cn } from "@/lib/utils";
+import {
+	Radio as RadioBase,
+	RadioGroup as RadioGroupBase,
+} from "@base-ui-components/react";
 import { useScrollSpy } from "@mantine/hooks";
-import * as RadioGroup from "@radix-ui/react-radio-group";
 import ContactItem from "./contact-item";
 import { UseContactAlphabetListReturnValue } from "./use-contact-alphabet-list";
 
@@ -60,25 +63,25 @@ export function AlphabetNavigator({
 
 	return (
 		<div className={cn("flex", className)} {...props}>
-			<RadioGroup.Root
+			<RadioGroupBase
 				value={alphabetListSpy.active.toString()}
 				className="w-5.5 flex flex-col justify-center items-center text-xs font-medium text-muted-foreground"
 			>
 				{alphabetListSpy.data.map((letter, index) => (
-					<RadioGroup.Item
+					<RadioBase.Root
 						key={letter.id}
 						value={index.toString()}
 						className={cn(
-							"w-full h-4 flex items-center justify-center cursor-pointer data-[state=checked]:text-[#03C160]",
+							"w-full h-4 flex items-center justify-center cursor-pointer data-[checked]:text-[#03C160]",
 						)}
 						onClick={() => {
 							letter.getNode().scrollIntoView();
 						}}
 					>
 						{letter.value}
-					</RadioGroup.Item>
+					</RadioBase.Root>
 				))}
-			</RadioGroup.Root>
+			</RadioGroupBase>
 		</div>
 	);
 }
