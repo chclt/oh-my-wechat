@@ -148,7 +148,7 @@ export interface DataAdapter {
 
 	getAttach: (
 		requestData: GetAttachRequest,
-	) => Promise<DataAdapterResponse<FileInfo[]>>;
+	) => Promise<DataAdapterResponse<FileInfo | undefined>>;
 
 	getNoteMessageImage: (
 		requestData: GetNoteMessageImageRequest,

@@ -1,3 +1,4 @@
+import { LoaderIcon } from "@/components/icon";
 import MessageInlineWrapper from "@/components/message-inline-wrapper";
 import type { AppMessageProps } from "@/components/message/app-message.tsx";
 import NoteDocument from "@/components/note-document/note-document";
@@ -10,13 +11,14 @@ import {
 	DialogTrigger,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { AttacheSuspenseQueryOptions } from "@/lib/fetchers";
+import { AttachQueryOptions } from "@/lib/fetchers";
+import queryClient from "@/lib/query-client.ts";
 import { cn, decodeUnicodeReferences } from "@/lib/utils.ts";
 import { AppMessageTypeEnum, NoteEntity } from "@/schema";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { XMLParser } from "fast-xml-parser";
-import { useMemo } from "react";
+import { Suspense, useMemo, useState } from "react";
 
 export interface NoteMessageEntity {
 	type: AppMessageTypeEnum.NOTE;
@@ -87,18 +89,56 @@ function NoteMessageDefault({
 		(item) => item["@_htmlid"] === "WeNoteHtmlFile",
 	);
 
-	const { data: files } = useSuspenseQuery({
-		...AttacheSuspenseQueryOptions({
+	// TODO: 新的获取笔记内容的方法，而不是拿 ObjectURL 再 fetch
+	const NoteDocumentQueryOptions = {
+		enabled: false,
+		...AttachQueryOptions({
 			message,
 			record: htmlFile,
 			type: "text/html",
 		}),
-	});
+	};
+	const {
+		data: noteDocumentFile,
+		isPending: isNoteDocumentPending,
+		isLoading: isNoteDocumentLoading,
+	} = useQuery(NoteDocumentQueryOptions);
+	const isNoteDocumentNotExists =
+		!isNoteDocumentPending && !noteDocumentFile ? true : undefined;
+	const [isNoteDocumentDialogOpen, setIsNoteDocumentDialogOpen] =
+		useState(false);
+	const handleOpenNoteDocument = () => {
+		queryClient
+			.ensureQueryData(NoteDocumentQueryOptions)
+			.then((noteDocumentFile) => {
+				if (noteDocumentFile) {
+					setIsNoteDocumentDialogOpen(true);
+				}
+			});
+	};
 
-	if (files.length === 0) return <div {...props}>没有找到对应的文件</div>;
+	const renderNoteDocument = useMemo(() => {
+		if (!noteDocumentFile) return null;
+		return (
+			<NoteDocument
+				message={message}
+				docUrl={noteDocumentFile.src}
+				noteEntity={noteContent}
+			/>
+		);
+	}, [noteDocumentFile]);
 
 	return (
-		<Dialog>
+		<Dialog
+			open={isNoteDocumentDialogOpen}
+			onOpenChange={(open) => {
+				if (open) {
+					handleOpenNoteDocument();
+				} else {
+					setIsNoteDocumentDialogOpen(false);
+				}
+			}}
+		>
 			<DialogTrigger asChild>
 				<button
 					type="button"
@@ -118,14 +158,30 @@ function NoteMessageDefault({
 
 					<div
 						className={
-							"px-3 py-1.5 text-sm leading-normal text-neutral-500 border-t border-neutral-200"
+							"px-3 py-1.5 text-sm leading-normal text-muted-foreground border-t"
 						}
 					>
-						笔记
+						<div className="inline">
+							<span>笔记</span>
+						</div>
+
+						{isNoteDocumentLoading ? (
+							<div className="float-end size-5 relative">
+								<LoaderIcon
+									aria-label="加载中"
+									className="absolute inset-0.5 size-4 text-muted-foreground/80 animate-spin"
+								/>
+							</div>
+						) : (
+							isNoteDocumentNotExists && (
+								<div className="float-end text-destructive-foreground/60">
+									没有找到文件
+								</div>
+							)
+						)}
 					</div>
 				</button>
 			</DialogTrigger>
-
 			<DialogContent
 				showCloseButton={false}
 				className="block p-0 gap-0 overflow-hidden h-[calc(100dvh-6rem)]"
@@ -138,17 +194,7 @@ function NoteMessageDefault({
 						</VisuallyHidden>
 					</DialogHeader>
 
-					{useMemo(
-						() => (
-							<NoteDocument
-								message={message}
-								docUrl={files[0].src}
-								noteEntity={noteContent}
-								className="w-full max-w-full"
-							/>
-						),
-						[files],
-					)}
+					<Suspense>{renderNoteDocument}</Suspense>
 				</ScrollArea>
 			</DialogContent>
 		</Dialog>

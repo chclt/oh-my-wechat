@@ -1,12 +1,15 @@
 import { FileBendSolid } from "@/components/central-icon.tsx";
 import FileTypeIcon from "@/components/filetype-icon.tsx";
+import { LoaderIcon } from "@/components/icon.tsx";
 import MessageInlineWrapper from "@/components/message-inline-wrapper";
 import type { AppMessageProps } from "@/components/message/app-message.tsx";
-import { getDataAdapter } from "@/lib/data-adapter.ts";
+import FileSizeFormatter from "@/components/ui/file-size-formatter.tsx";
+import { AttachQueryOptions } from "@/lib/fetchers";
+import queryClient from "@/lib/query-client.ts";
 import { cn, decodeUnicodeReferences } from "@/lib/utils.ts";
-import type { AppMessageTypeEnum, FileInfo } from "@/schema";
-import { useMutation } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import type { AppMessageTypeEnum } from "@/schema";
+import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
 
 export interface AttachMessageEntity {
 	type: AppMessageTypeEnum.ATTACH;
@@ -49,46 +52,52 @@ function AttachMessageDefault({
 	message,
 	...props
 }: Omit<AttachMessageProps, "variant">) {
-	const [isAttachmentNotFound, setIsAttachmentNotFound] = useState(false);
+	const AttachmentQueryOptions = {
+		enabled: false,
+		...AttachQueryOptions({
+			message,
+		}),
+	};
+	const {
+		data: attachmentFile,
+		isPending: isAttachmentFilePending,
+		isLoading: isAttachmentFileLoading,
+	} = useQuery(AttachmentQueryOptions);
+	const isAttachmentNotExists =
+		!isAttachmentFilePending && !attachmentFile ? true : undefined;
+	const handleDownloadAttachment = () => {
+		queryClient
+			.ensureQueryData(AttachmentQueryOptions)
+			.then((attachmentFile) => {
+				if (!attachmentFile) return;
 
-	const { mutateAsync: download, data } = useMutation<FileInfo[]>({
-		mutationKey: ["attache", message.chat_id, message.id],
-		mutationFn: () => {
-			return getDataAdapter()
-				.getAttach({ message })
-				.then((res) => res.data);
-		},
-		onSuccess: (data) => {
-			const downlaodLink = document.createElement("a");
-			downlaodLink.href = data[0].src;
-			downlaodLink.download = decodeUnicodeReferences(
-				message.message_entity.msg.appmsg.title,
-			);
-			downlaodLink.click();
-		},
-		onError: () => {
-			setIsAttachmentNotFound(true);
-		},
-	});
+				const downlaodLink = document.createElement("a");
+				downlaodLink.href = attachmentFile.src;
+				downlaodLink.download = decodeUnicodeReferences(
+					message.message_entity.msg.appmsg.title,
+				);
+				downlaodLink.click();
+			});
+	};
 
 	useEffect(() => {
 		return () => {
-			if (data?.length)
-				data.map((file) => {
-					URL.revokeObjectURL(file.src);
-				});
+			if (attachmentFile) {
+				URL.revokeObjectURL(attachmentFile.src);
+			}
 		};
 	});
 
 	return (
-		<div
+		<button
 			className={cn(
-				"file-type-icon_trigger",
+				"file-type-icon_trigger", // TODO: refactor
+				"text-start",
 				"max-w-80 py-2.5 pr-2 pl-4 flex items-start bg-white space-x-2.5 rounded-xl cursor-pointer",
 			)}
 			{...props}
 			onClick={() => {
-				download();
+				handleDownloadAttachment();
 			}}
 		>
 			<div>
@@ -96,30 +105,35 @@ function AttachMessageDefault({
 					{decodeUnicodeReferences(message.message_entity.msg.appmsg.title)}
 				</h4>
 				<small className={"text-neutral-500"}>
-					{(
-						Math.round(
-							((Array.isArray(
+					<FileSizeFormatter
+						bytes={
+							Array.isArray(
 								message.message_entity.msg.appmsg.appattach.totallen,
 							)
 								? message.message_entity.msg.appmsg.appattach.totallen[0]
-								: message.message_entity.msg.appmsg.appattach.totallen) /
-								1024 /
-								1024) *
-								100,
-						) / 100
-					).toFixed(2)}
-					MB
+								: message.message_entity.msg.appmsg.appattach.totallen
+						}
+					/>
+					{isAttachmentFileLoading ? (
+						<span className="ms-2 inline size-4 relative">
+							<LoaderIcon
+								aria-label="加载中"
+								className="absolute inset-0.5 size-3 text-muted-foreground/80 animate-spin"
+							/>
+						</span>
+					) : (
+						isAttachmentNotExists && (
+							<span className="ms-2 text-destructive-foreground">
+								没找到对应文件
+							</span>
+						)
+					)}
 				</small>
-				{isAttachmentNotFound && (
-					<p className="inline ml-2 text-red-500">
-						<small>没找到对应文件</small>
-					</p>
-				)}
 			</div>
 
 			{/*<img src={filetype_any} alt={"文件"} />*/}
 			<FileTypeIcon className="shrink-0" />
-		</div>
+		</button>
 	);
 }
 

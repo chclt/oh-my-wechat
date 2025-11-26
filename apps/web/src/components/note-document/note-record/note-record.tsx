@@ -12,6 +12,7 @@ import {
 	NoteVideoRecordEntity,
 	RecordTypeEnum,
 } from "@/schema";
+import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import AttatchNoteRecord from "./attatch-note-record";
 import AudioNoteRecord from "./audio-note-record";
@@ -49,15 +50,17 @@ export default function NoteRecord({
 				</div>
 			}
 		>
-			<NoteRecordComponent
-				onDoubleClick={() => {
-					if (import.meta.env.DEV) console.log(message);
-				}}
-				message={message}
-				recordEntity={recordEntity}
-				className={className}
-				{...props}
-			/>
+			<Suspense>
+				<NoteRecordComponent
+					onDoubleClick={() => {
+						if (import.meta.env.DEV) console.log(message);
+					}}
+					message={message}
+					recordEntity={recordEntity}
+					className={className}
+					{...props}
+				/>
+			</Suspense>
 		</ErrorBoundary>
 	);
 }

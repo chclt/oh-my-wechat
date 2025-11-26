@@ -2,7 +2,7 @@ import * as AttachController from "@/adapters/ios-backup/controllers/attach";
 import * as ImageController from "@/adapters/ios-backup/controllers/image";
 import * as VideoController from "@/adapters/ios-backup/controllers/video";
 import * as VoiceController from "@/adapters/ios-backup/controllers/voice";
-import type { FileInfo, ImageInfo, VideoInfo, VoiceInfo } from "@/schema";
+import type { ImageInfo, VideoInfo, VoiceInfo } from "@/schema";
 import type { UseSuspenseQueryOptions } from "@tanstack/react-query";
 import { getDataAdapter } from "../data-adapter.ts";
 
@@ -54,19 +54,17 @@ export function VoiceSuspenseQueryOptions(
 	};
 }
 
-// FIXME: Typo error
-export function AttacheSuspenseQueryOptions(
-	requestData: AttachController.GetInput[0],
-): UseSuspenseQueryOptions<FileInfo[]> {
+export function AttachQueryOptions(requestData: AttachController.GetInput[0]) {
 	return {
 		queryKey: [
 			`chat: ${requestData.message.chat_id}`,
 			`message: ${requestData.message.id}`,
-			"attache",
+			`record: ${requestData.record?.["@_dataid"]}`,
+			"attach",
 		],
 		queryFn: () =>
 			getDataAdapter()
 				.getAttach(requestData)
-				.then((res) => res.data),
+				.then((res) => res.data ?? null),
 	};
 }

@@ -8,7 +8,7 @@ export type GetInput = [
 	GetAttachRequest,
 	{ directory: FileSystemDirectoryHandle | FileList; databases: WCDatabases },
 ];
-export type GetOutput = Promise<DataAdapterResponse<FileInfo[]>>;
+export type GetOutput = Promise<DataAdapterResponse<FileInfo | undefined>>;
 
 export async function get(...inputs: GetInput): GetOutput {
 	const [{ message, record, type }, { directory, databases }] = inputs;
@@ -24,20 +24,21 @@ export async function get(...inputs: GetInput): GetOutput {
 			: `%/OpenData/${CryptoJS.MD5(message.chat_id).toString()}/${message.local_id}.%`,
 	);
 
-	const result = [];
+	let result;
 
 	for (const file of files) {
 		if (type) {
 			const fileBuffer = await file.file.arrayBuffer();
 			const fileBlob = new Blob([fileBuffer], { type });
-			result.push({
+			result = {
 				src: URL.createObjectURL(fileBlob),
-			});
+			};
 		} else {
-			result.push({
+			result = {
 				src: URL.createObjectURL(file.file),
-			});
+			};
 		}
+		break;
 	}
 
 	return { data: result };

@@ -13,16 +13,17 @@ import VideoMessage from "@/components/message/video-message.tsx";
 import VoiceMessage from "@/components/message/voice-message.tsx";
 import VoipMessage from "@/components/message/voip-message.tsx";
 import WeComContactMessage from "@/components/message/wecom-contact-message.tsx";
-import { MessageDirection, MessageTypeEnum, type MessageType } from "@/schema";
-import { ErrorBoundary } from "react-error-boundary";
-import { Route } from "@/routes/$accountId/route.tsx";
-import { useSuspenseQuery } from "@tanstack/react-query";
 import { AccountSuspenseQueryOptions } from "@/lib/fetchers/account.ts";
-import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
-import { ScrollArea, ScrollBar } from "../ui/scroll-area";
+import { Route } from "@/routes/$accountId/route.tsx";
+import { MessageDirection, MessageTypeEnum, type MessageType } from "@/schema";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import type React from "react";
+import { Suspense } from "react";
+import { ErrorBoundary } from "react-error-boundary";
 import { CircleQuestionmarkSolid } from "../icon";
 import { Card, CardContent, CardFooter, CardIndicator } from "../ui/card";
-import type React from "react";
+import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
+import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 
 // TODO
 export interface MessageProp<Message = MessageType, Variant = undefined> {
@@ -60,14 +61,16 @@ export default function Message({
 				</div>
 			}
 		>
-			<MessageComponent
-				onDoubleClick={() => {
-					if (import.meta.env.DEV) console.log(message);
-				}}
-				message={message}
-				variant={variant}
-				{...props}
-			/>
+			<Suspense>
+				<MessageComponent
+					onDoubleClick={() => {
+						if (import.meta.env.DEV) console.log(message);
+					}}
+					message={message}
+					variant={variant}
+					{...props}
+				/>
+			</Suspense>
 		</ErrorBoundary>
 	);
 }
