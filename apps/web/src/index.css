@@ -129,6 +129,14 @@
 		height: 100%;
 		overscroll-behavior: none;
 	}
+
+	body {
+		position: relative;
+	}
+
+	.root {
+		isolation: isolate;
+	}
 }
 
 @layer components {

@@ -1,6 +1,5 @@
 import { NoteMessageEntity } from "@/components/message/app-message/note-message";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+
 import { cn } from "@/lib/utils";
 import {
 	AppMessageType,
@@ -12,6 +11,7 @@ import {
 	NoteVideoRecordEntity,
 	RecordTypeEnum,
 } from "@/schema";
+import { Dialog, ScrollArea } from "@base-ui-components/react";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import AttatchNoteRecord from "./attatch-note-record";
@@ -19,6 +19,9 @@ import AudioNoteRecord from "./audio-note-record";
 import ImageNoteRecord from "./image-note-record";
 import LocationNoteRecord from "./location-note-record";
 import VideoNoteRecord from "./video-note-record";
+
+import dialogClasses from "@/components/ui/dialog.module.css";
+import scrollAreaClasses from "@/components/ui/scroll-area.module.css";
 
 interface NoteRecordProps extends React.HTMLAttributes<HTMLElement> {
 	message: AppMessageType<NoteMessageEntity>;
@@ -114,8 +117,8 @@ function NoteRecordComponent({
 		default: {
 			const { className, ...rest } = props;
 			return (
-				<Dialog>
-					<DialogTrigger
+				<Dialog.Root>
+					<Dialog.Trigger
 						className={cn(
 							"block w-full text-start py-3 px-3 text-muted-foreground bg-muted",
 							className,
@@ -123,16 +126,34 @@ function NoteRecordComponent({
 						{...rest}
 					>
 						暂未支持的笔记内容，点击查看原始数据
-					</DialogTrigger>
-					<DialogContent>
-						<ScrollArea className="max-w-full overflow-hidden">
-							<pre className="text-sm pb-4">
-								{JSON.stringify(recordEntity, null, 2)}
-							</pre>
-							<ScrollBar orientation="horizontal" />
-						</ScrollArea>
-					</DialogContent>
-				</Dialog>
+					</Dialog.Trigger>
+					<Dialog.Portal>
+						<Dialog.Backdrop className={dialogClasses.Backdrop} />
+						<Dialog.Popup
+							className={cn(
+								dialogClasses.Popup,
+								"w-md max-h-[calc(100%-6rem)] h-96",
+							)}
+						>
+							<ScrollArea.Root className="h-full overflow-hidden">
+								<ScrollArea.Viewport className={scrollAreaClasses.Viewport}>
+									<ScrollArea.Content
+										className={cn(scrollAreaClasses.Content, "p-4 w-full")}
+									>
+										<pre className="w-full text-sm pb-4 break-all whitespace-break-spaces">
+											{JSON.stringify(recordEntity, null, 2)}
+										</pre>
+									</ScrollArea.Content>
+								</ScrollArea.Viewport>
+								<ScrollArea.Scrollbar
+									className={cn(scrollAreaClasses.Scrollbar)}
+								>
+									<ScrollArea.Thumb className={scrollAreaClasses.Thumb} />
+								</ScrollArea.Scrollbar>
+							</ScrollArea.Root>
+						</Dialog.Popup>
+					</Dialog.Portal>
+				</Dialog.Root>
 			);
 		}
 	}

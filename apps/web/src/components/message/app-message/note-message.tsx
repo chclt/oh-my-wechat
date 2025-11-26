@@ -2,23 +2,16 @@ import { LoaderIcon } from "@/components/icon";
 import MessageInlineWrapper from "@/components/message-inline-wrapper";
 import type { AppMessageProps } from "@/components/message/app-message.tsx";
 import NoteDocument from "@/components/note-document/note-document";
-import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogHeader,
-	DialogTitle,
-	DialogTrigger,
-} from "@/components/ui/dialog";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import dialogClasses from "@/components/ui/dialog.module.css";
+import scrollAreaClasses from "@/components/ui/scroll-area.module.css";
 import { AttachQueryOptions } from "@/lib/fetchers";
 import queryClient from "@/lib/query-client.ts";
 import { cn, decodeUnicodeReferences } from "@/lib/utils.ts";
 import { AppMessageTypeEnum, NoteEntity } from "@/schema";
-import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import { Dialog, ScrollArea } from "@base-ui-components/react";
 import { useQuery } from "@tanstack/react-query";
 import { XMLParser } from "fast-xml-parser";
-import { Suspense, useMemo, useState } from "react";
+import { Suspense, useMemo, useRef, useState } from "react";
 
 export interface NoteMessageEntity {
 	type: AppMessageTypeEnum.NOTE;
@@ -128,8 +121,10 @@ function NoteMessageDefault({
 		);
 	}, [noteDocumentFile]);
 
+	const noteDocumentDialogPopupRef = useRef<HTMLDivElement>(null);
+
 	return (
-		<Dialog
+		<Dialog.Root
 			open={isNoteDocumentDialogOpen}
 			onOpenChange={(open) => {
 				if (open) {
@@ -139,65 +134,99 @@ function NoteMessageDefault({
 				}
 			}}
 		>
-			<DialogTrigger asChild>
-				<button
-					type="button"
-					className={cn(
-						"appearance-none text-start cursor-pointer",
-						"relative max-w-[20em] flex flex-col rounded-lg bg-white",
-					)}
-					{...props}
-				>
-					<div className="p-3">
-						{decodeUnicodeReferences(message.message_entity.msg.appmsg.des)
-							.split("\n")
-							.map((segment, index) => (
-								<p key={index}>{segment}</p>
-							))}
-					</div>
-
-					<div
-						className={
-							"px-3 py-1.5 text-sm leading-normal text-muted-foreground border-t"
-						}
-					>
-						<div className="inline">
-							<span>笔记</span>
-						</div>
-
-						{isNoteDocumentLoading ? (
-							<div className="float-end size-5 relative">
-								<LoaderIcon
-									aria-label="加载中"
-									className="absolute inset-0.5 size-4 text-muted-foreground/80 animate-spin"
-								/>
-							</div>
-						) : (
-							isNoteDocumentNotExists && (
-								<div className="float-end text-destructive-foreground/60">
-									没有找到文件
-								</div>
-							)
-						)}
-					</div>
-				</button>
-			</DialogTrigger>
-			<DialogContent
-				showCloseButton={false}
-				className="block p-0 gap-0 overflow-hidden h-[calc(100dvh-6rem)]"
+			<Dialog.Trigger
+				className={cn(
+					"appearance-none text-start cursor-pointer",
+					"relative max-w-[20em] flex flex-col rounded-lg bg-white",
+				)}
+				{...props}
 			>
-				<ScrollArea className="h-full  [&>div>div]:block! [&>div>div]:w-full [&>div>div]:max-w-full">
-					<DialogHeader className="z-10 sticky top-0 p-4 bg-background">
-						<DialogTitle>笔记</DialogTitle>
-						<VisuallyHidden>
-							<DialogDescription>笔记</DialogDescription>
-						</VisuallyHidden>
-					</DialogHeader>
+				<div className="p-3">
+					{decodeUnicodeReferences(message.message_entity.msg.appmsg.des)
+						.split("\n")
+						.map((segment, index) => (
+							<p key={index}>{segment}</p>
+						))}
+				</div>
 
-					<Suspense>{renderNoteDocument}</Suspense>
-				</ScrollArea>
-			</DialogContent>
-		</Dialog>
+				<div
+					className={
+						"px-3 py-1.5 text-sm leading-normal text-muted-foreground border-t"
+					}
+				>
+					<div className="inline">
+						<span>笔记</span>
+					</div>
+
+					{isNoteDocumentLoading ? (
+						<div className="float-end size-5 relative">
+							<LoaderIcon
+								aria-label="加载中"
+								className="absolute inset-0.5 size-4 text-muted-foreground/80 animate-spin"
+							/>
+						</div>
+					) : (
+						isNoteDocumentNotExists && (
+							<div className="float-end text-destructive-foreground/60">
+								没有找到文件
+							</div>
+						)
+					)}
+				</div>
+			</Dialog.Trigger>
+			<Dialog.Portal>
+				<Dialog.Backdrop
+					className={cn(
+						dialogClasses.Backdrop,
+						"backdrop-blur-[2px]",
+						"transition-[backdrop-filter,opacity]",
+						"ease-[var(--ease-out-fast)] duration-[600ms]",
+						"data-[starting-style]:backdrop-blur-0",
+						"data-[ending-style]:ease-[cubic-bezier(0.375,0.015,0.545,0.455)] data-[ending-style]:duration-[200ms]",
+						"data-[ending-style]:backdrop-blur-0",
+					)}
+				/>
+				<Dialog.Viewport className={dialogClasses.Viewport}>
+					<ScrollArea.Root
+						className={scrollAreaClasses.Viewport}
+						style={{ position: undefined }}
+					>
+						<ScrollArea.Viewport className={scrollAreaClasses.Viewport}>
+							<ScrollArea.Content
+								className={cn(scrollAreaClasses.Content, "overflow-hidden")}
+							>
+								<Dialog.Popup
+									ref={noteDocumentDialogPopupRef}
+									initialFocus={noteDocumentDialogPopupRef}
+									className={cn(
+										dialogClasses.Popup,
+										"relative w-md max-w-[calc(100%-2rem)] mx-auto my-18 rounded-xl bg-background overflow-hidden",
+										// "shadow-[0_10px_64px_-10px_rgba(36,40,52,0.2),0_0.25px_0_1px_rgba(229,231,235,1)]",
+										"ease-[cubic-bezier(0.45,1.005,0,1.005)] duration-[700ms]",
+										"data-[starting-style]:opacity-100 data-[starting-style]:translate-y-[100dvh]",
+										"data-[ending-style]:ease-[cubic-bezier(0.375,0.015,0.545,0.455)] data-[ending-style]:duration-[200ms]",
+										"data-[ending-style]:opacity-100 data-[ending-style]:translate-y-[max(100dvh,100%)]",
+									)}
+								>
+									<div className="z-10 sticky top-0 p-4 bg-background">
+										<Dialog.Title className={dialogClasses.Title}>
+											笔记
+										</Dialog.Title>
+									</div>
+
+									<Suspense>{renderNoteDocument}</Suspense>
+								</Dialog.Popup>
+							</ScrollArea.Content>
+						</ScrollArea.Viewport>
+						<ScrollArea.Scrollbar
+							className={cn(scrollAreaClasses.Scrollbar, "absolute rounded-xl")}
+						>
+							<ScrollArea.Thumb className={scrollAreaClasses.Thumb} />
+						</ScrollArea.Scrollbar>
+					</ScrollArea.Root>
+				</Dialog.Viewport>
+			</Dialog.Portal>
+		</Dialog.Root>
 	);
 }
 

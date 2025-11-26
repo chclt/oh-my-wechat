@@ -94,9 +94,11 @@ import VoiceMessage, {
 	type VoiceMessageEntity,
 } from "@/components/message/app-message/voice-message.tsx";
 import type { MessageProp } from "@/components/message/message.tsx";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import dialogClasses from "@/components/ui/dialog.module.css";
+import scrollAreaClasses from "@/components/ui/scroll-area.module.css";
+import { cn } from "@/lib/utils.ts";
 import { AppMessageTypeEnum, type AppMessageType } from "@/schema";
+import { Dialog, ScrollArea } from "@base-ui-components/react";
 
 export type AppMessageProps<
 	T = {
@@ -395,21 +397,41 @@ export default function AppMessage({
 
 		default:
 			return (
-				<Dialog>
-					<DialogTrigger className="text-start">
+				<Dialog.Root>
+					<Dialog.Trigger className="text-start">
 						<LinkCard
 							abstract="暂未支持的消息类型，点击查看原始数据"
-							from={`错误代码：49:${message.message_entity.msg.appmsg.type}`}
+							from={`49:${message.message_entity.msg.appmsg.type}`}
 							icon={<CircleQuestionmarkSolid className=" scale-[135%]" />}
 						/>
-					</DialogTrigger>
-					<DialogContent>
-						<ScrollArea className="max-w-full overflow-hidden">
-							<pre className="text-sm pb-4">{message.raw_message}</pre>
-							<ScrollBar orientation="horizontal" />
-						</ScrollArea>
-					</DialogContent>
-				</Dialog>
+					</Dialog.Trigger>
+					<Dialog.Portal>
+						<Dialog.Backdrop className={dialogClasses.Backdrop} />
+						<Dialog.Popup
+							className={cn(
+								dialogClasses.Popup,
+								"w-md max-h-[calc(100%-6rem)] h-96",
+							)}
+						>
+							<ScrollArea.Root className="h-full overflow-hidden">
+								<ScrollArea.Viewport className={scrollAreaClasses.Viewport}>
+									<ScrollArea.Content
+										className={cn(scrollAreaClasses.Content, "p-4 w-full")}
+									>
+										<pre className="w-full text-sm pb-4 break-all whitespace-break-spaces">
+											{message.raw_message}
+										</pre>
+									</ScrollArea.Content>
+								</ScrollArea.Viewport>
+								<ScrollArea.Scrollbar
+									className={cn(scrollAreaClasses.Scrollbar)}
+								>
+									<ScrollArea.Thumb className={scrollAreaClasses.Thumb} />
+								</ScrollArea.Scrollbar>
+							</ScrollArea.Root>
+						</Dialog.Popup>
+					</Dialog.Portal>
+				</Dialog.Root>
 			);
 	}
 }
