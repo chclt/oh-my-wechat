@@ -1,0 +1,67 @@
+@layer components {
+	.Viewport {
+		height: 100%;
+		border-radius: 0.375rem;
+		overscroll-behavior: contain;
+
+		&:focus-visible {
+			outline: 2px solid var(--color-blue);
+		}
+	}
+
+	.Content {
+		min-height: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		/*flex-direction: column;*/
+	}
+
+	.Scrollbar {
+		display: flex;
+		justify-content: center;
+		width: 0.25rem;
+		border-radius: 0.375rem;
+		margin: 0.5rem;
+		opacity: 0;
+		transition: opacity 150ms;
+		pointer-events: none;
+
+		&[data-scrolling] {
+			transition-duration: 0ms;
+		}
+
+		&[data-hovering],
+		&[data-scrolling] {
+			opacity: 1;
+			pointer-events: auto;
+		}
+
+		&::before {
+			content: "";
+			position: absolute;
+			width: 1.25rem;
+			height: 100%;
+		}
+
+		@media (min-width: 768px) {
+			width: 0.4375rem;
+		}
+	}
+
+	.Thumb {
+		width: 100%;
+		border-radius: inherit;
+		background-color: var(--border);
+
+		&::before {
+			content: "";
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			width: calc(100% + 1rem);
+			height: calc(100% + 1rem);
+		}
+	}
+}
