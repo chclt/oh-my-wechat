@@ -3,15 +3,14 @@ import {
 	MiniRoutePageContentClassName,
 	MiniRoutePageOverlayClassName,
 } from "@/components/mini-router/utils";
+import { Avatar } from "@/components/ui/avatar.tsx";
 import { Button } from "@/components/ui/button";
-import { ScrollAreaViewport, ScrollBar } from "@/components/ui/scroll-area";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils.ts";
 import { useDisclosure } from "@mantine/hooks";
-import * as ScrollAreaPrimitive from "@radix-ui/react-scroll-area";
 import { ChevronLeftIcon } from "lucide-react";
 import ChatListItem from "./chat-item";
 import { ChatListChatGroupItem } from "./use-chat-list";
-import { Avatar } from "@/components/ui/avatar.tsx";
 
 export interface ChatGroupListMiniRouteState {
 	name: "chatGroupList";
@@ -51,42 +50,40 @@ export default function ChatGroupList() {
 				)}
 				onAnimationEnd={handleAnimationEnd}
 			>
-				<ScrollAreaPrimitive.Root
-					data-slot="scroll-area"
-					className="relative w-full h-full"
+				<ScrollArea
+					className={cn(
+						"size-full",
+						"[&_[data-slot='scroll-area-scrollbar']]:z-30 [&_[data-slot='scroll-area-scrollbar']]:top-16!",
+					)}
 				>
-					<ScrollAreaViewport>
-						<header className="sticky z-30 top-0 h-16 px-3 flex items-center bg-background/80 border-b border-muted backdrop-blur-xl">
-							<Button
-								size="icon"
-								variant="ghost"
-								className="mr-3 opacity-80"
-								onClick={() => {
-									close();
-								}}
-							>
-								<ChevronLeftIcon />
-							</Button>
+					<header className="sticky z-30 top-0 h-16 px-3 flex items-center bg-background/80 border-b border-muted backdrop-blur-xl">
+						<Button
+							size="icon"
+							variant="ghost"
+							className="mr-3 opacity-80"
+							onClick={() => {
+								close();
+							}}
+						>
+							<ChevronLeftIcon />
+						</Button>
 
-							<Avatar
-								src={chatListItem.photo}
-								className="shrink-0 w-12 h-12 clothoid-corner-2"
-							/>
+						<Avatar
+							src={chatListItem.photo}
+							className="shrink-0 w-12 h-12 clothoid-corner-2"
+						/>
 
-							<div className="ms-3 font-semibold">
-								<span className="font-medium">{chatListItem.title}</span>
-							</div>
-						</header>
+						<div className="ms-3 font-semibold">
+							<span className="font-medium">{chatListItem.title}</span>
+						</div>
+					</header>
 
-						<ul>
-							{chatListItem.value.map((chat) => (
-								<ChatListItem key={chat.id} chatListItem={chat} />
-							))}
-						</ul>
-					</ScrollAreaViewport>
-					<ScrollBar className="z-30 !top-16" />
-					<ScrollAreaPrimitive.Corner />
-				</ScrollAreaPrimitive.Root>
+					<ul>
+						{chatListItem.value.map((chat) => (
+							<ChatListItem key={chat.id} chatListItem={chat} />
+						))}
+					</ul>
+				</ScrollArea>
 			</section>
 		</>
 	);

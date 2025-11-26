@@ -1,22 +1,23 @@
-import { cn } from "@/lib/utils";
-import { createFileRoute } from "@tanstack/react-router";
-import { useInfiniteQuery, useSuspenseQuery } from "@tanstack/react-query";
-import React, { type UIEventHandler, useEffect, useRef } from "react";
-import { MessageListInfiniteQueryOptions } from "@/lib/fetchers/message";
+import { LoaderIcon } from "@/components/icon";
+import { MessageBubbleGroup } from "@/components/message-bubble-group";
+import Message from "@/components/message/message";
+import { ScrollAreaScrollBar } from "@/components/ui/scroll-area";
+import scrollAreaClasses from "@/components/ui/scroll-area.module.css";
 import { ChatSuspenseQueryOptions } from "@/lib/fetchers/chat";
+import { MessageListInfiniteQueryOptions } from "@/lib/fetchers/message";
+import { UserSuspenseQueryOptions } from "@/lib/fetchers/user";
+import router from "@/lib/router";
+import { cn } from "@/lib/utils";
 import {
 	AppMessageTypeEnum,
 	MessageTypeEnum,
 	type MessageType,
 } from "@/schema";
+import { ScrollArea as ScrollAreaBase } from "@base-ui-components/react";
+import { useInfiniteQuery, useSuspenseQuery } from "@tanstack/react-query";
+import { createFileRoute } from "@tanstack/react-router";
 import { differenceInMinutes, format, isSameDay } from "date-fns";
-import { MessageBubbleGroup } from "@/components/message-bubble-group";
-import Message from "@/components/message/message";
-import { LoaderIcon } from "@/components/icon";
-import * as ScrollAreaPrimitive from "@radix-ui/react-scroll-area";
-import { ScrollBar } from "@/components/ui/scroll-area";
-import { UserSuspenseQueryOptions } from "@/lib/fetchers/user";
-import router from "@/lib/router";
+import React, { useEffect, useRef, type UIEventHandler } from "react";
 
 export const Route = createFileRoute("/$accountId/chat/$chatId")({
 	component: RouteComponent,
@@ -121,15 +122,15 @@ function RouteComponent() {
 	};
 
 	return (
-		<ScrollAreaPrimitive.Root
+		<ScrollAreaBase.Root
 			className={cn(
-				"relative overflow-hidden contain-strict bg-neutral-100",
-				"**:data-orientation:z-50",
-				"w-full h-full [&>div>div]:block!",
+				scrollAreaClasses.Root,
+				"contain-strict bg-neutral-100",
+				"size-full [&_[data-slot='scroll-area-scrollbar']]:z-50 [&_[data-slot='scroll-area-scrollbar']]:top-16!",
 			)}
 		>
-			<ScrollAreaPrimitive.Viewport
-				className="h-full w-full"
+			<ScrollAreaBase.Viewport
+				className={cn(scrollAreaClasses.Viewport)}
 				ref={scrollAreaViewportRef}
 				onScroll={onScroll}
 			>
@@ -277,9 +278,9 @@ function RouteComponent() {
 						</div>
 					)}
 				</div>
-			</ScrollAreaPrimitive.Viewport>
-			<ScrollBar />
-			<ScrollAreaPrimitive.Corner />
-		</ScrollAreaPrimitive.Root>
+			</ScrollAreaBase.Viewport>
+			<ScrollAreaScrollBar />
+			<ScrollAreaBase.Corner />
+		</ScrollAreaBase.Root>
 	);
 }

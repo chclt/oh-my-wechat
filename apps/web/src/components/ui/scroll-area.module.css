@@ -1,67 +1,46 @@
-@layer components {
-	.Viewport {
-		height: 100%;
-		border-radius: 0.375rem;
-		overscroll-behavior: contain;
+@reference "../../index.css";
 
-		&:focus-visible {
-			outline: 2px solid var(--color-blue);
-		}
+@layer components {
+	.Root {
+	}
+
+	.Viewport {
+		@apply size-full rounded-[inherit] overscroll-contain;
+		@apply focus-visible:outline-1 focus-visible:ring-[3px] focus-visible:ring-ring/50;
 	}
 
 	.Content {
-		min-height: 100%;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		/*flex-direction: column;*/
+		@apply min-h-full;
+		/* @apply flex flex-col items-center justify-center; */
 	}
 
 	.Scrollbar {
-		display: flex;
-		justify-content: center;
-		width: 0.25rem;
-		border-radius: 0.375rem;
-		margin: 0.5rem;
-		opacity: 0;
-		transition: opacity 150ms;
-		pointer-events: none;
+		@apply flex justify-center;
+		&[data-orientation="vertical"] {
+			@apply w-1 md:w-[7px];
+		}
+		&[data-orientation="horizontal"] {
+			@apply h-1 md:h-[7px];
+		}
+		@apply rounded-full m-0.5 pointer-events-none;
+		@apply transition-opacity opacity-0;
 
 		&[data-scrolling] {
-			transition-duration: 0ms;
+			@apply duration-0;
 		}
 
 		&[data-hovering],
 		&[data-scrolling] {
-			opacity: 1;
-			pointer-events: auto;
+			@apply opacity-100 pointer-events-auto;
 		}
 
 		&::before {
-			content: "";
-			position: absolute;
-			width: 1.25rem;
-			height: 100%;
-		}
-
-		@media (min-width: 768px) {
-			width: 0.4375rem;
+			@apply content-[''] absolute w-5 h-full;
+			inset-inline-end: -0.125rem;
 		}
 	}
 
 	.Thumb {
-		width: 100%;
-		border-radius: inherit;
-		background-color: var(--border);
-
-		&::before {
-			content: "";
-			position: absolute;
-			top: 50%;
-			left: 50%;
-			transform: translate(-50%, -50%);
-			width: calc(100% + 1rem);
-			height: calc(100% + 1rem);
-		}
+		@apply w-full rounded-[inherit] bg-border;
 	}
 }
