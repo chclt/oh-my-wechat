@@ -21,7 +21,7 @@ export default function AttatchNoteRecord({
 	const [isAttachmentNotFound, setIsAttachmentNotFound] = useState(false);
 
 	const { mutateAsync: download, data } = useMutation<FileInfo | null>({
-		mutationKey: ["attache", message.chat_id, message.id],
+		mutationKey: ["attach", message.chat_id, message.id],
 		mutationFn: () => {
 			return getDataAdapter()
 				.getNoteMessageFile({
