@@ -1,20 +1,19 @@
+import Image from "@/components/image.tsx";
 import { useMiniRoute, useMiniRouter } from "@/components/mini-router";
-import { useDisclosure } from "@mantine/hooks";
-import { cn } from "@/lib/utils.ts";
 import {
 	MiniRoutePageContentClassName,
 	MiniRoutePageOverlayClassName,
 } from "@/components/mini-router/utils.ts";
-import * as ScrollAreaPrimitive from "@radix-ui/react-scroll-area";
-import { ScrollAreaViewport, ScrollBar } from "@/components/ui/scroll-area.tsx";
 import { Button } from "@/components/ui/button.tsx";
-import { ChevronLeftIcon } from "lucide-react";
-import Image from "@/components/image.tsx";
-import { ContactListContctItem } from "@/routes/$accountId/contact/-components/contact-list/use-contact-list.ts";
-import { useQuery } from "@tanstack/react-query";
+import { ScrollArea } from "@/components/ui/scroll-area.tsx";
 import { GreetingMessageListQueryOptions } from "@/lib/fetchers/message.ts";
-import { MessageTypeEnum } from "@/schema";
+import { cn } from "@/lib/utils.ts";
 import GreetingMessageItem from "@/routes/$accountId/contact/-components/contact-list/greeting-message-item.tsx";
+import { ContactListContctItem } from "@/routes/$accountId/contact/-components/contact-list/use-contact-list.ts";
+import { MessageTypeEnum } from "@/schema";
+import { useDisclosure } from "@mantine/hooks";
+import { useQuery } from "@tanstack/react-query";
+import { ChevronLeftIcon } from "lucide-react";
 
 export interface GreetingMessageListMiniRouteState {
 	name: "greetingMessageList";
@@ -60,59 +59,57 @@ export default function GreetingMessageList() {
 				)}
 				onAnimationEnd={handleAnimationEnd}
 			>
-				<ScrollAreaPrimitive.Root
-					data-slot="scroll-area"
-					className="relative w-full h-full"
+				<ScrollArea
+					className={cn(
+						"size-full",
+						"[&_[data-slot='scroll-area-scrollbar']]:z-30 [&_[data-slot='scroll-area-scrollbar']]:top-16!",
+					)}
 				>
-					<ScrollAreaViewport>
-						<header className="sticky z-30 top-0 h-16 px-5 ps-2.5 flex items-center bg-background/80 border-b border-muted backdrop-blur-xl">
-							<Button
-								size="icon"
-								variant="ghost"
-								className="mr-3 opacity-80"
-								onClick={() => {
-									close();
-								}}
-							>
-								<ChevronLeftIcon />
-							</Button>
-							<div className="size-11 flex items-center justify-center text-[#FF970A] bg-background clothoid-corner-[18.18%] shrink-0">
-								<Image
-									src={contactItem.photo}
-									alt={contactItem.title}
-									className="size-full object-cover"
-								/>
-							</div>
-							<div className="ms-3 font-semibold">
-								<span className="font-medium">{contactItem.title}</span>
-							</div>
-						</header>
+					<header className="sticky z-30 top-0 h-16 px-5 ps-2.5 flex items-center bg-background/80 border-b border-muted backdrop-blur-xl">
+						<Button
+							size="icon"
+							variant="ghost"
+							className="mr-3 opacity-80"
+							onClick={() => {
+								close();
+							}}
+						>
+							<ChevronLeftIcon />
+						</Button>
+						<div className="size-11 flex items-center justify-center text-[#FF970A] bg-background clothoid-corner-[18.18%] shrink-0">
+							<Image
+								src={contactItem.photo}
+								alt={contactItem.title}
+								className="size-full object-cover"
+							/>
+						</div>
+						<div className="ms-3 font-semibold">
+							<span className="font-medium">{contactItem.title}</span>
+						</div>
+					</header>
 
-						<ul>
-							{greetingMessageList?.map((message) => {
-								if (message.type === MessageTypeEnum.VERITY) {
-									return (
-										<GreetingMessageItem
-											key={`${message.id}|${message.local_id}`}
-											message={message}
-											className={cn(
-												"relative border-b border-transparent",
-												"after:absolute after:left-[4.75rem] after:right-0 after:bottom-0 after:border-b after:border-muted",
-											)}
-										/>
-									);
-								} else {
-									console.error(
-										"Unsupported message type in greeting messages:",
-										message,
-									);
-								}
-							})}
-						</ul>
-					</ScrollAreaViewport>
-					<ScrollBar className="z-30 !top-16" />
-					<ScrollAreaPrimitive.Corner />
-				</ScrollAreaPrimitive.Root>
+					<ul>
+						{greetingMessageList?.map((message) => {
+							if (message.type === MessageTypeEnum.VERITY) {
+								return (
+									<GreetingMessageItem
+										key={`${message.id}|${message.local_id}`}
+										message={message}
+										className={cn(
+											"relative border-b border-transparent",
+											"after:absolute after:left-[4.75rem] after:right-0 after:bottom-0 after:border-b after:border-muted",
+										)}
+									/>
+								);
+							} else {
+								console.error(
+									"Unsupported message type in greeting messages:",
+									message,
+								);
+							}
+						})}
+					</ul>
+				</ScrollArea>
 			</section>
 		</>
 	);

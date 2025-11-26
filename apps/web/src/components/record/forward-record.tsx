@@ -101,9 +101,11 @@ export default function ForwardMessageRecord({
 								"h-[calc(100dvh-6rem)] max-w-md p-0 bg-neutral-100 overflow-hidden block",
 							)}
 						>
-							<ScrollArea className="h-full">
+							<ScrollArea className="size-full">
 								<div className="z-10 sticky top-0 p-4 bg-neutral-100">
-									<Dialog.Title>{record.datatitle}</Dialog.Title>
+									<Dialog.Title className={dialogClasses.Title}>
+										{record.datatitle}
+									</Dialog.Title>
 								</div>
 								<div className="space-y-2 p-4 pt-0">
 									{(Array.isArray(records) ? records : [records]).map(
