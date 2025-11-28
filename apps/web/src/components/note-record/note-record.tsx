@@ -15,7 +15,7 @@ import {
 import { Dialog } from "@base-ui-components/react";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
-import AttatchNoteRecord from "./attatch-note-record.tsx";
+import AttachNoteRecord from "./attach-note-record.tsx";
 import AudioNoteRecord from "./audio-note-record.tsx";
 import ImageNoteRecord from "./image-note-record.tsx";
 import LocationNoteRecord from "./location-note-record.tsx";
@@ -95,7 +95,7 @@ function NoteRecordComponent({
 			);
 		case RecordTypeEnum.ATTACH:
 			return (
-				<AttatchNoteRecord
+				<AttachNoteRecord
 					message={message}
 					recordEntity={recordEntity as AttachNoteRecordType}
 					{...props}
