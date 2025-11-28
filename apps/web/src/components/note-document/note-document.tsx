@@ -74,7 +74,7 @@ export default function NoteDocument({
 	return (
 		<section
 			className={cn(
-				"p-4",
+				"p-4 overflow-hidden",
 				"prose prose-neutral max-w-none leading-[inherit]",
 				"prose-p:my-0",
 				"prose-ul:my-0",
