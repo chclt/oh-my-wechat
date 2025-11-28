@@ -64,7 +64,7 @@ export default function ForwardMessageRecord({
 					<div
 						className={forwardMessageRecordVariants({
 							variant,
-							direction: message.direction,
+							direction: MessageDirection.incoming,
 							className,
 						})}
 						style={{
