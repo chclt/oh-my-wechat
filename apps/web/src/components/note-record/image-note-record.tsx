@@ -1,4 +1,4 @@
-import { NoteMessageImageQueryOptions } from "@/lib/fetchers/note-message.ts";
+import { RecordImageQueryOptions } from "@/lib/fetchers/record.ts";
 import { AppMessageType, ImageNoteRecordType } from "@/schema";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import Image from "../image.tsx";
@@ -16,8 +16,9 @@ export default function ImageNoteRecord({
 	...props
 }: ImageNoteRecordProps) {
 	const { data: image } = useSuspenseQuery(
-		NoteMessageImageQueryOptions({
+		RecordImageQueryOptions({
 			accountId: "",
+			chat: { id: message.chat_id },
 			message: message,
 			record: recordEntity,
 		}),

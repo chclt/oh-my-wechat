@@ -26,6 +26,7 @@ export default function AttatchNoteRecord({
 			return getDataAdapter()
 				.getNoteMessageFile({
 					accountId: "",
+					chat: { id: message.chat_id },
 					message,
 					record: recordEntity,
 				})

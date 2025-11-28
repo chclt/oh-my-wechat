@@ -10,9 +10,9 @@ import {
 	GetGreetingMessageListRequest,
 	GetImageRequest,
 	GetMessageListRequest,
-	GetNoteMessageFileRequest,
-	GetNoteMessageImageRequest,
-	GetNoteMessageVideoRequest,
+	GetRecordFileRequest,
+	GetRecordImageRequest,
+	GetRecordVideoRequest,
 	GetStatisticRequest,
 	GetUserListRequest,
 	GetUserRequest,
@@ -160,21 +160,21 @@ export default class IosBackupAdapter implements DataAdapter {
 		);
 	}
 
-	async getNoteMessageImage(input: GetNoteMessageImageRequest) {
+	async getNoteMessageImage(input: GetRecordImageRequest) {
 		return withCommonWrapper(
 			() => this._workerAdapter.getNoteMessageImage(input),
 			"getNoteMessageImage",
 		);
 	}
 
-	async getNoteMessageVideo(input: GetNoteMessageVideoRequest) {
+	async getNoteMessageVideo(input: GetRecordVideoRequest) {
 		return withCommonWrapper(
 			() => this._workerAdapter.getNoteMessageVideo(input),
 			"getNoteMessageVideo",
 		);
 	}
 
-	async getNoteMessageFile(input: GetNoteMessageFileRequest) {
+	async getNoteMessageFile(input: GetRecordFileRequest) {
 		return withCommonWrapper(
 			() => this._workerAdapter.getNoteMessageFile(input),
 			"getNoteMessageFile",

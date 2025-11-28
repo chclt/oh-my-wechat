@@ -1,20 +1,17 @@
-import {
-	DataAdapterResponse,
-	GetNoteMessageImageRequest,
-} from "@/adapters/adapter";
+import { DataAdapterResponse, GetRecordImageRequest } from "@/adapters/adapter";
 import { ImageInfoNext } from "@/schema";
 import CryptoJS from "crypto-js";
 import { WCDatabases } from "../types";
 import { getFilesFromManifast } from "../utils";
 
 export type GetInput = [
-	GetNoteMessageImageRequest,
+	GetRecordImageRequest,
 	{ directory: FileSystemDirectoryHandle | FileList; databases: WCDatabases },
 ];
 export type GetOutput = Promise<DataAdapterResponse<ImageInfoNext>>;
 
 export async function get(...inputs: GetInput): GetOutput {
-	const [{ message, record }, { directory, databases }] = inputs;
+	const [{ chat, message, record }, { directory, databases }] = inputs;
 
 	const db = databases.manifest;
 	if (!db) throw new Error("manifest database is not found");
@@ -22,7 +19,7 @@ export async function get(...inputs: GetInput): GetOutput {
 	const files = await getFilesFromManifast(
 		db,
 		directory,
-		`%/OpenData/${CryptoJS.MD5(message.chat_id).toString()}/${message.local_id}/${record["@_dataid"]}.%`,
+		`%/OpenData/${CryptoJS.MD5(chat.id).toString()}/${message.local_id}/${record["@_dataid"]}.%`,
 	);
 
 	const result: ImageInfoNext = {};
