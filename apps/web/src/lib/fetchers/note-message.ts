@@ -11,8 +11,8 @@ export function NoteMessageImageQueryOptions(
 			`account: ${requestData.accountId}`,
 			`chat: ${requestData.message.chat_id}`,
 			`message: ${requestData.message.id}`,
-			"note-message",
-			"image",
+			`record: ${requestData.record["@_dataid"]}`,
+			"note-message-image",
 		],
 		queryFn: () =>
 			getDataAdapter()
@@ -29,8 +29,8 @@ export function NoteMessageVideoQueryOptions(
 			`account: ${requestData.accountId}`,
 			`chat: ${requestData.message.chat_id}`,
 			`message: ${requestData.message.id}`,
-			"note-message",
-			"video",
+			`record: ${requestData.record["@_dataid"]}`,
+			"note-message-video",
 		],
 		queryFn: () =>
 			getDataAdapter()
@@ -47,8 +47,8 @@ export function NoteMessageFileQueryOptions(
 			`account: ${requestData.accountId}`,
 			`chat: ${requestData.message.chat_id}`,
 			`message: ${requestData.message.id}`,
-			"note-message",
-			"file",
+			`record: ${requestData.record["@_dataid"]}`,
+			"note-message-file",
 		],
 		queryFn: () => getDataAdapter().getNoteMessageFile(requestData),
 	};
