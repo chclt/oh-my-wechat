@@ -4,12 +4,12 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import {
 	AppMessageType,
-	NoteAttachRecordEntity,
-	NoteAudioRecordEntity,
-	NoteImageRecordEntity,
-	NoteLocationRecordEntity,
-	NoteRecordEntity,
-	NoteVideoRecordEntity,
+	AttachNoteRecordType,
+	AudioNoteRecordType,
+	ImageNoteRecordType,
+	LocationNoteRecordType,
+	NoteRecordType,
+	VideoNoteRecordType,
 	RecordTypeEnum,
 } from "@/schema";
 import { Dialog } from "@base-ui-components/react";
@@ -23,7 +23,7 @@ import VideoNoteRecord from "./video-note-record";
 
 interface NoteRecordProps extends React.HTMLAttributes<HTMLElement> {
 	message: AppMessageType<NoteMessageEntity>;
-	recordEntity: NoteRecordEntity;
+	recordEntity: NoteRecordType;
 }
 
 export default function NoteRecord({
@@ -80,7 +80,7 @@ function NoteRecordComponent({
 			return (
 				<ImageNoteRecord
 					message={message}
-					recordEntity={recordEntity as NoteImageRecordEntity}
+					recordEntity={recordEntity as ImageNoteRecordType}
 					{...props}
 				/>
 			);
@@ -89,7 +89,7 @@ function NoteRecordComponent({
 			return (
 				<AudioNoteRecord
 					message={message}
-					recordEntity={recordEntity as NoteAudioRecordEntity}
+					recordEntity={recordEntity as AudioNoteRecordType}
 					{...props}
 				/>
 			);
@@ -97,7 +97,7 @@ function NoteRecordComponent({
 			return (
 				<AttatchNoteRecord
 					message={message}
-					recordEntity={recordEntity as NoteAttachRecordEntity}
+					recordEntity={recordEntity as AttachNoteRecordType}
 					{...props}
 				/>
 			);
@@ -105,14 +105,14 @@ function NoteRecordComponent({
 			return (
 				<VideoNoteRecord
 					message={message}
-					recordEntity={recordEntity as NoteVideoRecordEntity}
+					recordEntity={recordEntity as VideoNoteRecordType}
 					{...props}
 				/>
 			);
 		case RecordTypeEnum.LOCATION:
 			return (
 				<LocationNoteRecord
-					recordEntity={recordEntity as NoteLocationRecordEntity}
+					recordEntity={recordEntity as LocationNoteRecordType}
 					{...props}
 				/>
 			);

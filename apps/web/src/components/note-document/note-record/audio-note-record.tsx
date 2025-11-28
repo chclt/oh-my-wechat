@@ -1,10 +1,10 @@
 import type { NoteMessageEntity } from "@/components/message/app-message/note-message";
 import { cn } from "@/lib/utils";
-import { AppMessageType, NoteAudioRecordEntity } from "@/schema";
+import { AppMessageType, AudioNoteRecordType } from "@/schema";
 
 interface AudioNoteRecordProps extends React.HTMLAttributes<HTMLElement> {
 	message: AppMessageType<NoteMessageEntity>;
-	recordEntity: NoteAudioRecordEntity;
+	recordEntity: AudioNoteRecordType;
 }
 
 export default function AudioNoteRecord({

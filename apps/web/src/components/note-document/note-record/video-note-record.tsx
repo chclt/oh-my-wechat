@@ -1,11 +1,11 @@
 import type { NoteMessageEntity } from "@/components/message/app-message/note-message.tsx";
 import { NoteMessageVideoQueryOptions } from "@/lib/fetchers/note-message";
-import { AppMessageType, NoteVideoRecordEntity } from "@/schema";
+import { AppMessageType, VideoNoteRecordType } from "@/schema";
 import { useSuspenseQuery } from "@tanstack/react-query";
 
 interface VideoNoteRecordProps extends React.HTMLAttributes<HTMLElement> {
 	message: AppMessageType<NoteMessageEntity>;
-	recordEntity: NoteVideoRecordEntity;
+	recordEntity: VideoNoteRecordType;
 }
 
 export default function VideoNoteRecord({
