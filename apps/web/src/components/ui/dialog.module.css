@@ -1,74 +1,49 @@
+@reference "../../index.css";
+
 @layer components {
 	.Backdrop {
-		position: fixed;
-		inset: 0;
-		background-color: color-mix(in oklab, var(--color-black) 50%, transparent);
-		transition: opacity 200ms cubic-bezier(0.45, 1.005, 0, 1.005);
+		@apply fixed inset-0 bg-black/50;
+		@apply transition-opacity duration-200 ease-[cubic-bezier(0.45,1.005,0,1.005)];
 
 		/* iOS 26+: Ensure the backdrop covers the entire visible viewport. */
 		@supports (-webkit-touch-callout: none) {
-			position: absolute;
+			@apply absolute;
 		}
 
 		&[data-starting-style],
 		&[data-ending-style] {
-			opacity: 0;
+			@apply opacity-0;
 		}
 	}
 
 	.Viewport {
-		position: fixed;
-		inset: 0;
+		@apply fixed inset-0;
 	}
 
 	.Popup {
-		position: fixed;
-		inset: 0;
-		margin: auto;
-		width: 100%;
-		max-width: calc(100% - 2rem);
-		background-color: var(--background);
-		border-radius: var(--radius);
-		box-shadow: var(--shadow-2xl);
-		transition: all 200ms;
-		@media (prefers-reduced-motion: reduce) {
-			transition-property: none;
-		}
+		@apply fixed inset-0 m-auto w-full max-w-[calc(100%-2rem)] bg-background rounded-xl shadow-2xl origin-center;
 
-		transform-origin: center;
-		transform: scale(calc(1 - 0.1 * var(--nested-dialogs)));
-		translate: 0 calc(0px + 3.5rem * var(--nested-dialogs));
-		filter: brightness(calc(100% - 20% * var(--nested-dialogs)));
+		@apply transition-all duration-200 motion-reduce:transition-none;
+
+		@apply scale-[calc(1-0.1*var(--nested-dialogs))] translate-y-[calc(0px+3.5rem*var(--nested-dialogs))] brightness-[calc(100%-20%*var(--nested-dialogs))];
 
 		&[data-nested-dialog-open] {
 			&::after {
-				content: "";
-				inset: 0;
-				position: absolute;
-				border-radius: inherit;
-				background-color: color-mix(
-					in oklab,
-					var(--color-black) 5%,
-					transparent
-				);
+				@apply content-[''] absolute inset-0 rounded-[inherit] bg-black/5;
 			}
 		}
 
 		&[data-starting-style],
 		&[data-ending-style] {
-			opacity: 0;
-			transform: scale(0.95);
+			@apply opacity-0 scale-95;
 		}
 	}
 
 	.Title {
-		font-size: var(--text-lg);
-		line-height: 1;
-		font-weight: var(--font-weight-semibold);
+		@apply text-lg leading-none font-semibold;
 	}
 
 	.Description {
-		font-size: var(--text-sm);
-		color: var(--color-muted-foreground);
+		@apply text-sm text-muted-foreground;
 	}
 }

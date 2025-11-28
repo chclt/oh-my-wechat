@@ -95,10 +95,10 @@ import VoiceMessage, {
 } from "@/components/message/app-message/voice-message.tsx";
 import type { MessageProp } from "@/components/message/message.tsx";
 import dialogClasses from "@/components/ui/dialog.module.css";
-import scrollAreaClasses from "@/components/ui/scroll-area.module.css";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils.ts";
 import { AppMessageTypeEnum, type AppMessageType } from "@/schema";
-import { Dialog, ScrollArea } from "@base-ui-components/react";
+import { Dialog } from "@base-ui-components/react";
 
 export type AppMessageProps<
 	T = {
@@ -413,22 +413,13 @@ export default function AppMessage({
 								"w-md max-h-[calc(100%-6rem)] h-96",
 							)}
 						>
-							<ScrollArea.Root className="h-full overflow-hidden">
-								<ScrollArea.Viewport className={scrollAreaClasses.Viewport}>
-									<ScrollArea.Content
-										className={cn(scrollAreaClasses.Content, "p-4 w-full")}
-									>
-										<pre className="w-full text-sm pb-4 break-all whitespace-break-spaces">
-											{message.raw_message}
-										</pre>
-									</ScrollArea.Content>
-								</ScrollArea.Viewport>
-								<ScrollArea.Scrollbar
-									className={cn(scrollAreaClasses.Scrollbar)}
-								>
-									<ScrollArea.Thumb className={scrollAreaClasses.Thumb} />
-								</ScrollArea.Scrollbar>
-							</ScrollArea.Root>
+							<ScrollArea className="size-full overflow-hidden">
+								<div className="p-4">
+									<pre className="w-full text-sm pb-4 break-all whitespace-break-spaces">
+										{message.raw_message}
+									</pre>
+								</div>
+							</ScrollArea>
 						</Dialog.Popup>
 					</Dialog.Portal>
 				</Dialog.Root>
