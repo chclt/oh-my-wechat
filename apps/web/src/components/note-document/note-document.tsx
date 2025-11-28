@@ -3,7 +3,7 @@ import { AppMessageType, NoteEntity } from "@/schema";
 import { useQuery } from "@tanstack/react-query";
 import parse, { DOMNode, domToReact, Element } from "html-react-parser";
 import { NoteMessageEntity } from "../message/app-message/note-message";
-import NoteRecord from "./note-record/note-record";
+import NoteRecord from "@/components/note-record/note-record";
 
 interface NoteDocumentProps extends React.HTMLAttributes<HTMLElement> {
 	docUrl: string;

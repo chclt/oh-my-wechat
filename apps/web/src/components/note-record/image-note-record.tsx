@@ -1,8 +1,8 @@
-import { NoteMessageImageQueryOptions } from "@/lib/fetchers/note-message";
+import { NoteMessageImageQueryOptions } from "@/lib/fetchers/note-message.ts";
 import { AppMessageType, ImageNoteRecordType } from "@/schema";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import Image from "../../image";
-import { NoteMessageEntity } from "../../message/app-message/note-message";
+import Image from "../image.tsx";
+import { NoteMessageEntity } from "../message/app-message/note-message.tsx";
 
 interface ImageNoteRecordProps extends React.HTMLAttributes<HTMLElement> {
 	message: AppMessageType<NoteMessageEntity>;

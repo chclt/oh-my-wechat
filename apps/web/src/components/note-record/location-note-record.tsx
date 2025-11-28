@@ -1,5 +1,5 @@
-import { LocationIcon } from "@/components/icon";
-import { cn } from "@/lib/utils";
+import { LocationIcon } from "@/components/icon.tsx";
+import { cn } from "@/lib/utils.ts";
 import { LocationNoteRecordType } from "@/schema";
 
 interface LocationNoteRecordProps extends React.HTMLAttributes<HTMLElement> {
