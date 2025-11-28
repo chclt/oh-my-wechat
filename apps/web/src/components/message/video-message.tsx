@@ -3,7 +3,8 @@ import LocalVideo from "@/components/local-video.tsx";
 import MessageInlineWrapper from "@/components/message-inline-wrapper";
 import type { MessageProp } from "@/components/message/message.tsx";
 import { cn } from "@/lib/utils.ts";
-import type { VideoMessageType } from "@/schema";
+import { MessageDirection, type VideoMessageType } from "@/schema";
+import { cva } from "class-variance-authority";
 import type React from "react";
 
 type VideoMessageProps = MessageProp<
@@ -55,6 +56,21 @@ export interface VideoMessageEntity {
 	};
 }
 
+export const videoMessageVariants = cva(
+	["max-w-[20em] min-w-32 min-h-32 rounded-lg overflow-hidden"],
+	{
+		variants: {
+			variant: {
+				default: [],
+			},
+			direction: {
+				[MessageDirection.outgoing]: ["mask-bubble-tail-r mr-[-5px]"],
+				[MessageDirection.incoming]: ["mask-bubble-tail-l ml-[-5px]"],
+			},
+		},
+	},
+);
+
 export default function VideoMessage({
 	message,
 	variant = "default",
@@ -87,19 +103,16 @@ export default function VideoMessage({
 
 function VideoMessageDefault({
 	message,
+	className,
 	...props
 }: Omit<VideoMessageProps, "variant">) {
 	return (
 		<div
-			className={cn(
-				"max-w-[20em] min-w-32 min-h-32 rounded-lg overflow-hidden ",
-				["mask-bubble-tail-r mr-[-5px]", "mask-bubble-tail-l ml-[-5px]"][
-					message.direction
-				],
-			)}
-			onClick={() => {
-				//
-			}}
+			className={videoMessageVariants({
+				variant: "default",
+				direction: message.direction,
+				className,
+			})}
 			{...props}
 		>
 			<div className={"relative"}>
