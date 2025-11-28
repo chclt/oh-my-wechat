@@ -27,6 +27,7 @@ import MusicRecord, { type MusicRecordEntity } from "./music-record";
 import NoteRecord, { type NoteRecordEntity } from "./note-record";
 import TextRecord, { type TextRecordEntity } from "./text-record";
 import TingRecord, { type TingRecordEntity } from "./ting-record";
+import VideoRecord, { VideoRecordEntity } from "./video-record";
 
 /**
  * 合并转发的消息内容、笔记中的内容，都是一个 Record 资源
@@ -96,9 +97,15 @@ function RecordComponent({
 					{...props}
 				/>
 			);
-		// TODO
-		// case RecordTypeEnum.VIDEO:
-		// 	return "视频";
+		case RecordTypeEnum.VIDEO:
+			return (
+				<VideoRecord
+					message={message}
+					record={record as unknown as VideoRecordEntity}
+					variant={variant}
+					{...props}
+				/>
+			);
 		case RecordTypeEnum.LINK:
 			return (
 				<LinkRecord
