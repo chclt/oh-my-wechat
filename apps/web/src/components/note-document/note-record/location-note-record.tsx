@@ -1,9 +1,9 @@
 import { LocationIcon } from "@/components/icon";
 import { cn } from "@/lib/utils";
-import { NoteLocationRecordEntity } from "@/schema";
+import { LocationNoteRecordType } from "@/schema";
 
 interface LocationNoteRecordProps extends React.HTMLAttributes<HTMLElement> {
-	recordEntity: NoteLocationRecordEntity;
+	recordEntity: LocationNoteRecordType;
 }
 
 export default function LocationNoteRecord({

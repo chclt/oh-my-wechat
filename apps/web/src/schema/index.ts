@@ -1,5 +1,5 @@
 export * from "./message";
-export * from "./note";
+export * from "./note-record.ts";
 export * from "./record";
 
 import { MessageType } from "./message";

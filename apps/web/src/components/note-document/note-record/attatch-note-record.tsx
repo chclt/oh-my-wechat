@@ -3,13 +3,13 @@ import type { NoteMessageEntity } from "@/components/message/app-message/note-me
 import FileSizeFormatter from "@/components/ui/file-size-formatter";
 import { getDataAdapter } from "@/lib/data-adapter";
 import { cn } from "@/lib/utils";
-import { AppMessageType, FileInfo, NoteAttachRecordEntity } from "@/schema";
+import { AppMessageType, FileInfo, AttachNoteRecordType } from "@/schema";
 import { useMutation } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
 interface AttatchNoteRecordProps extends React.HTMLAttributes<HTMLElement> {
 	message: AppMessageType<NoteMessageEntity>;
-	recordEntity: NoteAttachRecordEntity;
+	recordEntity: AttachNoteRecordType;
 }
 
 export default function AttatchNoteRecord({
