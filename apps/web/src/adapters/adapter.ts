@@ -73,22 +73,25 @@ export interface GetAttachRequest {
 	type?: string;
 }
 
-export interface GetNoteMessageImageRequest {
+export interface GetRecordImageRequest {
 	accountId: string;
-	message: MessageType;
-	record: MessageRecordBaseType;
+	chat: Pick<ChatType, "id">;
+	message: Pick<MessageType, "local_id">;
+	record: Pick<MessageRecordBaseType, "@_dataid">;
 }
 
-export interface GetNoteMessageVideoRequest {
+export interface GetRecordVideoRequest {
 	accountId: string;
-	message: MessageType;
-	record: MessageRecordBaseType;
+	chat: Pick<ChatType, "id">;
+	message: Pick<MessageType, "local_id">;
+	record: Pick<MessageRecordBaseType, "@_dataid">;
 }
 
-export interface GetNoteMessageFileRequest {
+export interface GetRecordFileRequest {
 	accountId: string;
-	message: MessageType;
-	record: MessageRecordBaseType;
+	chat: Pick<ChatType, "id">;
+	message: Pick<MessageType, "local_id">;
+	record: Pick<MessageRecordBaseType, "@_dataid">;
 }
 
 export interface GetStatisticRequest {
@@ -151,15 +154,15 @@ export interface DataAdapter {
 	) => Promise<DataAdapterResponse<FileInfo | undefined>>;
 
 	getNoteMessageImage: (
-		requestData: GetNoteMessageImageRequest,
+		requestData: GetRecordImageRequest,
 	) => Promise<DataAdapterResponse<ImageInfoNext>>;
 
 	getNoteMessageVideo: (
-		requestData: GetNoteMessageVideoRequest,
+		requestData: GetRecordVideoRequest,
 	) => Promise<DataAdapterResponse<VideoInfoNext>>;
 
 	getNoteMessageFile: (
-		requestData: GetNoteMessageFileRequest,
+		requestData: GetRecordFileRequest,
 	) => Promise<DataAdapterResponse<FileInfo | undefined>>;
 
 	getStatistic: (

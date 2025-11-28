@@ -1,5 +1,5 @@
 import type { NoteMessageEntity } from "@/components/message/app-message/note-message.tsx";
-import { NoteMessageVideoQueryOptions } from "@/lib/fetchers/note-message.ts";
+import { RecordVideoQueryOptions } from "@/lib/fetchers/record.ts";
 import { AppMessageType, VideoNoteRecordType } from "@/schema";
 import { useSuspenseQuery } from "@tanstack/react-query";
 
@@ -15,8 +15,9 @@ export default function VideoNoteRecord({
 	...props
 }: VideoNoteRecordProps) {
 	const { data: video } = useSuspenseQuery(
-		NoteMessageVideoQueryOptions({
+		RecordVideoQueryOptions({
 			accountId: "",
+			chat: { id: message.chat_id },
 			message: message,
 			record: recordEntity,
 		}),

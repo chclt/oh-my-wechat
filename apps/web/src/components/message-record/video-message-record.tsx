@@ -1,4 +1,4 @@
-import { NoteMessageVideoQueryOptions } from "@/lib/fetchers/note-message";
+import { RecordVideoQueryOptions } from "@/lib/fetchers/record.ts";
 import { cn } from "@/lib/utils";
 import { MessageType } from "@/schema";
 import { useInViewport } from "@mantine/hooks";
@@ -32,10 +32,10 @@ function VideoRecordDefault({
 }: Omit<VideoRecordProps, "variant">) {
 	const { ref, inViewport } = useInViewport();
 
-	// TODO
 	const { data: video } = useQuery({
-		...NoteMessageVideoQueryOptions({
+		...RecordVideoQueryOptions({
 			accountId: "",
+			chat: { id: message.chat_id },
 			message: message,
 			record: record,
 		}),
