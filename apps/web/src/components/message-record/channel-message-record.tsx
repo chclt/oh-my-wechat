@@ -15,7 +15,7 @@ interface ChannelRecordProps extends React.HTMLAttributes<HTMLDivElement> {
 	variant: "default" | string;
 }
 
-export default function ChannelRecord({
+export default function ChannelMessageRecord({
 	message,
 	record,
 	variant = "default",

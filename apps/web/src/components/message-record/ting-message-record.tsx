@@ -11,7 +11,7 @@ interface TingRecordProps extends React.HTMLAttributes<HTMLDivElement> {
 	variant: "default" | string;
 }
 
-export default function TingRecord({
+export default function TingMessageRecord({
 	message,
 	record,
 	variant = "default",

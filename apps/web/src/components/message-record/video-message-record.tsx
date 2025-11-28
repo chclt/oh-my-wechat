@@ -12,7 +12,7 @@ interface VideoRecordProps extends React.HTMLAttributes<HTMLElement> {
 	variant: "default" | string;
 }
 
-export default function VideoRecord({
+export default function VideoMessageRecord({
 	message,
 	record,
 	variant = "default",

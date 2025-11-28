@@ -13,7 +13,7 @@ interface MiniAppRecordProps extends React.HTMLAttributes<HTMLDivElement> {
 	variant: "default" | string;
 }
 
-export default function MiniAppRecord({
+export default function MiniAppMessageRecord({
 	message,
 	record,
 	variant = "default",

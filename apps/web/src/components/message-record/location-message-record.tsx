@@ -11,7 +11,7 @@ interface LocationRecordProps extends React.HTMLAttributes<HTMLDivElement> {
 	variant: "default" | string;
 }
 
-export default function LocationRecord({
+export default function LocationMessageRecord({
 	message,
 	record,
 	variant = "default",

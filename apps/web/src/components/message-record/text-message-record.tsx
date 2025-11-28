@@ -11,7 +11,7 @@ interface TextRecordProps extends React.HTMLAttributes<HTMLDivElement> {
 	variant: "default" | string;
 }
 
-export default function TextRecord({
+export default function TextMessageRecord({
 	message,
 	record,
 	variant = "default",

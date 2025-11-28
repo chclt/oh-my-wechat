@@ -9,7 +9,7 @@ interface MusicRecordProps extends React.HTMLAttributes<HTMLDivElement> {
 	variant: "default" | string;
 }
 
-export default function MusicRecord({
+export default function MusicMessageRecord({
 	message,
 	record,
 	...props

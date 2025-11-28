@@ -1,4 +1,4 @@
-import LiveRecord from "@/components/record/live-record.tsx";
+import LiveMessageRecord from "@/components/message-record/live-message-record.tsx";
 import dialogClasses from "@/components/ui/dialog.module.css";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
@@ -8,20 +8,20 @@ import type React from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { CircleQuestionmarkSolid } from "../icon";
 import { Card, CardContent, CardFooter, CardIndicator } from "../ui/card";
-import AttatchRecord from "./attatch-record";
-import ChannelRecord from "./channel-record";
-import ChannelVideoRecord from "./channel-video-record";
-import ContactRecord from "./contact-record";
-import ForwardMessageRecord from "./forward-record";
-import ImageRecord from "./image-record";
-import LinkRecord from "./link-record";
-import LocationRecord from "./location-record";
-import MiniAppRecord from "./miniapp-record";
-import MusicRecord from "./music-record";
-import NoteRecord from "./note-record";
-import TextRecord from "./text-record";
-import TingRecord from "./ting-record";
-import VideoRecord from "./video-record";
+import AttachMessageRecord from "./attach-message-record.tsx";
+import ChannelMessageRecord from "./channel-message-record.tsx";
+import ChannelVideoMessageRecord from "./channel-video-message-record.tsx";
+import ContactMessageRecord from "./contact-message-record.tsx";
+import ForwardMessageRecord from "./forward-message-record.tsx";
+import ImageMessageRecord from "./image-message-record.tsx";
+import LinkMessageRecord from "./link-message-record.tsx";
+import LocationMessageRecord from "./location-message-record.tsx";
+import MiniAppMessageRecord from "./mini-app-message-record.tsx";
+import MusicMessageRecord from "./music-message-record.tsx";
+import NoteMessageRecord from "./note-message-record.tsx";
+import TextMessageRecord from "./text-message-record.tsx";
+import TingMessageRecord from "./ting-message-record.tsx";
+import VideoMessageRecord from "./video-message-record.tsx";
 import {
 	AttachMessageRecordType,
 	ChannelMessageRecordType,
@@ -51,7 +51,7 @@ interface RecordProps extends React.HTMLAttributes<HTMLDivElement> {
 	variant?: "default" | "note" | string; // 笔记消息中的记录需要不同样式
 }
 
-export default function Record({
+export default function MessageRecord({
 	message,
 	record,
 	variant = "default",
@@ -64,7 +64,7 @@ export default function Record({
 			}}
 			fallback={<div>Error</div>}
 		>
-			<RecordComponent
+			<MessageRecordComponent
 				message={message}
 				record={record}
 				variant={variant}
@@ -79,7 +79,7 @@ export default function Record({
 	);
 }
 
-function RecordComponent({
+function MessageRecordComponent({
 	message,
 	record,
 	variant = "default",
@@ -88,7 +88,7 @@ function RecordComponent({
 	switch (record["@_datatype"]) {
 		case RecordTypeEnum.TEXT:
 			return (
-				<TextRecord
+				<TextMessageRecord
 					message={message}
 					record={record as unknown as TextMessageRecordType}
 					variant={variant}
@@ -97,7 +97,7 @@ function RecordComponent({
 			);
 		case RecordTypeEnum.IMAGE:
 			return (
-				<ImageRecord
+				<ImageMessageRecord
 					message={message}
 					record={record as unknown as ImageMessageRecordType}
 					variant={variant}
@@ -106,7 +106,7 @@ function RecordComponent({
 			);
 		case RecordTypeEnum.VIDEO:
 			return (
-				<VideoRecord
+				<VideoMessageRecord
 					message={message}
 					record={record as unknown as VideoMessageRecordType}
 					variant={variant}
@@ -115,7 +115,7 @@ function RecordComponent({
 			);
 		case RecordTypeEnum.LINK:
 			return (
-				<LinkRecord
+				<LinkMessageRecord
 					message={message}
 					record={record as unknown as LinkMessageRecordType}
 					variant={variant}
@@ -124,7 +124,7 @@ function RecordComponent({
 			);
 		case RecordTypeEnum.LOCATION:
 			return (
-				<LocationRecord
+				<LocationMessageRecord
 					message={message}
 					record={record as unknown as LocationMessageRecordType}
 					variant={variant}
@@ -133,7 +133,7 @@ function RecordComponent({
 			);
 		case RecordTypeEnum.ATTACH:
 			return (
-				<AttatchRecord
+				<AttachMessageRecord
 					message={message}
 					record={record as unknown as AttachMessageRecordType}
 					variant={variant}
@@ -142,7 +142,7 @@ function RecordComponent({
 			);
 		case RecordTypeEnum.CONTACT:
 			return (
-				<ContactRecord
+				<ContactMessageRecord
 					message={message}
 					record={record as unknown as ContactMessageRecordType}
 					variant={variant}
@@ -160,7 +160,7 @@ function RecordComponent({
 			);
 		case RecordTypeEnum.MINIAPP:
 			return (
-				<MiniAppRecord
+				<MiniAppMessageRecord
 					message={message}
 					record={record as unknown as MiniAppMessageRecordType}
 					variant={variant}
@@ -169,7 +169,7 @@ function RecordComponent({
 			);
 		case RecordTypeEnum.NOTE:
 			return (
-				<NoteRecord
+				<NoteMessageRecord
 					message={message}
 					record={record as unknown as NoteMessageRecordType}
 					variant={variant}
@@ -178,7 +178,7 @@ function RecordComponent({
 			);
 		case RecordTypeEnum.CHANNEL_VIDEO:
 			return (
-				<ChannelVideoRecord
+				<ChannelVideoMessageRecord
 					message={message}
 					record={record as unknown as ChannelVideoMessageRecordType}
 					variant={variant}
@@ -187,7 +187,7 @@ function RecordComponent({
 			);
 		case RecordTypeEnum.LIVE:
 			return (
-				<LiveRecord
+				<LiveMessageRecord
 					message={message}
 					record={record as unknown as LiveMessageRecordType}
 					variant={variant}
@@ -196,7 +196,7 @@ function RecordComponent({
 			);
 		case RecordTypeEnum.CHANNEL:
 			return (
-				<ChannelRecord
+				<ChannelMessageRecord
 					message={message}
 					record={record as unknown as ChannelMessageRecordType}
 					variant={variant}
@@ -205,7 +205,7 @@ function RecordComponent({
 			);
 		case RecordTypeEnum.MUSIC:
 			return (
-				<MusicRecord
+				<MusicMessageRecord
 					message={message}
 					record={record as unknown as MusicMessageRecordType}
 					variant={variant}
@@ -214,7 +214,7 @@ function RecordComponent({
 			);
 		case RecordTypeEnum.TING:
 			return (
-				<TingRecord
+				<TingMessageRecord
 					message={message}
 					record={record as unknown as TingMessageRecordType}
 					variant={variant}
