@@ -1,19 +1,12 @@
 import Link from "@/components/link.tsx";
-import type { MessageType, RecordTypeEnum } from "@/schema";
-import type { RecordType } from "./record";
+import type { MessageType } from "@/schema";
 import type React from "react";
+import { MusicMessageRecordType } from "@/schema/message-record.ts";
 
 interface MusicRecordProps extends React.HTMLAttributes<HTMLDivElement> {
 	message: MessageType;
-	record: MusicRecordEntity;
+	record: MusicMessageRecordType;
 	variant: "default" | string;
-}
-
-export interface MusicRecordEntity extends RecordType {
-	"@_datatype": RecordTypeEnum.MUSIC;
-	datatitle: string;
-	streamweburl: string;
-	streamdataurl: string;
 }
 
 export default function MusicRecord({

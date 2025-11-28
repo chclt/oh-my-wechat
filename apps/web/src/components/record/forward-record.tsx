@@ -1,43 +1,26 @@
-import {
-	MessageDirection,
-	type MessageType,
-	type RecordTypeEnum,
-} from "@/schema";
+import { MessageDirection, type MessageType } from "@/schema";
 
 import { MessageBubbleGroup } from "@/components/message-bubble-group";
 
 import MessageInlineWrapper from "@/components/message-inline-wrapper";
 import {
-	type ForwardMessageRecord as ForwardMessageRecordType,
 	forwardMessageRecordVariants,
 	forwardMessageVariants,
 } from "@/components/message/app-message/forward-message";
 import { cn } from "@/lib/utils.ts";
 import type React from "react";
 import { ScrollArea } from "../ui/scroll-area";
-import Record, { type RecordType } from "./record";
+import Record from "./record";
 
 import dialogClasses from "@/components/ui/dialog.module.css";
 import { Dialog } from "@base-ui-components/react";
+import { ForwardMessageRecordType } from "@/schema/message-record.ts";
 
 interface ForwardMessageRecordProps
 	extends React.HTMLAttributes<HTMLDivElement> {
 	message: MessageType;
-	record: ForwardMessageRecordEntity;
+	record: ForwardMessageRecordType;
 	variant: "default" | string;
-}
-
-export interface ForwardMessageRecordEntity extends RecordType {
-	"@_datatype": RecordTypeEnum.FORWARD_MESSAGE;
-	datatitle: string;
-	datadesc: string;
-	recordxml: {
-		recordinfo: {
-			datalist: {
-				dataitem: ForwardMessageRecordType[];
-			};
-		};
-	};
 }
 
 export default function ForwardMessageRecord({

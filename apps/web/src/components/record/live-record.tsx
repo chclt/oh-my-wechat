@@ -1,49 +1,12 @@
 import Image from "@/components/image.tsx";
-import type { MessageType, RecordTypeEnum } from "@/schema";
-import type { RecordType } from "./record";
+import type { MessageType } from "@/schema";
 import type React from "react";
+import { LiveMessageRecordType } from "@/schema/message-record.ts";
 
 interface LiveRecordProps extends React.HTMLAttributes<HTMLDivElement> {
 	message: MessageType;
-	record: LiveRecordEntity;
+	record: LiveMessageRecordType;
 	variant: "default" | string;
-}
-
-export interface LiveRecordEntity extends RecordType {
-	"@_datatype": RecordTypeEnum.LIVE;
-	datatitle: string;
-	datadesc: string;
-	finderLive: {
-		liveFlagValue: string;
-		headUrl: string;
-		authIconUrl: string;
-		chargeFlag: string;
-		cellWidth: string;
-		bizUsername: string;
-		cellHeight: string;
-		nickname: string;
-		finderUsername: string;
-		finderObjectID: string;
-		finderNonceID: string;
-		extFlag: string;
-		liveSourceTypeStr: string;
-		authIconTypeStr: string;
-		authIconType: string;
-		finderLiveStatus: string;
-		bizNickname: string;
-		media: {
-			coverUrl: string;
-			width: string;
-			height: string;
-		};
-		bindType: string;
-		liveStatus: string;
-		desc: string;
-		liveFlag: string;
-		replayStatus: string;
-		spamLiveExtFlagString: string;
-		finderLiveID: string;
-	};
 }
 
 export default function LiveRecord({

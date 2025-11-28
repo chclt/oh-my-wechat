@@ -37,7 +37,7 @@ export interface ForwardMessageEntity {
 	md5: string;
 }
 
-export interface ForwardMessageRecord {
+export interface ForwardMessageRecordItemType {
 	"@_datatype": RecordTypeEnum;
 	"@_dataid": string;
 	srcMsgLocalid: number;
@@ -57,7 +57,7 @@ interface ForwardMessageContent {
 		title: string;
 		desc: string;
 		datalist: {
-			dataitem: ForwardMessageRecord[];
+			dataitem: ForwardMessageRecordItemType[];
 		};
 		favusername: string;
 	};

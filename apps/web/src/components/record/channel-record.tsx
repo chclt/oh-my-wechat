@@ -5,25 +5,14 @@ import {
 	CardFooter,
 	CardTitle,
 } from "@/components/ui/card.tsx";
-import type { MessageType, RecordTypeEnum } from "@/schema";
-import type { RecordType } from "./record";
+import type { MessageType } from "@/schema";
 import type React from "react";
+import { ChannelMessageRecordType } from "@/schema/message-record.ts";
 
 interface ChannelRecordProps extends React.HTMLAttributes<HTMLDivElement> {
 	message: MessageType;
-	record: ChannelRecordEntity;
+	record: ChannelMessageRecordType;
 	variant: "default" | string;
-}
-
-export interface ChannelRecordEntity extends RecordType {
-	"@_datatype": RecordTypeEnum.CHANNEL;
-	datatitle: string;
-	datadesc: string;
-	finderShareNameCard: {
-		username: string;
-		nickname: string;
-		avatar: string;
-	};
 }
 
 export default function ChannelRecord({

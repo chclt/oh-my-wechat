@@ -1,35 +1,14 @@
 import { NoteMessageVideoQueryOptions } from "@/lib/fetchers/note-message";
 import { cn } from "@/lib/utils";
-import { MessageType, RecordTypeEnum } from "@/schema";
+import { MessageType } from "@/schema";
 import { useInViewport } from "@mantine/hooks";
 import { useQuery } from "@tanstack/react-query";
 import { videoMessageVariants } from "../message/video-message";
-import { RecordType } from "./record";
-
-export interface VideoRecordEntity extends RecordType {
-	"@_datatype": RecordTypeEnum.VIDEO;
-
-	fullmd5: string;
-	cdndatakey: string;
-	cdndataurl: string;
-	head256md5: string;
-	datasize: number;
-
-	thumbfullmd5: string;
-	cdnthumbkey: string;
-	cdnthumburl: string;
-	thumbhead256md5: string;
-	thumbsize: number;
-
-	thumbfiletype: number; // 1 看起来是是图片
-	datafmt: string;
-	filetype: number; // 4 看起来是是视频
-	duration: number; // 秒
-}
+import { VideoMessageRecordType } from "@/schema/message-record.ts";
 
 interface VideoRecordProps extends React.HTMLAttributes<HTMLElement> {
 	message: MessageType;
-	record: VideoRecordEntity;
+	record: VideoMessageRecordType;
 	variant: "default" | string;
 }
 

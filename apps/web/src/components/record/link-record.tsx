@@ -1,32 +1,13 @@
-import type { MessageType, RecordTypeEnum } from "@/schema";
+import type { MessageType } from "@/schema";
 import Image from "../image";
 import { LinkCard } from "../link-card";
-import type { RecordType } from "./record";
 import type React from "react";
+import { LinkMessageRecordType } from "@/schema/message-record.ts";
 
 interface LinkRecordProps extends React.HTMLAttributes<HTMLDivElement> {
 	message: MessageType;
-	record: LinkRecordEntity;
+	record: LinkMessageRecordType;
 	variant: "default" | string;
-}
-
-export interface LinkRecordEntity extends RecordType {
-	"@_datatype": RecordTypeEnum.LINK;
-	datatitle: string;
-	datasize: number;
-	link: string;
-	weburlitem: {
-		thumburl?: string;
-		title: string;
-		desc: string;
-		link: string;
-		appmsgshareitem?: {
-			pubtime: number; // Unix时间戳
-			srcdisplayname: string; // 公众号名称
-			srcusername: string; // 公众号id
-			cover: string;
-		};
-	};
 }
 
 export default function LinkRecord({

@@ -1,29 +1,14 @@
-import type { MessageType, RecordTypeEnum } from "@/schema";
+import type { MessageType } from "@/schema";
 import { cn } from "@/lib/utils";
 import { LocationIcon } from "../icon";
 import { locationMessageVariants } from "../message/location-message";
-import type { RecordType } from "./record";
 import type React from "react";
+import { LocationMessageRecordType } from "@/schema/message-record.ts";
 
 interface LocationRecordProps extends React.HTMLAttributes<HTMLDivElement> {
 	message: MessageType;
-	record: LocationRecordEntity;
+	record: LocationMessageRecordType;
 	variant: "default" | string;
-}
-
-export interface LocationRecordEntity extends RecordType {
-	"@_datatype": RecordTypeEnum.LOCATION;
-	locitem: {
-		lng: number; // 经度
-		buildingid: number; // 建筑ID？
-		poiname: string;
-		floorname: string; // e.g. "F2"
-		label: string;
-		isfrompoilist: number; // e.g. 1
-		poiid: string; // e.g. "qqmap_00000000000000000000"
-		lat: number; // 纬度
-		scale: number; // 地图缩放比例
-	};
 }
 
 export default function LocationRecord({
