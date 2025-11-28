@@ -7,17 +7,17 @@ import { AppMessageType, FileInfo, AttachNoteRecordType } from "@/schema";
 import { useMutation } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
-interface AttatchNoteRecordProps extends React.HTMLAttributes<HTMLElement> {
+interface AttachNoteRecordProps extends React.HTMLAttributes<HTMLElement> {
 	message: AppMessageType<NoteMessageEntity>;
 	recordEntity: AttachNoteRecordType;
 }
 
-export default function AttatchNoteRecord({
+export default function AttachNoteRecord({
 	message,
 	recordEntity,
 	className,
 	...props
-}: AttatchNoteRecordProps) {
+}: AttachNoteRecordProps) {
 	const [isAttachmentNotFound, setIsAttachmentNotFound] = useState(false);
 
 	const { mutateAsync: download, data } = useMutation<FileInfo | null>({

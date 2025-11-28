@@ -2,7 +2,7 @@ import type { MessageType } from "@/schema";
 import type React from "react";
 import { AttachMessageRecordType } from "@/schema/message-record.ts";
 
-interface AttatchRecordProps extends React.HTMLAttributes<HTMLDivElement> {
+interface AttachRecordProps extends React.HTMLAttributes<HTMLDivElement> {
 	message: MessageType;
 	record: AttachMessageRecordType;
 	variant: "default" | string;
@@ -14,7 +14,7 @@ export default function AttachMessageRecord({
 	variant = "default",
 	className,
 	...props
-}: AttatchRecordProps) {
+}: AttachRecordProps) {
 	if (variant === "default")
 		return (
 			<div className={className} {...props}>
