@@ -1,28 +1,16 @@
 import Image from "@/components/image.tsx";
 import LocalImage from "@/components/local-image.tsx";
-import type { MessageType, RecordTypeEnum } from "@/schema";
+import type { MessageType } from "@/schema";
 import { cn } from "@/lib/utils.ts";
 
 import { CardTitle } from "@/components/ui/card.tsx";
-import type { RecordType } from "./record";
 import type React from "react";
+import { MiniAppMessageRecordType } from "@/schema/message-record.ts";
 
 interface MiniAppRecordProps extends React.HTMLAttributes<HTMLDivElement> {
 	message: MessageType;
-	record: MiniAppRecordEntity;
+	record: MiniAppMessageRecordType;
 	variant: "default" | string;
-}
-
-export interface MiniAppRecordEntity extends RecordType {
-	"@_datatype": RecordTypeEnum.MINIAPP;
-	datatitle: string;
-	appbranditem: {
-		iconurl: string;
-		type: number;
-		sourcedisplayname: string;
-		username: string;
-		pagepath: string; // 小程序路径
-	};
 }
 
 export default function MiniAppRecord({

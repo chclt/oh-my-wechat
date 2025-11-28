@@ -1,12 +1,7 @@
 import { AttachQueryOptions } from "@/lib/fetchers";
 import queryClient from "@/lib/query-client";
 import { cn, decodeUnicodeReferences } from "@/lib/utils.ts";
-import type {
-	AppMessageType,
-	MessageType,
-	NoteEntity,
-	RecordTypeEnum,
-} from "@/schema";
+import type { AppMessageType, MessageType, NoteEntity } from "@/schema";
 import { Dialog } from "@base-ui-components/react";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
@@ -15,19 +10,12 @@ import { LoaderIcon } from "../icon";
 import { NoteMessageEntity } from "../message/app-message/note-message";
 import NoteDocument from "../note-document/note-document";
 import NoteDocumentDialogContent from "../note-document/note-document-dialog";
-import type { RecordType } from "./record";
+import { NoteMessageRecordType } from "@/schema/message-record.ts";
 
 interface NoteRecordProps extends React.HTMLAttributes<HTMLElement> {
 	message: MessageType;
-	record: NoteRecordEntity;
+	record: NoteMessageRecordType;
 	variant: "default" | string;
-}
-
-export interface NoteRecordEntity extends RecordType {
-	"@_datatype": RecordTypeEnum.NOTE;
-	datatitle: string;
-	datadesc: string;
-	recordxml: unknown;
 }
 
 export default function NoteRecord({

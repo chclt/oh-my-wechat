@@ -1,23 +1,14 @@
 import { textMessageVariants } from "@/components/message/text-message.tsx";
 import { cn } from "@/lib/utils.ts";
-import {
-	MessageDirection,
-	type MessageType,
-	type RecordTypeEnum,
-} from "@/schema";
+import { MessageDirection, type MessageType } from "@/schema";
 import type React from "react";
 import TextPrettier from "../text-prettier.tsx";
-import type { RecordType } from "./record";
+import { TextMessageRecordType } from "@/schema/message-record.ts";
 
 interface TextRecordProps extends React.HTMLAttributes<HTMLDivElement> {
 	message: MessageType;
-	record: TextRecordEntity;
+	record: TextMessageRecordType;
 	variant: "default" | string;
-}
-
-export interface TextRecordEntity extends RecordType {
-	"@_datatype": RecordTypeEnum.TEXT;
-	datadesc: string;
 }
 
 export default function TextRecord({

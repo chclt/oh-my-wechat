@@ -1,25 +1,13 @@
 import LocalImage from "@/components/local-image";
-import type { MessageType, RecordTypeEnum } from "@/schema";
+import type { MessageType } from "@/schema";
 import { cn } from "@/lib/utils.ts";
-import type { RecordType } from "./record";
 import type React from "react";
+import { ImageMessageRecordType } from "@/schema/message-record.ts";
 
 interface ImageRecordProps extends React.HTMLAttributes<HTMLDivElement> {
 	message: MessageType;
-	record: ImageRecordEntity;
+	record: ImageMessageRecordType;
 	variant: "default" | string;
-}
-
-export interface ImageRecordEntity extends RecordType {
-	"@_datatype": RecordTypeEnum.IMAGE;
-
-	datafmt: string; // e.g. "pic"
-
-	thumbsize: number;
-	thumbfullmd5: string;
-
-	datasize: number;
-	fullmd5: string;
 }
 
 export default function ImageRecord({

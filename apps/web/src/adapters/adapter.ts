@@ -1,4 +1,3 @@
-import type { RecordType } from "@/components/record/record";
 import type {
 	AccountType,
 	AppMessageTypeEnum,
@@ -16,6 +15,7 @@ import type {
 	VoiceInfo,
 } from "@/schema";
 import type { ChatStatistics } from "./ios-backup/controllers/statistic";
+import { MessageRecordBaseType } from "@/schema/message-record.ts";
 
 export interface GetUserRequest {
 	accountId: string;
@@ -53,7 +53,7 @@ export interface GetChatListRequest {
 
 export interface GetImageRequest {
 	message: MessageType;
-	record?: RecordType;
+	record?: MessageRecordBaseType;
 	size?: "origin" | "thumb";
 	domain?: "image" | "opendata" | "video";
 }
@@ -69,26 +69,26 @@ export interface GetVoiceRequest {
 
 export interface GetAttachRequest {
 	message: MessageType;
-	record?: RecordType;
+	record?: MessageRecordBaseType;
 	type?: string;
 }
 
 export interface GetNoteMessageImageRequest {
 	accountId: string;
 	message: MessageType;
-	record: RecordType;
+	record: MessageRecordBaseType;
 }
 
 export interface GetNoteMessageVideoRequest {
 	accountId: string;
 	message: MessageType;
-	record: RecordType;
+	record: MessageRecordBaseType;
 }
 
 export interface GetNoteMessageFileRequest {
 	accountId: string;
 	message: MessageType;
-	record: RecordType;
+	record: MessageRecordBaseType;
 }
 
 export interface GetStatisticRequest {

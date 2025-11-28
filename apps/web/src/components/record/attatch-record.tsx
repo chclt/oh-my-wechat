@@ -1,17 +1,11 @@
-import type { MessageType, RecordTypeEnum } from "@/schema";
-import type { RecordType } from "./record";
+import type { MessageType } from "@/schema";
 import type React from "react";
+import { AttachMessageRecordType } from "@/schema/message-record.ts";
 
 interface AttatchRecordProps extends React.HTMLAttributes<HTMLDivElement> {
 	message: MessageType;
-	record: AttatchRecordEntity;
+	record: AttachMessageRecordType;
 	variant: "default" | string;
-}
-
-export interface AttatchRecordEntity extends RecordType {
-	"@_datatype": RecordTypeEnum.ATTACH;
-	datatitle: string;
-	datasize: number;
 }
 
 export default function AttatchRecord({

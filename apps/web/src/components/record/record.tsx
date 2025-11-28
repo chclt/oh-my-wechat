@@ -1,6 +1,4 @@
-import LiveRecord, {
-	type LiveRecordEntity,
-} from "@/components/record/live-record.tsx";
+import LiveRecord from "@/components/record/live-record.tsx";
 import dialogClasses from "@/components/ui/dialog.module.css";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
@@ -10,24 +8,38 @@ import type React from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { CircleQuestionmarkSolid } from "../icon";
 import { Card, CardContent, CardFooter, CardIndicator } from "../ui/card";
-import AttatchRecord, { type AttatchRecordEntity } from "./attatch-record";
-import ChannelRecord, { type ChannelRecordEntity } from "./channel-record";
-import ChannelVideoRecord, {
-	type ChannelVideoRecordEntity,
-} from "./channel-video-record";
-import ContactRecord, { type ContactRecordEntity } from "./contact-record";
-import ForwardMessageRecord, {
-	type ForwardMessageRecordEntity,
-} from "./forward-record";
-import ImageRecord, { type ImageRecordEntity } from "./image-record";
-import LinkRecord, { type LinkRecordEntity } from "./link-record";
-import LocationRecord, { type LocationRecordEntity } from "./location-record";
-import MiniAppRecord, { type MiniAppRecordEntity } from "./miniapp-record";
-import MusicRecord, { type MusicRecordEntity } from "./music-record";
-import NoteRecord, { type NoteRecordEntity } from "./note-record";
-import TextRecord, { type TextRecordEntity } from "./text-record";
-import TingRecord, { type TingRecordEntity } from "./ting-record";
-import VideoRecord, { VideoRecordEntity } from "./video-record";
+import AttatchRecord from "./attatch-record";
+import ChannelRecord from "./channel-record";
+import ChannelVideoRecord from "./channel-video-record";
+import ContactRecord from "./contact-record";
+import ForwardMessageRecord from "./forward-record";
+import ImageRecord from "./image-record";
+import LinkRecord from "./link-record";
+import LocationRecord from "./location-record";
+import MiniAppRecord from "./miniapp-record";
+import MusicRecord from "./music-record";
+import NoteRecord from "./note-record";
+import TextRecord from "./text-record";
+import TingRecord from "./ting-record";
+import VideoRecord from "./video-record";
+import {
+	AttachMessageRecordType,
+	ChannelMessageRecordType,
+	ChannelVideoMessageRecordType,
+	ContactMessageRecordType,
+	ForwardMessageRecordType,
+	ImageMessageRecordType,
+	LinkMessageRecordType,
+	LiveMessageRecordType,
+	LocationMessageRecordType,
+	MiniAppMessageRecordType,
+	MusicMessageRecordType,
+	NoteMessageRecordType,
+	MessageRecordBaseType,
+	TextMessageRecordType,
+	TingMessageRecordType,
+	VideoMessageRecordType,
+} from "@/schema/message-record.ts";
 
 /**
  * 合并转发的消息内容、笔记中的内容，都是一个 Record 资源
@@ -35,13 +47,8 @@ import VideoRecord, { VideoRecordEntity } from "./video-record";
 
 interface RecordProps extends React.HTMLAttributes<HTMLDivElement> {
 	message: MessageType;
-	record: RecordType;
+	record: MessageRecordBaseType;
 	variant?: "default" | "note" | string; // 笔记消息中的记录需要不同样式
-}
-
-export interface RecordType {
-	"@_datatype": RecordTypeEnum;
-	"@_dataid": string;
 }
 
 export default function Record({
@@ -83,7 +90,7 @@ function RecordComponent({
 			return (
 				<TextRecord
 					message={message}
-					record={record as unknown as TextRecordEntity}
+					record={record as unknown as TextMessageRecordType}
 					variant={variant}
 					{...props}
 				/>
@@ -92,7 +99,7 @@ function RecordComponent({
 			return (
 				<ImageRecord
 					message={message}
-					record={record as unknown as ImageRecordEntity}
+					record={record as unknown as ImageMessageRecordType}
 					variant={variant}
 					{...props}
 				/>
@@ -101,7 +108,7 @@ function RecordComponent({
 			return (
 				<VideoRecord
 					message={message}
-					record={record as unknown as VideoRecordEntity}
+					record={record as unknown as VideoMessageRecordType}
 					variant={variant}
 					{...props}
 				/>
@@ -110,7 +117,7 @@ function RecordComponent({
 			return (
 				<LinkRecord
 					message={message}
-					record={record as unknown as LinkRecordEntity}
+					record={record as unknown as LinkMessageRecordType}
 					variant={variant}
 					{...props}
 				/>
@@ -119,7 +126,7 @@ function RecordComponent({
 			return (
 				<LocationRecord
 					message={message}
-					record={record as unknown as LocationRecordEntity}
+					record={record as unknown as LocationMessageRecordType}
 					variant={variant}
 					{...props}
 				/>
@@ -128,7 +135,7 @@ function RecordComponent({
 			return (
 				<AttatchRecord
 					message={message}
-					record={record as unknown as AttatchRecordEntity}
+					record={record as unknown as AttachMessageRecordType}
 					variant={variant}
 					{...props}
 				/>
@@ -137,7 +144,7 @@ function RecordComponent({
 			return (
 				<ContactRecord
 					message={message}
-					record={record as unknown as ContactRecordEntity}
+					record={record as unknown as ContactMessageRecordType}
 					variant={variant}
 					{...props}
 				/>
@@ -146,7 +153,7 @@ function RecordComponent({
 			return (
 				<ForwardMessageRecord
 					message={message}
-					record={record as unknown as ForwardMessageRecordEntity}
+					record={record as unknown as ForwardMessageRecordType}
 					variant={variant}
 					{...props}
 				/>
@@ -155,7 +162,7 @@ function RecordComponent({
 			return (
 				<MiniAppRecord
 					message={message}
-					record={record as unknown as MiniAppRecordEntity}
+					record={record as unknown as MiniAppMessageRecordType}
 					variant={variant}
 					{...props}
 				/>
@@ -164,7 +171,7 @@ function RecordComponent({
 			return (
 				<NoteRecord
 					message={message}
-					record={record as unknown as NoteRecordEntity}
+					record={record as unknown as NoteMessageRecordType}
 					variant={variant}
 					{...props}
 				/>
@@ -173,7 +180,7 @@ function RecordComponent({
 			return (
 				<ChannelVideoRecord
 					message={message}
-					record={record as unknown as ChannelVideoRecordEntity}
+					record={record as unknown as ChannelVideoMessageRecordType}
 					variant={variant}
 					{...props}
 				/>
@@ -182,7 +189,7 @@ function RecordComponent({
 			return (
 				<LiveRecord
 					message={message}
-					record={record as unknown as LiveRecordEntity}
+					record={record as unknown as LiveMessageRecordType}
 					variant={variant}
 					{...props}
 				/>
@@ -191,7 +198,7 @@ function RecordComponent({
 			return (
 				<ChannelRecord
 					message={message}
-					record={record as unknown as ChannelRecordEntity}
+					record={record as unknown as ChannelMessageRecordType}
 					variant={variant}
 					{...props}
 				/>
@@ -200,7 +207,7 @@ function RecordComponent({
 			return (
 				<MusicRecord
 					message={message}
-					record={record as unknown as MusicRecordEntity}
+					record={record as unknown as MusicMessageRecordType}
 					variant={variant}
 					{...props}
 				/>
@@ -209,7 +216,7 @@ function RecordComponent({
 			return (
 				<TingRecord
 					message={message}
-					record={record as unknown as TingRecordEntity}
+					record={record as unknown as TingMessageRecordType}
 					variant={variant}
 					{...props}
 				/>

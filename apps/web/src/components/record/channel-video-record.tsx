@@ -1,39 +1,13 @@
 import Image from "@/components/image.tsx";
-import type { MessageType, RecordTypeEnum } from "@/schema";
-import type { RecordType } from "./record";
+import type { MessageType } from "@/schema";
 import { cn } from "@/lib/utils.ts";
 import type React from "react";
+import { ChannelVideoMessageRecordType } from "@/schema/message-record.ts";
 
 interface ChannelVideoRecordProps extends React.HTMLAttributes<HTMLDivElement> {
 	message: MessageType;
-	record: ChannelVideoRecordEntity;
+	record: ChannelVideoMessageRecordType;
 	variant: "default" | string;
-}
-
-export interface ChannelVideoRecordEntity extends RecordType {
-	"@_datatype": RecordTypeEnum.CHANNEL_VIDEO;
-	datatitle: string;
-	datadesc: string;
-	finderFeed: {
-		username: string;
-		mediaCount: number;
-		nickname: string;
-		objectNonceId: string;
-		objectId: string;
-		mediaList: {
-			media: {
-				height: number;
-				mediaType: number; // e.g. 4 是视频?
-				width: number;
-				thumbUrl: string;
-				videoPlayDuration: number; // 秒
-				url: string;
-			};
-		};
-		feedType: number; // 4 是视频？
-		avatar: string;
-		desc: string;
-	};
 }
 
 export default function ChannelVideoRecord({

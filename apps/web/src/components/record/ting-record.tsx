@@ -1,35 +1,14 @@
 import Image from "@/components/image.tsx";
 import Link from "@/components/link.tsx";
-import type { MessageType, RecordTypeEnum } from "@/schema";
+import type { MessageType } from "@/schema";
 import { cn } from "@/lib/utils";
-import type { RecordType } from "./record";
 import type React from "react";
+import { TingMessageRecordType } from "@/schema/message-record.ts";
+
 interface TingRecordProps extends React.HTMLAttributes<HTMLDivElement> {
 	message: MessageType;
-	record: TingRecordEntity;
+	record: TingMessageRecordType;
 	variant: "default" | string;
-}
-
-export interface TingRecordEntity extends RecordType {
-	"@_datatype": RecordTypeEnum.TING;
-
-	datatitle: string;
-	datadesc: string;
-
-	streamweburl: string; // 如果是音乐，这个链接一般是前往QQ音乐，如果是音频，这个链接前往公众号文章
-	songalbumurl: string;
-	weburlitem: {
-		thumburl: string;
-		title: string;
-	};
-
-	// 如果是音乐会有下面的数据
-	streamdataurl?: string;
-	streamlowbandurl?: string;
-	musicShareItem?: {
-		mvSingerName: string;
-		mid: string;
-	};
 }
 
 export default function TingRecord({

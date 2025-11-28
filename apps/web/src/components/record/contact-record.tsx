@@ -5,21 +5,15 @@ import {
 	CardFooter,
 	CardTitle,
 } from "@/components/ui/card.tsx";
-import type { MessageType, RecordTypeEnum } from "@/schema";
+import type { MessageType } from "@/schema";
 import { XMLParser } from "fast-xml-parser";
 import type React from "react";
-import type { RecordType } from "./record";
+import { ContactMessageRecordType } from "@/schema/message-record.ts";
 
 interface ContactRecordProps extends React.HTMLAttributes<HTMLDivElement> {
 	message: MessageType;
-	record: ContactRecordEntity;
+	record: ContactMessageRecordType;
 	variant: "default" | string;
-}
-
-export interface ContactRecordEntity extends RecordType {
-	"@_datatype": RecordTypeEnum.CONTACT;
-	datasize: number;
-	datadesc: string; // xml
 }
 
 export default function ContactRecord({
