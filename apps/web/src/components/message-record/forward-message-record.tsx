@@ -10,7 +10,7 @@ import {
 import { cn } from "@/lib/utils.ts";
 import type React from "react";
 import { ScrollArea } from "../ui/scroll-area";
-import Record from "./record";
+import MessageRecord from "./message-record.tsx";
 
 import dialogClasses from "@/components/ui/dialog.module.css";
 import { Dialog } from "@base-ui-components/react";
@@ -69,7 +69,11 @@ export default function ForwardMessageRecord({
 								}
 								className={"[&>img]:top-0"}
 							>
-								<Record message={message} record={i} variant="abstract" />
+								<MessageRecord
+									message={message}
+									record={i}
+									variant="abstract"
+								/>
 							</MessageInlineWrapper>
 						))}
 					</div>
@@ -105,7 +109,7 @@ export default function ForwardMessageRecord({
 												showUsername={true}
 												className="[&>.sticky]:top-[3.125rem]"
 											>
-												<Record message={message} record={record} />
+												<MessageRecord message={message} record={record} />
 											</MessageBubbleGroup>
 										),
 									)}

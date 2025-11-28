@@ -1,34 +1,40 @@
 import Image from "@/components/image.tsx";
 import type { MessageType } from "@/schema";
+import { cn } from "@/lib/utils.ts";
 import type React from "react";
-import { LiveMessageRecordType } from "@/schema/message-record.ts";
+import { ChannelVideoMessageRecordType } from "@/schema/message-record.ts";
 
-interface LiveRecordProps extends React.HTMLAttributes<HTMLDivElement> {
+interface ChannelVideoRecordProps extends React.HTMLAttributes<HTMLDivElement> {
 	message: MessageType;
-	record: LiveMessageRecordType;
+	record: ChannelVideoMessageRecordType;
 	variant: "default" | string;
 }
 
-export default function LiveRecord({
+export default function ChannelVideoMessageRecord({
 	message,
 	record,
 	variant = "default",
+	className,
 	...props
-}: LiveRecordProps) {
+}: ChannelVideoRecordProps) {
 	if (variant === "default")
 		return (
 			<div
-				className="relative w-48 min-h-16 rounded-lg overflow-hidden bg-neutral-400"
+				className={cn("relative w-48 rounded-lg overflow-hidden", className)}
 				{...props}
 			>
-				<Image src={record.finderLive.media.coverUrl} alt="" />
+				<Image
+					src={record.finderFeed.mediaList.media.thumbUrl}
+					alt={record.datatitle}
+				/>
 				<div className="absolute right-0 left-0 bottom-0 p-2 flex items-center text-sm text-white">
 					<Image
-						src={record.finderLive.headUrl}
+						src={record.finderFeed.avatar}
+						alt={record.finderFeed.nickname}
 						className="mr-1 shrink-0 size-4 rounded-full bg-neutral-500"
 					/>
-					<h4>{record.finderLive.nickname}</h4>
-					{/*<p>{record.finderFeed.desc}</p>*/}
+					<h4>{record.finderFeed.nickname}</h4>
+					{/*<p>{message.message_entity.msg.appmsg.finderFeed.desc}</p>*/}
 				</div>
 
 				<div className="absolute right-2 bottom-2 size-4 p-0.5 [&_svg]:size-full rounded-full backdrop-blur">
@@ -50,5 +56,6 @@ export default function LiveRecord({
 				</div>
 			</div>
 		);
-	return <p>[直播] {record.datatitle}</p>;
+
+	return <p>[视频] {record.datatitle}</p>;
 }

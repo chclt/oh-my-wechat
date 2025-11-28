@@ -10,7 +10,7 @@ interface LinkRecordProps extends React.HTMLAttributes<HTMLDivElement> {
 	variant: "default" | string;
 }
 
-export default function LinkRecord({
+export default function LinkMessageRecord({
 	message,
 	record,
 	variant = "default",

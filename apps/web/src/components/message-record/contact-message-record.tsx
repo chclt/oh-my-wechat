@@ -16,7 +16,7 @@ interface ContactRecordProps extends React.HTMLAttributes<HTMLDivElement> {
 	variant: "default" | string;
 }
 
-export default function ContactRecord({
+export default function ContactMessageRecord({
 	message,
 	record,
 	variant = "default",

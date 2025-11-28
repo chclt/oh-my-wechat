@@ -10,7 +10,7 @@ interface ImageRecordProps extends React.HTMLAttributes<HTMLDivElement> {
 	variant: "default" | string;
 }
 
-export default function ImageRecord({
+export default function ImageMessageRecord({
 	message,
 	record,
 	variant = "default",

@@ -18,7 +18,7 @@ interface NoteRecordProps extends React.HTMLAttributes<HTMLElement> {
 	variant: "default" | string;
 }
 
-export default function NoteRecord({
+export default function NoteMessageRecord({
 	message,
 	record,
 	variant = "default",

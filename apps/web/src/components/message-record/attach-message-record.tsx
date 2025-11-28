@@ -8,7 +8,7 @@ interface AttatchRecordProps extends React.HTMLAttributes<HTMLDivElement> {
 	variant: "default" | string;
 }
 
-export default function AttatchRecord({
+export default function AttachMessageRecord({
 	message,
 	record,
 	variant = "default",

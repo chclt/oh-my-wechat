@@ -1,7 +1,7 @@
 import { MessageBubbleGroup } from "@/components/message-bubble-group";
 import MessageInlineWrapper from "@/components/message-inline-wrapper";
 import type { AppMessageProps } from "@/components/message/app-message.tsx";
-import Record from "@/components/record/record";
+import MessageRecord from "@/components/message-record/message-record.tsx";
 import dialogClasses from "@/components/ui/dialog.module.css";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn, decodeUnicodeReferences } from "@/lib/utils.ts";
@@ -190,7 +190,11 @@ function ForwardMessageDefault({
 							}
 							className={"[&>img]:top-0"}
 						>
-							<Record message={message} record={record} variant="abstract" />
+							<MessageRecord
+								message={message}
+								record={record}
+								variant="abstract"
+							/>
 						</MessageInlineWrapper>
 					))}
 				</div>
@@ -228,7 +232,7 @@ function ForwardMessageDefault({
 										showUsername={true}
 										className="[&>.sticky]:top-[3.125rem]"
 									>
-										<Record message={message} record={record} />
+										<MessageRecord message={message} record={record} />
 									</MessageBubbleGroup>
 								))}
 							</div>
