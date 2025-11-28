@@ -119,7 +119,8 @@ export default function ForwardMessageRecord({
 													photo: { thumb: record.sourceheadurl },
 													is_openim: false,
 												}}
-												className={"[&>img]:top-0"}
+												showUsername={true}
+												className="[&>.sticky]:top-[3.125rem]"
 											>
 												<Record message={message} record={record} />
 											</MessageBubbleGroup>

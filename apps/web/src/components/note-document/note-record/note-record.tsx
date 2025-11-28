@@ -1,5 +1,6 @@
 import { NoteMessageEntity } from "@/components/message/app-message/note-message";
-
+import dialogClasses from "@/components/ui/dialog.module.css";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import {
 	AppMessageType,
@@ -11,7 +12,7 @@ import {
 	NoteVideoRecordEntity,
 	RecordTypeEnum,
 } from "@/schema";
-import { Dialog, ScrollArea } from "@base-ui-components/react";
+import { Dialog } from "@base-ui-components/react";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import AttatchNoteRecord from "./attatch-note-record";
@@ -19,9 +20,6 @@ import AudioNoteRecord from "./audio-note-record";
 import ImageNoteRecord from "./image-note-record";
 import LocationNoteRecord from "./location-note-record";
 import VideoNoteRecord from "./video-note-record";
-
-import dialogClasses from "@/components/ui/dialog.module.css";
-import scrollAreaClasses from "@/components/ui/scroll-area.module.css";
 
 interface NoteRecordProps extends React.HTMLAttributes<HTMLElement> {
 	message: AppMessageType<NoteMessageEntity>;
@@ -46,7 +44,7 @@ export default function NoteRecord({
 						className,
 					)}
 					onDoubleClick={() => {
-						if (import.meta.env.DEV) console.log(message);
+						if (import.meta.env.DEV) console.log(recordEntity);
 					}}
 				>
 					解析失败的笔记内容
@@ -55,12 +53,16 @@ export default function NoteRecord({
 		>
 			<Suspense>
 				<NoteRecordComponent
-					onDoubleClick={() => {
-						if (import.meta.env.DEV) console.log(message);
-					}}
 					message={message}
 					recordEntity={recordEntity}
 					className={className}
+					onDoubleClick={(event) => {
+						if (import.meta.env.DEV) {
+							event.preventDefault();
+							event.stopPropagation();
+							console.log(message);
+						}
+					}}
 					{...props}
 				/>
 			</Suspense>
@@ -115,7 +117,7 @@ function NoteRecordComponent({
 				/>
 			);
 		default: {
-			const { className, ...rest } = props;
+			const { className, ...restProps } = props;
 			return (
 				<Dialog.Root>
 					<Dialog.Trigger
@@ -123,7 +125,7 @@ function NoteRecordComponent({
 							"block w-full text-start py-3 px-3 text-muted-foreground bg-muted",
 							className,
 						)}
-						{...rest}
+						{...restProps}
 					>
 						暂未支持的笔记内容，点击查看原始数据
 					</Dialog.Trigger>
@@ -135,22 +137,13 @@ function NoteRecordComponent({
 								"w-md max-h-[calc(100%-6rem)] h-96",
 							)}
 						>
-							<ScrollArea.Root className="h-full overflow-hidden">
-								<ScrollArea.Viewport className={scrollAreaClasses.Viewport}>
-									<ScrollArea.Content
-										className={cn(scrollAreaClasses.Content, "p-4 w-full")}
-									>
-										<pre className="w-full text-sm pb-4 break-all whitespace-break-spaces">
-											{JSON.stringify(recordEntity, null, 2)}
-										</pre>
-									</ScrollArea.Content>
-								</ScrollArea.Viewport>
-								<ScrollArea.Scrollbar
-									className={cn(scrollAreaClasses.Scrollbar)}
-								>
-									<ScrollArea.Thumb className={scrollAreaClasses.Thumb} />
-								</ScrollArea.Scrollbar>
-							</ScrollArea.Root>
+							<ScrollArea className="size-full overflow-hidden">
+								<div className="p-4">
+									<pre className="w-full text-sm pb-4 break-all whitespace-break-spaces">
+										{JSON.stringify(recordEntity, null, 2)}
+									</pre>
+								</div>
+							</ScrollArea>
 						</Dialog.Popup>
 					</Dialog.Portal>
 				</Dialog.Root>

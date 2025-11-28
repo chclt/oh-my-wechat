@@ -1,10 +1,10 @@
 import User from "@/components/user.tsx";
-import { MessageDirection, type UserType } from "@/schema";
-import type { MessageType } from "@/schema";
 import { cn } from "@/lib/utils.ts";
+import type { MessageType } from "@/schema";
+import { MessageDirection, type UserType } from "@/schema";
+import type React from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import Message from "./message/message.tsx";
-import type React from "react";
 
 interface BubbleGroupProps extends React.HTMLAttributes<HTMLDivElement> {
 	user: UserType;
@@ -52,7 +52,7 @@ export function MessageBubbleGroup({
 					<User.Photo
 						variant="default"
 						user={user}
-						className={"sticky top-20"}
+						className={"sticky top-20"} // TODO: 重构，不应该在这里 sticky
 					/>
 				)}
 				<div

@@ -226,7 +226,7 @@ function ForwardMessageDefault({
 											is_openim: false,
 										}}
 										showUsername={true}
-										className="[&>img]:top-12.5"
+										className="[&>.sticky]:top-[3.125rem]"
 									>
 										<Record message={message} record={record} />
 									</MessageBubbleGroup>

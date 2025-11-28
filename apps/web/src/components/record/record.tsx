@@ -1,10 +1,15 @@
 import LiveRecord, {
 	type LiveRecordEntity,
 } from "@/components/record/live-record.tsx";
-import { decodeUnicodeReferences } from "@/lib/utils";
+import dialogClasses from "@/components/ui/dialog.module.css";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { cn } from "@/lib/utils";
 import { type MessageType, RecordTypeEnum } from "@/schema";
+import { Dialog } from "@base-ui-components/react";
 import type React from "react";
 import { ErrorBoundary } from "react-error-boundary";
+import { CircleQuestionmarkSolid } from "../icon";
+import { Card, CardContent, CardFooter, CardIndicator } from "../ui/card";
 import AttatchRecord, { type AttatchRecordEntity } from "./attatch-record";
 import ChannelRecord, { type ChannelRecordEntity } from "./channel-record";
 import ChannelVideoRecord, {
@@ -55,8 +60,10 @@ export default function Record({
 				message={message}
 				record={record}
 				variant={variant}
-				onDoubleClick={() => {
+				onDoubleClick={(event) => {
 					if (import.meta.env.DEV) console.log(record);
+					event.preventDefault();
+					event.stopPropagation();
 				}}
 				{...props}
 			/>
@@ -89,6 +96,9 @@ function RecordComponent({
 					{...props}
 				/>
 			);
+		// TODO
+		// case RecordTypeEnum.VIDEO:
+		// 	return "视频";
 		case RecordTypeEnum.LINK:
 			return (
 				<LinkRecord
@@ -198,15 +208,52 @@ function RecordComponent({
 				/>
 			);
 		default:
-			return (
-				<div>
-					{record["@_datatype"]}:{/* @ts-ignore */}
-					{record.datadesc
-						? // @ts-ignore
-							decodeUnicodeReferences(record.datadesc)
-						: // @ts-ignore
-							record.datatitle}
-				</div>
-			);
+			// 观察到，当遇到第四层转发消息，微信客户端会显示“This message cannot be displayed”, 同时这条 record 没有 @_datatype 字段，但 datadesc 里仍然有部分摘要信息，对于用户来说可用程度有限
+			if (variant === "default") {
+				return (
+					<Dialog.Root>
+						<Dialog.Trigger className="text-start">
+							<Card className={"max-w-[20em]"} {...props}>
+								<CardContent className="p-3">
+									<div
+										className={
+											"mt-1 text-pretty text-mute-foreground break-all"
+										}
+									>
+										{record["@_datatype"]
+											? "暂未支持的转发消息类型，点击查看原始数据"
+											: "也许因为转发消息层级过深，这条消息无法完整展示，点击查看原始数据"}
+									</div>
+								</CardContent>
+								<CardFooter>
+									{record["@_datatype"] ? record["@_datatype"] : "\u200B"}
+									<CardIndicator>
+										<CircleQuestionmarkSolid className=" scale-[135%]" />
+									</CardIndicator>
+								</CardFooter>
+							</Card>
+						</Dialog.Trigger>
+						<Dialog.Portal>
+							<Dialog.Backdrop className={dialogClasses.Backdrop} />
+							<Dialog.Popup
+								className={cn(
+									dialogClasses.Popup,
+									"w-md max-h-[calc(100%-6rem)] h-96",
+								)}
+							>
+								<ScrollArea className="size-full overflow-hidden">
+									<div className="p-4">
+										<pre className="w-full text-sm pb-4 break-all whitespace-break-spaces">
+											{JSON.stringify(record, null, 2)}
+										</pre>
+									</div>
+								</ScrollArea>
+							</Dialog.Popup>
+						</Dialog.Portal>
+					</Dialog.Root>
+				);
+			} else {
+				return "";
+			}
 	}
 }
