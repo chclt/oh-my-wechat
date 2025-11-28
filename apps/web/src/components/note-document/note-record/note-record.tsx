@@ -1,6 +1,6 @@
 import { NoteMessageEntity } from "@/components/message/app-message/note-message";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import dialogClasses from "@/components/ui/dialog.module.css";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import {
 	AppMessageType,
@@ -12,6 +12,7 @@ import {
 	NoteVideoRecordEntity,
 	RecordTypeEnum,
 } from "@/schema";
+import { Dialog } from "@base-ui-components/react";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import AttatchNoteRecord from "./attatch-note-record";
@@ -43,7 +44,7 @@ export default function NoteRecord({
 						className,
 					)}
 					onDoubleClick={() => {
-						if (import.meta.env.DEV) console.log(message);
+						if (import.meta.env.DEV) console.log(recordEntity);
 					}}
 				>
 					解析失败的笔记内容
@@ -52,12 +53,16 @@ export default function NoteRecord({
 		>
 			<Suspense>
 				<NoteRecordComponent
-					onDoubleClick={() => {
-						if (import.meta.env.DEV) console.log(message);
-					}}
 					message={message}
 					recordEntity={recordEntity}
 					className={className}
+					onDoubleClick={(event) => {
+						if (import.meta.env.DEV) {
+							event.preventDefault();
+							event.stopPropagation();
+							console.log(message);
+						}
+					}}
 					{...props}
 				/>
 			</Suspense>
@@ -112,27 +117,36 @@ function NoteRecordComponent({
 				/>
 			);
 		default: {
-			const { className, ...rest } = props;
+			const { className, ...restProps } = props;
 			return (
-				<Dialog>
-					<DialogTrigger
+				<Dialog.Root>
+					<Dialog.Trigger
 						className={cn(
 							"block w-full text-start py-3 px-3 text-muted-foreground bg-muted",
 							className,
 						)}
-						{...rest}
+						{...restProps}
 					>
 						暂未支持的笔记内容，点击查看原始数据
-					</DialogTrigger>
-					<DialogContent>
-						<ScrollArea className="max-w-full overflow-hidden">
-							<pre className="text-sm pb-4">
-								{JSON.stringify(recordEntity, null, 2)}
-							</pre>
-							<ScrollBar orientation="horizontal" />
-						</ScrollArea>
-					</DialogContent>
-				</Dialog>
+					</Dialog.Trigger>
+					<Dialog.Portal>
+						<Dialog.Backdrop className={dialogClasses.Backdrop} />
+						<Dialog.Popup
+							className={cn(
+								dialogClasses.Popup,
+								"w-md max-h-[calc(100%-6rem)] h-96",
+							)}
+						>
+							<ScrollArea className="size-full overflow-hidden">
+								<div className="p-4">
+									<pre className="w-full text-sm pb-4 break-all whitespace-break-spaces">
+										{JSON.stringify(recordEntity, null, 2)}
+									</pre>
+								</div>
+							</ScrollArea>
+						</Dialog.Popup>
+					</Dialog.Portal>
+				</Dialog.Root>
 			);
 		}
 	}

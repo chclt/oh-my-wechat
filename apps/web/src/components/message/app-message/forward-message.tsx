@@ -2,23 +2,16 @@ import { MessageBubbleGroup } from "@/components/message-bubble-group";
 import MessageInlineWrapper from "@/components/message-inline-wrapper";
 import type { AppMessageProps } from "@/components/message/app-message.tsx";
 import Record from "@/components/record/record";
-import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogHeader,
-	DialogTitle,
-	DialogTrigger,
-} from "@/components/ui/dialog";
+import dialogClasses from "@/components/ui/dialog.module.css";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { decodeUnicodeReferences } from "@/lib/utils.ts";
+import { cn, decodeUnicodeReferences } from "@/lib/utils.ts";
 import {
 	type AppMessageTypeEnum,
 	MessageDirection,
 	type MessageType,
 	type RecordTypeEnum,
 } from "@/schema";
-import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import { Dialog } from "@base-ui-components/react";
 import { cva } from "class-variance-authority";
 import { XMLParser } from "fast-xml-parser";
 import type React from "react";
@@ -202,46 +195,47 @@ function ForwardMessageDefault({
 					))}
 				</div>
 			)}
-			<Dialog>
-				<DialogTrigger asChild>
-					<button className="absolute inset-0" type="button" />
-				</DialogTrigger>
-				<DialogContent
-					className={
-						"h-[calc(100dvh-6rem)] p-0 bg-neutral-100 overflow-hidden block"
-					}
-				>
-					<ScrollArea className="h-full">
-						<DialogHeader className="z-10 sticky top-0 p-4 bg-neutral-100">
-							<DialogTitle>{title}</DialogTitle>
-							<VisuallyHidden>
-								<DialogDescription>{title}</DialogDescription>
-							</VisuallyHidden>
-						</DialogHeader>
-						<div className="space-y-2 p-4 pt-0">
-							{(Array.isArray(records.recordinfo.datalist.dataitem)
-								? records.recordinfo.datalist.dataitem
-								: [records.recordinfo.datalist.dataitem]
-							).map((record) => (
-								<MessageBubbleGroup
-									key={record["@_dataid"]}
-									user={{
-										id: record.sourcename,
-										user_id: record.sourcename,
-										username: record.sourcename,
-										photo: { thumb: record.sourceheadurl },
-										is_openim: false,
-									}}
-									showUsername={true}
-									className="[&>img]:top-12.5"
-								>
-									<Record message={message} record={record} />
-								</MessageBubbleGroup>
-							))}
-						</div>
-					</ScrollArea>
-				</DialogContent>
-			</Dialog>
+			<Dialog.Root>
+				<Dialog.Trigger className="absolute inset-0" />
+				<Dialog.Portal>
+					<Dialog.Backdrop className={dialogClasses.Backdrop} />
+					<Dialog.Popup
+						className={cn(
+							dialogClasses.Popup,
+							"h-[calc(100dvh-6rem)] max-w-md p-0 bg-neutral-100 overflow-hidden block",
+						)}
+					>
+						<ScrollArea className="size-full">
+							<div className="z-10 sticky top-0 p-4 bg-neutral-100">
+								<Dialog.Title className={dialogClasses.Title}>
+									{title}
+								</Dialog.Title>
+							</div>
+							<div className="space-y-2 p-4 pt-0">
+								{(Array.isArray(records.recordinfo.datalist.dataitem)
+									? records.recordinfo.datalist.dataitem
+									: [records.recordinfo.datalist.dataitem]
+								).map((record) => (
+									<MessageBubbleGroup
+										key={record["@_dataid"]}
+										user={{
+											id: record.sourcename,
+											user_id: record.sourcename,
+											username: record.sourcename,
+											photo: { thumb: record.sourceheadurl },
+											is_openim: false,
+										}}
+										showUsername={true}
+										className="[&>.sticky]:top-[3.125rem]"
+									>
+										<Record message={message} record={record} />
+									</MessageBubbleGroup>
+								))}
+							</div>
+						</ScrollArea>
+					</Dialog.Popup>
+				</Dialog.Portal>
+			</Dialog.Root>
 		</div>
 	);
 }

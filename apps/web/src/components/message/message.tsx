@@ -13,17 +13,19 @@ import VideoMessage from "@/components/message/video-message.tsx";
 import VoiceMessage from "@/components/message/voice-message.tsx";
 import VoipMessage from "@/components/message/voip-message.tsx";
 import WeComContactMessage from "@/components/message/wecom-contact-message.tsx";
+import dialogClasses from "@/components/ui/dialog.module.css";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { AccountSuspenseQueryOptions } from "@/lib/fetchers/account.ts";
+import { cn } from "@/lib/utils.ts";
 import { Route } from "@/routes/$accountId/route.tsx";
 import { MessageDirection, MessageTypeEnum, type MessageType } from "@/schema";
+import { Dialog } from "@base-ui-components/react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import type React from "react";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { CircleQuestionmarkSolid } from "../icon";
 import { Card, CardContent, CardFooter, CardIndicator } from "../ui/card";
-import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
-import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 
 // TODO
 export interface MessageProp<Message = MessageType, Variant = undefined> {
@@ -149,14 +151,14 @@ function MessageComponent({ message, variant, ...props }: MessageProp) {
 
 		default:
 			return (
-				<Dialog>
-					<DialogTrigger className="text-start">
+				<Dialog.Root>
+					<Dialog.Trigger className="text-start">
 						<Card className={"max-w-[20em]"} {...props}>
 							<CardContent className="p-3">
 								<div
 									className={"mt-1 text-pretty text-mute-foreground break-all"}
 								>
-									暂未支持的消息类型，点击查看原始数据{" "}
+									暂未支持的消息类型，点击查看原始数据
 								</div>
 							</CardContent>
 							<CardFooter>
@@ -166,16 +168,25 @@ function MessageComponent({ message, variant, ...props }: MessageProp) {
 								</CardIndicator>
 							</CardFooter>
 						</Card>
-					</DialogTrigger>
-					<DialogContent>
-						<ScrollArea className="max-w-full overflow-hidden">
-							<pre className="text-sm pb-4">
-								{(message as MessageType).raw_message}
-							</pre>
-							<ScrollBar orientation="horizontal" />
-						</ScrollArea>
-					</DialogContent>
-				</Dialog>
+					</Dialog.Trigger>
+					<Dialog.Portal>
+						<Dialog.Backdrop className={dialogClasses.Backdrop} />
+						<Dialog.Popup
+							className={cn(
+								dialogClasses.Popup,
+								"w-md max-h-[calc(100%-6rem)] h-96",
+							)}
+						>
+							<ScrollArea className="size-full overflow-hidden">
+								<div className="p-4">
+									<pre className="w-full text-sm pb-4 break-all whitespace-break-spaces">
+										{(message as MessageType).raw_message}
+									</pre>
+								</div>
+							</ScrollArea>
+						</Dialog.Popup>
+					</Dialog.Portal>
+				</Dialog.Root>
 			);
 	}
 }

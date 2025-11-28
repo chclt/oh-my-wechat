@@ -1,0 +1,29 @@
+@reference "../../index.css";
+
+@layer components {
+	.Group {
+		@apply grid gap-3;
+	}
+
+	.Item {
+		@apply shrink-0 size-4 aspect-square rounded-full text-primary border border-input outline-none dark:bg-input/30;
+
+		&:focus-visible {
+			@apply ring-[3px] border-ring ring-ring/50;
+		}
+
+		&[aria-invalid="true"] {
+			@apply border-destructive ring-destructive/20 dark:ring-destructive/40;
+		}
+
+		&:disabled {
+			@apply opacity-50 cursor-not-allowed;
+		}
+
+		@apply transition-[color];
+	}
+
+	.Indicator {
+		@apply relative size-full flex items-center justify-center;
+	}
+}

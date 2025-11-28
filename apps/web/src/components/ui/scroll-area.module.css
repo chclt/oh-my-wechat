@@ -1,0 +1,46 @@
+@reference "../../index.css";
+
+@layer components {
+	.Root {
+	}
+
+	.Viewport {
+		@apply size-full rounded-[inherit] overscroll-contain;
+		@apply focus-visible:outline-1 focus-visible:ring-[3px] focus-visible:ring-ring/50;
+	}
+
+	.Content {
+		@apply min-h-full;
+		/* @apply flex flex-col items-center justify-center; */
+	}
+
+	.Scrollbar {
+		@apply flex justify-center;
+		&[data-orientation="vertical"] {
+			@apply w-1 md:w-[7px];
+		}
+		&[data-orientation="horizontal"] {
+			@apply h-1 md:h-[7px];
+		}
+		@apply rounded-full m-0.5 pointer-events-none;
+		@apply transition-opacity opacity-0;
+
+		&[data-scrolling] {
+			@apply duration-0;
+		}
+
+		&[data-hovering],
+		&[data-scrolling] {
+			@apply opacity-100 pointer-events-auto;
+		}
+
+		&::before {
+			@apply content-[''] absolute w-5 h-full;
+			inset-inline-end: -0.125rem;
+		}
+	}
+
+	.Thumb {
+		@apply w-full rounded-[inherit] bg-border;
+	}
+}

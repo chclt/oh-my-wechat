@@ -40,7 +40,7 @@ export default function ChatList() {
 				className={cn("absolute inset-0", MiniRouteFirstPageContentClassName)}
 			>
 				<ScrollArea
-					className={"w-full h-full [&>div>div]:block!"}
+					className={"size-full"}
 					aria-hidden={!isThisMiniRouteOnTop}
 					style={{
 						pointerEvents: isThisMiniRouteOnTop ? "auto" : "none",

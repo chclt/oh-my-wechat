@@ -3,11 +3,11 @@ import {
 	MiniRoutePageContentClassName,
 	MiniRoutePageOverlayClassName,
 } from "@/components/mini-router/utils";
+import { Avatar } from "@/components/ui/avatar.tsx";
 import { Button } from "@/components/ui/button";
-import { ScrollAreaViewport, ScrollBar } from "@/components/ui/scroll-area";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { useDisclosure } from "@mantine/hooks";
-import * as ScrollAreaPrimitive from "@radix-ui/react-scroll-area";
 import { ChevronLeftIcon } from "lucide-react";
 import { useId, useState } from "react";
 import ContactAlphabetList, {
@@ -15,7 +15,6 @@ import ContactAlphabetList, {
 } from "./contact-alphabet-list";
 import useContactAlphabetList from "./use-contact-alphabet-list";
 import { ContactListContctGroupItem } from "./use-contact-list";
-import { Avatar } from "@/components/ui/avatar.tsx";
 
 export interface ContactGroupListMiniRouteState {
 	name: "contactGroupList";
@@ -64,44 +63,41 @@ export default function ContactGroupList() {
 				)}
 				onAnimationEnd={handleAnimationEnd}
 			>
-				<ScrollAreaPrimitive.Root
-					data-slot="scroll-area"
-					className="relative w-full h-full"
+				<ScrollArea
+					ref={(node) => {
+						if (node) {
+							setScrollTarget(node);
+						}
+					}}
+					className={cn(
+						"size-full",
+						"[&_[data-slot='scroll-area-scrollbar']]:z-30 [&_[data-slot='scroll-area-scrollbar']]:top-16!",
+					)}
 				>
-					<ScrollAreaViewport
-						ref={(node) => {
-							if (node) {
-								setScrollTarget(node);
-							}
-						}}
-					>
-						<header className="sticky z-30 top-0 h-16 px-5 ps-2.5 flex items-center bg-background/80 border-b border-muted backdrop-blur-xl">
-							<Button
-								size="icon"
-								variant="ghost"
-								className="mr-3 opacity-80"
-								onClick={() => {
-									close();
-								}}
-							>
-								<ChevronLeftIcon />
-							</Button>
+					<header className="sticky z-30 top-0 h-16 px-5 ps-2.5 flex items-center bg-background/80 border-b border-muted backdrop-blur-xl">
+						<Button
+							size="icon"
+							variant="ghost"
+							className="mr-3 opacity-80"
+							onClick={() => {
+								close();
+							}}
+						>
+							<ChevronLeftIcon />
+						</Button>
 
-							<Avatar src={contctGroup.photo} className="shrink-0" />
+						<Avatar src={contctGroup.photo} className="shrink-0" />
 
-							<div className="ms-3 font-semibold">
-								<span className="font-medium">{contctGroup.title}</span>
-							</div>
-						</header>
+						<div className="ms-3 font-semibold">
+							<span className="font-medium">{contctGroup.title}</span>
+						</div>
+					</header>
 
-						<ContactAlphabetList
-							accountId={accountId}
-							contactAlphabetList={contactAlphabetList}
-						/>
-					</ScrollAreaViewport>
-					<ScrollBar className="z-30 !top-16" />
-					<ScrollAreaPrimitive.Corner />
-				</ScrollAreaPrimitive.Root>
+					<ContactAlphabetList
+						accountId={accountId}
+						contactAlphabetList={contactAlphabetList}
+					/>
+				</ScrollArea>
 
 				{scrollTarget && (
 					<AlphabetNavigator
