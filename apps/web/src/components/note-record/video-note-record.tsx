@@ -1,5 +1,5 @@
 import type { NoteMessageEntity } from "@/components/message/app-message/note-message.tsx";
-import { NoteMessageVideoQueryOptions } from "@/lib/fetchers/note-message";
+import { NoteMessageVideoQueryOptions } from "@/lib/fetchers/note-message.ts";
 import { AppMessageType, VideoNoteRecordType } from "@/schema";
 import { useSuspenseQuery } from "@tanstack/react-query";
 

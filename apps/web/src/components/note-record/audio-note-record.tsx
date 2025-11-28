@@ -1,5 +1,5 @@
-import type { NoteMessageEntity } from "@/components/message/app-message/note-message";
-import { cn } from "@/lib/utils";
+import type { NoteMessageEntity } from "@/components/message/app-message/note-message.tsx";
+import { cn } from "@/lib/utils.ts";
 import { AppMessageType, AudioNoteRecordType } from "@/schema";
 
 interface AudioNoteRecordProps extends React.HTMLAttributes<HTMLElement> {

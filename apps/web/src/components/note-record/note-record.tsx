@@ -1,7 +1,7 @@
-import { NoteMessageEntity } from "@/components/message/app-message/note-message";
+import { NoteMessageEntity } from "@/components/message/app-message/note-message.tsx";
 import dialogClasses from "@/components/ui/dialog.module.css";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { cn } from "@/lib/utils";
+import { ScrollArea } from "@/components/ui/scroll-area.tsx";
+import { cn } from "@/lib/utils.ts";
 import {
 	AppMessageType,
 	AttachNoteRecordType,
@@ -15,11 +15,11 @@ import {
 import { Dialog } from "@base-ui-components/react";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
-import AttatchNoteRecord from "./attatch-note-record";
-import AudioNoteRecord from "./audio-note-record";
-import ImageNoteRecord from "./image-note-record";
-import LocationNoteRecord from "./location-note-record";
-import VideoNoteRecord from "./video-note-record";
+import AttatchNoteRecord from "./attatch-note-record.tsx";
+import AudioNoteRecord from "./audio-note-record.tsx";
+import ImageNoteRecord from "./image-note-record.tsx";
+import LocationNoteRecord from "./location-note-record.tsx";
+import VideoNoteRecord from "./video-note-record.tsx";
 
 interface NoteRecordProps extends React.HTMLAttributes<HTMLElement> {
 	message: AppMessageType<NoteMessageEntity>;

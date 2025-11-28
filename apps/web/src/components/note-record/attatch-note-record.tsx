@@ -1,8 +1,8 @@
-import FileTypeIcon from "@/components/filetype-icon";
-import type { NoteMessageEntity } from "@/components/message/app-message/note-message";
-import FileSizeFormatter from "@/components/ui/file-size-formatter";
-import { getDataAdapter } from "@/lib/data-adapter";
-import { cn } from "@/lib/utils";
+import FileTypeIcon from "@/components/filetype-icon.tsx";
+import type { NoteMessageEntity } from "@/components/message/app-message/note-message.tsx";
+import FileSizeFormatter from "@/components/ui/file-size-formatter.tsx";
+import { getDataAdapter } from "@/lib/data-adapter.ts";
+import { cn } from "@/lib/utils.ts";
 import { AppMessageType, FileInfo, AttachNoteRecordType } from "@/schema";
 import { useMutation } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
