@@ -37,8 +37,7 @@ export function ChevronRightSmallLine(props: React.SVGProps<SVGSVGElement>) {
 				fillRule="evenodd"
 				clipRule="evenodd"
 				d="M12.3905 9.72402C12.9112 9.20332 13.7555 9.20332 14.2761 9.72402L18.6667 14.1146C19.708 15.1559 19.708 16.8444 18.6667 17.8858L14.2761 22.2763C13.7555 22.797 12.9112 22.797 12.3905 22.2763C11.8698 21.7556 11.8698 20.9114 12.3905 20.3907L16.7811 16.0002L12.3905 11.6096C11.8698 11.0889 11.8698 10.2447 12.3905 9.72402Z"
-				fill="black"
-				fillOpacity="0.9"
+				fill="currentColor"
 			/>
 		</svg>
 	);
