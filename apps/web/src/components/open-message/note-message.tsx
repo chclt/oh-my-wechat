@@ -1,48 +1,61 @@
+import { LoaderIcon } from "@/components/icon.tsx";
+import MessageInlineWrapper from "@/components/message-inline-wrapper.tsx";
+import NoteDocumentDialogContent from "@/components/note-document/note-document-dialog.tsx";
+import NoteDocument from "@/components/note-document/note-document.tsx";
+import type { OpenMessageProps } from "@/components/open-message/open-message.tsx";
 import { RecordFileQueryOptions } from "@/lib/fetchers/record.ts";
-import queryClient from "@/lib/query-client";
+import queryClient from "@/lib/query-client.ts";
 import { cn, decodeUnicodeReferences } from "@/lib/utils.ts";
-import type { MessageType, NoteEntity, OpenMessageType } from "@/schema";
-import {
-	MessageRecordBaseType,
-	NoteMessageRecordType,
-} from "@/schema/message-record.ts";
+import { NoteEntity } from "@/schema";
+import { MessageRecordBaseType } from "@/schema/message-record.ts";
 import { NoteOpenMessageEntity } from "@/schema/open-message.ts";
 import { Dialog } from "@base-ui-components/react";
 import { useQuery } from "@tanstack/react-query";
-import type React from "react";
+import { XMLParser } from "fast-xml-parser";
 import { Suspense, useMemo, useState } from "react";
-import { LoaderIcon } from "../icon";
-import NoteDocument from "../note-document/note-document";
-import NoteDocumentDialogContent from "../note-document/note-document-dialog";
 
-interface NoteRecordProps extends React.HTMLAttributes<HTMLElement> {
-	message: MessageType;
-	record: NoteMessageRecordType;
-	variant: "default" | string;
-}
+/**
+ * 一个笔记是一个 htm 文件，文件内除了文本，还包括 <object> 标签，
+ * 标签内是图片、视频、音频等富媒体内容，
+ */
 
-export default function NoteMessageRecord({
+type NoteMessageProps = OpenMessageProps<NoteOpenMessageEntity>;
+
+export default function NoteMessage({
 	message,
-	record,
 	variant = "default",
 	...props
-}: NoteRecordProps) {
-	if (variant === "default")
-		return <NoteRecordDefault message={message} record={record} {...props} />;
-
-	return (
-		<p className="inline" {...props}>
-			[笔记] {record.datadesc}
-		</p>
-	);
+}: NoteMessageProps) {
+	if (variant === "default") {
+		return <NoteMessageDefault message={message} {...props} />;
+	} else if (variant === "referenced" || variant === "abstract") {
+		return <NoteMessageAbstract message={message} {...props} />;
+	}
 }
 
-function NoteRecordDefault({
+function NoteMessageDefault({
 	message,
-	record,
 	...props
-}: Omit<NoteRecordProps, "variant">) {
-	const noteContent = record.recordxml as unknown as NoteEntity;
+}: Omit<NoteMessageProps, "variant">) {
+	const xmlParser = new XMLParser({
+		parseAttributeValue: true,
+		ignoreAttributes: false,
+		tagValueProcessor: (_, tagValue, jPath) => {
+			if (
+				jPath === "recordinfo.datalist.dataitem.datatitle" ||
+				jPath === "recordinfo.datalist.dataitem.datadesc"
+			) {
+				return undefined; // 不解析
+			}
+			return tagValue; // 走默认的解析
+		},
+	});
+
+	const noteContent = xmlParser.parse(
+		decodeUnicodeReferences(
+			message.message_entity.msg.appmsg.recorditem.replace(/&#x20;/g, " "), // 有些时候标签和属性之间的空格编码过
+		),
+	) as NoteEntity;
 
 	const noteHtmlFile = noteContent.recordinfo.datalist.dataitem.find(
 		(item) => item["@_htmlid"] === "WeNoteHtmlFile",
@@ -85,7 +98,7 @@ function NoteRecordDefault({
 		if (!noteDocumentFile) return null;
 		return (
 			<NoteDocument
-				message={message as OpenMessageType<NoteOpenMessageEntity>}
+				message={message}
 				docUrl={noteDocumentFile.src}
 				noteEntity={noteContent}
 			/>
@@ -111,7 +124,7 @@ function NoteRecordDefault({
 				{...props}
 			>
 				<div className="p-3">
-					{decodeUnicodeReferences(record.datadesc)
+					{decodeUnicodeReferences(message.message_entity.msg.appmsg.des)
 						.split("\n")
 						.map((segment, index) => (
 							<p key={index}>{segment}</p>
@@ -147,5 +160,16 @@ function NoteRecordDefault({
 				<Suspense>{renderNoteDocument}</Suspense>
 			</NoteDocumentDialogContent>
 		</Dialog.Root>
+	);
+}
+
+function NoteMessageAbstract({
+	message,
+	...props
+}: Omit<NoteMessageProps, "variant">) {
+	return (
+		<MessageInlineWrapper message={message} {...props}>
+			[笔记] {message.message_entity.msg.appmsg.des}
+		</MessageInlineWrapper>
 	);
 }

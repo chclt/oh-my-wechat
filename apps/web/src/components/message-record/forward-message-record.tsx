@@ -6,15 +6,15 @@ import MessageInlineWrapper from "@/components/message-inline-wrapper";
 import {
 	forwardMessageRecordVariants,
 	forwardMessageVariants,
-} from "@/components/message/app-message/forward-message";
+} from "@/components/open-message/forward-message";
 import { cn } from "@/lib/utils.ts";
 import type React from "react";
 import { ScrollArea } from "../ui/scroll-area";
 import MessageRecord from "./message-record.tsx";
 
 import dialogClasses from "@/components/ui/dialog.module.css";
-import { Dialog } from "@base-ui-components/react";
 import { ForwardMessageRecordType } from "@/schema/message-record.ts";
+import { Dialog } from "@base-ui-components/react";
 
 interface ForwardMessageRecordProps
 	extends React.HTMLAttributes<HTMLDivElement> {

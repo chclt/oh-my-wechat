@@ -1,4 +1,3 @@
-import AppMessage from "@/components/message/app-message.tsx";
 import ChatroomVoipMessage from "@/components/message/chatroom-voip-message.tsx";
 import ContactMessage from "@/components/message/contact-message.tsx";
 import ImageMessage from "@/components/message/image-message.tsx";
@@ -13,6 +12,7 @@ import VideoMessage from "@/components/message/video-message.tsx";
 import VoiceMessage from "@/components/message/voice-message.tsx";
 import VoipMessage from "@/components/message/voip-message.tsx";
 import WeComContactMessage from "@/components/message/wecom-contact-message.tsx";
+import OpenMessage from "@/components/open-message/open-message.tsx";
 import dialogClasses from "@/components/ui/dialog.module.css";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { AccountSuspenseQueryOptions } from "@/lib/fetchers/account.ts";
@@ -109,7 +109,7 @@ function MessageComponent({ message, variant, ...props }: MessageProp) {
 			return <LocationMessage message={message} variant={variant} {...props} />;
 
 		case MessageTypeEnum.APP:
-			return <AppMessage message={message} variant={variant} {...props} />;
+			return <OpenMessage message={message} variant={variant} {...props} />;
 
 		case MessageTypeEnum.VOIP:
 			return <VoipMessage message={message} variant={variant} {...props} />;

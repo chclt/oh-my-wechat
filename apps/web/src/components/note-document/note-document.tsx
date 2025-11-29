@@ -1,14 +1,14 @@
+import NoteRecord from "@/components/note-record/note-record";
 import { cn } from "@/lib/utils";
-import { AppMessageType, NoteEntity } from "@/schema";
+import { NoteEntity, OpenMessageType } from "@/schema";
+import { NoteOpenMessageEntity } from "@/schema/open-message.ts";
 import { useQuery } from "@tanstack/react-query";
 import parse, { DOMNode, domToReact, Element } from "html-react-parser";
-import { NoteMessageEntity } from "../message/app-message/note-message";
-import NoteRecord from "@/components/note-record/note-record";
 
 interface NoteDocumentProps extends React.HTMLAttributes<HTMLElement> {
 	docUrl: string;
 	noteEntity: NoteEntity;
-	message: AppMessageType<NoteMessageEntity>;
+	message: OpenMessageType<NoteOpenMessageEntity>;
 }
 
 export default function NoteDocument({

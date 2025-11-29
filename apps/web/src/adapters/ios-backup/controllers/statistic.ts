@@ -1,24 +1,26 @@
-import type { ReferMessageEntity } from "@/components/message/app-message/refer-message.tsx";
-import {
-	type AppMessageType,
-	AppMessageTypeEnum,
-	MessageTypeEnum,
-	type MessageType,
-	type TextMessageType,
-	type UserType,
-	MessageDirection,
-} from "@/schema";
-import { countStringLength, formatDateTime } from "@/lib/utils.ts";
-import WechatEmojiTable from "@/lib/wechat-emojis.ts";
-import CryptoJS from "crypto-js";
-import { getUnixTime } from "date-fns";
-import * as MessageController from "./message";
 import type {
 	DataAdapterCursorPagination,
 	DataAdapterResponse,
 	GetStatisticRequest,
 } from "@/adapters/adapter";
+import { countStringLength } from "@/lib/utils.ts";
+import WechatEmojiTable from "@/lib/wechat-emojis.ts";
+import {
+	type MessageType,
+	type OpenMessageType,
+	type TextMessageType,
+	type UserType,
+	MessageDirection,
+	MessageTypeEnum,
+} from "@/schema";
+import {
+	OpenMessageTypeEnum,
+	ReferOpenMessageEntity,
+} from "@/schema/open-message.ts";
+import CryptoJS from "crypto-js";
+import { getUnixTime } from "date-fns";
 import type { WCDatabases } from "../types";
+import * as MessageController from "./message";
 
 export interface ChatStatistics {
 	date_contact_added?: string;
@@ -538,7 +540,7 @@ export async function get(...inputs: GetInput): GetOutput {
 			{
 				chatId,
 				type: MessageTypeEnum.APP,
-				type_app: AppMessageTypeEnum.REFER,
+				type_app: OpenMessageTypeEnum.REFER,
 				limit,
 			},
 			{
@@ -554,8 +556,8 @@ export async function get(...inputs: GetInput): GetOutput {
 
 			try {
 				length = countStringLength(
-					(message as AppMessageType<ReferMessageEntity>).message_entity.msg
-						.appmsg.title,
+					(message as OpenMessageType<ReferOpenMessageEntity>).message_entity
+						.msg.appmsg.title,
 				);
 			} catch (error) {
 				continue;
@@ -569,7 +571,7 @@ export async function get(...inputs: GetInput): GetOutput {
 
 			(
 				(
-					message as AppMessageType<ReferMessageEntity>
+					message as OpenMessageType<ReferOpenMessageEntity>
 				).message_entity.msg.appmsg.title.match(/\[\S+\]/g) ?? []
 			).map((wxemojiKey) => {
 				if (WechatEmojiTable[wxemojiKey]) {

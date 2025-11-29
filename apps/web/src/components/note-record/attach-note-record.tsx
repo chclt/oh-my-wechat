@@ -1,14 +1,14 @@
 import FileTypeIcon from "@/components/filetype-icon.tsx";
-import type { NoteMessageEntity } from "@/components/message/app-message/note-message.tsx";
 import FileSizeFormatter from "@/components/ui/file-size-formatter.tsx";
 import { getDataAdapter } from "@/lib/data-adapter.ts";
 import { cn } from "@/lib/utils.ts";
-import { AppMessageType, AttachNoteRecordType, FileInfo } from "@/schema";
+import { AttachNoteRecordType, FileInfo, OpenMessageType } from "@/schema";
+import { NoteOpenMessageEntity } from "@/schema/open-message.ts";
 import { useMutation } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
 interface AttachNoteRecordProps extends React.HTMLAttributes<HTMLElement> {
-	message: AppMessageType<NoteMessageEntity>;
+	message: OpenMessageType<NoteOpenMessageEntity>;
 	recordEntity: AttachNoteRecordType;
 }
 

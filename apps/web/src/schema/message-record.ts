@@ -1,5 +1,5 @@
+import type { ForwardMessageRecordItemType } from "@/components/open-message/forward-message.tsx";
 import { RecordTypeEnum } from "@/schema/record.ts";
-import type { ForwardMessageRecordItemType } from "@/components/message/app-message/forward-message.tsx";
 
 export interface MessageRecordBaseType {
 	"@_datatype": RecordTypeEnum;
