@@ -17,24 +17,24 @@ if (rootEl) {
 		<React.StrictMode>
 			<QueryClientProvider client={queryClient}>
 				<RouterProvider router={router} />
-				<Portal.Root container={document.body}>
-					<TanStackDevtools
-						config={{
-							position: "bottom-left",
-						}}
-						plugins={[
-							{
-								name: "TanStack Query",
-								render: <ReactQueryDevtoolsPanel />,
-							},
-							{
-								name: "TanStack Router",
-								render: <TanStackRouterDevtoolsPanel router={router} />,
-							},
-						]}
-					/>
-				</Portal.Root>
 			</QueryClientProvider>
+			<Portal.Root container={document.body}>
+				<TanStackDevtools
+					config={{
+						position: "bottom-left",
+					}}
+					plugins={[
+						{
+							name: "TanStack Query",
+							render: <ReactQueryDevtoolsPanel client={queryClient} />,
+						},
+						{
+							name: "TanStack Router",
+							render: <TanStackRouterDevtoolsPanel router={router} />,
+						},
+					]}
+				/>
+			</Portal.Root>
 		</React.StrictMode>,
 	);
 }
