@@ -1,6 +1,8 @@
 import type {
 	DataAdapterCursorPagination,
 	DataAdapterResponse,
+	GetGreetingMessageListRequest,
+	GetGreetingMessageListResponse,
 	GetMessageListRequest,
 } from "@/adapters/adapter.ts";
 import type { ChatroomVoipMessageEntity } from "@/components/message/chatroom-voip-message.tsx";
@@ -435,7 +437,7 @@ export type AllInput = [
 export type AllOutput = Promise<DataAdapterCursorPagination<MessageType[]>>;
 
 export async function all(...inputs: AllInput): AllOutput {
-	const [{ chatId, type, type_app, cursor, limit = 50 }, { databases }] =
+	const [{ account, chat, type, type_app, cursor, limit = 50 }, { databases }] =
 		inputs;
 
 	const cursorObject: Partial<ControllerPaginatorCursor> = {};
@@ -461,7 +463,7 @@ export async function all(...inputs: AllInput): AllOutput {
 	const dbs = databases.message;
 	if (!dbs) throw new Error("message databases are not found");
 
-	const tableName = `Chat_${CryptoJS.MD5(chatId).toString()}`;
+	const tableName = `Chat_${CryptoJS.MD5(chat.id).toString()}`;
 
 	const chatTable = getChatTable(tableName);
 
@@ -816,12 +818,12 @@ export async function all(...inputs: AllInput): AllOutput {
 		console.error("cursor_value and cursor_condition are not set correctly");
 	}
 
-	const chats = await ChatController.find({ ids: [chatId] }, { databases });
-	const chat = chats.data[0];
+	const chats = await ChatController.find({ ids: [chat.id] }, { databases });
+	const chatDetail = chats.data[0];
 
 	return {
 		data: await parseMessageDatabaseChatTableRows(rows, {
-			chat,
+			chat: chatDetail,
 			databases,
 		}),
 		meta: {
@@ -841,52 +843,6 @@ export async function all(...inputs: AllInput): AllOutput {
 					},
 				}
 			: {}),
-	};
-}
-
-export type AllFromAllInput = [
-	{
-		type?: MessageTypeEnum | MessageTypeEnum[];
-		type_app?: OpenMessageTypeEnum | OpenMessageTypeEnum[];
-		limit: number;
-	},
-	{
-		databases: WCDatabases;
-	},
-];
-
-export type AllFromAllOutput = Promise<
-	DataAdapterCursorPagination<MessageType[]>
->;
-
-export async function allFromAll(...inputs: AllFromAllInput): AllFromAllOutput {
-	const [{ type, type_app, limit }, { databases }] = inputs;
-
-	if (!databases) {
-		throw new Error("databases are not found");
-	}
-
-	const chats = await ChatController.all({ databases });
-
-	const chatMessagePromiseResults = (
-		await Promise.all(
-			chats.data.map((chat) => {
-				return all(
-					{
-						chatId: chat.id,
-						type,
-						type_app,
-						limit,
-					},
-					{ databases },
-				);
-			}),
-		)
-	).flatMap((result) => result.data);
-
-	return {
-		data: chatMessagePromiseResults,
-		meta: {},
 	};
 }
 
@@ -961,16 +917,16 @@ export async function find(...inputs: findInput): findOutput {
 }
 
 export type allVerifyInput = [
-	{ accountId: string },
+	GetGreetingMessageListRequest,
 	{
 		databases: WCDatabases;
 	},
 ];
 
-export type allVerifyOutput = Promise<DataAdapterResponse<VerityMessageType[]>>;
+export type allVerifyOutput = GetGreetingMessageListResponse;
 
 export async function allVerify(...inputs: allVerifyInput): allVerifyOutput {
-	const [_, { databases }] = inputs;
+	const [{ account }, { databases }] = inputs;
 
 	const dbs = databases.message;
 	if (!dbs) {

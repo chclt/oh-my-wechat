@@ -80,7 +80,7 @@ export default class IosBackupAdapter implements DataAdapter {
 	async getUser(input: GetUserRequest) {
 		return withCommonWrapper(async () => {
 			const temp = (await this._workerAdapter.getUserList({
-				userIds: [input.userId],
+				userIds: [input.user.id],
 			})) as DataAdapterResponse<UserType[]>;
 
 			const data = {
@@ -108,7 +108,7 @@ export default class IosBackupAdapter implements DataAdapter {
 	async getChat(input: GetChatRequest) {
 		return withCommonWrapper(async () => {
 			const temp = await this._workerAdapter.getChatList({
-				userIds: [input.chatId],
+				userIds: [input.chat.id],
 			});
 
 			const data = {

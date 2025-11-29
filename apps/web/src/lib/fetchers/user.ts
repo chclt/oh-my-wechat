@@ -1,9 +1,10 @@
+import { GetUserRequest } from "@/adapters/adapter.ts";
+import { getDataAdapter } from "@/lib/data-adapter.ts";
+import type { UserType } from "@/schema";
 import type {
 	UseQueryOptions,
 	UseSuspenseQueryOptions,
 } from "@tanstack/react-query";
-import type { UserType } from "@/schema";
-import { getDataAdapter } from "@/lib/data-adapter.ts";
 
 export function UserListQueryOptions(
 	accountId: string,
@@ -21,17 +22,16 @@ export function UserListQueryOptions(
 }
 
 export function UserSuspenseQueryOptions(
-	accountId: string,
-	userId: string,
+	requestData: GetUserRequest,
 ): UseSuspenseQueryOptions<UserType> {
 	return {
-		queryKey: [`account: ${accountId}`, `user: ${userId}`],
+		queryKey: [
+			`account: ${requestData.account.id}`,
+			`user: ${requestData.user.id}`,
+		],
 		queryFn: () =>
 			getDataAdapter()
-				.getUser({
-					accountId,
-					userId,
-				})
+				.getUser(requestData)
 				.then((res) => res.data ?? null),
 	};
 }

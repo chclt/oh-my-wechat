@@ -31,7 +31,10 @@ function RoutePlaceholderComponent({ message }: { message?: string }) {
 	const { accountId, chatId } = Route.useParams();
 
 	const { data: user } = useSuspenseQuery(
-		UserSuspenseQueryOptions(accountId, chatId),
+		UserSuspenseQueryOptions({
+			account: { id: accountId },
+			user: { id: chatId }, // chatId 的确就是 userId，但这里语义不明
+		}),
 	);
 
 	return (
@@ -67,8 +70,9 @@ function RouteComponent() {
 		fetchNextPage,
 		isFetchingNextPage,
 	} = useInfiniteQuery(
-		MessageListInfiniteQueryOptions(accountId, {
-			chatId: chat.id,
+		MessageListInfiniteQueryOptions({
+			account: { id: accountId },
+			chat: { id: chat.id },
 			limit: 20,
 		}),
 	);

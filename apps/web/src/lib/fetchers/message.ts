@@ -1,5 +1,8 @@
-import { DataAdapterCursorPagination } from "@/adapters/adapter.ts";
-import * as MessageController from "@/adapters/ios-backup/controllers/message";
+import {
+	DataAdapterCursorPagination,
+	GetGreetingMessageListRequest,
+	GetMessageListRequest,
+} from "@/adapters/adapter.ts";
 import { type MessageType, VerityMessageType } from "@/schema";
 import type {
 	DefaultError,
@@ -11,8 +14,7 @@ import type {
 import { getDataAdapter } from "../data-adapter.ts";
 
 export function MessageListInfiniteQueryOptions(
-	accountId: string,
-	requestData: MessageController.AllInput[0],
+	requestData: GetMessageListRequest,
 ): UndefinedInitialDataInfiniteOptions<
 	DataAdapterCursorPagination<MessageType[]>,
 	DefaultError,
@@ -22,8 +24,8 @@ export function MessageListInfiniteQueryOptions(
 > {
 	return {
 		queryKey: [
-			`account: ${accountId}`,
-			`chat: ${requestData.chatId}`,
+			`account: ${requestData.account.id}`,
+			`chat: ${requestData.chat.id}`,
 			`messageList:${requestData.limit}`,
 		],
 		queryFn: ({ pageParam }) =>
@@ -38,13 +40,12 @@ export function MessageListInfiniteQueryOptions(
 }
 
 export function LastMessageQueryOptions(
-	accountId: string,
-	requestData: Omit<MessageController.AllInput[0], "limit">,
+	requestData: Omit<GetMessageListRequest, "limit">,
 ): UseQueryOptions<MessageType | null> {
 	return {
 		queryKey: [
-			`account: ${accountId}`,
-			`chat: ${requestData.chatId}`,
+			`account: ${requestData.account.id}`,
+			`chat: ${requestData.chat.id}`,
 			"lastMessage",
 		],
 		queryFn: () =>
@@ -55,13 +56,13 @@ export function LastMessageQueryOptions(
 }
 
 export function GreetingMessageListQueryOptions(
-	accountId: string,
+	requestData: GetGreetingMessageListRequest,
 ): UseQueryOptions<VerityMessageType[]> {
 	return {
-		queryKey: [`account: ${accountId}`, "greetingMessageList"],
+		queryKey: [`account: ${requestData.account.id}`, "greetingMessageList"],
 		queryFn: () =>
 			getDataAdapter()
-				.getGreetingMessageList({ accountId })
+				.getGreetingMessageList(requestData)
 				.then((res) => res.data),
 	};
 }

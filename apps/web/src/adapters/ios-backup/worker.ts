@@ -71,10 +71,6 @@ export interface AdapterWorkerType
 		controllerInput: MessageController.AllInput[0],
 	) => MessageController.AllOutput;
 
-	getAllMessageList: (
-		controllerInput: MessageController.AllFromAllInput[0],
-	) => MessageController.AllFromAllOutput;
-
 	getGreetingMessageList: (
 		controllerInput: MessageController.allVerifyInput[0],
 	) => MessageController.allVerifyOutput;
@@ -330,11 +326,13 @@ export const adapterWorker: AdapterWorkerType = {
 		});
 	},
 
+	/*
 	getAllMessageList: async (controllerInput) => {
 		return await MessageController.allFromAll(controllerInput, {
 			databases: adapterWorker._getStoreItem("databases"),
 		});
 	},
+	*/
 
 	getGreetingMessageList: async (controllerInput) => {
 		return await MessageController.allVerify(controllerInput, {

@@ -22,14 +22,14 @@ export type GetAccountListResponse = Promise<
 >;
 
 export interface GetAccountRequest {
-	account: { id: string };
+	account: Pick<AccountType, "id">;
 }
 
 export type GetAccountResponse = Promise<DataAdapterResponse<AccountType>>;
 
 export interface GetUserRequest {
-	accountId: string;
-	userId: string;
+	account: Pick<AccountType, "id">;
+	user: Pick<UserType, "id">;
 }
 
 export type GetUserResponse = Promise<DataAdapterResponse<UserType>>;
@@ -41,8 +41,7 @@ export interface GetUserListRequest {
 export type GetUserListResponse = Promise<DataAdapterResponse<UserType[]>>;
 
 export interface GetAccountContactListRequest {
-	// TODO: 其他接口也应该传 accountId
-	accountId: string;
+	account: Pick<AccountType, "id">;
 }
 
 export type GetAccountContactListResponse = Promise<
@@ -50,7 +49,8 @@ export type GetAccountContactListResponse = Promise<
 >;
 
 export interface GetMessageListRequest {
-	chatId: ChatType["id"];
+	account: Pick<AccountType, "id">;
+	chat: Pick<ChatType, "id">;
 	type?: MessageTypeEnum | MessageTypeEnum[];
 	type_app?: OpenMessageTypeEnum | OpenMessageTypeEnum[]; // 有 bug
 	cursor?: string;
@@ -62,7 +62,7 @@ export type GetMessageListResponse = Promise<
 >;
 
 export interface GetGreetingMessageListRequest {
-	accountId: string;
+	account: Pick<AccountType, "id">;
 }
 
 export type GetGreetingMessageListResponse = Promise<
@@ -70,7 +70,8 @@ export type GetGreetingMessageListResponse = Promise<
 >;
 
 export interface GetChatRequest {
-	chatId: string;
+	account: Pick<AccountType, "id">;
+	chat: Pick<ChatType, "id">;
 }
 
 export type GetChatResponse = Promise<DataAdapterResponse<ChatType>>;
@@ -157,7 +158,7 @@ export type GetRecordFileResponse = Promise<
 
 export interface GetStatisticRequest {
 	account: Pick<AccountType, "id">;
-	chatId: ChatType["id"]; // TODO
+	chat: Pick<ChatType, "id">;
 	startTime: Date;
 	endTime: Date;
 }

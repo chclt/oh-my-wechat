@@ -29,7 +29,10 @@ export default function GreetingMessageItem({
 			: message.message_entity.msg["@_fromusername"];
 
 	const { data: userInfo, isFetching } = useQuery({
-		...UserSuspenseQueryOptions(accountId, userId),
+		...UserSuspenseQueryOptions({
+			account: { id: accountId },
+			user: { id: userId },
+		}),
 		enabled: inViewport,
 	});
 
