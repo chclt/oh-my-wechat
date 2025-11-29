@@ -1,4 +1,5 @@
 import { RecordVideoQueryOptions } from "@/lib/fetchers/record.ts";
+import { Route } from "@/routes/$accountId/route.tsx";
 import { OpenMessageType, VideoNoteRecordType } from "@/schema";
 import { NoteOpenMessageEntity } from "@/schema/open-message.ts";
 import { useSuspenseQuery } from "@tanstack/react-query";
@@ -14,9 +15,11 @@ export default function VideoNoteRecord({
 	className,
 	...props
 }: VideoNoteRecordProps) {
+	const { accountId } = Route.useParams();
+
 	const { data: video } = useSuspenseQuery(
 		RecordVideoQueryOptions({
-			accountId: "",
+			account: { id: accountId },
 			chat: { id: message.chat_id },
 			message: message,
 			record: recordEntity,

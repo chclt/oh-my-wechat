@@ -2,6 +2,7 @@ import FileTypeIcon from "@/components/filetype-icon.tsx";
 import FileSizeFormatter from "@/components/ui/file-size-formatter.tsx";
 import { getDataAdapter } from "@/lib/data-adapter.ts";
 import { cn } from "@/lib/utils.ts";
+import { Route } from "@/routes/$accountId/route.tsx";
 import { AttachNoteRecordType, FileInfo, OpenMessageType } from "@/schema";
 import { NoteOpenMessageEntity } from "@/schema/open-message.ts";
 import { useMutation } from "@tanstack/react-query";
@@ -18,6 +19,8 @@ export default function AttachNoteRecord({
 	className,
 	...props
 }: AttachNoteRecordProps) {
+	const { accountId } = Route.useParams();
+
 	const [isAttachmentNotFound, setIsAttachmentNotFound] = useState(false);
 
 	const { mutateAsync: download, data } = useMutation<FileInfo | null>({
@@ -25,7 +28,7 @@ export default function AttachNoteRecord({
 		mutationFn: () => {
 			return getDataAdapter()
 				.getRecordFile({
-					accountId: "",
+					account: { id: accountId },
 					chat: { id: message.chat_id },
 					message,
 					record: recordEntity,

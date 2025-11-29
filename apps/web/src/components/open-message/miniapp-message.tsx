@@ -5,6 +5,7 @@ import type { OpenMessageProps } from "@/components/open-message/open-message.ts
 import { CardTitle } from "@/components/ui/card.tsx";
 import { MessageImageQueryOptions } from "@/lib/fetchers";
 import { cn, decodeUnicodeReferences } from "@/lib/utils.ts";
+import { Route } from "@/routes/$accountId/route.tsx";
 import { MiniAppOpenMessageEntity } from "@/schema/open-message.ts";
 import { useInViewport } from "@mantine/hooks";
 import { useQuery } from "@tanstack/react-query";
@@ -27,11 +28,13 @@ function MiniappMessageDefault({
 	message,
 	...props
 }: Omit<MiniappMessageProps, "variant">) {
+	const { accountId } = Route.useParams();
+
 	const { ref: imageRef, inViewport } = useInViewport();
 
 	const { data: image } = useQuery({
 		...MessageImageQueryOptions({
-			account: { id: "" },
+			account: { id: accountId },
 			chat: { id: message.chat_id },
 			message,
 			domain: "opendata",

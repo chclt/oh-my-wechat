@@ -1,6 +1,7 @@
 import { RecordFileQueryOptions } from "@/lib/fetchers/record.ts";
 import queryClient from "@/lib/query-client";
 import { cn, decodeUnicodeReferences } from "@/lib/utils.ts";
+import { Route } from "@/routes/$accountId/route.tsx";
 import type { MessageType, NoteEntity, OpenMessageType } from "@/schema";
 import {
 	MessageRecordBaseType,
@@ -42,6 +43,8 @@ function NoteRecordDefault({
 	record,
 	...props
 }: Omit<NoteRecordProps, "variant">) {
+	const { accountId } = Route.useParams();
+
 	const noteContent = record.recordxml as unknown as NoteEntity;
 
 	const noteHtmlFile = noteContent.recordinfo.datalist.dataitem.find(
@@ -52,7 +55,7 @@ function NoteRecordDefault({
 	const NoteDocumentQueryOptions = {
 		enabled: false,
 		...RecordFileQueryOptions({
-			accountId: "",
+			account: { id: accountId },
 			chat: { id: message.chat_id },
 			message,
 			record: noteHtmlFile as unknown as Pick<

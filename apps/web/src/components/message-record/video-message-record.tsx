@@ -1,5 +1,6 @@
 import { RecordVideoQueryOptions } from "@/lib/fetchers/record.ts";
 import { cn } from "@/lib/utils";
+import { Route } from "@/routes/$accountId/route.tsx";
 import { MessageType } from "@/schema";
 import { VideoMessageRecordType } from "@/schema/message-record.ts";
 import { useInViewport } from "@mantine/hooks";
@@ -30,11 +31,13 @@ function VideoRecordDefault({
 	className,
 	...props
 }: Omit<VideoRecordProps, "variant">) {
+	const { accountId } = Route.useParams();
+
 	const { ref, inViewport } = useInViewport();
 
 	const { data: video } = useQuery({
 		...RecordVideoQueryOptions({
-			accountId: "",
+			account: { id: accountId },
 			chat: { id: message.chat_id },
 			message: message,
 			record: record,
