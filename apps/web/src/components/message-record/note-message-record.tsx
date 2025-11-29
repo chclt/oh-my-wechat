@@ -2,7 +2,10 @@ import { RecordFileQueryOptions } from "@/lib/fetchers/record.ts";
 import queryClient from "@/lib/query-client";
 import { cn, decodeUnicodeReferences } from "@/lib/utils.ts";
 import type { AppMessageType, MessageType, NoteEntity } from "@/schema";
-import { NoteMessageRecordType } from "@/schema/message-record.ts";
+import {
+	MessageRecordBaseType,
+	NoteMessageRecordType,
+} from "@/schema/message-record.ts";
 import { Dialog } from "@base-ui-components/react";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
@@ -52,8 +55,11 @@ function NoteRecordDefault({
 			accountId: "",
 			chat: { id: message.chat_id },
 			message,
-			record: noteHtmlFile,
-			type: "text/html",
+			record: noteHtmlFile as unknown as Pick<
+				MessageRecordBaseType,
+				"@_dataid"
+			>, // FIXME
+			// type: "text/html",
 		}),
 	};
 	const {
