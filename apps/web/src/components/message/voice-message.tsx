@@ -50,7 +50,6 @@ function VoiceMessageDefault({
 			account: { id: "" },
 			chat: { id: message.chat_id },
 			message,
-			scope: "transcription",
 		}),
 		enabled: inViewport,
 	});

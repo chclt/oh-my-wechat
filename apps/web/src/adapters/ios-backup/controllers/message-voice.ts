@@ -15,7 +15,7 @@ export type GetInput = [
 export type GetOutput = GetMessageVoiceResponse;
 
 export async function get(...inputs: GetInput): GetOutput {
-	const [{ chat, message, scope = "all" }, { directory, databases }] = inputs;
+	const [{ chat, message, include }, { directory, databases }] = inputs;
 
 	const db = databases.manifest;
 	if (!db) throw new Error("manifest database is not found");
