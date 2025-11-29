@@ -1,9 +1,12 @@
+import AutoResolutionFallbackImage from "@/components/auto-resolution-fallback-image.tsx";
 import { LinkCard } from "@/components/link-card.tsx";
-import LocalImage from "@/components/local-image.tsx";
 import MessageInlineWrapper from "@/components/message-inline-wrapper";
 import type { AppMessageProps } from "@/components/message/app-message.tsx";
+import { MessageImageQueryOptions } from "@/lib/fetchers";
 import { decodeUnicodeReferences } from "@/lib/utils.ts";
 import type { AppMessageTypeEnum } from "@/schema";
+import { useInViewport } from "@mantine/hooks";
+import { useQuery } from "@tanstack/react-query";
 
 export interface VideoMessageEntity {
 	type: AppMessageTypeEnum.VIDEO;
@@ -46,11 +49,23 @@ function VideoMessageDefault({
 	message,
 	...props
 }: Omit<VideoMessageProps, "variant">) {
+	const { ref: imageRef, inViewport } = useInViewport();
+
+	const { data: image } = useQuery({
+		...MessageImageQueryOptions({
+			account: { id: "" },
+			chat: { id: message.chat_id },
+			message,
+			domain: "opendata",
+		}),
+		enabled: inViewport,
+	});
+
 	const heading = decodeUnicodeReferences(
 		message.message_entity.msg.appmsg.title,
 	);
 	const preview = message.message_entity.msg.appmsg.appattach.cdnthumbmd5 ? (
-		<LocalImage message={message} domain="opendata" alt={heading} />
+		<AutoResolutionFallbackImage ref={imageRef} image={image} alt={heading} />
 	) : undefined;
 
 	return (

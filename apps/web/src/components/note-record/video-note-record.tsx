@@ -27,7 +27,7 @@ export default function VideoNoteRecord({
 		<div className={className} {...props}>
 			<video
 				src={video.src}
-				poster={video.poster?.src}
+				poster={video.cover?.src}
 				controls
 				className="w-full"
 			/>

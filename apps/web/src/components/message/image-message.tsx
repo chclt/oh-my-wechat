@@ -1,9 +1,13 @@
-import LocalImage from "@/components/local-image.tsx";
+import AutoResolutionFallbackImage from "@/components/auto-resolution-fallback-image.tsx";
+import Image from "@/components/image.tsx";
 import MessageInlineWrapper from "@/components/message-inline-wrapper";
 import type { MessageProp } from "@/components/message/message.tsx";
 import User from "@/components/user.tsx";
+import { MessageImageQueryOptions } from "@/lib/fetchers";
 import { cn } from "@/lib/utils.ts";
 import type { ImageMessageType } from "@/schema";
+import { useInViewport } from "@mantine/hooks";
+import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 
 type ImageMessageProps = MessageProp<
@@ -70,15 +74,7 @@ export default function ImageMessage({
 	} else if (variant === "viewer_detail") {
 		// TODO
 	} else if (variant === "viewer_thumb") {
-		return (
-			<div {...props}>
-				<LocalImage
-					message={message}
-					size={variant === "viewer_thumb" ? "thumb" : "origin"}
-					alt={""}
-				/>
-			</div>
-		);
+		return <div {...props}>TODO</div>;
 	} else if (variant === "abstract") {
 		return <ImageMessageAbstract message={message} {...props} />;
 	}
@@ -88,6 +84,17 @@ function ImageMessageDefault({
 	message,
 	...props
 }: Omit<ImageMessageProps, "variant">) {
+	const { ref: imageRef, inViewport } = useInViewport();
+
+	const { data: image } = useQuery({
+		...MessageImageQueryOptions({
+			account: { id: "" },
+			chat: { id: message.chat_id },
+			message,
+		}),
+		enabled: inViewport,
+	});
+
 	return (
 		<div
 			className={cn("rounded-lg overflow-hidden")}
@@ -96,10 +103,9 @@ function ImageMessageDefault({
 			}}
 			{...props}
 		>
-			<LocalImage
-				message={message}
-				size="origin"
-				alt={"图片"}
+			<AutoResolutionFallbackImage
+				ref={imageRef}
+				image={image}
 				className={
 					"max-w-[16em] max-h-128 min-w-32 min-h-16 object-contain bg-white"
 				}
@@ -112,15 +118,24 @@ function ImageMessageAbstract({
 	message,
 	...props
 }: Omit<ImageMessageProps, "variant">) {
+	const { ref: imageRef, inViewport } = useInViewport();
+
+	const { data: image } = useQuery({
+		...MessageImageQueryOptions({
+			account: { id: "" },
+			chat: { id: message.chat_id },
+			message,
+			sizes: ["thumbnail"],
+		}),
+		enabled: inViewport,
+	});
+
 	return (
 		<MessageInlineWrapper message={message} {...props}>
-			<LocalImage
-				message={message}
-				size="thumb"
-				alt={""}
-				className={
-					"me-1 inline align-middle min-w-4 min-h-4 size-4 object-cover rounded-[3px]"
-				}
+			<Image
+				ref={imageRef}
+				src={image?.thumbnail?.src}
+				className="me-1 inline align-middle min-w-4 min-h-4 size-4 object-cover rounded-[3px]"
 			/>
 			[图片]
 		</MessageInlineWrapper>
@@ -131,6 +146,18 @@ function ImageMessageReferenced({
 	message,
 	...props
 }: Omit<ImageMessageProps, "variant">) {
+	const { ref: imageRef, inViewport } = useInViewport();
+
+	const { data: image } = useQuery({
+		...MessageImageQueryOptions({
+			account: { id: "" },
+			chat: { id: message.chat_id },
+			message,
+			sizes: ["thumbnail"],
+		}),
+		enabled: inViewport,
+	});
+
 	return (
 		<div {...props}>
 			{message.from && (
@@ -139,13 +166,10 @@ function ImageMessageReferenced({
 					<span>: </span>
 				</>
 			)}
-			<LocalImage
-				message={message}
-				size="origin"
-				alt={""}
-				className={
-					"inline mx-[0.2em] align-top max-w-16 max-h-16 rounded overflow-hidden"
-				}
+			<AutoResolutionFallbackImage
+				ref={imageRef}
+				image={image}
+				className="inline mx-[0.2em] align-top max-w-16 max-h-16 rounded overflow-hidden"
 			/>
 		</div>
 	);

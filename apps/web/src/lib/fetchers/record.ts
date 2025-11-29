@@ -1,12 +1,9 @@
-import * as NoteMessageFileController from "@/adapters/ios-backup/controllers/record-file.ts";
-import * as NoteMessageImageController from "@/adapters/ios-backup/controllers/record-image.ts";
-import * as NoteMessageVideoController from "@/adapters/ios-backup/controllers/record-video.ts";
-import { getDataAdapter } from "../data-adapter";
 import {
 	GetRecordFileRequest,
 	GetRecordImageRequest,
 	GetRecordVideoRequest,
 } from "@/adapters/adapter.ts";
+import { getDataAdapter } from "../data-adapter";
 
 export function RecordImageQueryOptions(requestData: GetRecordImageRequest) {
 	return {
@@ -19,8 +16,8 @@ export function RecordImageQueryOptions(requestData: GetRecordImageRequest) {
 		],
 		queryFn: () =>
 			getDataAdapter()
-				.getNoteMessageImage(requestData)
-				.then((res) => res.data),
+				.getRecordImage(requestData)
+				.then((res) => res.data ?? null),
 	};
 }
 
@@ -35,8 +32,8 @@ export function RecordVideoQueryOptions(requestData: GetRecordVideoRequest) {
 		],
 		queryFn: () =>
 			getDataAdapter()
-				.getNoteMessageVideo(requestData)
-				.then((res) => res.data),
+				.getRecordVideo(requestData)
+				.then((res) => res.data ?? null),
 	};
 }
 
@@ -49,6 +46,9 @@ export function RecordFileQueryOptions(requestData: GetRecordFileRequest) {
 			`record: ${requestData.record["@_dataid"]}`,
 			"record-file",
 		],
-		queryFn: () => getDataAdapter().getNoteMessageFile(requestData),
+		queryFn: () =>
+			getDataAdapter()
+				.getRecordFile(requestData)
+				.then((res) => res.data ?? null),
 	};
 }

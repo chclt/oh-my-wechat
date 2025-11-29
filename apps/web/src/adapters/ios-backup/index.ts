@@ -4,20 +4,21 @@ import {
 	DataAdapter,
 	DataAdapterResponse,
 	GetAccountContactListRequest,
-	GetAttachRequest,
+	GetAccountRequest,
 	GetChatListRequest,
 	GetChatRequest,
 	GetGreetingMessageListRequest,
-	GetImageRequest,
+	GetMessageAttachRequest,
+	GetMessageImageRequest,
 	GetMessageListRequest,
+	GetMessageVideoRequest,
+	GetMessageVoiceRequest,
 	GetRecordFileRequest,
 	GetRecordImageRequest,
 	GetRecordVideoRequest,
 	GetStatisticRequest,
 	GetUserListRequest,
 	GetUserRequest,
-	GetVideoRequest,
-	GetVoiceRequest,
 } from "../adapter.ts";
 import type { AdapterWorkerType } from "./worker.ts";
 import AdapterWorker from "./worker.ts?worker";
@@ -59,9 +60,9 @@ export default class IosBackupAdapter implements DataAdapter {
 		);
 	}
 
-	async getAccount(accountId: string) {
+	async getAccount(input: GetAccountRequest) {
 		return withCommonWrapper(
-			() => this._workerAdapter.getAccount(accountId),
+			() => this._workerAdapter.getAccount(input),
 			"getAccount",
 		);
 	}
@@ -132,51 +133,52 @@ export default class IosBackupAdapter implements DataAdapter {
 		);
 	}
 
-	async getImage(input: GetImageRequest) {
+	async getMessageImage(input: GetMessageImageRequest) {
 		return withCommonWrapper(
-			() => this._workerAdapter.getImage(input),
-			"getImage",
+			() => this._workerAdapter.getMessageImage(input),
+			"getMessageImage",
 		);
 	}
 
-	async getVideo(input: GetVideoRequest) {
+	async getMessageVideo(input: GetMessageVideoRequest) {
 		return withCommonWrapper(
-			() => this._workerAdapter.getVideo(input),
-			"getVideo",
+			() => this._workerAdapter.getMessageVideo(input),
+			"getMessageVideo",
 		);
 	}
 
-	async getVoice(input: GetVoiceRequest) {
+	async getMessageVoice(input: GetMessageVoiceRequest) {
 		return withCommonWrapper(
-			() => this._workerAdapter.getVoice(input),
-			"getVoice",
+			() => this._workerAdapter.getMessageVoice(input),
+			"getMessageVoice",
 		);
 	}
 
-	async getAttach(input: GetAttachRequest) {
+	async getMessageAttach(input: GetMessageAttachRequest) {
 		return withCommonWrapper(
-			() => this._workerAdapter.getAttach(input),
-			"getAttach",
+			() => this._workerAdapter.getMessageAttach(input),
+			"getMessageAttach",
 		);
 	}
 
-	async getNoteMessageImage(input: GetRecordImageRequest) {
+	// TODO: rename to getRecord...
+	async getRecordImage(input: GetRecordImageRequest) {
 		return withCommonWrapper(
-			() => this._workerAdapter.getNoteMessageImage(input),
+			() => this._workerAdapter.getRecordImage(input),
 			"getNoteMessageImage",
 		);
 	}
 
-	async getNoteMessageVideo(input: GetRecordVideoRequest) {
+	async getRecordVideo(input: GetRecordVideoRequest) {
 		return withCommonWrapper(
-			() => this._workerAdapter.getNoteMessageVideo(input),
+			() => this._workerAdapter.getRecordVideo(input),
 			"getNoteMessageVideo",
 		);
 	}
 
-	async getNoteMessageFile(input: GetRecordFileRequest) {
+	async getRecordFile(input: GetRecordFileRequest) {
 		return withCommonWrapper(
-			() => this._workerAdapter.getNoteMessageFile(input),
+			() => this._workerAdapter.getRecordFile(input),
 			"getNoteMessageFile",
 		);
 	}

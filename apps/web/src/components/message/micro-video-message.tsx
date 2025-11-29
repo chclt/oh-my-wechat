@@ -1,7 +1,9 @@
-import LocalVideo from "@/components/local-video.tsx";
 import MessageInlineWrapper from "@/components/message-inline-wrapper";
 import type { MessageProp } from "@/components/message/message.tsx";
+import { MessageVideoQueryOptions } from "@/lib/fetchers";
 import type { MicroVideoMessageType } from "@/schema";
+import { useInViewport } from "@mantine/hooks";
+import { useQuery } from "@tanstack/react-query";
 
 type MicroVideoMessageProps = MessageProp<MicroVideoMessageType>;
 
@@ -46,9 +48,27 @@ function MicroVideoMessageDefault({
 	message,
 	...props
 }: Omit<MicroVideoMessageProps, "variant">) {
+	const { ref: videoRef, inViewport } = useInViewport();
+
+	const { data: video } = useQuery({
+		enabled: inViewport,
+		...MessageVideoQueryOptions({
+			account: { id: "" },
+			chat: { id: message.chat_id },
+			message,
+		}),
+	});
+
 	return (
 		<div {...props}>
-			<LocalVideo message={message} />
+			<video
+				ref={videoRef}
+				src={video?.src}
+				poster={video?.cover?.src}
+				controls
+				// width={result?.[0]?.width}
+				// height={result?.[0]?.height}
+			/>
 		</div>
 	);
 }

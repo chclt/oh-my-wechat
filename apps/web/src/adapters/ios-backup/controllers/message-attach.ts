@@ -1,17 +1,19 @@
-import { DataAdapterResponse, GetAttachRequest } from "@/adapters/adapter";
-import type { FileInfo } from "@/schema";
+import {
+	GetMessageAttachRequest,
+	GetMessageAttachResponse,
+} from "@/adapters/adapter";
 import CryptoJS from "crypto-js";
 import { WCDatabases } from "../types";
 import { getFilesFromManifast } from "../utils";
 
 export type GetInput = [
-	GetAttachRequest,
+	GetMessageAttachRequest,
 	{ directory: FileSystemDirectoryHandle | FileList; databases: WCDatabases },
 ];
-export type GetOutput = Promise<DataAdapterResponse<FileInfo | undefined>>;
+export type GetOutput = GetMessageAttachResponse;
 
 export async function get(...inputs: GetInput): GetOutput {
-	const [{ message, record, type }, { directory, databases }] = inputs;
+	const [{ chat, message, type }, { directory, databases }] = inputs;
 
 	const db = databases.manifest;
 	if (!db) throw new Error("manifest database is not found");
@@ -19,10 +21,10 @@ export async function get(...inputs: GetInput): GetOutput {
 	const files = await getFilesFromManifast(
 		db,
 		directory,
-		record
-			? `%/OpenData/${CryptoJS.MD5(message.chat_id).toString()}/${message.local_id}/${record["@_dataid"]}.%`
-			: `%/OpenData/${CryptoJS.MD5(message.chat_id).toString()}/${message.local_id}.%`,
+		`%/OpenData/${CryptoJS.MD5(chat.id).toString()}/${message.local_id}.%`,
 	);
+
+	if (files.length === 0) return { data: undefined };
 
 	let result;
 

@@ -1,18 +1,21 @@
+import {
+	GetMessageVoiceRequest,
+	GetMessageVoiceResponse,
+} from "@/adapters/adapter";
 import type { VoiceInfo } from "@/schema";
 import CryptoJS from "crypto-js";
-import { getFilesFromManifast } from "../utils";
-import { DataAdapterResponse, GetVoiceRequest } from "@/adapters/adapter";
 import { WCDatabases } from "../types";
+import { getFilesFromManifast } from "../utils";
 import { convertSilk } from "../utils/silk";
 
 export type GetInput = [
-	GetVoiceRequest,
+	GetMessageVoiceRequest,
 	{ directory: FileSystemDirectoryHandle | FileList; databases: WCDatabases },
 ];
-export type GetOutput = Promise<DataAdapterResponse<VoiceInfo>>;
+export type GetOutput = GetMessageVoiceResponse;
 
 export async function get(...inputs: GetInput): GetOutput {
-	const [{ message, scope = "all" }, { directory, databases }] = inputs;
+	const [{ chat, message, scope = "all" }, { directory, databases }] = inputs;
 
 	const db = databases.manifest;
 	if (!db) throw new Error("manifest database is not found");
@@ -20,8 +23,10 @@ export async function get(...inputs: GetInput): GetOutput {
 	const files = await getFilesFromManifast(
 		db,
 		directory,
-		`%/Audio/${CryptoJS.MD5(message.chat_id).toString()}/${message.local_id}.%`,
+		`%/Audio/${CryptoJS.MD5(chat.id).toString()}/${message.local_id}.%`,
 	);
+
+	if (files.length === 0) return { data: undefined };
 
 	let result: VoiceInfo = {
 		raw_aud_src: "",

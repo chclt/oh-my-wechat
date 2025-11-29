@@ -1,10 +1,10 @@
 import { RecordVideoQueryOptions } from "@/lib/fetchers/record.ts";
 import { cn } from "@/lib/utils";
 import { MessageType } from "@/schema";
+import { VideoMessageRecordType } from "@/schema/message-record.ts";
 import { useInViewport } from "@mantine/hooks";
 import { useQuery } from "@tanstack/react-query";
 import { videoMessageVariants } from "../message/video-message";
-import { VideoMessageRecordType } from "@/schema/message-record.ts";
 
 interface VideoRecordProps extends React.HTMLAttributes<HTMLElement> {
 	message: MessageType;
@@ -58,7 +58,7 @@ function VideoRecordDefault({
 			<div className="relative">
 				<video
 					src={video?.src}
-					poster={video?.poster?.src}
+					poster={video?.cover?.src}
 					controls
 					className="w-full"
 				/>

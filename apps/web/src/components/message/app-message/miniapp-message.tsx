@@ -1,10 +1,13 @@
+import AutoResolutionFallbackImage from "@/components/auto-resolution-fallback-image.tsx";
 import Image from "@/components/image.tsx";
-import LocalImage from "@/components/local-image.tsx";
 import MessageInlineWrapper from "@/components/message-inline-wrapper";
 import type { AppMessageProps } from "@/components/message/app-message.tsx";
 import { CardTitle } from "@/components/ui/card";
+import { MessageImageQueryOptions } from "@/lib/fetchers";
 import { cn, decodeUnicodeReferences } from "@/lib/utils";
 import type { AppMessageTypeEnum } from "@/schema";
+import { useInViewport } from "@mantine/hooks";
+import { useQuery } from "@tanstack/react-query";
 
 export interface MiniappMessageEntity {
 	type: AppMessageTypeEnum.MINIAPP;
@@ -67,6 +70,18 @@ function MiniappMessageDefault({
 	message,
 	...props
 }: Omit<MiniappMessageProps, "variant">) {
+	const { ref: imageRef, inViewport } = useInViewport();
+
+	const { data: image } = useQuery({
+		...MessageImageQueryOptions({
+			account: { id: "" },
+			chat: { id: message.chat_id },
+			message,
+			domain: "opendata",
+		}),
+		enabled: inViewport,
+	});
+
 	return (
 		<div
 			className={cn("relative w-52 bg-white rounded-lg overflow-hidden")}
@@ -93,10 +108,9 @@ function MiniappMessageDefault({
 				)}
 			</div>
 
-			<LocalImage
-				message={message}
-				size="origin"
-				domain="opendata"
+			<AutoResolutionFallbackImage
+				ref={imageRef}
+				image={image}
 				className={"w-full"}
 			/>
 

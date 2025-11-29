@@ -4,7 +4,7 @@ import { LoaderIcon } from "@/components/icon.tsx";
 import MessageInlineWrapper from "@/components/message-inline-wrapper";
 import type { AppMessageProps } from "@/components/message/app-message.tsx";
 import FileSizeFormatter from "@/components/ui/file-size-formatter.tsx";
-import { AttachQueryOptions } from "@/lib/fetchers";
+import { MessageAttachQueryOptions } from "@/lib/fetchers";
 import queryClient from "@/lib/query-client.ts";
 import { cn, decodeUnicodeReferences } from "@/lib/utils.ts";
 import type { AppMessageTypeEnum } from "@/schema";
@@ -54,7 +54,9 @@ function AttachMessageDefault({
 }: Omit<AttachMessageProps, "variant">) {
 	const AttachmentQueryOptions = {
 		enabled: false,
-		...AttachQueryOptions({
+		...MessageAttachQueryOptions({
+			account: { id: "" },
+			chat: { id: message.chat_id },
 			message,
 		}),
 	};
