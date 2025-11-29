@@ -1,17 +1,16 @@
+import { GetAccountContactListRequest } from "@/adapters/adapter.ts";
+import { ContactType } from "@/schema";
 import { UseSuspenseQueryOptions } from "@tanstack/react-query";
 import { getDataAdapter } from "../data-adapter";
-import { ContactType } from "@/schema";
 
 export function AccountContactListSuspenseQueryOptions(
-	accountId: string,
+	requestData: GetAccountContactListRequest,
 ): UseSuspenseQueryOptions<ContactType[]> {
 	return {
-		queryKey: [`account: ${accountId}`, "ContactList"],
+		queryKey: [`account: ${requestData.account.id}`, "ContactList"],
 		queryFn: () =>
 			getDataAdapter()
-				.getAccountContactList({
-					accountId,
-				})
+				.getAccountContactList(requestData)
 				.then((res) => res.data),
 	};
 }

@@ -96,12 +96,12 @@ export type GetInput = [GetStatisticRequest, { databases: WCDatabases }];
 export type GetOutput = Promise<DataAdapterResponse<ChatStatistics>>;
 
 export async function get(...inputs: GetInput): GetOutput {
-	const [{ chatId, startTime, endTime }, { databases }] = inputs;
+	const [{ account, chat, startTime, endTime }, { databases }] = inputs;
 
 	const dbs = databases.message;
 	if (!dbs) throw new Error("message databases is not found");
 
-	const sessionIdMd5 = CryptoJS.MD5(chatId).toString();
+	const sessionIdMd5 = CryptoJS.MD5(chat.id).toString();
 	const startTimestampUnix = getUnixTime(startTime);
 	const endTimestampUnix = getUnixTime(endTime);
 
@@ -478,7 +478,8 @@ export async function get(...inputs: GetInput): GetOutput {
 	do {
 		result = await MessageController.all(
 			{
-				chatId,
+				account: { id: account.id },
+				chat: { id: chat.id },
 				type: MessageTypeEnum.TEXT,
 				limit,
 			},
@@ -538,7 +539,8 @@ export async function get(...inputs: GetInput): GetOutput {
 	do {
 		result = await MessageController.all(
 			{
-				chatId,
+				account: { id: account.id },
+				chat: { id: chat.id },
 				type: MessageTypeEnum.APP,
 				type_app: OpenMessageTypeEnum.REFER,
 				limit,

@@ -1,5 +1,6 @@
 import Message from "@/components/message/message.tsx";
 import { useMiniRouter } from "@/components/mini-router";
+import { Avatar } from "@/components/ui/avatar.tsx";
 import { LastMessageQueryOptions } from "@/lib/fetchers/message";
 import { cn, formatDateTime } from "@/lib/utils.ts";
 import { useInViewport } from "@mantine/hooks";
@@ -9,7 +10,6 @@ import type React from "react";
 import { Route } from "../../route";
 import { ChatGroupListMiniRouteState } from "./chat-group-list";
 import { ChatListChatGroupItem, ChatListChatItem } from "./use-chat-list";
-import { Avatar } from "@/components/ui/avatar.tsx";
 
 interface ChatItemProps extends React.HTMLAttributes<HTMLLIElement> {
 	chatListItem: ChatListChatItem | ChatListChatGroupItem;
@@ -28,8 +28,9 @@ export default function ChatListItem({
 	const { ref: itemRef, inViewport } = useInViewport();
 
 	const { data: last_message } = useQuery({
-		...LastMessageQueryOptions(accountId, {
-			chatId: chatListItem.chat.id,
+		...LastMessageQueryOptions({
+			account: { id: accountId },
+			chat: { id: chatListItem.chat.id },
 		}),
 		enabled: inViewport,
 	});

@@ -42,7 +42,9 @@ export default function ContactList() {
 		thisMiniRoutePosition === miniRouterStates.length - 1;
 
 	const { data: contactList } = useSuspenseQuery(
-		AccountContactListSuspenseQueryOptions(accountId),
+		AccountContactListSuspenseQueryOptions({
+			account: { id: accountId },
+		}),
 	);
 
 	const [scrollTarget, setScrollTarget] = useState<HTMLDivElement>();

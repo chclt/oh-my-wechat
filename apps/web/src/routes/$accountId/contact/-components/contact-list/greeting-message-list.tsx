@@ -37,7 +37,9 @@ export default function GreetingMessageList() {
 	};
 
 	const { data: greetingMessageList, isLoading } = useQuery(
-		GreetingMessageListQueryOptions(accountId),
+		GreetingMessageListQueryOptions({
+			account: { id: accountId },
+		}),
 	);
 
 	return (
