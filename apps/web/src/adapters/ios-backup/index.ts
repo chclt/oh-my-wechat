@@ -161,25 +161,24 @@ export default class IosBackupAdapter implements DataAdapter {
 		);
 	}
 
-	// TODO: rename to getRecord...
 	async getRecordImage(input: GetRecordImageRequest) {
 		return withCommonWrapper(
 			() => this._workerAdapter.getRecordImage(input),
-			"getNoteMessageImage",
+			"getRecordImage",
 		);
 	}
 
 	async getRecordVideo(input: GetRecordVideoRequest) {
 		return withCommonWrapper(
 			() => this._workerAdapter.getRecordVideo(input),
-			"getNoteMessageVideo",
+			"getRecordVideo",
 		);
 	}
 
 	async getRecordFile(input: GetRecordFileRequest) {
 		return withCommonWrapper(
 			() => this._workerAdapter.getRecordFile(input),
-			"getNoteMessageFile",
+			"getRecordFile",
 		);
 	}
 
