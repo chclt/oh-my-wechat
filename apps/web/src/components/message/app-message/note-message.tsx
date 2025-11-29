@@ -3,7 +3,7 @@ import MessageInlineWrapper from "@/components/message-inline-wrapper";
 import type { AppMessageProps } from "@/components/message/app-message.tsx";
 import NoteDocument from "@/components/note-document/note-document";
 import NoteDocumentDialogContent from "@/components/note-document/note-document-dialog";
-import { AttachQueryOptions } from "@/lib/fetchers";
+import { RecordFileQueryOptions } from "@/lib/fetchers/record.ts";
 import queryClient from "@/lib/query-client.ts";
 import { cn, decodeUnicodeReferences } from "@/lib/utils.ts";
 import { AppMessageTypeEnum, NoteEntity } from "@/schema";
@@ -77,16 +77,18 @@ function NoteMessageDefault({
 		),
 	) as NoteEntity;
 
-	const htmlFile = noteContent.recordinfo.datalist.dataitem.find(
+	const noteHtmlFile = noteContent.recordinfo.datalist.dataitem.find(
 		(item) => item["@_htmlid"] === "WeNoteHtmlFile",
 	);
 
 	// TODO: 新的获取笔记内容的方法，而不是拿 ObjectURL 再 fetch
 	const NoteDocumentQueryOptions = {
 		enabled: false,
-		...AttachQueryOptions({
+		...RecordFileQueryOptions({
+			account: { id: "" },
+			chat: { id: message.chat_id },
 			message,
-			record: htmlFile,
+			record: noteHtmlFile,
 			type: "text/html",
 		}),
 	};

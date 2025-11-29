@@ -1,9 +1,10 @@
-import LocalImage from "@/components/local-image.tsx";
-import LocalVideo from "@/components/local-video.tsx";
 import MessageInlineWrapper from "@/components/message-inline-wrapper";
 import type { MessageProp } from "@/components/message/message.tsx";
+import { MessageVideoQueryOptions } from "@/lib/fetchers";
 import { cn } from "@/lib/utils.ts";
 import { MessageDirection, type VideoMessageType } from "@/schema";
+import { useInViewport } from "@mantine/hooks";
+import { useQuery } from "@tanstack/react-query";
 import { cva } from "class-variance-authority";
 import type React from "react";
 
@@ -79,23 +80,9 @@ export default function VideoMessage({
 	if (variant === "default") {
 		return <VideoMessageDefault message={message} {...props} />;
 	} else if (variant === "viewer_detail") {
-		return (
-			<div {...props}>
-				<LocalVideo message={message} className={""} />
-			</div>
-		);
+		return <div {...props}>TODO</div>;
 	} else if (variant === "viewer_thumb") {
-		return (
-			<div {...props}>
-				<LocalImage
-					message={message}
-					domain="video"
-					size="thumb"
-					alt={""}
-					className={""}
-				/>
-			</div>
-		);
+		return <div {...props}>TODO</div>;
 	} else if (variant === "referenced" || variant === "abstract") {
 		return <VideoMessageAbstract message={message} {...props} />;
 	}
@@ -106,6 +93,17 @@ function VideoMessageDefault({
 	className,
 	...props
 }: Omit<VideoMessageProps, "variant">) {
+	const { ref: videoRef, inViewport } = useInViewport();
+
+	const { data: video } = useQuery({
+		enabled: inViewport,
+		...MessageVideoQueryOptions({
+			account: { id: "" },
+			chat: { id: message.chat_id },
+			message,
+		}),
+	});
+
 	return (
 		<div
 			className={videoMessageVariants({
@@ -116,9 +114,13 @@ function VideoMessageDefault({
 			{...props}
 		>
 			<div className={"relative"}>
-				<LocalVideo
-					message={message}
+				<video
+					ref={videoRef}
+					src={video?.src}
+					poster={video?.cover?.src}
 					controls
+					// width={result?.[0]?.width}
+					// height={result?.[0]?.height}
 					className={"min-w-32 min-h-32 object-contain bg-white"}
 				/>
 

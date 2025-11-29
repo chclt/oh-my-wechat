@@ -3,7 +3,7 @@ import type { NoteMessageEntity } from "@/components/message/app-message/note-me
 import FileSizeFormatter from "@/components/ui/file-size-formatter.tsx";
 import { getDataAdapter } from "@/lib/data-adapter.ts";
 import { cn } from "@/lib/utils.ts";
-import { AppMessageType, FileInfo, AttachNoteRecordType } from "@/schema";
+import { AppMessageType, AttachNoteRecordType, FileInfo } from "@/schema";
 import { useMutation } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
@@ -24,7 +24,7 @@ export default function AttachNoteRecord({
 		mutationKey: ["attach", message.chat_id, message.id],
 		mutationFn: () => {
 			return getDataAdapter()
-				.getNoteMessageFile({
+				.getRecordFile({
 					accountId: "",
 					chat: { id: message.chat_id },
 					message,

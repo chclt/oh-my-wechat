@@ -1,10 +1,13 @@
+import AutoResolutionFallbackImage from "@/components/auto-resolution-fallback-image.tsx";
 import Image from "@/components/image.tsx";
 import { LinkCard } from "@/components/link-card";
-import LocalImage from "@/components/local-image.tsx";
 import MessageInlineWrapper from "@/components/message-inline-wrapper";
 import type { AppMessageProps } from "@/components/message/app-message.tsx";
+import { MessageImageQueryOptions } from "@/lib/fetchers";
 import { decodeUnicodeReferences } from "@/lib/utils.ts";
 import type { AppMessageTypeEnum } from "@/schema";
+import { useInViewport } from "@mantine/hooks";
+import { useQuery } from "@tanstack/react-query";
 
 export interface UrlMessageEntity {
 	type: AppMessageTypeEnum.URL;
@@ -100,6 +103,21 @@ function UrlMessageDefault({
 	message,
 	...props
 }: Omit<UrlMessageProps, "variant">) {
+	const { ref: imageRef, inViewport } = useInViewport();
+
+	const { data: image } = useQuery({
+		...MessageImageQueryOptions({
+			account: { id: "" },
+			chat: { id: message.chat_id },
+			message,
+			domain: "opendata",
+		}),
+		enabled:
+			inViewport &&
+			!message.message_entity.msg.appmsg.thumburl &&
+			!!message.message_entity.msg.appmsg.appattach.cdnthumbmd5,
+	});
+
 	const heading = decodeUnicodeReferences(
 		message.message_entity.msg.appmsg.title,
 	);
@@ -109,7 +127,7 @@ function UrlMessageDefault({
 			<Image src={message.message_entity.msg.appmsg.thumburl} alt={heading} />
 		) : undefined) ??
 		(message.message_entity.msg.appmsg.appattach.cdnthumbmd5 ? (
-			<LocalImage message={message} domain="opendata" alt={heading} />
+			<AutoResolutionFallbackImage ref={imageRef} image={image} alt={heading} />
 		) : undefined);
 
 	return (

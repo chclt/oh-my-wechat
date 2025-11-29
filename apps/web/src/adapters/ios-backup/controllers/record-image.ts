@@ -1,5 +1,8 @@
-import { DataAdapterResponse, GetRecordImageRequest } from "@/adapters/adapter";
-import { ImageInfoNext } from "@/schema";
+import {
+	GetRecordImageRequest,
+	GetRecordImageResponse,
+} from "@/adapters/adapter";
+import { ImageInfo } from "@/schema";
 import CryptoJS from "crypto-js";
 import { WCDatabases } from "../types";
 import { getFilesFromManifast } from "../utils";
@@ -8,7 +11,7 @@ export type GetInput = [
 	GetRecordImageRequest,
 	{ directory: FileSystemDirectoryHandle | FileList; databases: WCDatabases },
 ];
-export type GetOutput = Promise<DataAdapterResponse<ImageInfoNext>>;
+export type GetOutput = GetRecordImageResponse;
 
 export async function get(...inputs: GetInput): GetOutput {
 	const [{ chat, message, record }, { directory, databases }] = inputs;
@@ -22,7 +25,7 @@ export async function get(...inputs: GetInput): GetOutput {
 		`%/OpenData/${CryptoJS.MD5(chat.id).toString()}/${message.local_id}/${record["@_dataid"]}.%`,
 	);
 
-	const result: ImageInfoNext = {};
+	const result: ImageInfo = {};
 
 	for (const file of files) {
 		if (file.filename.endsWith(".record_dat")) {

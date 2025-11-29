@@ -1,9 +1,12 @@
+import AutoResolutionFallbackImage from "@/components/auto-resolution-fallback-image.tsx";
 import Link from "@/components/link.tsx";
-import LocalImage from "@/components/local-image.tsx";
 import MessageInlineWrapper from "@/components/message-inline-wrapper";
 import type { AppMessageProps } from "@/components/message/app-message.tsx";
+import { MessageImageQueryOptions } from "@/lib/fetchers";
 import { cn, decodeUnicodeReferences } from "@/lib/utils.ts";
 import type { AppMessageTypeEnum } from "@/schema";
+import { useInViewport } from "@mantine/hooks";
+import { useQuery } from "@tanstack/react-query";
 
 export interface MusicMessageEntity {
 	type: AppMessageTypeEnum.MUSIC;
@@ -63,6 +66,18 @@ function MusicMessageDefault({
 	message,
 	...props
 }: Omit<MusicMessageProps, "variant">) {
+	const { ref: imageRef, inViewport } = useInViewport();
+
+	const { data: image } = useQuery({
+		...MessageImageQueryOptions({
+			account: { id: "" },
+			chat: { id: message.chat_id },
+			message,
+			domain: "opendata",
+		}),
+		enabled: inViewport,
+	});
+
 	return (
 		<Link href={message.message_entity.msg.appmsg.url}>
 			<div
@@ -71,10 +86,9 @@ function MusicMessageDefault({
 				)}
 				{...props}
 			>
-				<LocalImage
-					message={message}
-					size="origin"
-					domain="opendata"
+				<AutoResolutionFallbackImage
+					ref={imageRef}
+					image={image}
 					className={"absolute inset-0 w-full h-full object-cover"}
 				/>
 				<div
@@ -87,10 +101,9 @@ function MusicMessageDefault({
 							"relative shrink-0 size-16 before:content-[''] before:absolute before:-inset-8 before:rounded-full before:bg-black"
 						}
 					>
-						<LocalImage
-							message={message}
-							size="origin"
-							domain="opendata"
+						<AutoResolutionFallbackImage
+							ref={imageRef}
+							image={image}
 							className={"relative rounded-full"}
 						/>
 					</div>

@@ -1,7 +1,8 @@
-import { AttachQueryOptions } from "@/lib/fetchers";
+import { RecordFileQueryOptions } from "@/lib/fetchers/record.ts";
 import queryClient from "@/lib/query-client";
 import { cn, decodeUnicodeReferences } from "@/lib/utils.ts";
 import type { AppMessageType, MessageType, NoteEntity } from "@/schema";
+import { NoteMessageRecordType } from "@/schema/message-record.ts";
 import { Dialog } from "@base-ui-components/react";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
@@ -10,7 +11,6 @@ import { LoaderIcon } from "../icon";
 import { NoteMessageEntity } from "../message/app-message/note-message";
 import NoteDocument from "../note-document/note-document";
 import NoteDocumentDialogContent from "../note-document/note-document-dialog";
-import { NoteMessageRecordType } from "@/schema/message-record.ts";
 
 interface NoteRecordProps extends React.HTMLAttributes<HTMLElement> {
 	message: MessageType;
@@ -41,16 +41,18 @@ function NoteRecordDefault({
 }: Omit<NoteRecordProps, "variant">) {
 	const noteContent = record.recordxml as unknown as NoteEntity;
 
-	const htmlFile = noteContent.recordinfo.datalist.dataitem.find(
+	const noteHtmlFile = noteContent.recordinfo.datalist.dataitem.find(
 		(item) => item["@_htmlid"] === "WeNoteHtmlFile",
 	);
 
 	// TODO: 新的获取笔记内容的方法，而不是拿 ObjectURL 再 fetch
 	const NoteDocumentQueryOptions = {
 		enabled: false,
-		...AttachQueryOptions({
+		...RecordFileQueryOptions({
+			accountId: "",
+			chat: { id: message.chat_id },
 			message,
-			record: htmlFile,
+			record: noteHtmlFile,
 			type: "text/html",
 		}),
 	};

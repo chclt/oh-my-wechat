@@ -42,7 +42,7 @@ export default function Message({
 }: MessageProp & React.HTMLAttributes<HTMLElement>) {
 	const { accountId } = Route.useParams();
 	const { data: account } = useSuspenseQuery(
-		AccountSuspenseQueryOptions(accountId),
+		AccountSuspenseQueryOptions({ account: { id: accountId } }),
 	);
 
 	if (message.direction === MessageDirection.outgoing && account)

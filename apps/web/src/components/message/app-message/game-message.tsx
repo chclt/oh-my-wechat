@@ -1,8 +1,11 @@
-import LocalImage from "@/components/local-image.tsx";
+import AutoResolutionFallbackImage from "@/components/auto-resolution-fallback-image.tsx";
 import MessageInlineWrapper from "@/components/message-inline-wrapper";
 import type { AppMessageProps } from "@/components/message/app-message.tsx";
+import { MessageImageQueryOptions } from "@/lib/fetchers";
 import { cn } from "@/lib/utils.ts";
 import type { AppMessageTypeEnum } from "@/schema";
+import { useInViewport } from "@mantine/hooks";
+import { useQuery } from "@tanstack/react-query";
 
 export interface GameMessageEntity {
 	type: AppMessageTypeEnum.GAME;
@@ -62,6 +65,18 @@ function GameMessageDefault({
 	message,
 	...props
 }: Omit<GameMessageProps, "variant">) {
+	const { ref: imageRef, inViewport } = useInViewport();
+
+	const { data: image } = useQuery({
+		...MessageImageQueryOptions({
+			account: { id: "" },
+			chat: { id: message.chat_id },
+			message,
+			domain: "opendata",
+		}),
+		enabled: inViewport,
+	});
+
 	return (
 		<div
 			className={cn("relative max-w-[20em] flex flex-col rounded-lg bg-white")}
@@ -73,11 +88,10 @@ function GameMessageDefault({
 				</h4>
 				<div className={"mt-1 text-pretty line-clamp-5 text-neutral-500"}>
 					{message.message_entity.msg.appmsg.appattach.cdnthumbmd5 && (
-						<LocalImage
-							message={message}
-							domain="opendata"
+						<AutoResolutionFallbackImage
+							ref={imageRef}
+							image={image}
 							className={"float-end ms-2 h-12 w-auto rounded"}
-							alt={""}
 						/>
 					)}
 				</div>
