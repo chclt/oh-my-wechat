@@ -6,6 +6,7 @@ import type { OpenMessageProps } from "@/components/open-message/open-message.ts
 import { RecordFileQueryOptions } from "@/lib/fetchers/record.ts";
 import queryClient from "@/lib/query-client.ts";
 import { cn, decodeUnicodeReferences } from "@/lib/utils.ts";
+import { Route } from "@/routes/$accountId/route.tsx";
 import { NoteEntity } from "@/schema";
 import { MessageRecordBaseType } from "@/schema/message-record.ts";
 import { NoteOpenMessageEntity } from "@/schema/open-message.ts";
@@ -37,6 +38,8 @@ function NoteMessageDefault({
 	message,
 	...props
 }: Omit<NoteMessageProps, "variant">) {
+	const { accountId } = Route.useParams();
+
 	const xmlParser = new XMLParser({
 		parseAttributeValue: true,
 		ignoreAttributes: false,
@@ -65,7 +68,7 @@ function NoteMessageDefault({
 	const NoteDocumentQueryOptions = {
 		enabled: false,
 		...RecordFileQueryOptions({
-			accountId: "",
+			account: { id: accountId },
 			chat: { id: message.chat_id },
 			message,
 			record: noteHtmlFile as unknown as Pick<

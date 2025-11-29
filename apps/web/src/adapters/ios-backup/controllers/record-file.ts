@@ -11,7 +11,7 @@ export type GetInput = [
 export type GetOutput = Promise<DataAdapterResponse<FileInfo | undefined>>;
 
 export async function get(...inputs: GetInput): GetOutput {
-	const [{ chat, message, record }, { directory, databases }] = inputs;
+	const [{ account, chat, message, record }, { directory, databases }] = inputs;
 
 	const db = databases.manifest;
 	if (!db) throw new Error("manifest database is not found");
@@ -20,7 +20,7 @@ export async function get(...inputs: GetInput): GetOutput {
 		db,
 		directory,
 		// @ts-expect-error FIXME
-		`%/OpenData/${CryptoJS.MD5(chat.id).toString()}/${message.local_id}/${record["@_dataid"]}.${record["datafmt"]}`,
+		`Documents/${CryptoJS.MD5(account.id).toString()}/OpenData/${CryptoJS.MD5(chat.id).toString()}/${message.local_id}/${record["@_dataid"]}.${record["datafmt"]}`,
 	);
 
 	if (files.length === 0) return { data: undefined };

@@ -14,8 +14,10 @@ export type GetInput = [
 export type GetOutput = GetMessageImageResponse;
 
 export async function get(...inputs: GetInput): GetOutput {
-	const [{ chat, message, sizes, domain = "image" }, { directory, databases }] =
-		inputs;
+	const [
+		{ account, chat, message, sizes, domain = "image" },
+		{ directory, databases },
+	] = inputs;
 
 	const db = databases.manifest;
 	if (!db) throw new Error("manifest database is not found");
@@ -23,7 +25,7 @@ export async function get(...inputs: GetInput): GetOutput {
 	const files = await getFilesFromManifast(
 		db,
 		directory,
-		`%/${
+		`Documents/${CryptoJS.MD5(account.id).toString()}/${
 			{
 				image: "Img",
 				opendata: "OpenData",
@@ -41,7 +43,7 @@ export async function get(...inputs: GetInput): GetOutput {
 		const appendFiles = await getFilesFromManifast(
 			db,
 			directory,
-			`%/ImgV2/${CryptoJS.MD5(chat.id).toString()}/${message.local_id}.%`,
+			`Documents/${CryptoJS.MD5(account.id).toString()}/ImgV2/${CryptoJS.MD5(chat.id).toString()}/${message.local_id}.%`,
 		);
 
 		files.push(...appendFiles);

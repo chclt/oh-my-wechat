@@ -7,6 +7,7 @@ import FileSizeFormatter from "@/components/ui/file-size-formatter.tsx";
 import { MessageAttachQueryOptions } from "@/lib/fetchers";
 import queryClient from "@/lib/query-client.ts";
 import { cn, decodeUnicodeReferences } from "@/lib/utils.ts";
+import { Route } from "@/routes/$accountId/route.tsx";
 import { AttachOpenMessageEntity } from "@/schema/open-message.ts";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
@@ -29,10 +30,12 @@ function AttachMessageDefault({
 	message,
 	...props
 }: Omit<AttachMessageProps, "variant">) {
+	const { accountId } = Route.useParams();
+
 	const AttachmentQueryOptions = {
 		enabled: false,
 		...MessageAttachQueryOptions({
-			account: { id: "" },
+			account: { id: accountId },
 			chat: { id: message.chat_id },
 			message,
 		}),

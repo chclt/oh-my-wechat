@@ -8,7 +8,7 @@ import { getDataAdapter } from "../data-adapter";
 export function RecordImageQueryOptions(requestData: GetRecordImageRequest) {
 	return {
 		queryKey: [
-			`account: ${requestData.accountId}`,
+			`account: ${requestData.account.id}`,
 			`chat: ${requestData.chat.id}`,
 			`message: ${requestData.message.local_id}`,
 			`record: ${requestData.record["@_dataid"]}`,
@@ -24,7 +24,7 @@ export function RecordImageQueryOptions(requestData: GetRecordImageRequest) {
 export function RecordVideoQueryOptions(requestData: GetRecordVideoRequest) {
 	return {
 		queryKey: [
-			`account: ${requestData.accountId}`,
+			`account: ${requestData.account.id}`,
 			`chat: ${requestData.chat.id}`,
 			`message: ${requestData.message.local_id}`,
 			`record: ${requestData.record["@_dataid"]}`,
@@ -40,7 +40,7 @@ export function RecordVideoQueryOptions(requestData: GetRecordVideoRequest) {
 export function RecordFileQueryOptions(requestData: GetRecordFileRequest) {
 	return {
 		queryKey: [
-			`account: ${requestData.accountId}`,
+			`account: ${requestData.account.id}`,
 			`chat: ${requestData.chat.id}`,
 			`message: ${requestData.message.local_id}`,
 			`record: ${requestData.record["@_dataid"]}`,

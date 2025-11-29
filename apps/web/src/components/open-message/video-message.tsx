@@ -4,6 +4,7 @@ import MessageInlineWrapper from "@/components/message-inline-wrapper.tsx";
 import type { OpenMessageProps } from "@/components/open-message/open-message.tsx";
 import { MessageImageQueryOptions } from "@/lib/fetchers";
 import { decodeUnicodeReferences } from "@/lib/utils.ts";
+import { Route } from "@/routes/$accountId/route.tsx";
 import { VideoOpenMessageEntity } from "@/schema/open-message.ts";
 import { useInViewport } from "@mantine/hooks";
 import { useQuery } from "@tanstack/react-query";
@@ -26,11 +27,13 @@ function VideoMessageDefault({
 	message,
 	...props
 }: Omit<VideoMessageProps, "variant">) {
+	const { accountId } = Route.useParams();
+
 	const { ref: imageRef, inViewport } = useInViewport();
 
 	const { data: image } = useQuery({
 		...MessageImageQueryOptions({
-			account: { id: "" },
+			account: { id: accountId },
 			chat: { id: message.chat_id },
 			message,
 			domain: "opendata",

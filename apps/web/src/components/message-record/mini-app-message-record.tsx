@@ -1,10 +1,10 @@
 import AutoResolutionFallbackImage from "@/components/auto-resolution-fallback-image.tsx";
 import Image from "@/components/image.tsx";
-import { cn } from "@/lib/utils.ts";
-import type { MessageType } from "@/schema";
-
 import { CardTitle } from "@/components/ui/card.tsx";
 import { RecordImageQueryOptions } from "@/lib/fetchers/record";
+import { cn } from "@/lib/utils.ts";
+import { Route } from "@/routes/$accountId/route.tsx";
+import type { MessageType } from "@/schema";
 import { MiniAppMessageRecordType } from "@/schema/message-record.ts";
 import { useInViewport } from "@mantine/hooks";
 import { useQuery } from "@tanstack/react-query";
@@ -43,11 +43,13 @@ function MiniAppMessageRecordDefault({
 	className,
 	...props
 }: Omit<MiniAppRecordProps, "variant">) {
+	const { accountId } = Route.useParams();
+
 	const { ref: imageRef, inViewport } = useInViewport();
 
 	const { data: image } = useQuery({
 		...RecordImageQueryOptions({
-			accountId: "",
+			account: { id: accountId },
 			chat: { id: message.chat_id },
 			message,
 			record,

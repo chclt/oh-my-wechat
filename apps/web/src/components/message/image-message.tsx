@@ -5,6 +5,7 @@ import type { MessageProp } from "@/components/message/message.tsx";
 import User from "@/components/user.tsx";
 import { MessageImageQueryOptions } from "@/lib/fetchers";
 import { cn } from "@/lib/utils.ts";
+import { Route } from "@/routes/$accountId/route.tsx";
 import type { ImageMessageType } from "@/schema";
 import { useInViewport } from "@mantine/hooks";
 import { useQuery } from "@tanstack/react-query";
@@ -84,11 +85,13 @@ function ImageMessageDefault({
 	message,
 	...props
 }: Omit<ImageMessageProps, "variant">) {
+	const { accountId } = Route.useParams();
+
 	const { ref: imageRef, inViewport } = useInViewport();
 
 	const { data: image } = useQuery({
 		...MessageImageQueryOptions({
-			account: { id: "" },
+			account: { id: accountId },
 			chat: { id: message.chat_id },
 			message,
 		}),
@@ -118,11 +121,13 @@ function ImageMessageAbstract({
 	message,
 	...props
 }: Omit<ImageMessageProps, "variant">) {
+	const { accountId } = Route.useParams();
+
 	const { ref: imageRef, inViewport } = useInViewport();
 
 	const { data: image } = useQuery({
 		...MessageImageQueryOptions({
-			account: { id: "" },
+			account: { id: accountId },
 			chat: { id: message.chat_id },
 			message,
 			sizes: ["thumbnail"],
@@ -146,11 +151,13 @@ function ImageMessageReferenced({
 	message,
 	...props
 }: Omit<ImageMessageProps, "variant">) {
+	const { accountId } = Route.useParams();
+
 	const { ref: imageRef, inViewport } = useInViewport();
 
 	const { data: image } = useQuery({
 		...MessageImageQueryOptions({
-			account: { id: "" },
+			account: { id: accountId },
 			chat: { id: message.chat_id },
 			message,
 			sizes: ["thumbnail"],

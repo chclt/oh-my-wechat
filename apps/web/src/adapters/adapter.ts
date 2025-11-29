@@ -127,7 +127,7 @@ export type GetMessageAttachResponse = Promise<
 >;
 
 export interface GetRecordImageRequest {
-	accountId: string;
+	account: Pick<AccountType, "id">;
 	chat: Pick<ChatType, "id">;
 	message: Pick<MessageType, "local_id">;
 	record: Pick<MessageRecordBaseType, "@_dataid">;
@@ -136,7 +136,7 @@ export interface GetRecordImageRequest {
 export type GetRecordImageResponse = Promise<DataAdapterResponse<ImageInfo>>;
 
 export interface GetRecordVideoRequest {
-	accountId: string;
+	account: Pick<AccountType, "id">;
 	chat: Pick<ChatType, "id">;
 	message: Pick<MessageType, "local_id">;
 	record: Pick<MessageRecordBaseType, "@_dataid">;
@@ -145,7 +145,7 @@ export interface GetRecordVideoRequest {
 export type GetRecordVideoResponse = Promise<DataAdapterResponse<VideoInfo>>;
 
 export interface GetRecordFileRequest {
-	accountId: string;
+	account: Pick<AccountType, "id">;
 	chat: Pick<ChatType, "id">;
 	message: Pick<MessageType, "local_id">;
 	record: Pick<MessageRecordBaseType, "@_dataid">;
@@ -156,7 +156,8 @@ export type GetRecordFileResponse = Promise<
 >;
 
 export interface GetStatisticRequest {
-	chatId: ChatType["id"];
+	account: Pick<AccountType, "id">;
+	chatId: ChatType["id"]; // TODO
 	startTime: Date;
 	endTime: Date;
 }
