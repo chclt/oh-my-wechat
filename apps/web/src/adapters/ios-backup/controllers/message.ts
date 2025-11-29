@@ -1,5 +1,8 @@
-import type { AppMessageEntity } from "@/components/message/app-message.tsx";
-import type { ReferMessageEntity } from "@/components/message/app-message/refer-message.tsx";
+import type {
+	DataAdapterCursorPagination,
+	DataAdapterResponse,
+	GetMessageListRequest,
+} from "@/adapters/adapter.ts";
 import type { ChatroomVoipMessageEntity } from "@/components/message/chatroom-voip-message.tsx";
 import type { ContactMessageEntity } from "@/components/message/contact-message.tsx";
 import type { ImageMessageEntity } from "@/components/message/image-message.tsx";
@@ -14,12 +17,8 @@ import type { VideoMessageEntity } from "@/components/message/video-message.tsx"
 import type { VoiceMessageEntity } from "@/components/message/voice-message.tsx";
 import type { VoipMessageEntity } from "@/components/message/voip-message.tsx";
 import type { WeComContactMessageEntity } from "@/components/message/wecom-contact-message.tsx";
-import * as ChatController from "./chat.ts";
-import * as UserController from "./user.ts";
-import { adapterWorker } from "../worker.ts";
+import type { OpenMessageEntity } from "@/components/open-message/open-message.tsx";
 import {
-	type AppMessageType,
-	AppMessageTypeEnum,
 	BasicMessageType,
 	type ChatroomVoipMessageType,
 	type ChatType,
@@ -31,6 +30,7 @@ import {
 	type MessageType,
 	MessageTypeEnum,
 	type MicroVideoMessageType,
+	type OpenMessageType,
 	type StickerMessageType,
 	type SystemExtendedMessageType,
 	type SystemMessageType,
@@ -42,26 +42,11 @@ import {
 	type VoipMessageType,
 	type WeComContactMessageType,
 } from "@/schema";
-import CryptoJS from "crypto-js";
-import { XMLParser } from "fast-xml-parser";
-import WCDB, {
-	WCDBDatabaseSeriesName,
-	WCDBTableSeriesName,
-} from "../utils/wcdb.ts";
-import type {
-	DataAdapterCursorPagination,
-	DataAdapterResponse,
-	GetMessageListRequest,
-} from "@/adapters/adapter.ts";
-import type { ControllerPaginatorCursor, WCDatabases } from "../types.ts";
 import {
-	chatTableSelect,
-	ChatTableSelectInfer,
-	getChatTable,
-	getHelloTable,
-	helloTableSelect,
-	HelloTableSelectInfer,
-} from "../database/message.ts";
+	OpenMessageTypeEnum,
+	ReferOpenMessageEntity,
+} from "@/schema/open-message.ts";
+import CryptoJS from "crypto-js";
 import {
 	and,
 	asc,
@@ -77,6 +62,23 @@ import {
 	sql,
 } from "drizzle-orm";
 import { unionAll } from "drizzle-orm/sqlite-core";
+import { XMLParser } from "fast-xml-parser";
+import {
+	chatTableSelect,
+	ChatTableSelectInfer,
+	getChatTable,
+	getHelloTable,
+	helloTableSelect,
+	HelloTableSelectInfer,
+} from "../database/message.ts";
+import type { ControllerPaginatorCursor, WCDatabases } from "../types.ts";
+import WCDB, {
+	WCDBDatabaseSeriesName,
+	WCDBTableSeriesName,
+} from "../utils/wcdb.ts";
+import { adapterWorker } from "../worker.ts";
+import * as ChatController from "./chat.ts";
+import * as UserController from "./user.ts";
 
 async function parseMessageDatabaseChatTableRows(
 	rows: ChatTableSelectInfer[],
@@ -295,15 +297,15 @@ async function parseMessageDatabaseChatTableRows(
 			}
 
 			case MessageTypeEnum.APP: {
-				const messageEntity: AppMessageEntity<{ type: number }> =
+				const messageEntity: OpenMessageEntity<{ type: number }> =
 					xmlParser.parse(raw_message_row.Message);
 
 				try {
-					if (messageEntity.msg.appmsg.type === AppMessageTypeEnum.REFER) {
+					if (messageEntity.msg.appmsg.type === OpenMessageTypeEnum.REFER) {
 						messageIndexesHasReplyMessage.push(index);
 
 						const replyMessageId = (
-							messageEntity as AppMessageEntity<ReferMessageEntity>
+							messageEntity as OpenMessageEntity<ReferOpenMessageEntity>
 						).msg.appmsg.refermsg.svrid;
 						replyMessageIds.push(replyMessageId);
 					}
@@ -314,7 +316,7 @@ async function parseMessageDatabaseChatTableRows(
 				return {
 					...message,
 					message_entity: messageEntity,
-				} as AppMessageType<ReferMessageEntity>;
+				} as OpenMessageType<ReferOpenMessageEntity>;
 			}
 
 			case MessageTypeEnum.VOIP: {
@@ -414,7 +416,7 @@ async function parseMessageDatabaseChatTableRows(
 				replyMessageTable[
 					(
 						messages[index]
-							.message_entity as AppMessageEntity<ReferMessageEntity>
+							.message_entity as OpenMessageEntity<ReferOpenMessageEntity>
 					).msg.appmsg.refermsg.svrid
 				];
 		}
@@ -845,7 +847,7 @@ export async function all(...inputs: AllInput): AllOutput {
 export type AllFromAllInput = [
 	{
 		type?: MessageTypeEnum | MessageTypeEnum[];
-		type_app?: AppMessageTypeEnum | AppMessageTypeEnum[];
+		type_app?: OpenMessageTypeEnum | OpenMessageTypeEnum[];
 		limit: number;
 	},
 	{

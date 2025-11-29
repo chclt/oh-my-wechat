@@ -1,6 +1,5 @@
 import type {
 	AccountType,
-	AppMessageTypeEnum,
 	ChatType,
 	ContactType,
 	FileInfo,
@@ -13,6 +12,7 @@ import type {
 	VoiceInfo,
 } from "@/schema";
 import { MessageRecordBaseType } from "@/schema/message-record.ts";
+import { OpenMessageTypeEnum } from "@/schema/open-message.ts";
 import type { ChatStatistics } from "./ios-backup/controllers/statistic";
 
 // export interface GetAccountListRequest {}
@@ -52,7 +52,7 @@ export type GetAccountContactListResponse = Promise<
 export interface GetMessageListRequest {
 	chatId: ChatType["id"];
 	type?: MessageTypeEnum | MessageTypeEnum[];
-	type_app?: AppMessageTypeEnum | AppMessageTypeEnum[]; // 有 bug
+	type_app?: OpenMessageTypeEnum | OpenMessageTypeEnum[]; // 有 bug
 	cursor?: string;
 	limit: number;
 }

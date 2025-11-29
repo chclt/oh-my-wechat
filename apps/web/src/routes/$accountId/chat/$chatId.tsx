@@ -8,11 +8,8 @@ import { MessageListInfiniteQueryOptions } from "@/lib/fetchers/message";
 import { UserSuspenseQueryOptions } from "@/lib/fetchers/user";
 import router from "@/lib/router";
 import { cn } from "@/lib/utils";
-import {
-	AppMessageTypeEnum,
-	MessageTypeEnum,
-	type MessageType,
-} from "@/schema";
+import { MessageTypeEnum, type MessageType } from "@/schema";
+import { OpenMessageTypeEnum } from "@/schema/open-message.ts";
 import { ScrollArea as ScrollAreaBase } from "@base-ui-components/react";
 import { useInfiniteQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
@@ -176,8 +173,8 @@ function RouteComponent() {
 								const isMessageGroupable = (message: MessageType) => {
 									if (message.type === MessageTypeEnum.APP) {
 										return ![
-											AppMessageTypeEnum.PAT,
-											AppMessageTypeEnum.RINGTONE,
+											OpenMessageTypeEnum.PAT,
+											OpenMessageTypeEnum.RINGTONE,
 										].includes(
 											message.message_entity.msg.appmsg.type as number,
 										);
