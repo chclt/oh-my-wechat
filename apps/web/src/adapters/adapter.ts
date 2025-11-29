@@ -97,7 +97,7 @@ export interface GetMessageVideoRequest {
 	account: Pick<AccountType, "id">;
 	chat: Pick<ChatType, "id">;
 	message: Pick<MessageType, "local_id">;
-	include?: ("cover" | "video")[];
+	include?: ("video" | "cover")[];
 }
 
 export type GetMessageVideoResponse = Promise<
@@ -108,7 +108,7 @@ export interface GetMessageVoiceRequest {
 	account: Pick<AccountType, "id">;
 	chat: Pick<ChatType, "id">;
 	message: Pick<MessageType, "local_id">;
-	scope?: "all" | "transcription";
+	include?: ("voice" | "transcription")[];
 }
 
 export type GetMessageVoiceResponse = Promise<
