@@ -10,7 +10,7 @@ import router from "@/lib/router";
 import { cn } from "@/lib/utils";
 import { MessageTypeEnum, type MessageType } from "@/schema";
 import { OpenMessageTypeEnum } from "@/schema/open-message.ts";
-import { ScrollArea as ScrollAreaBase } from "@base-ui-components/react";
+import { ScrollArea as ScrollAreaBase } from "@base-ui/react";
 import { useInfiniteQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { differenceInMinutes, format, isSameDay } from "date-fns";

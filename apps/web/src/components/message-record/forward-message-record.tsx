@@ -14,8 +14,8 @@ import MessageRecord from "./message-record.tsx";
 
 import dialogClasses from "@/components/ui/dialog.module.css";
 import { ForwardMessageRecordType } from "@/schema/message-record.ts";
-import { Dialog } from "@base-ui-components/react";
-
+import { Dialog } from "@base-ui/react";
+ 
 interface ForwardMessageRecordProps
 	extends React.HTMLAttributes<HTMLDivElement> {
 	message: MessageType;

@@ -3,7 +3,25 @@ import dialogClasses from "@/components/ui/dialog.module.css";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { type MessageType, RecordTypeEnum } from "@/schema";
-import { Dialog } from "@base-ui-components/react";
+import {
+	AttachMessageRecordType,
+	ChannelMessageRecordType,
+	ChannelVideoMessageRecordType,
+	ContactMessageRecordType,
+	ForwardMessageRecordType,
+	ImageMessageRecordType,
+	LinkMessageRecordType,
+	LiveMessageRecordType,
+	LocationMessageRecordType,
+	MessageRecordBaseType,
+	MiniAppMessageRecordType,
+	MusicMessageRecordType,
+	NoteMessageRecordType,
+	TextMessageRecordType,
+	TingMessageRecordType,
+	VideoMessageRecordType,
+} from "@/schema/message-record.ts";
+import { Dialog } from "@base-ui/react";
 import type React from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { CircleQuestionmarkSolid } from "../icon";
@@ -22,24 +40,6 @@ import NoteMessageRecord from "./note-message-record.tsx";
 import TextMessageRecord from "./text-message-record.tsx";
 import TingMessageRecord from "./ting-message-record.tsx";
 import VideoMessageRecord from "./video-message-record.tsx";
-import {
-	AttachMessageRecordType,
-	ChannelMessageRecordType,
-	ChannelVideoMessageRecordType,
-	ContactMessageRecordType,
-	ForwardMessageRecordType,
-	ImageMessageRecordType,
-	LinkMessageRecordType,
-	LiveMessageRecordType,
-	LocationMessageRecordType,
-	MiniAppMessageRecordType,
-	MusicMessageRecordType,
-	NoteMessageRecordType,
-	MessageRecordBaseType,
-	TextMessageRecordType,
-	TingMessageRecordType,
-	VideoMessageRecordType,
-} from "@/schema/message-record.ts";
 
 /**
  * 合并转发的消息内容、笔记中的内容，都是一个 Record 资源

@@ -2,7 +2,7 @@ import { CentralCrossLargeFilledOffStroke2Radius2 } from "@/components/central-i
 import { ChatIconFill, ContactIconFill } from "@/components/icon";
 import dialogClasses from "@/components/ui/dialog.module.css";
 import { cn } from "@/lib/utils";
-import { Dialog } from "@base-ui-components/react";
+import { Dialog } from "@base-ui/react";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import {
 	createFileRoute,

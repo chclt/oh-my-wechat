@@ -11,7 +11,7 @@ import {
 	type RecordTypeEnum,
 } from "@/schema";
 import { ForwardOpenMessageEntity } from "@/schema/open-message.ts";
-import { Dialog } from "@base-ui-components/react";
+import { Dialog } from "@base-ui/react";
 import { cva } from "class-variance-authority";
 import { XMLParser } from "fast-xml-parser";
 import type React from "react";

@@ -70,11 +70,11 @@ import {
 	VideoOpenMessageEntity,
 	VoiceOpenMessageEntity,
 } from "@/schema/open-message.ts";
-import { Dialog } from "@base-ui-components/react";
+import { Dialog } from "@base-ui/react";
 
 export type OpenMessageProps<
 	T = {
-		type: 0;
+		type: 0; 
 	},
 > = MessageProp<OpenMessageType<T>>;
 

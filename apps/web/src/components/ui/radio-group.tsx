@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 import {
 	Radio as RadioBase,
 	RadioGroup as RadioGroupBase,
-} from "@base-ui-components/react";
+} from "@base-ui/react";
 import { CircleIcon } from "lucide-react";
 import classes from "./radio-group.module.css";
 

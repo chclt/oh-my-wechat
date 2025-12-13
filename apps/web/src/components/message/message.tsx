@@ -19,7 +19,7 @@ import { AccountSuspenseQueryOptions } from "@/lib/fetchers/account.ts";
 import { cn } from "@/lib/utils.ts";
 import { Route } from "@/routes/$accountId/route.tsx";
 import { MessageDirection, MessageTypeEnum, type MessageType } from "@/schema";
-import { Dialog } from "@base-ui-components/react";
+import { Dialog } from "@base-ui/react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import type React from "react";
 import { Suspense } from "react";

@@ -8,7 +8,7 @@ import {
 	NoteMessageRecordType,
 } from "@/schema/message-record.ts";
 import { NoteOpenMessageEntity } from "@/schema/open-message.ts";
-import { Dialog } from "@base-ui-components/react";
+import { Dialog } from "@base-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { Suspense, useMemo, useState } from "react";

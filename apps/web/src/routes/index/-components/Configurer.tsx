@@ -15,7 +15,7 @@ import { AccountListSuspenseQueryOptions } from "@/lib/fetchers/account";
 import queryClient from "@/lib/query-client";
 import { cn } from "@/lib/utils.ts";
 import type { AccountType } from "@/schema";
-import { RadioGroup } from "@base-ui-components/react";
+import { RadioGroup } from "@base-ui/react";
 import { useToggle } from "@mantine/hooks";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import type React from "react";
