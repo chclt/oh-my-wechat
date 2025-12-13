@@ -10,7 +10,7 @@ import { Route } from "@/routes/$accountId/route.tsx";
 import { NoteEntity } from "@/schema";
 import { MessageRecordBaseType } from "@/schema/message-record.ts";
 import { NoteOpenMessageEntity } from "@/schema/open-message.ts";
-import { Dialog } from "@base-ui-components/react";
+import { Dialog } from "@base-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { XMLParser } from "fast-xml-parser";
 import { Suspense, useMemo, useState } from "react";

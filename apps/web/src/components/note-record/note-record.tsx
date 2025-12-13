@@ -12,7 +12,7 @@ import {
 	VideoNoteRecordType,
 } from "@/schema";
 import { NoteOpenMessageEntity } from "@/schema/open-message.ts";
-import { Dialog } from "@base-ui-components/react";
+import { Dialog } from "@base-ui/react";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import AttachNoteRecord from "./attach-note-record.tsx";

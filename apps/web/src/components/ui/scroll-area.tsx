@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { ScrollArea as ScrollAreaBase } from "@base-ui-components/react";
+import { ScrollArea as ScrollAreaBase } from "@base-ui/react";
 import type * as React from "react";
 import classes from "./scroll-area.module.css";
 
