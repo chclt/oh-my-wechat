@@ -5,10 +5,10 @@ import {
 	useMiniRouter,
 } from "@/components/mini-router";
 import { MiniRouteFirstPageContentClassName } from "@/components/mini-router/utils";
-import { ScrollAreaViewport, ScrollBar } from "@/components/ui/scroll-area";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { AccountContactListSuspenseQueryOptions } from "@/lib/fetchers/contact";
 import { cn } from "@/lib/utils";
-import * as ScrollAreaPrimitive from "@radix-ui/react-scroll-area";
+import { GreetingMessageListMiniRouteState } from "@/routes/$accountId/contact/-components/contact-list/greeting-message-list.tsx";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import ContactAlphabetList, {
@@ -17,9 +17,8 @@ import ContactAlphabetList, {
 import ContactItem from "./contact-item";
 import useContactAlphabetList from "./use-contact-alphabet-list";
 import useContactList, { ContactListContctGroupItem } from "./use-contact-list";
-import imageGroupChats from "/public/images/avatar/group_chats.png";
 import imageGreetingMessages from "/public/images/avatar/greeting_messages.png";
-import { GreetingMessageListMiniRouteState } from "@/routes/$accountId/contact/-components/contact-list/greeting-message-list.tsx";
+import imageGroupChats from "/public/images/avatar/group_chats.png";
 
 export interface ContactListMiniRouteState {
 	name: "root";
@@ -43,7 +42,9 @@ export default function ContactList() {
 		thisMiniRoutePosition === miniRouterStates.length - 1;
 
 	const { data: contactList } = useSuspenseQuery(
-		AccountContactListSuspenseQueryOptions(accountId),
+		AccountContactListSuspenseQueryOptions({
+			account: { id: accountId },
+		}),
 	);
 
 	const [scrollTarget, setScrollTarget] = useState<HTMLDivElement>();
@@ -64,70 +65,68 @@ export default function ContactList() {
 					pointerEvents: isThisMiniRouteOnTop ? "auto" : "none",
 				}}
 			>
-				<ScrollAreaPrimitive.Root className="relative w-full h-full">
-					<ScrollAreaViewport
-						ref={(node) => {
-							if (node) {
-								setScrollTarget(node);
-							}
-						}}
-					>
-						<header className="sticky z-30 top-0 h-16 px-5 flex items-center bg-background/80 border-b border-muted backdrop-blur-xl">
-							<div className="size-11 flex items-center justify-center text-[#FF970A] bg-background clothoid-corner-[18.18%] shrink-0">
-								<ContactIconFill className="size-8" />
-							</div>
-							<div className="ms-3 font-semibold">
-								<span className="font-medium">联系人</span>
-							</div>
-						</header>
+				<ScrollArea
+					ref={(node) => {
+						if (node) {
+							setScrollTarget(node);
+						}
+					}}
+					className={cn(
+						"size-full",
+						"[&_[data-slot='scroll-area-scrollbar']]:z-30 [&_[data-slot='scroll-area-scrollbar']]:top-16!",
+					)}
+				>
+					<header className="sticky z-30 top-0 h-16 px-5 flex items-center bg-background/80 border-b border-muted backdrop-blur-xl">
+						<div className="size-11 flex items-center justify-center text-[#FF970A] bg-background clothoid-corner-[18.18%] shrink-0">
+							<ContactIconFill className="size-8" />
+						</div>
+						<div className="ms-3 font-semibold">
+							<span className="font-medium">联系人</span>
+						</div>
+					</header>
 
-						{import.meta.env.DEV && (
-							<ContactItem
-								accountId={accountId}
-								contactItem={{
-									title: "新的朋友",
-									photo: imageGreetingMessages,
-								}}
-								onClick={(event) => {
-									event.preventDefault();
-									event.stopPropagation();
-									pushMiniRouterStates({
-										name: "greetingMessageList",
-										data: {
-											accountId,
-											contactItem: {
-												title: "新的朋友",
-												photo: imageGreetingMessages,
-											},
-										},
-									} satisfies GreetingMessageListMiniRouteState);
-								}}
-							/>
-						)}
-
+					{import.meta.env.DEV && (
 						<ContactItem
 							accountId={accountId}
-							contactItem={
-								{
-									type: "contactGroup",
-									id: "group_chats",
-									title: "群聊",
-									photo: imageGroupChats,
-									value: contactListWithGroup.groupChat,
-								} satisfies ContactListContctGroupItem
-							}
+							contactItem={{
+								title: "新的朋友",
+								photo: imageGreetingMessages,
+							}}
+							onClick={(event) => {
+								event.preventDefault();
+								event.stopPropagation();
+								pushMiniRouterStates({
+									name: "greetingMessageList",
+									data: {
+										accountId,
+										contactItem: {
+											title: "新的朋友",
+											photo: imageGreetingMessages,
+										},
+									},
+								} satisfies GreetingMessageListMiniRouteState);
+							}}
 						/>
+					)}
 
-						<ContactAlphabetList
-							accountId={accountId}
-							contactAlphabetList={personalAccountAlphabetList}
-						/>
-					</ScrollAreaViewport>
-					<ScrollBar className="z-30 !top-16" />
+					<ContactItem
+						accountId={accountId}
+						contactItem={
+							{
+								type: "contactGroup",
+								id: "group_chats",
+								title: "群聊",
+								photo: imageGroupChats,
+								value: contactListWithGroup.groupChat,
+							} satisfies ContactListContctGroupItem
+						}
+					/>
 
-					<ScrollAreaPrimitive.Corner />
-				</ScrollAreaPrimitive.Root>
-
+					<ContactAlphabetList
+						accountId={accountId}
+						contactAlphabetList={personalAccountAlphabetList}
+					/>
+				</ScrollArea>
 				{scrollTarget && (
 					<AlphabetNavigator
 						scrollTarget={scrollTarget}

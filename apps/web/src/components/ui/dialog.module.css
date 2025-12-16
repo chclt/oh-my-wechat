@@ -1,0 +1,49 @@
+@reference "../../index.css";
+
+@layer components {
+	.Backdrop {
+		@apply fixed inset-0 bg-black/50;
+		@apply transition-opacity duration-200 ease-[cubic-bezier(0.45,1.005,0,1.005)];
+
+		/* iOS 26+: Ensure the backdrop covers the entire visible viewport. */
+		@supports (-webkit-touch-callout: none) {
+			@apply absolute;
+		}
+
+		&[data-starting-style],
+		&[data-ending-style] {
+			@apply opacity-0;
+		}
+	}
+
+	.Viewport {
+		@apply fixed inset-0;
+	}
+
+	.Popup {
+		@apply fixed inset-0 m-auto w-full max-w-[calc(100%-2rem)] bg-background rounded-xl shadow-2xl origin-center;
+
+		@apply transition-all duration-200 motion-reduce:transition-none;
+
+		@apply scale-[calc(1-0.1*var(--nested-dialogs))] translate-y-[calc(0px+3.5rem*var(--nested-dialogs))] brightness-[calc(100%-20%*var(--nested-dialogs))];
+
+		&[data-nested-dialog-open] {
+			&::after {
+				@apply content-[''] absolute inset-0 rounded-[inherit] bg-black/5;
+			}
+		}
+
+		&[data-starting-style],
+		&[data-ending-style] {
+			@apply opacity-0 scale-95;
+		}
+	}
+
+	.Title {
+		@apply text-lg leading-none font-semibold;
+	}
+
+	.Description {
+		@apply text-sm text-muted-foreground;
+	}
+}

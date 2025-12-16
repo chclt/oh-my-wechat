@@ -1,13 +1,11 @@
-import { MessageDirection, VerityMessageType } from "@/schema";
-import { Link } from "@tanstack/react-router";
-import { Route } from "@/routes/$accountId/route.tsx";
 import { Avatar } from "@/components/ui/avatar.tsx";
-import { ArrowUpRightIcon } from "lucide-react";
-import { useInViewport, useMergedRef } from "@mantine/hooks";
-import { useQuery } from "@tanstack/react-query";
-import { ImageSuspenseQueryOptions } from "@/lib/fetchers";
 import { UserSuspenseQueryOptions } from "@/lib/fetchers/user.ts";
-import { userInfo } from "node:os";
+import { Route } from "@/routes/$accountId/route.tsx";
+import { MessageDirection, VerityMessageType } from "@/schema";
+import { useInViewport } from "@mantine/hooks";
+import { useQuery } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
+import { ArrowUpRightIcon } from "lucide-react";
 
 interface GreetingMessageItemProps extends React.HTMLAttributes<HTMLLIElement> {
 	message: VerityMessageType;
@@ -25,13 +23,16 @@ export default function GreetingMessageItem({
 	// fromusername 也许是一个编码过的字符串，因为微信号最大20，所以以此判断是否是经编码的微信号
 	// fullpy 看字面意思是全拼的意思，但是实际发现很多时候是是微信号，暂时没有更准确的数据
 	// 把 fullpy 当作微信号依然可能查不到用户
-	let userId =
+	const userId =
 		message.message_entity.msg["@_fromusername"].length > 20
 			? message.message_entity.msg["@_fullpy"]
 			: message.message_entity.msg["@_fromusername"];
 
 	const { data: userInfo, isFetching } = useQuery({
-		...UserSuspenseQueryOptions(accountId, userId),
+		...UserSuspenseQueryOptions({
+			account: { id: accountId },
+			user: { id: userId },
+		}),
 		enabled: inViewport,
 	});
 

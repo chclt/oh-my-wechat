@@ -1,137 +1,225 @@
 import type {
 	AccountType,
-	AppMessageTypeEnum,
+	ChatType,
+	ContactType,
 	FileInfo,
-	MessageTypeEnum,
 	ImageInfo,
+	MessageType,
+	MessageTypeEnum,
 	UserType,
+	VerityMessageType,
 	VideoInfo,
 	VoiceInfo,
-	ContactType,
-	VerityMessageType,
 } from "@/schema";
-import type { ChatType, MessageType } from "@/schema";
+import { MessageRecordBaseType } from "@/schema/message-record.ts";
+import { OpenMessageTypeEnum } from "@/schema/open-message.ts";
 import type { ChatStatistics } from "./ios-backup/controllers/statistic";
-import type { RecordType } from "@/components/record/record";
+
+// export interface GetAccountListRequest {}
+
+export type GetAccountListResponse = Promise<
+	DataAdapterResponse<AccountType[]>
+>;
+
+export interface GetAccountRequest {
+	account: Pick<AccountType, "id">;
+}
+
+export type GetAccountResponse = Promise<DataAdapterResponse<AccountType>>;
 
 export interface GetUserRequest {
-	accountId: string;
-	userId: string;
+	account: Pick<AccountType, "id">;
+	user: Pick<UserType, "id">;
 }
+
+export type GetUserResponse = Promise<DataAdapterResponse<UserType>>;
 
 export interface GetUserListRequest {
 	userIds: string[];
 }
 
+export type GetUserListResponse = Promise<DataAdapterResponse<UserType[]>>;
+
 export interface GetAccountContactListRequest {
-	// TODO: 其他接口也应该传 accountId
-	accountId: string;
+	account: Pick<AccountType, "id">;
 }
 
+export type GetAccountContactListResponse = Promise<
+	DataAdapterResponse<ContactType[]>
+>;
+
 export interface GetMessageListRequest {
-	chatId: ChatType["id"];
+	account: Pick<AccountType, "id">;
+	chat: Pick<ChatType, "id">;
 	type?: MessageTypeEnum | MessageTypeEnum[];
-	type_app?: AppMessageTypeEnum | AppMessageTypeEnum[]; // 有 bug
+	type_app?: OpenMessageTypeEnum | OpenMessageTypeEnum[]; // 有 bug
 	cursor?: string;
 	limit: number;
 }
 
+export type GetMessageListResponse = Promise<
+	DataAdapterCursorPagination<MessageType[]>
+>;
+
 export interface GetGreetingMessageListRequest {
-	accountId: string;
+	account: Pick<AccountType, "id">;
 }
 
+export type GetGreetingMessageListResponse = Promise<
+	DataAdapterResponse<VerityMessageType[]>
+>;
+
 export interface GetChatRequest {
-	chatId: string;
+	account: Pick<AccountType, "id">;
+	chat: Pick<ChatType, "id">;
 }
+
+export type GetChatResponse = Promise<DataAdapterResponse<ChatType>>;
 
 export interface GetChatListRequest {
 	userIds?: string[];
 }
 
-export interface GetImageRequest {
-	message: MessageType;
-	record?: RecordType;
-	size?: "origin" | "thumb";
-	domain?: "image" | "opendata" | "video";
+export type GetChatListResponse = Promise<DataAdapterResponse<ChatType[]>>;
+
+export interface GetMessageImageRequest {
+	account: Pick<AccountType, "id">;
+	chat: Pick<ChatType, "id">;
+	message: Pick<MessageType, "local_id">;
+	sizes?: NonNullable<keyof ImageInfo>[];
+	domain?: "image" | "opendata";
 }
 
-export interface GetVideoRequest {
-	message: MessageType;
+export type GetMessageImageResponse = Promise<
+	DataAdapterResponse<ImageInfo | undefined>
+>;
+
+export interface GetMessageVideoRequest {
+	account: Pick<AccountType, "id">;
+	chat: Pick<ChatType, "id">;
+	message: Pick<MessageType, "local_id">;
+	include?: ("video" | "cover")[];
 }
 
-export interface GetVoiceRequest {
-	message: MessageType;
-	scope?: "all" | "transcription";
+export type GetMessageVideoResponse = Promise<
+	DataAdapterResponse<VideoInfo | undefined>
+>;
+
+export interface GetMessageVoiceRequest {
+	account: Pick<AccountType, "id">;
+	chat: Pick<ChatType, "id">;
+	message: Pick<MessageType, "local_id">;
+	include?: ("voice" | "transcription")[];
 }
 
-export interface GetAttachRequest {
-	message: MessageType;
-	record?: RecordType;
+export type GetMessageVoiceResponse = Promise<
+	DataAdapterResponse<VoiceInfo | undefined>
+>;
+
+export interface GetMessageAttachRequest {
+	account: Pick<AccountType, "id">;
+	chat: Pick<ChatType, "id">;
+	message: Pick<MessageType, "local_id">;
 	type?: string;
 }
 
+export type GetMessageAttachResponse = Promise<
+	DataAdapterResponse<FileInfo | undefined>
+>;
+
+export interface GetRecordImageRequest {
+	account: Pick<AccountType, "id">;
+	chat: Pick<ChatType, "id">;
+	message: Pick<MessageType, "local_id">;
+	record: Pick<MessageRecordBaseType, "@_dataid">;
+}
+
+export type GetRecordImageResponse = Promise<DataAdapterResponse<ImageInfo>>;
+
+export interface GetRecordVideoRequest {
+	account: Pick<AccountType, "id">;
+	chat: Pick<ChatType, "id">;
+	message: Pick<MessageType, "local_id">;
+	record: Pick<MessageRecordBaseType, "@_dataid">;
+}
+
+export type GetRecordVideoResponse = Promise<DataAdapterResponse<VideoInfo>>;
+
+export interface GetRecordFileRequest {
+	account: Pick<AccountType, "id">;
+	chat: Pick<ChatType, "id">;
+	message: Pick<MessageType, "local_id">;
+	record: Pick<MessageRecordBaseType, "@_dataid">;
+}
+
+export type GetRecordFileResponse = Promise<
+	DataAdapterResponse<FileInfo | undefined>
+>;
+
 export interface GetStatisticRequest {
-	chatId: ChatType["id"];
+	account: Pick<AccountType, "id">;
+	chat: Pick<ChatType, "id">;
 	startTime: Date;
 	endTime: Date;
 }
 
+export type GetStatisticResponse = Promise<DataAdapterResponse<ChatStatistics>>;
+
 export interface DataAdapter {
 	init: () => void;
 
-	getAccountList: (
-		...requestData: any[]
-	) => Promise<DataAdapterResponse<AccountType[]>>;
+	getAccountList: (...requestData: any[]) => GetAccountListResponse;
 
-	getAccount: (accountId: string) => Promise<DataAdapterResponse<AccountType>>;
+	getAccount: (requestData: GetAccountRequest) => GetAccountResponse;
 
-	getUser: (
-		requestData: GetUserRequest,
-	) => Promise<DataAdapterResponse<UserType>>;
+	getUser: (requestData: GetUserRequest) => GetUserResponse;
 
-	getUserList: (
-		requestData: GetUserListRequest,
-	) => Promise<DataAdapterResponse<UserType[]>>;
+	getUserList: (requestData: GetUserListRequest) => GetUserListResponse;
 
 	getAccountContactList: (
 		requestData: GetAccountContactListRequest,
-	) => Promise<DataAdapterResponse<ContactType[]>>;
+	) => GetAccountContactListResponse;
 
-	getChat: (
-		requestData: GetChatRequest,
-	) => Promise<DataAdapterResponse<ChatType>>;
+	getChat: (requestData: GetChatRequest) => GetChatResponse;
 
-	getChatList: (
-		requestData: GetChatListRequest,
-	) => Promise<DataAdapterResponse<ChatType[]>>;
+	getChatList: (requestData: GetChatListRequest) => GetChatListResponse;
 
 	getMessageList: (
 		requestData: GetMessageListRequest,
-	) => Promise<DataAdapterCursorPagination<MessageType[]>>;
+	) => GetMessageListResponse;
 
 	getGreetingMessageList: (
 		requestData: GetGreetingMessageListRequest,
-	) => Promise<DataAdapterResponse<VerityMessageType[]>>;
+	) => GetGreetingMessageListResponse;
 
-	getImage: (
-		requestData: GetImageRequest,
-	) => Promise<DataAdapterResponse<ImageInfo>>;
+	getMessageImage: (
+		requestData: GetMessageImageRequest,
+	) => GetMessageImageResponse;
 
-	getVideo: (
-		requestData: GetVideoRequest,
-	) => Promise<DataAdapterResponse<VideoInfo>>;
+	getMessageVideo: (
+		requestData: GetMessageVideoRequest,
+	) => GetMessageVideoResponse;
 
-	getVoice: (
-		requestData: GetVoiceRequest,
-	) => Promise<DataAdapterResponse<VoiceInfo>>;
+	getMessageVoice: (
+		requestData: GetMessageVoiceRequest,
+	) => GetMessageVoiceResponse;
 
-	getAttach: (
-		requestData: GetAttachRequest,
-	) => Promise<DataAdapterResponse<FileInfo[]>>;
+	getMessageAttach: (
+		requestData: GetMessageAttachRequest,
+	) => GetMessageAttachResponse;
 
-	getStatistic: (
-		requestData: GetStatisticRequest,
-	) => Promise<DataAdapterResponse<ChatStatistics>>;
+	// TODO: maybe undefined
+	getRecordImage: (
+		requestData: GetRecordImageRequest,
+	) => GetRecordImageResponse;
+
+	getRecordVideo: (
+		requestData: GetRecordVideoRequest,
+	) => GetRecordVideoResponse;
+
+	getRecordFile: (requestData: GetRecordFileRequest) => GetRecordFileResponse;
+
+	getStatistic: (requestData: GetStatisticRequest) => GetStatisticResponse;
 }
 
 export interface DataAdapterResponse<DataType> {

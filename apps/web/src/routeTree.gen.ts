@@ -24,7 +24,7 @@ const AccountIdRouteRoute = AccountIdRouteRouteImport.update({
 } as any)
 const IndexRouteRoute = IndexRouteRouteImport.update({
   id: '/',
-  path: '/',
+  path: '',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AccountIdIndexRoute = AccountIdIndexRouteImport.update({
@@ -54,7 +54,6 @@ const AccountIdChatChatIdRoute = AccountIdChatChatIdRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRouteRoute
   '/$accountId': typeof AccountIdRouteRouteWithChildren
   '/$accountId/chat': typeof AccountIdChatRouteRouteWithChildren
   '/$accountId/': typeof AccountIdIndexRoute
@@ -63,7 +62,6 @@ export interface FileRoutesByFullPath {
   '/$accountId/contact': typeof AccountIdContactIndexRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRouteRoute
   '/$accountId': typeof AccountIdIndexRoute
   '/$accountId/chat/$chatId': typeof AccountIdChatChatIdRoute
   '/$accountId/chat': typeof AccountIdChatIndexRoute
@@ -82,7 +80,6 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | '/'
     | '/$accountId'
     | '/$accountId/chat'
     | '/$accountId/'
@@ -91,7 +88,6 @@ export interface FileRouteTypes {
     | '/$accountId/contact'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/'
     | '/$accountId'
     | '/$accountId/chat/$chatId'
     | '/$accountId/chat'
@@ -123,8 +119,8 @@ declare module '@tanstack/react-router' {
     }
     '/': {
       id: '/'
-      path: '/'
-      fullPath: '/'
+      path: ''
+      fullPath: ''
       preLoaderRoute: typeof IndexRouteRouteImport
       parentRoute: typeof rootRouteImport
     }

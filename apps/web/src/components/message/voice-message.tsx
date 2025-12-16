@@ -1,8 +1,11 @@
-import LocalVoice from "@/components/local-voice.tsx";
 import MessageInlineWrapper from "@/components/message-inline-wrapper";
 import type { MessageProp } from "@/components/message/message.tsx";
+import { MessageVoiceQueryOptions } from "@/lib/fetchers";
 import { cn } from "@/lib/utils.ts";
+import { Route } from "@/routes/$accountId/route.tsx";
 import type { VoiceMessageType } from "@/schema";
+import { useInViewport } from "@mantine/hooks";
+import { useQuery } from "@tanstack/react-query";
 
 type VoiceMessageProps = MessageProp<VoiceMessageType>;
 
@@ -41,9 +44,28 @@ function VoiceMessageDefault({
 	message,
 	...props
 }: Omit<VoiceMessageProps, "variant">) {
+	const { accountId } = Route.useParams();
+
+	const { ref: voiceRef, inViewport } = useInViewport();
+
+	const { data: voice } = useQuery({
+		...MessageVoiceQueryOptions({
+			account: { id: accountId },
+			chat: { id: message.chat_id },
+			message,
+		}),
+		enabled: inViewport,
+	});
+
 	return (
 		<div className={cn("max-w-[20em]")} {...props}>
-			<LocalVoice message={message} />
+			<audio
+				ref={voiceRef}
+				src={voice?.src}
+				controls
+				// width={result?.[0]?.width}
+				// height={result?.[0]?.height}
+			/>
 		</div>
 	);
 }

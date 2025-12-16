@@ -1,9 +1,12 @@
-import LocalImage from "@/components/local-image.tsx";
-import LocalVideo from "@/components/local-video.tsx";
 import MessageInlineWrapper from "@/components/message-inline-wrapper";
 import type { MessageProp } from "@/components/message/message.tsx";
+import { MessageVideoQueryOptions } from "@/lib/fetchers";
 import { cn } from "@/lib/utils.ts";
-import type { VideoMessageType } from "@/schema";
+import { Route } from "@/routes/$accountId/route.tsx";
+import { MessageDirection, type VideoMessageType } from "@/schema";
+import { useInViewport } from "@mantine/hooks";
+import { useQuery } from "@tanstack/react-query";
+import { cva } from "class-variance-authority";
 import type React from "react";
 
 type VideoMessageProps = MessageProp<
@@ -55,6 +58,21 @@ export interface VideoMessageEntity {
 	};
 }
 
+export const videoMessageVariants = cva(
+	["max-w-[20em] min-w-32 min-h-32 rounded-lg overflow-hidden"],
+	{
+		variants: {
+			variant: {
+				default: [],
+			},
+			direction: {
+				[MessageDirection.outgoing]: ["mask-bubble-tail-r mr-[-5px]"],
+				[MessageDirection.incoming]: ["mask-bubble-tail-l ml-[-5px]"],
+			},
+		},
+	},
+);
+
 export default function VideoMessage({
 	message,
 	variant = "default",
@@ -63,23 +81,9 @@ export default function VideoMessage({
 	if (variant === "default") {
 		return <VideoMessageDefault message={message} {...props} />;
 	} else if (variant === "viewer_detail") {
-		return (
-			<div {...props}>
-				<LocalVideo message={message} className={""} />
-			</div>
-		);
+		return <div {...props}>TODO</div>;
 	} else if (variant === "viewer_thumb") {
-		return (
-			<div {...props}>
-				<LocalImage
-					message={message}
-					domain="video"
-					size="thumb"
-					alt={""}
-					className={""}
-				/>
-			</div>
-		);
+		return <div {...props}>TODO</div>;
 	} else if (variant === "referenced" || variant === "abstract") {
 		return <VideoMessageAbstract message={message} {...props} />;
 	}
@@ -87,25 +91,39 @@ export default function VideoMessage({
 
 function VideoMessageDefault({
 	message,
+	className,
 	...props
 }: Omit<VideoMessageProps, "variant">) {
+	const { accountId } = Route.useParams();
+
+	const { ref: videoRef, inViewport } = useInViewport();
+
+	const { data: video } = useQuery({
+		enabled: inViewport,
+		...MessageVideoQueryOptions({
+			account: { id: accountId },
+			chat: { id: message.chat_id },
+			message,
+		}),
+	});
+
 	return (
 		<div
-			className={cn(
-				"max-w-[20em] min-w-32 min-h-32 rounded-lg overflow-hidden ",
-				["mask-bubble-tail-r mr-[-5px]", "mask-bubble-tail-l ml-[-5px]"][
-					message.direction
-				],
-			)}
-			onClick={() => {
-				//
-			}}
+			className={videoMessageVariants({
+				variant: "default",
+				direction: message.direction,
+				className,
+			})}
 			{...props}
 		>
 			<div className={"relative"}>
-				<LocalVideo
-					message={message}
+				<video
+					ref={videoRef}
+					src={video?.src}
+					poster={video?.cover?.src}
 					controls
+					// width={result?.[0]?.width}
+					// height={result?.[0]?.height}
 					className={"min-w-32 min-h-32 object-contain bg-white"}
 				/>
 

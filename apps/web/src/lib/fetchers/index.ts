@@ -1,71 +1,77 @@
-import type { UseSuspenseQueryOptions } from "@tanstack/react-query";
-import type { FileInfo, ImageInfo, VideoInfo, VoiceInfo } from "@/schema";
+import {
+	GetMessageAttachRequest,
+	GetMessageImageRequest,
+	GetMessageVideoRequest,
+	GetMessageVoiceRequest,
+} from "@/adapters/adapter.ts";
+import type { ImageInfo, VideoInfo, VoiceInfo } from "@/schema";
+import type { UseQueryOptions } from "@tanstack/react-query";
 import { getDataAdapter } from "../data-adapter.ts";
-import * as ImageController from "@/adapters/ios-backup/controllers/image";
-import * as VideoController from "@/adapters/ios-backup/controllers/video";
-import * as VoiceController from "@/adapters/ios-backup/controllers/voice";
-import * as AttachController from "@/adapters/ios-backup/controllers/attach";
 
-export function ImageSuspenseQueryOptions(
-	requestData: ImageController.GetInput[0],
-): UseSuspenseQueryOptions<ImageInfo> {
+export function MessageImageQueryOptions(
+	requestData: GetMessageImageRequest,
+): UseQueryOptions<ImageInfo | null> {
 	return {
 		queryKey: [
-			`chat: ${requestData.message.chat_id}`,
-			`message: ${requestData.message.id}`,
+			`account: ${requestData.account.id}`,
+			`chat: ${requestData.chat.id}`,
+			`message: ${requestData.message.local_id}`,
 			"image",
 		],
 		queryFn: async () =>
 			await getDataAdapter()
-				.getImage(requestData)
-				.then((res) => res.data),
+				.getMessageImage(requestData)
+				.then((res) => res.data ?? null),
 	};
 }
 
-export function VideoSuspenseQueryOptions(
-	requestData: VideoController.GetInput[0],
-): UseSuspenseQueryOptions<VideoInfo> {
+export function MessageVideoQueryOptions(
+	requestData: GetMessageVideoRequest,
+): UseQueryOptions<VideoInfo | null> {
 	return {
 		queryKey: [
-			`chat: ${requestData.message.chat_id}`,
-			`message: ${requestData.message.id}`,
+			`account: ${requestData.account.id}`,
+			`chat: ${requestData.chat.id}`,
+			`message: ${requestData.message.local_id}`,
 			"video",
 		],
 		queryFn: () =>
 			getDataAdapter()
-				.getVideo(requestData)
-				.then((res) => res.data),
+				.getMessageVideo(requestData)
+				.then((res) => res.data ?? null),
 	};
 }
 
-export function VoiceSuspenseQueryOptions(
-	requestData: VoiceController.GetInput[0],
-): UseSuspenseQueryOptions<VoiceInfo> {
+export function MessageVoiceQueryOptions(
+	requestData: GetMessageVoiceRequest,
+): UseQueryOptions<VoiceInfo | null> {
 	return {
 		queryKey: [
-			`chat: ${requestData.message.chat_id}`,
-			`message: ${requestData.message.id}`,
+			`account: ${requestData.account.id}`,
+			`chat: ${requestData.chat.id}`,
+			`message: ${requestData.message.local_id}`,
 			"voice",
 		],
 		queryFn: () =>
 			getDataAdapter()
-				.getVoice(requestData)
-				.then((res) => res.data),
+				.getMessageVoice(requestData)
+				.then((res) => res.data ?? null),
 	};
 }
 
-export function AttacheSuspenseQueryOptions(
-	requestData: AttachController.GetInput[0],
-): UseSuspenseQueryOptions<FileInfo[]> {
+export function MessageAttachQueryOptions(
+	requestData: GetMessageAttachRequest,
+) {
 	return {
 		queryKey: [
-			`chat: ${requestData.message.chat_id}`,
-			`message: ${requestData.message.id}`,
-			"attache",
+			`account: ${requestData.account.id}`,
+			`chat: ${requestData.chat.id}`,
+			`message: ${requestData.message.local_id}`,
+			"attach",
 		],
 		queryFn: () =>
 			getDataAdapter()
-				.getAttach(requestData)
-				.then((res) => res.data),
+				.getMessageAttach(requestData)
+				.then((res) => res.data ?? null),
 	};
 }

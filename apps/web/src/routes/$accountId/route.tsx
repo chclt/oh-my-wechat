@@ -1,13 +1,8 @@
 import { CentralCrossLargeFilledOffStroke2Radius2 } from "@/components/central-icon";
 import { ChatIconFill, ContactIconFill } from "@/components/icon";
-import {
-	Dialog,
-	DialogClose,
-	DialogContent,
-	DialogHeader,
-	DialogTitle,
-} from "@/components/ui/dialog";
+import dialogClasses from "@/components/ui/dialog.module.css";
 import { cn } from "@/lib/utils";
+import { Dialog } from "@base-ui/react";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import {
 	createFileRoute,
@@ -96,7 +91,7 @@ function RouteComponent() {
 						<span className="mt-0.5 text-xs">通讯录</span>
 					</button>
 
-					<Dialog
+					<Dialog.Root
 						open={modal === AccountSearchModalOptions.CONTACT}
 						onOpenChange={(open) => {
 							if (!open && canGoBack) {
@@ -109,33 +104,40 @@ function RouteComponent() {
 							}
 						}}
 					>
-						<DialogContent
-							showCloseButton={false}
-							className="p-0 max-w-sm sm:max-w-sm h-[calc(100dvh-10rem)] rounded-xl overflow-hidden"
-						>
-							<VisuallyHidden>
-								<DialogHeader>
-									<DialogTitle>通讯录</DialogTitle>
-								</DialogHeader>
-							</VisuallyHidden>
+						<Dialog.Portal>
+							<Dialog.Backdrop className={dialogClasses.Backdrop} />
+							<Dialog.Viewport className={dialogClasses.Viewport}>
+								<Dialog.Popup
+									className={cn(
+										dialogClasses.Popup,
+										"p-0 max-w-sm sm:max-w-sm h-[calc(100dvh-10rem)] rounded-xl overflow-hidden",
+									)}
+								>
+									<VisuallyHidden>
+										<div>
+											<Dialog.Title>通讯录</Dialog.Title>
+										</div>
+									</VisuallyHidden>
 
-							<div className="relative w-full h-full overflow-hidden">
-								<ContactListMiniRouter />
-							</div>
+									<div className="relative w-full h-full overflow-hidden">
+										<ContactListMiniRouter />
+									</div>
 
-							<DialogClose
-								data-slot="dialog-close"
-								className={cn(
-									"z-40 absolute top-5 right-5 size-6 rounded-xs cursor-pointer",
-									"data-[state=open]:bg-accent data-[state=open]:text-muted-foreground",
-									"ring-offset-background focus:ring-ring focus:ring-2 focus:ring-offset-2 focus:outline-hidden",
-									"[&_svg]:pointer-events-none [&_svg]:size-full",
-								)}
-							>
-								<CentralCrossLargeFilledOffStroke2Radius2 />
-							</DialogClose>
-						</DialogContent>
-					</Dialog>
+									<Dialog.Close
+										data-slot="dialog-close"
+										className={cn(
+											"z-40 absolute top-5 right-5 size-6 rounded-xs cursor-pointer",
+											"data-[state=open]:bg-accent data-[state=open]:text-muted-foreground",
+											"ring-offset-background focus:ring-ring focus:ring-2 focus:ring-offset-2 focus:outline-hidden",
+											"[&_svg]:pointer-events-none [&_svg]:size-full",
+										)}
+									>
+										<CentralCrossLargeFilledOffStroke2Radius2 />
+									</Dialog.Close>
+								</Dialog.Popup>
+							</Dialog.Viewport>
+						</Dialog.Portal>
+					</Dialog.Root>
 				</div>
 			</aside>
 

@@ -1,25 +1,28 @@
+import type { AccountType, UserType } from "@/schema";
+import * as Comlink from "comlink";
+import CryptoJS from "crypto-js";
+import { drizzle } from "drizzle-orm/sql-js";
 import initSqlJs from "sql.js";
 import sqliteUrl from "sql.js/dist/sql-wasm.wasm?url";
-import CryptoJS from "crypto-js";
-import type { AccountType, UserType } from "@/schema";
+import type { DataAdapter, DataAdapterResponse } from "../adapter";
+import * as ChatController from "./controllers/chat";
+import * as MessageController from "./controllers/message";
+import * as MessageAttachController from "./controllers/message-attach.ts";
+import * as MessageImageController from "./controllers/message-image.ts";
+import * as MessageVideoController from "./controllers/message-video.ts";
+import * as MessageVoiceController from "./controllers/message-voice.ts";
+import * as RecordFileController from "./controllers/record-file.ts";
+import * as RecordImageController from "./controllers/record-image.ts";
+import * as RecordVideoController from "./controllers/record-video.ts";
+import * as StatisticController from "./controllers/statistic";
+import * as UserController from "./controllers/user.ts";
+import type { WCDatabaseNames, WCDatabases } from "./types";
 import {
 	getFileFromDirectory,
 	getFilesFromManifast,
 	parseLocalInfo,
 	parseUserFromMmsetting,
 } from "./utils";
-import * as ChatController from "./controllers/chat";
-import * as UserController from "./controllers/user.ts";
-import * as MessageController from "./controllers/message";
-import * as ImageController from "./controllers/image";
-import * as VideoController from "./controllers/video";
-import * as VoiceController from "./controllers/voice";
-import * as AttachController from "./controllers/attach";
-import * as StatisticController from "./controllers/statistic";
-import * as Comlink from "comlink";
-import type { DataAdapterResponse } from "../adapter";
-import type { WCDatabaseNames, WCDatabases } from "./types";
-import { drizzle } from "drizzle-orm/sql-js";
 
 import { Buffer } from "buffer";
 globalThis.Buffer = Buffer;
@@ -38,7 +41,8 @@ interface AdapterWorkerStore {
 	account: AccountType | undefined;
 }
 
-export interface AdapterWorkerType {
+export interface AdapterWorkerType
+	extends Record<keyof Omit<DataAdapter, "init">, Function> {
 	_loadDirectory: (
 		directory: FileSystemDirectoryHandle | FileList,
 	) => Promise<void>;
@@ -53,7 +57,9 @@ export interface AdapterWorkerType {
 
 	getAccountList: () => Promise<DataAdapterResponse<AccountType[]>>;
 
-	getAccount: (accountId: string) => Promise<DataAdapterResponse<AccountType>>;
+	getAccount: (input: {
+		account: { id: string };
+	}) => Promise<DataAdapterResponse<AccountType>>;
 
 	getChatList: (input?: { userIds?: string[] }) => ChatController.AllOutput;
 
@@ -65,29 +71,37 @@ export interface AdapterWorkerType {
 		controllerInput: MessageController.AllInput[0],
 	) => MessageController.AllOutput;
 
-	getAllMessageList: (
-		controllerInput: MessageController.AllFromAllInput[0],
-	) => MessageController.AllFromAllOutput;
-
 	getGreetingMessageList: (
 		controllerInput: MessageController.allVerifyInput[0],
 	) => MessageController.allVerifyOutput;
 
-	getImage: (
-		controllerInput: ImageController.GetInput[0],
-	) => ImageController.GetOutput;
+	getMessageImage: (
+		controllerInput: MessageImageController.GetInput[0],
+	) => MessageImageController.GetOutput;
 
-	getVideo: (
-		controllerInput: VideoController.GetInput[0],
-	) => VideoController.GetOutput;
+	getMessageVideo: (
+		controllerInput: MessageVideoController.GetInput[0],
+	) => MessageVideoController.GetOutput;
 
-	getVoice: (
-		controllerInput: VoiceController.GetInput[0],
-	) => VoiceController.GetOutput;
+	getMessageVoice: (
+		controllerInput: MessageVoiceController.GetInput[0],
+	) => MessageVoiceController.GetOutput;
 
-	getAttach: (
-		controllerInput: AttachController.GetInput[0],
-	) => AttachController.GetOutput;
+	getMessageAttach: (
+		controllerInput: MessageAttachController.GetInput[0],
+	) => MessageAttachController.GetOutput;
+
+	getRecordImage: (
+		controllerInput: RecordImageController.GetInput[0],
+	) => RecordImageController.GetOutput;
+
+	getRecordVideo: (
+		controllerInput: RecordVideoController.GetInput[0],
+	) => RecordVideoController.GetOutput;
+
+	getRecordFile: (
+		controllerInput: RecordFileController.GetInput[0],
+	) => RecordFileController.GetOutput;
 
 	getStatistic: (
 		controllerInput: StatisticController.GetInput[0],
@@ -246,10 +260,10 @@ export const adapterWorker: AdapterWorkerType = {
 		return { data: adapterWorker._getStoreItem("accountList") };
 	},
 
-	getAccount: async (accountId) => {
+	getAccount: async ({ account: targetAccount }) => {
 		const account = adapterWorker
 			._getStoreItem("accountList")
-			?.find((account) => account.id === accountId);
+			?.find((account) => account.id === targetAccount.id);
 
 		if (!account) {
 			throw new Error("Account not found");
@@ -277,6 +291,10 @@ export const adapterWorker: AdapterWorkerType = {
 		});
 	},
 
+	getChat: async () => {
+		throw Error("Not implemented");
+	},
+
 	getAccountContactList: async () => {
 		return await UserController.contactList({
 			databases: adapterWorker._getStoreItem("databases"),
@@ -298,17 +316,23 @@ export const adapterWorker: AdapterWorkerType = {
 		});
 	},
 
+	getUser: async () => {
+		throw Error("Not implemented");
+	},
+
 	getMessageList: async (controllerInput) => {
 		return await MessageController.all(controllerInput, {
 			databases: adapterWorker._getStoreItem("databases"),
 		});
 	},
 
+	/*
 	getAllMessageList: async (controllerInput) => {
 		return await MessageController.allFromAll(controllerInput, {
 			databases: adapterWorker._getStoreItem("databases"),
 		});
 	},
+	*/
 
 	getGreetingMessageList: async (controllerInput) => {
 		return await MessageController.allVerify(controllerInput, {
@@ -316,29 +340,50 @@ export const adapterWorker: AdapterWorkerType = {
 		});
 	},
 
-	getImage: async (controllerInput) => {
-		return await ImageController.get(controllerInput, {
+	getMessageImage: async (controllerInput) => {
+		return await MessageImageController.get(controllerInput, {
 			directory: adapterWorker._getStoreItem("directory"),
 			databases: adapterWorker._getStoreItem("databases"),
 		});
 	},
 
-	getVideo: async (controllerInput) => {
-		return await VideoController.get(controllerInput, {
+	getMessageVideo: async (controllerInput) => {
+		return await MessageVideoController.get(controllerInput, {
 			directory: adapterWorker._getStoreItem("directory"),
 			databases: adapterWorker._getStoreItem("databases"),
 		});
 	},
 
-	getVoice: async (controllerInput) => {
-		return await VoiceController.get(controllerInput, {
+	getMessageVoice: async (controllerInput) => {
+		return await MessageVoiceController.get(controllerInput, {
 			directory: adapterWorker._getStoreItem("directory"),
 			databases: adapterWorker._getStoreItem("databases"),
 		});
 	},
 
-	getAttach: async (controllerInput) => {
-		return await AttachController.get(controllerInput, {
+	getMessageAttach: async (controllerInput) => {
+		return await MessageAttachController.get(controllerInput, {
+			directory: adapterWorker._getStoreItem("directory"),
+			databases: adapterWorker._getStoreItem("databases"),
+		});
+	},
+
+	getRecordImage: async (controllerInput) => {
+		return await RecordImageController.get(controllerInput, {
+			directory: adapterWorker._getStoreItem("directory"),
+			databases: adapterWorker._getStoreItem("databases"),
+		});
+	},
+
+	getRecordVideo: async (controllerInput) => {
+		return await RecordVideoController.get(controllerInput, {
+			directory: adapterWorker._getStoreItem("directory"),
+			databases: adapterWorker._getStoreItem("databases"),
+		});
+	},
+
+	getRecordFile: async (controllerInput) => {
+		return await RecordFileController.get(controllerInput, {
 			directory: adapterWorker._getStoreItem("directory"),
 			databases: adapterWorker._getStoreItem("databases"),
 		});

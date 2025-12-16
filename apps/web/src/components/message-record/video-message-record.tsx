@@ -1,0 +1,71 @@
+import { RecordVideoQueryOptions } from "@/lib/fetchers/record.ts";
+import { cn } from "@/lib/utils";
+import { Route } from "@/routes/$accountId/route.tsx";
+import { MessageType } from "@/schema";
+import { VideoMessageRecordType } from "@/schema/message-record.ts";
+import { useInViewport } from "@mantine/hooks";
+import { useQuery } from "@tanstack/react-query";
+import { videoMessageVariants } from "../message/video-message";
+
+interface VideoRecordProps extends React.HTMLAttributes<HTMLElement> {
+	message: MessageType;
+	record: VideoMessageRecordType;
+	variant: "default" | string;
+}
+
+export default function VideoMessageRecord({
+	message,
+	record,
+	variant = "default",
+	...props
+}: VideoRecordProps) {
+	if (variant === "default") {
+		return <VideoRecordDefault message={message} record={record} {...props} />;
+	}
+	return <p className="inline">视频</p>;
+}
+
+function VideoRecordDefault({
+	message,
+	record,
+	className,
+	...props
+}: Omit<VideoRecordProps, "variant">) {
+	const { accountId } = Route.useParams();
+
+	const { ref, inViewport } = useInViewport();
+
+	const { data: video } = useQuery({
+		...RecordVideoQueryOptions({
+			account: { id: accountId },
+			chat: { id: message.chat_id },
+			message: message,
+			record: record,
+		}),
+
+		enabled: inViewport,
+	});
+
+	return (
+		<div
+			ref={ref}
+			className={cn(
+				videoMessageVariants({
+					variant: "default",
+					direction: message.direction,
+					className,
+				}),
+			)}
+			{...props}
+		>
+			<div className="relative">
+				<video
+					src={video?.src}
+					poster={video?.cover?.src}
+					controls
+					className="w-full"
+				/>
+			</div>
+		</div>
+	);
+}

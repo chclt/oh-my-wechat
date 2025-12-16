@@ -1,4 +1,3 @@
-import { createFileRoute } from "@tanstack/react-router";
 import {
 	BubbleQuestionSolid,
 	GithubSolid,
@@ -6,10 +5,11 @@ import {
 } from "@/components/central-icon.tsx";
 import Image from "@/components/image.tsx";
 import Link from "@/components/link.tsx";
-import logo from "/images/logo.svg?url";
-import Configurer from "./-components/Configurer";
+import { createFileRoute } from "@tanstack/react-router";
 import { ErrorBoundary } from "react-error-boundary";
+import Configurer from "./-components/Configurer";
 import ConfigurerErrorFallback from "./-components/ConfigurerErrorFallback";
+import logo from "/images/logo.svg?url";
 
 export const Route = createFileRoute("/")({
 	component: RouteComponent,

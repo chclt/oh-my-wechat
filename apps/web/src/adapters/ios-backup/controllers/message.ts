@@ -1,5 +1,10 @@
-import type { AppMessageEntity } from "@/components/message/app-message.tsx";
-import type { ReferMessageEntity } from "@/components/message/app-message/refer-message.tsx";
+import type {
+	DataAdapterCursorPagination,
+	DataAdapterResponse,
+	GetGreetingMessageListRequest,
+	GetGreetingMessageListResponse,
+	GetMessageListRequest,
+} from "@/adapters/adapter.ts";
 import type { ChatroomVoipMessageEntity } from "@/components/message/chatroom-voip-message.tsx";
 import type { ContactMessageEntity } from "@/components/message/contact-message.tsx";
 import type { ImageMessageEntity } from "@/components/message/image-message.tsx";
@@ -14,12 +19,8 @@ import type { VideoMessageEntity } from "@/components/message/video-message.tsx"
 import type { VoiceMessageEntity } from "@/components/message/voice-message.tsx";
 import type { VoipMessageEntity } from "@/components/message/voip-message.tsx";
 import type { WeComContactMessageEntity } from "@/components/message/wecom-contact-message.tsx";
-import * as ChatController from "./chat.ts";
-import * as UserController from "./user.ts";
-import { adapterWorker } from "../worker.ts";
+import type { OpenMessageEntity } from "@/components/open-message/open-message.tsx";
 import {
-	type AppMessageType,
-	AppMessageTypeEnum,
 	BasicMessageType,
 	type ChatroomVoipMessageType,
 	type ChatType,
@@ -31,6 +32,7 @@ import {
 	type MessageType,
 	MessageTypeEnum,
 	type MicroVideoMessageType,
+	type OpenMessageType,
 	type StickerMessageType,
 	type SystemExtendedMessageType,
 	type SystemMessageType,
@@ -42,26 +44,11 @@ import {
 	type VoipMessageType,
 	type WeComContactMessageType,
 } from "@/schema";
-import CryptoJS from "crypto-js";
-import { XMLParser } from "fast-xml-parser";
-import WCDB, {
-	WCDBDatabaseSeriesName,
-	WCDBTableSeriesName,
-} from "../utils/wcdb.ts";
-import type {
-	DataAdapterCursorPagination,
-	DataAdapterResponse,
-	GetMessageListRequest,
-} from "@/adapters/adapter.ts";
-import type { ControllerPaginatorCursor, WCDatabases } from "../types.ts";
 import {
-	chatTableSelect,
-	ChatTableSelectInfer,
-	getChatTable,
-	getHelloTable,
-	helloTableSelect,
-	HelloTableSelectInfer,
-} from "../database/message.ts";
+	OpenMessageTypeEnum,
+	ReferOpenMessageEntity,
+} from "@/schema/open-message.ts";
+import CryptoJS from "crypto-js";
 import {
 	and,
 	asc,
@@ -77,6 +64,23 @@ import {
 	sql,
 } from "drizzle-orm";
 import { unionAll } from "drizzle-orm/sqlite-core";
+import { XMLParser } from "fast-xml-parser";
+import {
+	chatTableSelect,
+	ChatTableSelectInfer,
+	getChatTable,
+	getHelloTable,
+	helloTableSelect,
+	HelloTableSelectInfer,
+} from "../database/message.ts";
+import type { ControllerPaginatorCursor, WCDatabases } from "../types.ts";
+import WCDB, {
+	WCDBDatabaseSeriesName,
+	WCDBTableSeriesName,
+} from "../utils/wcdb.ts";
+import { adapterWorker } from "../worker.ts";
+import * as ChatController from "./chat.ts";
+import * as UserController from "./user.ts";
 
 async function parseMessageDatabaseChatTableRows(
 	rows: ChatTableSelectInfer[],
@@ -295,15 +299,15 @@ async function parseMessageDatabaseChatTableRows(
 			}
 
 			case MessageTypeEnum.APP: {
-				const messageEntity: AppMessageEntity<{ type: number }> =
+				const messageEntity: OpenMessageEntity<{ type: number }> =
 					xmlParser.parse(raw_message_row.Message);
 
 				try {
-					if (messageEntity.msg.appmsg.type === AppMessageTypeEnum.REFER) {
+					if (messageEntity.msg.appmsg.type === OpenMessageTypeEnum.REFER) {
 						messageIndexesHasReplyMessage.push(index);
 
 						const replyMessageId = (
-							messageEntity as AppMessageEntity<ReferMessageEntity>
+							messageEntity as OpenMessageEntity<ReferOpenMessageEntity>
 						).msg.appmsg.refermsg.svrid;
 						replyMessageIds.push(replyMessageId);
 					}
@@ -314,7 +318,7 @@ async function parseMessageDatabaseChatTableRows(
 				return {
 					...message,
 					message_entity: messageEntity,
-				} as AppMessageType<ReferMessageEntity>;
+				} as OpenMessageType<ReferOpenMessageEntity>;
 			}
 
 			case MessageTypeEnum.VOIP: {
@@ -414,7 +418,7 @@ async function parseMessageDatabaseChatTableRows(
 				replyMessageTable[
 					(
 						messages[index]
-							.message_entity as AppMessageEntity<ReferMessageEntity>
+							.message_entity as OpenMessageEntity<ReferOpenMessageEntity>
 					).msg.appmsg.refermsg.svrid
 				];
 		}
@@ -433,7 +437,7 @@ export type AllInput = [
 export type AllOutput = Promise<DataAdapterCursorPagination<MessageType[]>>;
 
 export async function all(...inputs: AllInput): AllOutput {
-	const [{ chatId, type, type_app, cursor, limit = 50 }, { databases }] =
+	const [{ account, chat, type, type_app, cursor, limit = 50 }, { databases }] =
 		inputs;
 
 	const cursorObject: Partial<ControllerPaginatorCursor> = {};
@@ -459,7 +463,7 @@ export async function all(...inputs: AllInput): AllOutput {
 	const dbs = databases.message;
 	if (!dbs) throw new Error("message databases are not found");
 
-	const tableName = `Chat_${CryptoJS.MD5(chatId).toString()}`;
+	const tableName = `Chat_${CryptoJS.MD5(chat.id).toString()}`;
 
 	const chatTable = getChatTable(tableName);
 
@@ -814,12 +818,12 @@ export async function all(...inputs: AllInput): AllOutput {
 		console.error("cursor_value and cursor_condition are not set correctly");
 	}
 
-	const chats = await ChatController.find({ ids: [chatId] }, { databases });
-	const chat = chats.data[0];
+	const chats = await ChatController.find({ ids: [chat.id] }, { databases });
+	const chatDetail = chats.data[0];
 
 	return {
 		data: await parseMessageDatabaseChatTableRows(rows, {
-			chat,
+			chat: chatDetail,
 			databases,
 		}),
 		meta: {
@@ -839,52 +843,6 @@ export async function all(...inputs: AllInput): AllOutput {
 					},
 				}
 			: {}),
-	};
-}
-
-export type AllFromAllInput = [
-	{
-		type?: MessageTypeEnum | MessageTypeEnum[];
-		type_app?: AppMessageTypeEnum | AppMessageTypeEnum[];
-		limit: number;
-	},
-	{
-		databases: WCDatabases;
-	},
-];
-
-export type AllFromAllOutput = Promise<
-	DataAdapterCursorPagination<MessageType[]>
->;
-
-export async function allFromAll(...inputs: AllFromAllInput): AllFromAllOutput {
-	const [{ type, type_app, limit }, { databases }] = inputs;
-
-	if (!databases) {
-		throw new Error("databases are not found");
-	}
-
-	const chats = await ChatController.all({ databases });
-
-	const chatMessagePromiseResults = (
-		await Promise.all(
-			chats.data.map((chat) => {
-				return all(
-					{
-						chatId: chat.id,
-						type,
-						type_app,
-						limit,
-					},
-					{ databases },
-				);
-			}),
-		)
-	).flatMap((result) => result.data);
-
-	return {
-		data: chatMessagePromiseResults,
-		meta: {},
 	};
 }
 
@@ -959,16 +917,16 @@ export async function find(...inputs: findInput): findOutput {
 }
 
 export type allVerifyInput = [
-	{ accountId: string },
+	GetGreetingMessageListRequest,
 	{
 		databases: WCDatabases;
 	},
 ];
 
-export type allVerifyOutput = Promise<DataAdapterResponse<VerityMessageType[]>>;
+export type allVerifyOutput = GetGreetingMessageListResponse;
 
 export async function allVerify(...inputs: allVerifyInput): allVerifyOutput {
-	const [_, { databases }] = inputs;
+	const [{ account }, { databases }] = inputs;
 
 	const dbs = databases.message;
 	if (!dbs) {

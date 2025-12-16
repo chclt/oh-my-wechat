@@ -1,4 +1,6 @@
 export * from "./message";
+export * from "./note-record.ts";
+export * from "./record";
 
 import { MessageType } from "./message";
 
@@ -72,20 +74,22 @@ export interface GroupChatType extends BasicChatType {
 
 export type ChatType = PrivateChatType | GroupChatType;
 
-export type ImageInfo = {
-	src: string;
-	size: "origin" | "thumb"; // planned to be deprecated
-	width?: number;
-	height?: number;
-	file_size?: number;
-}[];
+export type ImageInfo = Partial<
+	Record<
+		"regular" | "thumbnail" | "hd",
+		{
+			src: string;
+			width?: number;
+			height?: number;
+		}
+	>
+>;
 
 export interface VideoInfo {
-	src?: string;
-	poster: string;
-	poster_width?: number;
-	poster_height?: number;
-	file_size?: number;
+	src: string;
+	width?: number;
+	height?: number;
+	cover?: ImageInfo[keyof ImageInfo];
 }
 
 export interface VoiceInfo {

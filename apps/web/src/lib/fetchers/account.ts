@@ -1,15 +1,16 @@
+import { GetAccountRequest } from "@/adapters/adapter.ts";
+import type { AccountType } from "@/schema";
 import type { UseSuspenseQueryOptions } from "@tanstack/react-query";
 import { getDataAdapter } from "../data-adapter.ts";
-import type { AccountType } from "@/schema";
 
 export function AccountSuspenseQueryOptions(
-	accountId: string,
+	requestData: GetAccountRequest,
 ): UseSuspenseQueryOptions<AccountType> {
 	return {
-		queryKey: [`account: ${accountId}`],
+		queryKey: [`account: ${requestData.account.id}`],
 		queryFn: () =>
 			getDataAdapter()
-				.getAccount(accountId)
+				.getAccount(requestData)
 				.then((res) => res.data),
 	};
 }
