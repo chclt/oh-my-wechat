@@ -1,8 +1,9 @@
-import path from "path";
-import react from "@vitejs/plugin-react";
-import { defineConfig } from "vite";
 import tailwindcss from "@tailwindcss/vite";
+import { devtools } from "@tanstack/devtools-vite";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
+import react from "@vitejs/plugin-react";
+import path from "path";
+import { defineConfig } from "vite";
 import wasm from "vite-plugin-wasm";
 
 // https://vitejs.dev/config/
@@ -11,6 +12,7 @@ export default defineConfig({
 		exclude: ["@ffmpeg/ffmpeg", "@ffmpeg/util", "silk-wasm"],
 	},
 	plugins: [
+		devtools(),
 		tanstackRouter({
 			target: "react",
 			autoCodeSplitting: true,
