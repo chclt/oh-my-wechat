@@ -9,13 +9,12 @@ const ffmpegCoreURL =
 const ffmpegWasmURL =
 	"https://unpkg.com/@ffmpeg/core@0.12.10/dist/esm/ffmpeg-core.wasm";
 
-export const ffmpeg = new FFmpeg();
-
-export async function initFFmpeg() {
-	const ffmpegInitResult = await ffmpeg.load({
-		coreURL: await toBlobURL(ffmpegCoreURL, "text/javascript"),
-		wasmURL: await toBlobURL(ffmpegWasmURL, "application/wasm"),
-	});
-
-	return ffmpegInitResult;
+export async function loadFFmpeg() {
+	const [coreURL, wasmURL] = await Promise.all([
+		toBlobURL(ffmpegCoreURL, "text/javascript"),
+		toBlobURL(ffmpegWasmURL, "application/wasm"),
+	]);
+	const ffmpeg = new FFmpeg();
+	await ffmpeg.load({ coreURL, wasmURL });
+	return ffmpeg;
 }

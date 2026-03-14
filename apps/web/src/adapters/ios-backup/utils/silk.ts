@@ -1,6 +1,9 @@
+import { loadFFmpeg } from "@/adapters/ios-backup/utils/ffmpeg";
+import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { AsyncQueuer } from "@tanstack/pacer";
 import { decode } from "silk-wasm";
-import { ffmpeg, initFFmpeg } from "./ffmpeg";
+
+let ffmpeg: FFmpeg | undefined;
 
 type SilkQueueItemProps = {
 	silk: ArrayBuffer;
@@ -11,16 +14,17 @@ type SilkQueueItemProps = {
 };
 
 async function processQueueItem(item: SilkQueueItemProps) {
-	const silk = await decode(item.silk, 24000);
+	if (!ffmpeg) throw new Error("FFmpeg is not loaded");
 
-	// const ffmpegInputFilename = `${message.chat.id}|${message.local_id}.pcm`;
-	// const ffmpegOutputFilename = `${message.chat.id}|${message.local_id}.wav`;
+	const silk = await decode(item.silk, 24000);
 
 	// 在只有一个 FFmpeg 实例的情况下，相同的文件名会覆盖，所以使用相同的文件名要注意时序
 	const ffmpegInputFilename = `input.pcm`;
 	const ffmpegOutputFilename = `output.wav`;
 
-	await ffmpeg.writeFile(ffmpegInputFilename, silk.data);
+	const pcmData = new Uint8Array(silk.data);
+
+	await ffmpeg.writeFile(ffmpegInputFilename, pcmData);
 	await ffmpeg.exec([
 		"-y",
 		"-f",
@@ -34,12 +38,9 @@ async function processQueueItem(item: SilkQueueItemProps) {
 		ffmpegOutputFilename,
 	]);
 	const wav = await ffmpeg.readFile(ffmpegOutputFilename);
-
-	ffmpeg.deleteFile(ffmpegInputFilename);
-	ffmpeg.deleteFile(ffmpegOutputFilename);
-
-	// TODO
-	// @ts-ignore
+	await ffmpeg.deleteFile(ffmpegInputFilename);
+	await ffmpeg.deleteFile(ffmpegOutputFilename);
+	// @ts-expect-error wav is Uint8Array for binary read
 	return URL.createObjectURL(new Blob([wav], { type: "audio/wav" }));
 }
 
@@ -60,8 +61,9 @@ export const silkQueue = new AsyncQueuer<SilkQueueItemProps>(processQueueItem, {
 	started: false,
 });
 
-initFFmpeg()
-	.then(() => {
+loadFFmpeg()
+	.then((ffmpegInstance) => {
+		ffmpeg = ffmpegInstance;
 		silkQueue.start();
 	})
 	.catch((error) => {

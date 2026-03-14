@@ -6,6 +6,17 @@ import type { ImageInfo } from "@/schema";
 import CryptoJS from "crypto-js";
 import { WCDatabases } from "../types";
 import { getFilesFromManifast } from "../utils";
+import { convertWxgfToJpg } from "../utils/wxgf";
+import { isWxgf } from "../utils/wxgf/utils";
+
+async function getImageSrc(file: File): Promise<string> {
+	const header = new Uint8Array(await file.slice(0, 4).arrayBuffer());
+	if (isWxgf(header)) {
+		const data = new Uint8Array(await file.arrayBuffer());
+		return convertWxgfToJpg(data);
+	}
+	return URL.createObjectURL(file);
+}
 
 export type GetInput = [
 	GetMessageImageRequest,
@@ -54,13 +65,34 @@ export async function get(...inputs: GetInput): GetOutput {
 	for (const file of files) {
 		if (file.filename.endsWith(".pic_hd")) {
 			if (!sizeIncludeMap.hd) continue;
-			result.hd = { src: URL.createObjectURL(file.file) };
+			try {
+				result.hd = { src: await getImageSrc(file.file) };
+			} catch (error) {
+				console.error(
+					`[message-image] Failed to load ${file.filename}:`,
+					error,
+				);
+			}
 		} else if (file.filename.endsWith(".pic")) {
 			if (!sizeIncludeMap.regular) continue;
-			result.regular = { src: URL.createObjectURL(file.file) };
+			try {
+				result.regular = { src: await getImageSrc(file.file) };
+			} catch (error) {
+				console.error(
+					`[message-image] Failed to load ${file.filename}:`,
+					error,
+				);
+			}
 		} else if (file.filename.endsWith(".pic_thum")) {
 			if (!sizeIncludeMap.thumbnail) continue;
-			result.thumbnail = { src: URL.createObjectURL(file.file) };
+			try {
+				result.thumbnail = { src: await getImageSrc(file.file) };
+			} catch (error) {
+				console.error(
+					`[message-image] Failed to load ${file.filename}:`,
+					error,
+				);
+			}
 			// width: Number.parseInt(messageEntity.msg.img["@_cdnthumbwidth"]),
 			// height: Number.parseInt(messageEntity.msg.img["@_cdnthumbheight"]),
 		}
