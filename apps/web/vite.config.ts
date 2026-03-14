@@ -12,7 +12,14 @@ export default defineConfig({
 		exclude: ["@ffmpeg/ffmpeg", "@ffmpeg/util", "silk-wasm"],
 	},
 	plugins: [
-		devtools(),
+		devtools({
+			enhancedLogs: {
+				enabled: false,
+			},
+			injectSource: {
+				enabled: false,
+			},
+		}),
 		tanstackRouter({
 			target: "react",
 			autoCodeSplitting: true,
