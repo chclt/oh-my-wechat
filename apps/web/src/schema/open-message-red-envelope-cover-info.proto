@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+message OpenMessageRedEnvelopeCoverInfo {
+  string openingImageUrl = 5; // 拆红包页图片
+  string openingImageMd5 = 6; // 拆红包页图片md5
+  string detailImageUrl = 7; // 也许是红包详情页，相比于第五字段的图片，底下没有红色装饰
+  string redPacketId = 10; // `redpacketid_${string}`
+  optional string field12 = 12; // 品牌logo
+  optional string openingDecorationImageUrl = 16; // 拆红包页红包挂件图片
+  optional string bubbleDecorationSenderImageUrl = 18; // 拆红包页红包挂件图片，猜测和字段20一个是发送方一个是接收方
+  optional string bubbleDecorationReceiverImageUrl = 20; // 拆红包页红包挂件图片，猜测和字段20一个是发送方一个是接收方
+  optional string field24 = 24; // 品牌logo
+  optional string field28 = 28; // 品牌logo
+  optional string field30 = 30; // 品牌logo
+  int32 field32 = 32; // 0/1 
+  optional string field33 = 33; // 未知，看上去和气泡图片一样
+}

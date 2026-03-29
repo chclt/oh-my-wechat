@@ -27,6 +27,8 @@ export enum OpenMessageTypeEnum {
 	TING = 92, // 微信内置音频平台的音频
 	GAME = 101,
 	STORE = 111, // 微信小店
+	GIFT = 115, // 礼物
+	GIFT_LOTTERY = 124, // 抽奖
 	RINGTONE = 996, // 系统提示朋友的铃声
 	SCAN_RESULT = 998, // 扫码结果
 	TRANSFER = 2000, // 转账
@@ -846,6 +848,12 @@ export interface RedEnvelopeOpenMessageEntity {
 		detailshowsourceurl?: string; // 红包封面全尺寸
 		corpname?: string; // 红包封面的作者是哪个品牌
 
+		/**
+		 * base64 编码的红包封面信息，解码后是一个 ProtoBuf
+		 * @file "./open-message-red-envelope-cover-info.proto"
+		 */
+		coverinfo?: string;
+
 		newaa?: {
 			billno: string;
 			newaatype: number; // eg. 2
@@ -853,5 +861,15 @@ export interface RedEnvelopeOpenMessageEntity {
 			payerlist: string;
 			customize_payerlist: string;
 		};
+	};
+
+	voice?: {
+		voiceurl: string;
+		aeskey: string;
+		voicemd5: string;
+		length: number;
+		playtime: number;
+		format: number;
+		key_words: string; // ms-string eg. "150-恭喜|775-发财|"
 	};
 }
