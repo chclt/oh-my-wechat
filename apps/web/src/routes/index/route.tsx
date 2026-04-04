@@ -9,7 +9,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { ErrorBoundary } from "react-error-boundary";
 import Configurer from "./-components/Configurer";
 import ConfigurerErrorFallback from "./-components/ConfigurerErrorFallback";
-import logo from "/images/logo.svg?url";
+import imageLogo from "/images/logo.svg?url";
 
 export const Route = createFileRoute("/")({
 	component: RouteComponent,
@@ -21,17 +21,19 @@ function RouteComponent() {
 			<div className={"grow grid justify-items-center place-content-center"}>
 				<ErrorBoundary fallback={<ConfigurerErrorFallback />}>
 					<Image
-						src={logo}
-						alt={"OhMyWechat.com (beta) logo"}
+						src={imageLogo}
+						alt={"OhMyWechat.com logo"}
 						draggable={false}
-						className={"select-none"}
-						width={250}
-						height={50}
+						className={"select-none h-12 w-auto"}
+						width={223}
+						height={48}
 					/>
 
-					<Configurer className="mt-5 w-full" />
+					<Configurer className="mt-6 w-full" />
 
-					<p className={"mt-7 flex items-center text-sm text-muted-foreground"}>
+					<p
+						className={"mt-10 flex items-center text-sm text-muted-foreground"}
+					>
 						<span
 							className={
 								"mr-1 shrink-0 size-4.5 [&_svg]:size-full relative bottom-px"
