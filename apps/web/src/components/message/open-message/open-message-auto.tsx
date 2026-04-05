@@ -72,22 +72,20 @@ import {
 	UrlMessage,
 	VideoMessage,
 	VoiceMessage,
-} from "./index.ts";
+} from "../../open-message";
 
-export type OpenMessageProps<
-	T = {
-		type: 0;
-	},
-> = MessageProp<OpenMessageType<T>>;
+interface OpenMessageProps
+	extends MessageProp<
+		OpenMessageType<{
+			type: number;
+		}>
+	> {}
 
-export default function OpenMessage({
+export function OpenMessageAuto({
 	message,
 	variant,
 	...props
-}: OpenMessageProps<{
-	type: unknown;
-	[key: string]: unknown;
-}>) {
+}: OpenMessageProps) {
 	if (!message.message_entity.msg?.appmsg) {
 		// throw new Error("Invalid app message");
 		console.error(message);

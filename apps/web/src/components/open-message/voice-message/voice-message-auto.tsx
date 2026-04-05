@@ -7,12 +7,15 @@ export interface VoiceMessageAutoProps extends VoiceMessageProps {
 }
 
 export function VoiceMessageAuto({
+	accountId,
 	message,
 	variant,
 	...props
 }: VoiceMessageAutoProps) {
 	if (variant === "default") {
-		return <VoiceMessageDefault message={message} {...props} />;
+		return (
+			<VoiceMessageDefault accountId={accountId} message={message} {...props} />
+		);
 	} else if (variant === "referenced" || variant === "abstract") {
 		return <VoiceMessageAbstract message={message} {...props} />;
 	}

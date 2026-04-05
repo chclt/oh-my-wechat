@@ -6,7 +6,7 @@ import type { LinkMessage2Props } from "./types";
 export function LinkMessage2Abstract({
 	message,
 	...props
-}: LinkMessage2Props) {
+}: Omit<LinkMessage2Props, "accountId">) {
 	return (
 		<UrlMessage.Abstract
 			message={message as unknown as OpenMessageType<UrlOpenMessageEntity>}

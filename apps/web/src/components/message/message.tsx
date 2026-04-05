@@ -13,8 +13,9 @@ import {
 	VoiceMessage,
 	VoipMessage,
 	WeComContactMessage,
+	OpenMessage,
 } from "@/components/message";
-import OpenMessage from "@/components/open-message/open-message.tsx";
+
 import dialogClasses from "@/components/ui/dialog.module.css";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { AccountSuspenseQueryOptions } from "@/lib/fetchers/account.ts";
@@ -131,7 +132,9 @@ function MessageComponent({ message, variant, ...props }: MessageProp) {
 			);
 
 		case MessageTypeEnum.APP:
-			return <OpenMessage message={message} variant={variant} {...props} />;
+			return (
+				<OpenMessage.Auto message={message} variant={variant} {...props} />
+			);
 
 		case MessageTypeEnum.VOIP:
 			return (

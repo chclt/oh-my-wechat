@@ -12,3 +12,5 @@ export * from "./video-message";
 export * from "./voice-message";
 export * from "./voip-message";
 export * from "./wecom-contact-message";
+
+export * from "./open-message";

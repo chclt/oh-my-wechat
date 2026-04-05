@@ -7,12 +7,15 @@ export interface LinkMessage2AutoProps extends LinkMessage2Props {
 }
 
 export function LinkMessage2Auto({
+	accountId,
 	message,
 	variant,
 	...props
 }: LinkMessage2AutoProps) {
 	if (variant === "default") {
-		return <LinkMessage2Default message={message} {...props} />;
+		return (
+			<LinkMessage2Default accountId={accountId} message={message} {...props} />
+		);
 	} else if (variant === "referenced" || variant === "abstract") {
 		return <LinkMessage2Abstract message={message} {...props} />;
 	}

@@ -6,7 +6,7 @@ import type { MiniappMessage2Props } from "./types";
 export function MiniappMessage2Abstract({
 	message,
 	...props
-}: MiniappMessage2Props) {
+}: Omit<MiniappMessage2Props, "accountId">) {
 	return (
 		<MiniappMessage.Abstract
 			message={message as unknown as OpenMessageType<MiniAppOpenMessageEntity>}

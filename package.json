@@ -2,11 +2,11 @@
   "name": "oh-my-wechat",
   "private": true,
   "scripts": {
-    "build": "turbo run build",
-    "dev": "turbo run dev",
-    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "check-types": "turbo run check-types"
+    "lint": "turbo run lint",
+    "build": "turbo run build",
+    "dev": "turbo run dev"
   },
   "devDependencies": {
     "prettier": "^3.6.2",
