@@ -80,19 +80,6 @@ export type OpenMessageProps<
 	},
 > = MessageProp<OpenMessageType<T>>;
 
-export interface OpenMessageEntity<
-	T = {
-		type: 0;
-	},
-> {
-	msg: {
-		appmsg: T;
-		appinfo?: {
-			appname: string;
-		};
-	};
-}
-
 export default function OpenMessage({
 	message,
 	variant,

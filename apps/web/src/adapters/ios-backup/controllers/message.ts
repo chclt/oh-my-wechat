@@ -5,7 +5,6 @@ import type {
 	GetGreetingMessageListResponse,
 	GetMessageListRequest,
 } from "@/adapters/adapter.ts";
-import type { OpenMessageEntity } from "@/components/open-message/open-message.tsx";
 import {
 	BasicMessageType,
 	type ChatroomVoipMessageEntity,
@@ -24,6 +23,7 @@ import {
 	MessageTypeEnum,
 	type MicroVideoMessageEntity,
 	type MicroVideoMessageType,
+	type OpenMessageEntity,
 	type OpenMessageType,
 	type StickerMessageEntity,
 	type StickerMessageType,

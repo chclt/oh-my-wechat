@@ -1,5 +1,4 @@
 import type { TextMessageEntity } from "@/components/message/text-message/types.ts";
-import type { OpenMessageEntity } from "@/components/open-message/open-message.tsx";
 import type { ChatType, UserType } from "@/schema/index.ts";
 
 export enum MessageDirection {
@@ -324,6 +323,20 @@ export type LocationMessageType = BasicMessageType<
 	MessageTypeEnum.LOCATION,
 	LocationMessageEntity
 >;
+
+export interface OpenMessageEntity<
+	T = {
+		type: 0;
+	},
+> {
+	msg: {
+		appmsg: T;
+		appinfo?: {
+			appname: string;
+		};
+	};
+}
+
 export type OpenMessageType<
 	OpenMessageEntityType = {
 		type: unknown;
