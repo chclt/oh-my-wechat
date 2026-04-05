@@ -1,3 +1,4 @@
+import { AccountProvider } from "@/components/account-provider.tsx";
 import { CentralCrossLargeFilledOffStroke2Radius2 } from "@/components/central-icon";
 import { ChatIconFill, ContactIconFill } from "@/components/icon";
 import dialogClasses from "@/components/ui/dialog.module.css";
@@ -12,12 +13,8 @@ import {
 	useNavigate,
 	useRouter,
 } from "@tanstack/react-router";
+import { AccountSearchModalOptions } from "./-types";
 import ContactListMiniRouter from "./contact/-components/contact-list/contact-list-mini-router";
-import { AccountProvider } from "@/components/account-provider.tsx";
-
-export enum AccountSearchModalOptions {
-	CONTACT = "contact",
-}
 
 interface AccountSearchProps {
 	modal: AccountSearchModalOptions;

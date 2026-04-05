@@ -1,5 +1,5 @@
 import { createFileRoute, Navigate } from "@tanstack/react-router";
-import { AccountSearchModalOptions } from "../route";
+import { AccountSearchModalOptions } from "../-types";
 
 export const Route = createFileRoute("/$accountId/contact/")({
 	component: RouteComponent,

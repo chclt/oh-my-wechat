@@ -1,4 +1,3 @@
-import { AccountSearchModalOptions } from "@/routes/$accountId/route";
 import { routeTree } from "@/routeTree.gen";
 import {
 	createMemoryHistory,
@@ -20,7 +19,7 @@ const accountContactModalToAccountRootMask = createRouteMask({
 		};
 	},
 	search: {
-		modal: AccountSearchModalOptions.CONTACT,
+		modal: "contact",
 	},
 });
 

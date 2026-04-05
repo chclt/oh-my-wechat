@@ -1,7 +1,7 @@
 import { ImageMessageAbstract } from "./image-message-abstract.tsx";
-import type { ImageMessageProps } from "./types.ts";
 import { ImageMessageDefault } from "./image-message-default.tsx";
 import { ImageMessageReferenced } from "./image-message-referenced.tsx";
+import type { ImageMessageProps } from "./types.ts";
 
 export interface ImageMessageAutoProps extends ImageMessageProps {
 	variant:
