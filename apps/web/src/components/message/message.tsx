@@ -1,13 +1,12 @@
 import ChatroomVoipMessage from "@/components/message/chatroom-voip-message.tsx";
 import ContactMessage from "@/components/message/contact-message.tsx";
-import ImageMessage from "@/components/message/image-message.tsx";
 import LocationMessage from "@/components/message/location-message.tsx";
 import MailMessage from "@/components/message/mail-message.tsx";
 import MicroVideoMessage from "@/components/message/micro-video-message.tsx";
 import StickerMessage from "@/components/message/sticker-message.tsx";
 import SystemExtendedMessage from "@/components/message/system-extended-message.tsx";
 import SystemMessage from "@/components/message/system-message.tsx";
-import { TextMessage } from "@/components/message";
+import { TextMessage, ImageMessage } from "@/components/message";
 import VideoMessage from "@/components/message/video-message.tsx";
 import VoiceMessage from "@/components/message/voice-message.tsx";
 import VoipMessage from "@/components/message/voip-message.tsx";
@@ -85,7 +84,9 @@ function MessageComponent({ message, variant, ...props }: MessageProp) {
 			);
 
 		case MessageTypeEnum.IMAGE:
-			return <ImageMessage message={message} variant={variant} {...props} />;
+			return (
+				<ImageMessage.Auto message={message} variant={variant} {...props} />
+			);
 
 		case MessageTypeEnum.VOICE:
 			return <VoiceMessage message={message} variant={variant} {...props} />;

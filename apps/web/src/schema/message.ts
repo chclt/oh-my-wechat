@@ -1,6 +1,5 @@
 import type { ChatroomVoipMessageEntity } from "@/components/message/chatroom-voip-message.tsx";
 import type { ContactMessageEntity } from "@/components/message/contact-message.tsx";
-import type { ImageMessageEntity } from "@/components/message/image-message.tsx";
 import type { LocationMessageEntity } from "@/components/message/location-message.tsx";
 import type { MailMessageEntity } from "@/components/message/mail-message.tsx";
 import type { MicroVideoMessageEntity } from "@/components/message/micro-video-message.tsx";
@@ -62,6 +61,53 @@ export type TextMessageType = BasicMessageType<
 	MessageTypeEnum.TEXT,
 	TextMessageEntity
 >;
+
+export interface ImageMessageEntity {
+	msg: {
+		img: {
+			"@_hdlength": string;
+			"@_length": string;
+			"@_aeskey": string;
+			"@_encryver": "0" | "1";
+			"@_md5": string;
+			"@_filekey": `${string}_${string}_${string}`;
+			"@_uploadcontinuecount": string;
+			"@_imgsourceurl": string;
+			"@_hevc_mid_size": string;
+
+			"@_cdnbigimgurl": "";
+
+			"@_cdnmidimgurl": string;
+			"@_cdnmidheight": string;
+			"@_cdnmidwidth": string;
+
+			"@_cdnhdheight": string;
+			"@_cdnhdwidth": string;
+
+			"@_cdnthumburl": string;
+			"@_cdnthumblength": string;
+			"@_cdnthumbwidth": string;
+			"@_cdnthumbheight": string;
+			"@_cdnthumbaeskey": string;
+		};
+		appinfo: {
+			appid: "";
+			appname: "";
+			version: 0;
+			isforceupdate: 1;
+			mediatagname: "";
+			messageext: "";
+			messageaction: "";
+		};
+		MMAsset: {
+			m_assetUrlForSystem: string;
+			m_isNeedOriginImage: 0 | 1;
+			m_isFailedFromIcloud: 0 | 1;
+			m_isLoadingFromIcloud: 0 | 1;
+		};
+	};
+}
+
 export type ImageMessageType = BasicMessageType<
 	MessageTypeEnum.IMAGE,
 	ImageMessageEntity

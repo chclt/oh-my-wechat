@@ -7,7 +7,6 @@ import type {
 } from "@/adapters/adapter.ts";
 import type { ChatroomVoipMessageEntity } from "@/components/message/chatroom-voip-message.tsx";
 import type { ContactMessageEntity } from "@/components/message/contact-message.tsx";
-import type { ImageMessageEntity } from "@/components/message/image-message.tsx";
 import type { LocationMessageEntity } from "@/components/message/location-message.tsx";
 import type { MailMessageEntity } from "@/components/message/mail-message.tsx";
 import type { MicroVideoMessageEntity } from "@/components/message/micro-video-message.tsx";
@@ -25,6 +24,7 @@ import {
 	type ChatroomVoipMessageType,
 	type ChatType,
 	type ContactMessageType,
+	type ImageMessageEntity,
 	type ImageMessageType,
 	type LocationMessageType,
 	type MailMessageType,
