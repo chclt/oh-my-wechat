@@ -1,4 +1,3 @@
-import type { ForwardMessageRecordItemType } from "@/components/open-message/forward-message.tsx";
 import { RecordTypeEnum } from "@/schema/record.ts";
 
 export interface MessageRecordBaseType {
@@ -95,6 +94,22 @@ export interface ContactMessageRecordType extends MessageRecordBaseType {
 	"@_datatype": RecordTypeEnum.CONTACT;
 	datasize: number;
 	datadesc: string; // xml
+}
+
+/** 转发的消息记录中的转发消息记录 */
+export interface ForwardMessageRecordItemType {
+	"@_datatype": RecordTypeEnum;
+	"@_dataid": string;
+	srcMsgLocalid: number;
+	datadesc: string;
+	sourcename: string;
+	sourceheadurl: string;
+	sourcetime: string;
+	dataitemsource: {
+		hashusername: string;
+		realchatname?: string;
+		fromusr?: string;
+	};
 }
 
 /** 转发的消息记录中的转发消息记录 */
