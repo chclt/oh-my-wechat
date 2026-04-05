@@ -5,7 +5,6 @@ import type {
 	GetGreetingMessageListResponse,
 	GetMessageListRequest,
 } from "@/adapters/adapter.ts";
-import type { VerityMessageEntity } from "@/components/message/verify-message.tsx";
 import type { OpenMessageEntity } from "@/components/open-message/open-message.tsx";
 import {
 	BasicMessageType,
@@ -34,6 +33,7 @@ import {
 	type SystemMessageType,
 	type TextMessageType,
 	type UserType,
+	type VerityMessageEntity,
 	type VerityMessageType,
 	type VideoMessageEntity,
 	type VideoMessageType,

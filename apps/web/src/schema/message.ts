@@ -1,5 +1,4 @@
 import type { TextMessageEntity } from "@/components/message/text-message/types.ts";
-import type { VerityMessageEntity } from "@/components/message/verify-message.tsx";
 import type { OpenMessageEntity } from "@/components/open-message/open-message.tsx";
 import type { ChatType, UserType } from "@/schema/index.ts";
 
@@ -491,11 +490,55 @@ export type SystemExtendedMessageType = BasicMessageType<
 	MessageTypeEnum.SYSTEM_EXTENDED,
 	SystemExtendedMessageEntity
 >;
+
 // Special Message Type
+export interface VerityMessageEntity {
+	msg: {
+		"@_fromusername": "wxid";
+		"@_fromnickname": "nickname";
+		"@_fullpy": string;
+		"@_shortpy": string;
+		"@_encryptusername": string;
+		"@_content": string; // eg. 我是...
+		"@_sign": string; // bio
+		"@_imagestatus": "3";
+		"@_scene": "17";
+		"@_country": string;
+		"@_province": string;
+		"@_city": string;
+		"@_percard": "1";
+		"@_sex": "1";
+		"@_alias": string; // user_id;
+		"@_weibo": "";
+		"@_albumflag": "0";
+		"@_albumstyle": "0";
+		"@_albumbgimgid": string;
+		"@_snsflag": "305";
+		"@_snsbgimgid": "http://.../0";
+		"@_snsbgobjectid": string;
+		"@_mhash": string;
+		"@_mfullhash": string;
+		"@_bigheadimgurl": "http://.../0";
+		"@_smallheadimgurl": "http://.../132";
+		"@_ticket": string; // e.g. "@v4_xxxxx@stranger"
+		"@_opcode": "2";
+		"@_googlecontact": "";
+		"@_qrticket": "";
+		"@_chatroomusername": "";
+		"@_sourceusername": "wxid";
+		"@_sourcenickname": "nickname";
+		"@_sharecardusername": "wxid";
+		"@_sharecardnickname": "nickname";
+		"@_cardversion": "0";
+		"@_extflag": "0";
+	};
+}
+
 export type VerityMessageType = Omit<
 	BasicMessageType<MessageTypeEnum.VERITY, VerityMessageEntity>,
 	"from" | "chat_id"
 >;
+
 export type OMWErrorMessageType = BasicMessageType<
 	MessageTypeEnum.OMW_ERROR,
 	TextMessageEntity
