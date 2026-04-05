@@ -1,4 +1,3 @@
-import type { TextMessageEntity } from "@/components/message/text-message/types.ts";
 import type { ChatType, UserType } from "@/schema/index.ts";
 
 export enum MessageDirection {
@@ -42,6 +41,8 @@ export interface BasicMessageType<
 	chat_id: ChatType["id"]; // Chat the message belongs to
 	raw_message: string;
 }
+
+export type TextMessageEntity = string;
 
 export type TextMessageType = BasicMessageType<
 	MessageTypeEnum.TEXT,
