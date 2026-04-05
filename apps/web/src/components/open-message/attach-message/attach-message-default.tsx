@@ -7,12 +7,14 @@ import { cn, decodeUnicodeReferences } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { AttachMessageProps } from "./types";
+import { useAccount } from "@/components/account-provider.tsx";
 
 export function AttachMessageDefault({
-	accountId,
 	message,
 	...props
 }: AttachMessageProps) {
+	const { accountId } = useAccount();
+
 	const AttachmentQueryOptions = {
 		enabled: false,
 		...MessageAttachQueryOptions({

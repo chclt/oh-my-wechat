@@ -10,6 +10,7 @@ import type React from "react";
 import { Route } from "../../route";
 import { ChatGroupListMiniRouteState } from "./chat-group-list";
 import { ChatListChatGroupItem, ChatListChatItem } from "./use-chat-list";
+import { ChatUiConfigProvider } from "@/components/chat-ui-config-provider.tsx";
 
 interface ChatItemProps extends React.HTMLAttributes<HTMLLIElement> {
 	chatListItem: ChatListChatItem | ChatListChatGroupItem;
@@ -109,12 +110,14 @@ export default function ChatListItem({
 						className={"min-h-[1.5em] text-sm line-clamp-1 text-neutral-600"}
 					>
 						{last_message && (
-							<Message
-								variant="abstract"
-								message={last_message}
-								showUsername={chatListItem.chat.type === "chatroom"}
-								className={""}
-							/>
+							<ChatUiConfigProvider
+								value={{
+									showUsername: chatListItem.chat.type === "chatroom",
+									showPhoto: false,
+								}}
+							>
+								<Message variant="abstract" message={last_message} />
+							</ChatUiConfigProvider>
 						)}
 					</div>
 				</div>

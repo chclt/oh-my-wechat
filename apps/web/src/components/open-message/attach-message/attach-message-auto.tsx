@@ -7,19 +7,12 @@ export interface AttachMessageAutoProps extends AttachMessageProps {
 }
 
 export function AttachMessageAuto({
-	accountId,
 	message,
 	variant,
 	...props
 }: AttachMessageAutoProps) {
 	if (variant === "default") {
-		return (
-			<AttachMessageDefault
-				accountId={accountId}
-				message={message}
-				{...props}
-			/>
-		);
+		return <AttachMessageDefault message={message} {...props} />;
 	} else if (variant === "referenced" || variant === "abstract") {
 		return <AttachMessageAbstract message={message} {...props} />;
 	}

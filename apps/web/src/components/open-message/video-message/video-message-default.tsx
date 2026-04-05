@@ -5,12 +5,11 @@ import { decodeUnicodeReferences } from "@/lib/utils.ts";
 import { useInViewport } from "@mantine/hooks";
 import { useQuery } from "@tanstack/react-query";
 import type { VideoMessageProps } from "./types";
+import { useAccount } from "@/components/account-provider.tsx";
 
-export function VideoMessageDefault({
-	accountId,
-	message,
-	...props
-}: VideoMessageProps) {
+export function VideoMessageDefault({ message, ...props }: VideoMessageProps) {
+	const { accountId } = useAccount();
+
 	const { ref: imageRef, inViewport } = useInViewport();
 
 	const { data: image } = useQuery({

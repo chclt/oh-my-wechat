@@ -3,12 +3,11 @@ import { cn } from "@/lib/utils.ts";
 import { useInViewport } from "@mantine/hooks";
 import { useQuery } from "@tanstack/react-query";
 import type { VoiceMessageProps } from "./types.ts";
+import { useAccount } from "@/components/account-provider.tsx";
 
-export function VoiceMessageDefault({
-	accountId,
-	message,
-	...props
-}: VoiceMessageProps) {
+export function VoiceMessageDefault({ message, ...props }: VoiceMessageProps) {
+	const { accountId } = useAccount();
+
 	const { ref: voiceRef, inViewport } = useInViewport();
 
 	const { data: voice } = useQuery({

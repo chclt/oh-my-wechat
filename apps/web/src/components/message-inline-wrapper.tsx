@@ -1,24 +1,22 @@
 import type { MessageType } from "@/schema";
 import type React from "react";
 import User from "./user";
+import { useChatUiConfig } from "@/components/chat-ui-config-provider.tsx";
 
 interface MessageInlineWrapperProps
 	extends React.HTMLAttributes<HTMLParagraphElement> {
 	message: MessageType;
-
-	showUsername?: boolean;
-	showPhoto?: boolean;
 }
 
 export default function MessageInlineWrapper({
 	message,
-	showUsername = true,
-	showPhoto = true,
 
 	children,
 	className,
 	...props
 }: MessageInlineWrapperProps) {
+	const { showUsername, showPhoto } = useChatUiConfig();
+
 	return (
 		<p className={className} {...props}>
 			{showUsername && (

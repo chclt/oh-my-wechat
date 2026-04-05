@@ -7,15 +7,12 @@ export interface MusicMessageAutoProps extends MusicMessageProps {
 }
 
 export function MusicMessageAuto({
-	accountId,
 	message,
 	variant,
 	...props
 }: MusicMessageAutoProps) {
 	if (variant === "default") {
-		return (
-			<MusicMessageDefault accountId={accountId} message={message} {...props} />
-		);
+		return <MusicMessageDefault message={message} {...props} />;
 	} else if (variant === "referenced" || variant === "abstract") {
 		return <MusicMessageAbstract message={message} {...props} />;
 	}

@@ -6,12 +6,11 @@ import { decodeUnicodeReferences } from "@/lib/utils.ts";
 import { useInViewport } from "@mantine/hooks";
 import { useQuery } from "@tanstack/react-query";
 import type { UrlMessageProps } from "./types";
+import { useAccount } from "@/components/account-provider.tsx";
 
-export function UrlMessageDefault({
-	accountId,
-	message,
-	...props
-}: UrlMessageProps) {
+export function UrlMessageDefault({ message, ...props }: UrlMessageProps) {
+	const { accountId } = useAccount();
+
 	const { ref: imageRef, inViewport } = useInViewport();
 
 	const { data: image } = useQuery({

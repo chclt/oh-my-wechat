@@ -1,12 +1,14 @@
 import { ChatSuspenseQueryOptions } from "@/lib/fetchers/chat.ts";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import type { TransferMessageProps } from "./types";
+import { useAccount } from "@/components/account-provider.tsx";
 
 export function TransferMessageDefault({
-	accountId,
 	message,
 	...props
 }: TransferMessageProps) {
+	const { accountId } = useAccount();
+
 	const { data: chat } = useSuspenseQuery(
 		ChatSuspenseQueryOptions(accountId, message.chat_id),
 	);

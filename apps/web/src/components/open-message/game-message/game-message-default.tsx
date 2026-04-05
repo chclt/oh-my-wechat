@@ -4,12 +4,11 @@ import { cn } from "@/lib/utils.ts";
 import { useInViewport } from "@mantine/hooks";
 import { useQuery } from "@tanstack/react-query";
 import type { GameMessageProps } from "./types";
+import { useAccount } from "@/components/account-provider.tsx";
 
-export function GameMessageDefault({
-	accountId,
-	message,
-	...props
-}: GameMessageProps) {
+export function GameMessageDefault({ message, ...props }: GameMessageProps) {
+	const { accountId } = useAccount();
+
 	const { ref: imageRef, inViewport } = useInViewport();
 
 	const { data: image } = useQuery({

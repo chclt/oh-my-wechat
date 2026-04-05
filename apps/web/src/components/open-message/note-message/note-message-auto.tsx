@@ -7,15 +7,12 @@ export interface NoteMessageAutoProps extends NoteMessageProps {
 }
 
 export function NoteMessageAuto({
-	accountId,
 	message,
 	variant,
 	...props
 }: NoteMessageAutoProps) {
 	if (variant === "default") {
-		return (
-			<NoteMessageDefault accountId={accountId} message={message} {...props} />
-		);
+		return <NoteMessageDefault message={message} {...props} />;
 	} else if (variant === "referenced" || variant === "abstract") {
 		return <NoteMessageAbstract message={message} {...props} />;
 	}

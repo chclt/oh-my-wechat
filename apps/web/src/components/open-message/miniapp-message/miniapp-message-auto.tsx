@@ -7,19 +7,12 @@ export interface MiniappMessageAutoProps extends MiniappMessageProps {
 }
 
 export function MiniappMessageAuto({
-	accountId,
 	message,
 	variant,
 	...props
 }: MiniappMessageAutoProps) {
 	if (variant === "default") {
-		return (
-			<MiniappMessageDefault
-				accountId={accountId}
-				message={message}
-				{...props}
-			/>
-		);
+		return <MiniappMessageDefault message={message} {...props} />;
 	} else if (variant === "referenced" || variant === "abstract") {
 		return <MiniappMessageAbstract message={message} {...props} />;
 	}

@@ -7,15 +7,12 @@ export interface TingMessageAutoProps extends TingMessageProps {
 }
 
 export function TingMessageAuto({
-	accountId,
 	message,
 	variant,
 	...props
 }: TingMessageAutoProps) {
 	if (variant === "default") {
-		return (
-			<TingMessageDefault accountId={accountId} message={message} {...props} />
-		);
+		return <TingMessageDefault message={message} {...props} />;
 	} else if (variant === "referenced" || variant === "abstract") {
 		return <TingMessageAbstract message={message} {...props} />;
 	}

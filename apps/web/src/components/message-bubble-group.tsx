@@ -5,25 +5,23 @@ import { MessageDirection, type UserType } from "@/schema";
 import type React from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import Message from "./message/message.tsx";
+import { useChatUiConfig } from "@/components/chat-ui-config-provider.tsx";
 
 interface BubbleGroupProps extends React.HTMLAttributes<HTMLDivElement> {
 	user: UserType;
 	messages?: MessageType[];
-
-	showPhoto?: boolean;
-	showUsername?: boolean;
 }
 
 export function MessageBubbleGroup({
 	user,
 	messages = [],
-	showPhoto = true,
-	showUsername = false,
 
 	className,
 	children,
 	...props
 }: BubbleGroupProps) {
+	const { showUsername, showPhoto } = useChatUiConfig();
+
 	const messageDirection = messages[0]?.direction ?? MessageDirection.incoming;
 
 	return (
@@ -82,7 +80,11 @@ export function MessageBubbleGroup({
 						{...props}
 					>
 						{messages.map((message, index) => (
-							<Message key={`(${index})${message.id}`} message={message} />
+							<Message
+								key={`(${index})${message.id}`}
+								message={message}
+								variant="default"
+							/>
 						))}
 						{children}
 					</div>

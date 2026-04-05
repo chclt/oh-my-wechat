@@ -9,7 +9,6 @@ export interface RedEnvelopeMessageAutoProps extends RedEnvelopeMessageProps {
 }
 
 export function RedEnvelopeMessageAuto({
-	accountId,
 	message,
 	variant,
 	...props
@@ -24,21 +23,9 @@ export function RedEnvelopeMessageAuto({
 		}
 	} else {
 		if (variant === "default") {
-			return (
-				<RedEnvelopeMessageDefault
-					accountId={accountId}
-					message={message}
-					{...props}
-				/>
-			);
+			return <RedEnvelopeMessageDefault message={message} {...props} />;
 		} else if (variant === "referenced" || variant === "abstract") {
-			return (
-				<RedEnvelopeMessageAbstract
-					accountId={accountId}
-					message={message}
-					{...props}
-				/>
-			);
+			return <RedEnvelopeMessageAbstract message={message} {...props} />;
 		}
 	}
 

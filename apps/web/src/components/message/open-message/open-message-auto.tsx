@@ -1,10 +1,9 @@
 import { CircleQuestionmarkSolid } from "@/components/icon.tsx";
 import { LinkCard } from "@/components/link-card.tsx";
-import type { MessageProp } from "@/components/message/message.tsx";
 import dialogClasses from "@/components/ui/dialog.module.css";
 import { ScrollArea } from "@/components/ui/scroll-area.tsx";
 import { cn } from "@/lib/utils.ts";
-import { type OpenMessageType } from "@/schema";
+import { MessageType, type OpenMessageType } from "@/schema";
 import {
 	AnnouncementOpenMessageEntity,
 	Attach2OpenMessageEntity,
@@ -74,12 +73,12 @@ import {
 	VoiceMessage,
 } from "../../open-message";
 
-interface OpenMessageProps
-	extends MessageProp<
-		OpenMessageType<{
-			type: number;
-		}>
-	> {}
+interface OpenMessageProps {
+	message: OpenMessageType<{
+		type: number;
+	}>;
+	variant: "default" | "referenced" | "abstract";
+}
 
 export function OpenMessageAuto({
 	message,
@@ -130,7 +129,6 @@ export function OpenMessageAuto({
 		case OpenMessageTypeEnum.ATTACH:
 			return (
 				<AttachMessage.Auto
-					accountId=""
 					message={
 						message as unknown as OpenMessageType<AttachOpenMessageEntity>
 					}
@@ -268,13 +266,20 @@ export function OpenMessageAuto({
 				/>
 			);
 		case OpenMessageTypeEnum.PAT:
-			return (
-				<PatMessage.Auto
-					message={message as unknown as OpenMessageType<PatOpenMessageEntity>}
-					variant={variant}
-					{...props}
-				/>
-			);
+			if (variant === "default" || variant === "abstract") {
+				return (
+					<PatMessage.Auto
+						message={
+							message as unknown as OpenMessageType<PatOpenMessageEntity>
+						}
+						variant={variant}
+						{...props}
+					/>
+				);
+			} else {
+				console.error(`PatMessage does not support variant ${variant}`);
+				return null;
+			}
 
 		case OpenMessageTypeEnum.LIVE:
 			return (
@@ -299,6 +304,7 @@ export function OpenMessageAuto({
 		case OpenMessageTypeEnum.ATTACH_2:
 			return (
 				<Attach2Message.Auto
+					// @ts-ignore
 					message={
 						message as unknown as OpenMessageType<Attach2OpenMessageEntity>
 					}
@@ -400,15 +406,20 @@ export function OpenMessageAuto({
 			);
 
 		case OpenMessageTypeEnum.SCAN_RESULT:
-			return (
-				<ScanResultMessage.Auto
-					message={
-						message as unknown as OpenMessageType<ScanResultOpenMessageEntity>
-					}
-					variant={variant}
-					{...props}
-				/>
-			);
+			if (variant === "default" || variant === "abstract") {
+				return (
+					<ScanResultMessage.Auto
+						message={
+							message as unknown as OpenMessageType<ScanResultOpenMessageEntity>
+						}
+						variant={variant}
+						{...props}
+					/>
+				);
+			} else {
+				console.error(`ScanResultMessage does not support variant ${variant}`);
+				return null;
+			}
 
 		case OpenMessageTypeEnum.RINGTONE:
 			return (

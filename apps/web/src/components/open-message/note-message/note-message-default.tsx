@@ -11,17 +11,16 @@ import { useQuery } from "@tanstack/react-query";
 import { XMLParser } from "fast-xml-parser";
 import { Suspense, useMemo, useState } from "react";
 import type { NoteMessageProps } from "./types";
+import { useAccount } from "@/components/account-provider.tsx";
 
 /**
  * 一个笔记是一个 htm 文件，文件内除了文本，还包括 <object> 标签，
  * 标签内是图片、视频、音频等富媒体内容，
  */
 
-export function NoteMessageDefault({
-	accountId,
-	message,
-	...props
-}: NoteMessageProps) {
+export function NoteMessageDefault({ message, ...props }: NoteMessageProps) {
+	const { accountId } = useAccount();
+
 	const xmlParser = new XMLParser({
 		parseAttributeValue: true,
 		ignoreAttributes: false,

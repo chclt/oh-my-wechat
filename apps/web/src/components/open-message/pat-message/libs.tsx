@@ -5,12 +5,14 @@ import type { ChatType, OpenMessageType } from "@/schema";
 import { PatOpenMessageEntity } from "@/schema/open-message.ts";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import { useAccount } from "@/components/account-provider.tsx";
 
 export function useContentParser(
 	message: OpenMessageType<PatOpenMessageEntity>,
 	chat: ChatType,
-	accountId: string,
 ) {
+	const { accountId } = useAccount();
+
 	// 在用户退群的情况下，chat信息中可能缺少用户信息，需额外查询
 	const [missingUserIds, setMissingUserIds] = useState<string[]>([]);
 

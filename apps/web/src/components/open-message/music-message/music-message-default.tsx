@@ -5,12 +5,11 @@ import { cn, decodeUnicodeReferences } from "@/lib/utils.ts";
 import { useInViewport } from "@mantine/hooks";
 import { useQuery } from "@tanstack/react-query";
 import type { MusicMessageProps } from "./types";
+import { useAccount } from "@/components/account-provider.tsx";
 
-export function MusicMessageDefault({
-	accountId,
-	message,
-	...props
-}: MusicMessageProps) {
+export function MusicMessageDefault({ message, ...props }: MusicMessageProps) {
+	const { accountId } = useAccount();
+
 	const { ref: imageRef, inViewport } = useInViewport();
 
 	const { data: image } = useQuery({

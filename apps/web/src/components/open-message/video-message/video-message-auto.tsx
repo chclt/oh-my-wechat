@@ -7,15 +7,12 @@ export interface VideoMessageAutoProps extends VideoMessageProps {
 }
 
 export function VideoMessageAuto({
-	accountId,
 	message,
 	variant,
 	...props
 }: VideoMessageAutoProps) {
 	if (variant === "default") {
-		return (
-			<VideoMessageDefault accountId={accountId} message={message} {...props} />
-		);
+		return <VideoMessageDefault message={message} {...props} />;
 	} else if (variant === "referenced" || variant === "abstract") {
 		return <VideoMessageAbstract message={message} {...props} />;
 	}

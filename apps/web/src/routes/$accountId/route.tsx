@@ -13,6 +13,7 @@ import {
 	useRouter,
 } from "@tanstack/react-router";
 import ContactListMiniRouter from "./contact/-components/contact-list/contact-list-mini-router";
+import { AccountProvider } from "@/components/account-provider.tsx";
 
 export enum AccountSearchModalOptions {
 	CONTACT = "contact",
@@ -58,90 +59,92 @@ function RouteComponent() {
 	};
 
 	return (
-		<div className="h-full flex items-stretch">
-			<aside className={"flex flex-col justify-between border-r"}>
-				<div className="flex flex-col">
-					<Link
-						to="/$accountId/chat"
-						params={{ accountId }}
-						className={cn(
-							"w-16 h-16 p-0 flex flex-col items-center justify-center text-sm ",
-							"group text-neutral-500/80 [&.active]:text-[#03C160] rounded-none after:content-none hover:bg-neutral-100",
-						)}
-					>
-						<div className="mt-1 w-8 h-8 [&>svg]:size-full">
-							<ChatIconFill />
-						</div>
-						<span className="mt-0.5 text-xs">消息</span>
-					</Link>
+		<AccountProvider value={{ accountId }}>
+			<div className="h-full flex items-stretch">
+				<aside className={"flex flex-col justify-between border-r"}>
+					<div className="flex flex-col">
+						<Link
+							to="/$accountId/chat"
+							params={{ accountId }}
+							className={cn(
+								"w-16 h-16 p-0 flex flex-col items-center justify-center text-sm ",
+								"group text-neutral-500/80 [&.active]:text-[#03C160] rounded-none after:content-none hover:bg-neutral-100",
+							)}
+						>
+							<div className="mt-1 w-8 h-8 [&>svg]:size-full">
+								<ChatIconFill />
+							</div>
+							<span className="mt-0.5 text-xs">消息</span>
+						</Link>
 
-					<button
-						type="button"
-						className={cn(
-							"w-16 h-16 p-0 flex flex-col items-center justify-center text-sm ",
-							"group text-neutral-500/80 hover:text-[#03C160] rounded-none after:content-none hover:bg-neutral-100",
-						)}
-						onClick={() => {
-							handleNavigateToContact();
-						}}
-					>
-						<div className="mt-1 w-8 h-8 [&>svg]:size-full">
-							<ContactIconFill />
-						</div>
-						<span className="mt-0.5 text-xs">通讯录</span>
-					</button>
+						<button
+							type="button"
+							className={cn(
+								"w-16 h-16 p-0 flex flex-col items-center justify-center text-sm ",
+								"group text-neutral-500/80 hover:text-[#03C160] rounded-none after:content-none hover:bg-neutral-100",
+							)}
+							onClick={() => {
+								handleNavigateToContact();
+							}}
+						>
+							<div className="mt-1 w-8 h-8 [&>svg]:size-full">
+								<ContactIconFill />
+							</div>
+							<span className="mt-0.5 text-xs">通讯录</span>
+						</button>
 
-					<Dialog.Root
-						open={modal === AccountSearchModalOptions.CONTACT}
-						onOpenChange={(open) => {
-							if (!open && canGoBack) {
-								router.history.back();
-							} else {
-								navigate({
-									to: "/$accountId/chat",
-									params: { accountId },
-								});
-							}
-						}}
-					>
-						<Dialog.Portal>
-							<Dialog.Backdrop className={dialogClasses.Backdrop} />
-							<Dialog.Viewport className={dialogClasses.Viewport}>
-								<Dialog.Popup
-									className={cn(
-										dialogClasses.Popup,
-										"p-0 max-w-sm sm:max-w-sm h-[calc(100dvh-10rem)] rounded-xl overflow-hidden",
-									)}
-								>
-									<VisuallyHidden>
-										<div>
-											<Dialog.Title>通讯录</Dialog.Title>
-										</div>
-									</VisuallyHidden>
-
-									<div className="relative w-full h-full overflow-hidden">
-										<ContactListMiniRouter />
-									</div>
-
-									<Dialog.Close
-										data-slot="dialog-close"
+						<Dialog.Root
+							open={modal === AccountSearchModalOptions.CONTACT}
+							onOpenChange={(open) => {
+								if (!open && canGoBack) {
+									router.history.back();
+								} else {
+									navigate({
+										to: "/$accountId/chat",
+										params: { accountId },
+									});
+								}
+							}}
+						>
+							<Dialog.Portal>
+								<Dialog.Backdrop className={dialogClasses.Backdrop} />
+								<Dialog.Viewport className={dialogClasses.Viewport}>
+									<Dialog.Popup
 										className={cn(
-											"z-40 absolute top-5 right-5 size-6 rounded-xs cursor-pointer",
-											"data-[state=open]:bg-accent data-[state=open]:text-muted-foreground",
-											"ring-offset-background focus:ring-ring focus:ring-2 focus:ring-offset-2 focus:outline-hidden",
-											"[&_svg]:pointer-events-none [&_svg]:size-full",
+											dialogClasses.Popup,
+											"p-0 max-w-sm sm:max-w-sm h-[calc(100dvh-10rem)] rounded-xl overflow-hidden",
 										)}
 									>
-										<CentralCrossLargeFilledOffStroke2Radius2 />
-									</Dialog.Close>
-								</Dialog.Popup>
-							</Dialog.Viewport>
-						</Dialog.Portal>
-					</Dialog.Root>
-				</div>
-			</aside>
+										<VisuallyHidden>
+											<div>
+												<Dialog.Title>通讯录</Dialog.Title>
+											</div>
+										</VisuallyHidden>
 
-			<Outlet />
-		</div>
+										<div className="relative w-full h-full overflow-hidden">
+											<ContactListMiniRouter />
+										</div>
+
+										<Dialog.Close
+											data-slot="dialog-close"
+											className={cn(
+												"z-40 absolute top-5 right-5 size-6 rounded-xs cursor-pointer",
+												"data-[state=open]:bg-accent data-[state=open]:text-muted-foreground",
+												"ring-offset-background focus:ring-ring focus:ring-2 focus:ring-offset-2 focus:outline-hidden",
+												"[&_svg]:pointer-events-none [&_svg]:size-full",
+											)}
+										>
+											<CentralCrossLargeFilledOffStroke2Radius2 />
+										</Dialog.Close>
+									</Dialog.Popup>
+								</Dialog.Viewport>
+							</Dialog.Portal>
+						</Dialog.Root>
+					</div>
+				</aside>
+
+				<Outlet />
+			</div>
+		</AccountProvider>
 	);
 }

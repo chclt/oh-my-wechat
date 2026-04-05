@@ -15,6 +15,7 @@ import MessageRecord from "./message-record.tsx";
 import dialogClasses from "@/components/ui/dialog.module.css";
 import { ForwardMessageRecordType } from "@/schema/message-record.ts";
 import { Dialog } from "@base-ui/react";
+import { ChatUiConfigProvider } from "@/components/chat-ui-config-provider.tsx";
 
 interface ForwardMessageRecordProps
 	extends React.HTMLAttributes<HTMLDivElement> {
@@ -95,24 +96,30 @@ export default function ForwardMessageRecord({
 									</Dialog.Title>
 								</div>
 								<div className="space-y-2 p-4 pt-0">
-									{(Array.isArray(records) ? records : [records]).map(
-										(record) => (
-											<MessageBubbleGroup
-												key={record["@_dataid"]}
-												user={{
-													id: record.sourcename,
-													user_id: record.sourcename,
-													username: record.sourcename,
-													photo: { thumb: record.sourceheadurl },
-													is_openim: false,
-												}}
-												showUsername={true}
-												className="[&>.sticky]:top-[3.125rem]"
-											>
-												<MessageRecord message={message} record={record} />
-											</MessageBubbleGroup>
-										),
-									)}
+									<ChatUiConfigProvider
+										value={{
+											showUsername: true,
+											showPhoto: true,
+										}}
+									>
+										{(Array.isArray(records) ? records : [records]).map(
+											(record) => (
+												<MessageBubbleGroup
+													key={record["@_dataid"]}
+													user={{
+														id: record.sourcename,
+														user_id: record.sourcename,
+														username: record.sourcename,
+														photo: { thumb: record.sourceheadurl },
+														is_openim: false,
+													}}
+													className="[&>.sticky]:top-[3.125rem]"
+												>
+													<MessageRecord message={message} record={record} />
+												</MessageBubbleGroup>
+											),
+										)}
+									</ChatUiConfigProvider>
 								</div>
 							</ScrollArea>
 						</Dialog.Popup>

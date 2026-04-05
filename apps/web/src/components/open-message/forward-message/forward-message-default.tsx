@@ -13,6 +13,7 @@ import {
 	forwardMessageVariants,
 } from "./libs";
 import type { ForwardMessageProps } from "./types";
+import { ChatUiConfigProvider } from "@/components/chat-ui-config-provider.tsx";
 
 export function ForwardMessageDefault({
 	message,
@@ -106,25 +107,31 @@ export function ForwardMessageDefault({
 								</Dialog.Title>
 							</div>
 							<div className="space-y-2 p-4 pt-0">
-								{(Array.isArray(records.recordinfo.datalist.dataitem)
-									? records.recordinfo.datalist.dataitem
-									: [records.recordinfo.datalist.dataitem]
-								).map((record) => (
-									<MessageBubbleGroup
-										key={record["@_dataid"]}
-										user={{
-											id: record.sourcename,
-											user_id: record.sourcename,
-											username: record.sourcename,
-											photo: { thumb: record.sourceheadurl },
-											is_openim: false,
-										}}
-										showUsername={true}
-										className="[&>.sticky]:top-[3.125rem]"
-									>
-										<MessageRecord message={message} record={record} />
-									</MessageBubbleGroup>
-								))}
+								<ChatUiConfigProvider
+									value={{
+										showUsername: true,
+										showPhoto: true,
+									}}
+								>
+									{(Array.isArray(records.recordinfo.datalist.dataitem)
+										? records.recordinfo.datalist.dataitem
+										: [records.recordinfo.datalist.dataitem]
+									).map((record) => (
+										<MessageBubbleGroup
+											key={record["@_dataid"]}
+											user={{
+												id: record.sourcename,
+												user_id: record.sourcename,
+												username: record.sourcename,
+												photo: { thumb: record.sourceheadurl },
+												is_openim: false,
+											}}
+											className="[&>.sticky]:top-[3.125rem]"
+										>
+											<MessageRecord message={message} record={record} />
+										</MessageBubbleGroup>
+									))}
+								</ChatUiConfigProvider>
 							</div>
 						</ScrollArea>
 					</Dialog.Popup>

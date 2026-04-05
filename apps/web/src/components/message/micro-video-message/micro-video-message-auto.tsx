@@ -7,19 +7,12 @@ export interface MicroVideoMessageAutoProps extends MicroVideoMessageProps {
 }
 
 export function MicroVideoMessageAuto({
-	accountId,
 	message,
 	variant = "default",
 	...props
 }: MicroVideoMessageAutoProps) {
 	if (variant === "default") {
-		return (
-			<MicroVideoMessageDefault
-				accountId={accountId}
-				message={message}
-				{...props}
-			/>
-		);
+		return <MicroVideoMessageDefault message={message} {...props} />;
 	} else if (variant === "referenced" || variant === "abstract") {
 		return <MicroVideoMessageAbstract message={message} {...props} />;
 	}

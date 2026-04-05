@@ -1,11 +1,13 @@
 import MessageInlineWrapper from "@/components/message-inline-wrapper.tsx";
 import type { RedEnvelopeMessageProps } from "./types";
+import { useAccount } from "@/components/account-provider.tsx";
 
 export function RedEnvelopeMessageAbstract({
-	accountId,
 	message,
 	...props
 }: RedEnvelopeMessageProps) {
+	const { accountId } = useAccount();
+
 	const userRole: "SENDER" | "RECEIVER" =
 		accountId === message.from.user_id ? "SENDER" : "RECEIVER";
 

@@ -7,19 +7,12 @@ export interface StickerMessageAutoProps extends StickerMessageProps {
 }
 
 export function StickerMessageAuto({
-	accountId,
 	message,
 	variant,
 	...props
 }: StickerMessageAutoProps) {
 	if (variant === "default") {
-		return (
-			<StickerMessageDefault
-				accountId={accountId}
-				message={message}
-				{...props}
-			/>
-		);
+		return <StickerMessageDefault message={message} {...props} />;
 	} else if (variant === "referenced" || variant === "abstract") {
 		return <StickerMessageAbstract message={message} {...props} />;
 	}

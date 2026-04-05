@@ -7,15 +7,12 @@ export interface GameMessageAutoProps extends GameMessageProps {
 }
 
 export function GameMessageAuto({
-	accountId,
 	message,
 	variant,
 	...props
 }: GameMessageAutoProps) {
 	if (variant === "default") {
-		return (
-			<GameMessageDefault accountId={accountId} message={message} {...props} />
-		);
+		return <GameMessageDefault message={message} {...props} />;
 	} else if (variant === "referenced" || variant === "abstract") {
 		return <GameMessageAbstract message={message} {...props} />;
 	}

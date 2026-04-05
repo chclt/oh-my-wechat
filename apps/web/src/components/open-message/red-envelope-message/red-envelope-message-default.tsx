@@ -3,12 +3,14 @@ import { cn } from "@/lib/utils";
 import { OpenMessageRedEnvelopeCoverInfoSchema } from "@/schema/open-message-red-envelope-cover-info_pb.ts";
 import { fromBinary } from "@bufbuild/protobuf";
 import type { RedEnvelopeMessageProps } from "./types";
+import { useAccount } from "@/components/account-provider.tsx";
 
 export function RedEnvelopeMessageDefault({
-	accountId,
 	message,
 	...props
 }: RedEnvelopeMessageProps) {
+	const { accountId } = useAccount();
+
 	const userRole: "SENDER" | "RECEIVER" =
 		accountId === message.from.user_id ? "SENDER" : "RECEIVER";
 

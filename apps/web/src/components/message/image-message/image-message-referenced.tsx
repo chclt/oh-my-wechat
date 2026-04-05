@@ -5,12 +5,14 @@ import { useInViewport } from "@mantine/hooks";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import type { ImageMessageProps } from "./types.ts";
+import { useAccount } from "@/components/account-provider.tsx";
 
 export function ImageMessageReferenced({
-	accountId,
 	message,
 	...props
 }: ImageMessageProps) {
+	const { accountId } = useAccount();
+
 	const { ref: imageRef, inViewport } = useInViewport();
 
 	const { data: image } = useQuery({

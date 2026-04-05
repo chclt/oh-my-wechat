@@ -7,18 +7,13 @@ export interface PatMessageAutoProps extends PatMessageProps {
 }
 
 export function PatMessageAuto({
-	accountId,
 	message,
 	variant,
 	...props
 }: PatMessageAutoProps) {
 	if (variant === "default") {
-		return (
-			<PatMessageDefault accountId={accountId} message={message} {...props} />
-		);
+		return <PatMessageDefault message={message} {...props} />;
 	} else if (variant === "abstract") {
-		return (
-			<PatMessageAbstract accountId={accountId} message={message} {...props} />
-		);
+		return <PatMessageAbstract message={message} {...props} />;
 	}
 }

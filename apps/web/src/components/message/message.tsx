@@ -15,13 +15,17 @@ import {
 	WeComContactMessage,
 	OpenMessage,
 } from "@/components/message";
-
 import dialogClasses from "@/components/ui/dialog.module.css";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { AccountSuspenseQueryOptions } from "@/lib/fetchers/account.ts";
 import { cn } from "@/lib/utils.ts";
 import { Route } from "@/routes/$accountId/route.tsx";
-import { MessageDirection, MessageTypeEnum, type MessageType } from "@/schema";
+import {
+	MessageDirection,
+	MessageTypeEnum,
+	type MessageType,
+	OpenMessageType,
+} from "@/schema";
 import { Dialog } from "@base-ui/react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import type React from "react";
@@ -29,13 +33,11 @@ import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { CircleQuestionmarkSolid } from "../icon";
 import { Card, CardContent, CardFooter, CardIndicator } from "../ui/card";
+import { useAccount } from "@/components/account-provider.tsx";
 
-// TODO
-export interface MessageProp<Message = MessageType, Variant = undefined> {
-	message: Message;
-	variant?: "default" | "referenced" | "abstract" | Variant;
-	showPhoto?: boolean;
-	showUsername?: boolean;
+interface MessageProp {
+	message: MessageType;
+	variant: "default" | "referenced" | "abstract";
 }
 
 export default function Message({
@@ -43,7 +45,8 @@ export default function Message({
 	variant = "default",
 	...props
 }: MessageProp & React.HTMLAttributes<HTMLElement>) {
-	const { accountId } = Route.useParams();
+	const { accountId } = useAccount();
+
 	const { data: account } = useSuspenseQuery(
 		AccountSuspenseQueryOptions({ account: { id: accountId } }),
 	);
@@ -68,11 +71,11 @@ export default function Message({
 		>
 			<Suspense>
 				<MessageComponent
+					message={message}
+					variant={variant}
 					onDoubleClick={() => {
 						if (import.meta.env.DEV) console.log(message);
 					}}
-					message={message}
-					variant={variant}
 					{...props}
 				/>
 			</Suspense>
@@ -133,7 +136,11 @@ function MessageComponent({ message, variant, ...props }: MessageProp) {
 
 		case MessageTypeEnum.APP:
 			return (
-				<OpenMessage.Auto message={message} variant={variant} {...props} />
+				<OpenMessage.Auto
+					message={message as OpenMessageType<{ type: number }>}
+					variant={variant}
+					{...props}
+				/>
 			);
 
 		case MessageTypeEnum.VOIP:

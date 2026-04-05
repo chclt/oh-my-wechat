@@ -1,6 +1,7 @@
 import { SystemExtendedMessageAbstract } from "./system-extended-message-abstract.tsx";
 import { SystemExtendedMessageDefault } from "./system-extended-message-default.tsx";
 import type { SystemExtendedMessageProps } from "./types.ts";
+import { useAccount } from "@/components/account-provider.tsx";
 
 export interface SystemExtendedMessageAutoProps
 	extends SystemExtendedMessageProps {
@@ -8,26 +9,15 @@ export interface SystemExtendedMessageAutoProps
 }
 
 export function SystemExtendedMessageAuto({
-	accountId,
 	message,
 	variant = "default",
 	...props
 }: SystemExtendedMessageAutoProps) {
+	const { accountId } = useAccount();
+
 	if (variant === "default") {
-		return (
-			<SystemExtendedMessageDefault
-				accountId={accountId}
-				message={message}
-				{...props}
-			/>
-		);
+		return <SystemExtendedMessageDefault message={message} {...props} />;
 	} else if (variant === "referenced" || variant === "abstract") {
-		return (
-			<SystemExtendedMessageAbstract
-				accountId={accountId}
-				message={message}
-				{...props}
-			/>
-		);
+		return <SystemExtendedMessageAbstract message={message} {...props} />;
 	}
 }

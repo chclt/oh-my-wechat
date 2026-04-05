@@ -7,15 +7,12 @@ export interface UrlMessageAutoProps extends UrlMessageProps {
 }
 
 export function UrlMessageAuto({
-	accountId,
 	message,
 	variant,
 	...props
 }: UrlMessageAutoProps) {
 	if (variant === "default") {
-		return (
-			<UrlMessageDefault accountId={accountId} message={message} {...props} />
-		);
+		return <UrlMessageDefault message={message} {...props} />;
 	} else if (variant === "referenced" || variant === "abstract") {
 		return <UrlMessageAbstract message={message} {...props} />;
 	}

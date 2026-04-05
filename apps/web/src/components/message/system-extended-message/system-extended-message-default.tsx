@@ -2,12 +2,14 @@ import { ChatSuspenseQueryOptions } from "@/lib/fetchers/chat.ts";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { parsePlainTextContent, parseXMLContent } from "./libs.tsx";
 import type { SystemExtendedMessageProps } from "./types.ts";
+import { useAccount } from "@/components/account-provider.tsx";
 
 export function SystemExtendedMessageDefault({
-	accountId,
 	message,
 	...props
 }: SystemExtendedMessageProps) {
+	const { accountId } = useAccount();
+
 	const { data: chat } = useSuspenseQuery(
 		ChatSuspenseQueryOptions(accountId, message.chat_id),
 	);
