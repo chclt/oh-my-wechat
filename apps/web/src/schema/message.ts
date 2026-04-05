@@ -7,7 +7,7 @@ import type { MicroVideoMessageEntity } from "@/components/message/micro-video-m
 import type { StickerMessageEntity } from "@/components/message/sticker-message.tsx";
 import type { SystemExtendedMessageEntity } from "@/components/message/system-extended-message.tsx";
 import type { SystemMessageEntity } from "@/components/message/system-message.tsx";
-import type { TextMessageEntity } from "@/components/message/text-message.tsx";
+import type { TextMessageEntity } from "@/components/message/text-message/types.ts";
 import type { VerityMessageEntity } from "@/components/message/verify-message.tsx";
 import type { VideoMessageEntity } from "@/components/message/video-message.tsx";
 import type { VoiceMessageEntity } from "@/components/message/voice-message.tsx";

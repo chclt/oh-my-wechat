@@ -1,5 +1,5 @@
 import MessageInlineWrapper from "@/components/message-inline-wrapper.tsx";
-import { textMessageVariants } from "@/components/message/text-message.tsx";
+import { textMessageVariants } from "@/components/message/text-message/libs.ts";
 import type { OpenMessageProps } from "@/components/open-message/open-message.tsx";
 import { cn } from "@/lib/utils.ts";
 import { TextOpenMessageEntity } from "@/schema/open-message.ts";

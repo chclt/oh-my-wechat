@@ -1,4 +1,4 @@
-import { textMessageVariants } from "@/components/message/text-message.tsx";
+import { textMessageVariants } from "@/components/message/text-message/libs.ts";
 import { cn } from "@/lib/utils.ts";
 import { MessageDirection, type MessageType } from "@/schema";
 import type React from "react";

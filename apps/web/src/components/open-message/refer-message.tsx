@@ -1,6 +1,6 @@
 import MessageInlineWrapper from "@/components/message-inline-wrapper.tsx";
 import Message from "@/components/message/message.tsx";
-import { textMessageVariants } from "@/components/message/text-message.tsx";
+import { textMessageVariants } from "@/components/message/text-message/libs.ts";
 import type { OpenMessageProps } from "@/components/open-message/open-message.tsx";
 import TextPrettier from "@/components/text-prettier.tsx";
 import User from "@/components/user.tsx";
