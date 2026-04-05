@@ -5,15 +5,11 @@ import type {
 	GetGreetingMessageListResponse,
 	GetMessageListRequest,
 } from "@/adapters/adapter.ts";
-import type { ChatroomVoipMessageEntity } from "@/components/message/chatroom-voip-message.tsx";
-import type { SystemExtendedMessageEntity } from "@/components/message/system-extended-message.tsx";
-import type { SystemMessageEntity } from "@/components/message/system-message.tsx";
 import type { VerityMessageEntity } from "@/components/message/verify-message.tsx";
-import type { VoipMessageEntity } from "@/components/message/voip-message.tsx";
-import type { WeComContactMessageEntity } from "@/components/message/wecom-contact-message.tsx";
 import type { OpenMessageEntity } from "@/components/open-message/open-message.tsx";
 import {
 	BasicMessageType,
+	type ChatroomVoipMessageEntity,
 	type ChatroomVoipMessageType,
 	type ChatType,
 	type ContactMessageEntity,
@@ -32,7 +28,9 @@ import {
 	type OpenMessageType,
 	type StickerMessageEntity,
 	type StickerMessageType,
+	type SystemExtendedMessageEntity,
 	type SystemExtendedMessageType,
+	type SystemMessageEntity,
 	type SystemMessageType,
 	type TextMessageType,
 	type UserType,
@@ -41,7 +39,9 @@ import {
 	type VideoMessageType,
 	type VoiceMessageEntity,
 	type VoiceMessageType,
+	type VoipMessageEntity,
 	type VoipMessageType,
+	type WeComContactMessageEntity,
 	type WeComContactMessageType,
 } from "@/schema";
 import {

@@ -1,10 +1,5 @@
-import type { ChatroomVoipMessageEntity } from "@/components/message/chatroom-voip-message.tsx";
-import type { SystemExtendedMessageEntity } from "@/components/message/system-extended-message.tsx";
-import type { SystemMessageEntity } from "@/components/message/system-message.tsx";
 import type { TextMessageEntity } from "@/components/message/text-message/types.ts";
 import type { VerityMessageEntity } from "@/components/message/verify-message.tsx";
-import type { VoipMessageEntity } from "@/components/message/voip-message.tsx";
-import type { WeComContactMessageEntity } from "@/components/message/wecom-contact-message.tsx";
 import type { OpenMessageEntity } from "@/components/open-message/open-message.tsx";
 import type { ChatType, UserType } from "@/schema/index.ts";
 
@@ -338,6 +333,35 @@ export type OpenMessageType<
 	MessageTypeEnum.APP,
 	OpenMessageEntity<OpenMessageEntityType>
 >;
+export interface VoipMessageEntity {
+	voipmsg?: {
+		"@_type": "VoIPBubbleMsg" | string; // eg. VoIPBubbleMsg
+		VoIPBubbleMsg: {
+			msg: string; // eg. 通话时长 00:31
+			room_type: number; // 0: 视频通话, 1: 语音通话
+			red_dot: "true" | "false";
+			roomid: string;
+			roomkey: string;
+			inviteid: string;
+			msg_type: string; // eg. 0
+			timestamp: string;
+			identity: string;
+			duration: string;
+			inviteid64: string;
+			business: string;
+		};
+	};
+	voipinvitemsg?: {
+		roomid: number;
+		key: string;
+		status: 2;
+		invitetype: 1;
+	};
+	voipextinfo?: {
+		recvtime: number;
+	};
+}
+
 export type VoipMessageType = BasicMessageType<
 	MessageTypeEnum.VOIP,
 	VoipMessageEntity
@@ -372,18 +396,97 @@ export type MicroVideoMessageType = BasicMessageType<
 	MessageTypeEnum.MICROVIDEO,
 	MicroVideoMessageEntity
 >;
+export interface ChatroomVoipMessageEntity {
+	msgLocalID: number;
+	clientGroupID: string;
+	groupID: string;
+	lastMsgID: number;
+	msgContent: string; // eg. "XXX has started a voice call"
+}
+
 export type ChatroomVoipMessageType = BasicMessageType<
 	MessageTypeEnum.GROUP_VOIP,
 	ChatroomVoipMessageEntity
 >;
+
+export interface WeComContactMessageEntity {
+	msg: {
+		"@_username": string;
+		"@_nickname": string;
+		"@_sex": string;
+		"@_smallheadimgurl": string;
+		"@_bigheadimgurl": string;
+		"@_openimappid": string;
+		"@_openimdesc": string;
+		"@_openimdescicon": string;
+	};
+}
+
 export type WeComContactMessageType = BasicMessageType<
 	MessageTypeEnum.WECOM_CONTACT,
 	WeComContactMessageEntity
 >;
+
+export type SystemMessageEntity = string;
+
 export type SystemMessageType = BasicMessageType<
 	MessageTypeEnum.SYSTEM,
 	SystemMessageEntity
 >;
+
+export interface SystemExtendedMessageEntity {
+	sysmsg:
+		| {
+				"@_type": "editrevokecontent";
+				editrevokecontent: {
+					text: string; // eg. "You recalled a message"
+					link: {
+						scene: string; // eg. "editrevokecontent"
+						text: string; // eg. "Edit"
+						revokecontent: string;
+						referid: string;
+						atuserlist: string;
+						createTime: string;
+					};
+				};
+		  }
+		| {
+				"@_type": "sysmsgtemplate";
+				sysmsgtemplate: {
+					content_template: {
+						plain: "";
+						template: "$username$ invited $names$ to the group chat";
+						link_list: {
+							link: [
+								{
+									memberlist: {
+										member: {
+											username: "wxid";
+											nickname: "nickname";
+										};
+									};
+									"@_name": "username";
+									"@_type": "link_profile";
+								},
+								{
+									memberlist: {
+										member: {
+											username: "wxid";
+											nickname: "nickname";
+										};
+									};
+									separator: ", ";
+									"@_name": "names";
+									"@_type": "link_profile";
+								},
+							];
+						};
+						"@_type": "tmpl_type_profile";
+					};
+				};
+		  };
+}
+
 export type SystemExtendedMessageType = BasicMessageType<
 	MessageTypeEnum.SYSTEM_EXTENDED,
 	SystemExtendedMessageEntity

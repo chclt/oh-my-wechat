@@ -1,19 +1,19 @@
 import {
+	ChatroomVoipMessage,
 	ContactMessage,
 	ImageMessage,
 	LocationMessage,
 	MailMessage,
 	MicroVideoMessage,
 	StickerMessage,
+	SystemExtendedMessage,
+	SystemMessage,
 	TextMessage,
 	VideoMessage,
 	VoiceMessage,
+	VoipMessage,
+	WeComContactMessage,
 } from "@/components/message";
-import ChatroomVoipMessage from "@/components/message/chatroom-voip-message.tsx";
-import SystemExtendedMessage from "@/components/message/system-extended-message.tsx";
-import SystemMessage from "@/components/message/system-message.tsx";
-import VoipMessage from "@/components/message/voip-message.tsx";
-import WeComContactMessage from "@/components/message/wecom-contact-message.tsx";
 import OpenMessage from "@/components/open-message/open-message.tsx";
 import dialogClasses from "@/components/ui/dialog.module.css";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -134,24 +134,40 @@ function MessageComponent({ message, variant, ...props }: MessageProp) {
 			return <OpenMessage message={message} variant={variant} {...props} />;
 
 		case MessageTypeEnum.VOIP:
-			return <VoipMessage message={message} variant={variant} {...props} />;
+			return (
+				<VoipMessage.Auto message={message} variant={variant} {...props} />
+			);
 
 		case MessageTypeEnum.GROUP_VOIP:
 			return (
-				<ChatroomVoipMessage message={message} variant={variant} {...props} />
+				<ChatroomVoipMessage.Auto
+					message={message}
+					variant={variant}
+					{...props}
+				/>
 			);
 
 		case MessageTypeEnum.WECOM_CONTACT:
 			return (
-				<WeComContactMessage message={message} variant={variant} {...props} />
+				<WeComContactMessage.Auto
+					message={message}
+					variant={variant}
+					{...props}
+				/>
 			);
 
 		case MessageTypeEnum.SYSTEM:
-			return <SystemMessage message={message} variant={variant} {...props} />;
+			return (
+				<SystemMessage.Auto message={message} variant={variant} {...props} />
+			);
 
 		case MessageTypeEnum.SYSTEM_EXTENDED:
 			return (
-				<SystemExtendedMessage message={message} variant={variant} {...props} />
+				<SystemExtendedMessage.Auto
+					message={message}
+					variant={variant}
+					{...props}
+				/>
 			);
 
 		case MessageTypeEnum.OMW_ERROR:
