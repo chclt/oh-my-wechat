@@ -11,6 +11,7 @@ import type {
 	UndefinedInitialDataInfiniteOptions,
 	UseQueryOptions,
 } from "@tanstack/react-query";
+import { omit } from "es-toolkit";
 import { getDataAdapter } from "../data-adapter.ts";
 
 export function MessageListInfiniteQueryOptions(
@@ -27,13 +28,14 @@ export function MessageListInfiniteQueryOptions(
 			`account: ${requestData.account.id}`,
 			`chat: ${requestData.chat.id}`,
 			`messageList:${requestData.limit}`,
+			omit(requestData, ["account", "chat", "limit"]),
 		],
 		queryFn: ({ pageParam }) =>
 			getDataAdapter().getMessageList({
 				...requestData,
 				cursor: pageParam,
 			}),
-		initialPageParam: undefined,
+		initialPageParam: requestData.cursor,
 		getPreviousPageParam: (lastPage) => lastPage.meta.previous_cursor,
 		getNextPageParam: (lastPage) => lastPage.meta.next_cursor,
 	};

@@ -15,7 +15,8 @@ import { Route as AccountIdIndexRouteImport } from './routes/$accountId/index'
 import { Route as AccountIdChatRouteRouteImport } from './routes/$accountId/chat/route'
 import { Route as AccountIdContactIndexRouteImport } from './routes/$accountId/contact/index'
 import { Route as AccountIdChatIndexRouteImport } from './routes/$accountId/chat/index'
-import { Route as AccountIdChatChatIdRouteImport } from './routes/$accountId/chat/$chatId'
+import { Route as AccountIdChatChatIdRouteRouteImport } from './routes/$accountId/chat/$chatId/route'
+import { Route as AccountIdChatChatIdInfoRouteImport } from './routes/$accountId/chat/$chatId/info'
 
 const AccountIdRouteRoute = AccountIdRouteRouteImport.update({
   id: '/$accountId',
@@ -47,25 +48,33 @@ const AccountIdChatIndexRoute = AccountIdChatIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AccountIdChatRouteRoute,
 } as any)
-const AccountIdChatChatIdRoute = AccountIdChatChatIdRouteImport.update({
-  id: '/$chatId',
-  path: '/$chatId',
-  getParentRoute: () => AccountIdChatRouteRoute,
+const AccountIdChatChatIdRouteRoute =
+  AccountIdChatChatIdRouteRouteImport.update({
+    id: '/$chatId',
+    path: '/$chatId',
+    getParentRoute: () => AccountIdChatRouteRoute,
+  } as any)
+const AccountIdChatChatIdInfoRoute = AccountIdChatChatIdInfoRouteImport.update({
+  id: '/info',
+  path: '/info',
+  getParentRoute: () => AccountIdChatChatIdRouteRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/$accountId': typeof AccountIdRouteRouteWithChildren
   '/$accountId/chat': typeof AccountIdChatRouteRouteWithChildren
   '/$accountId/': typeof AccountIdIndexRoute
-  '/$accountId/chat/$chatId': typeof AccountIdChatChatIdRoute
+  '/$accountId/chat/$chatId': typeof AccountIdChatChatIdRouteRouteWithChildren
   '/$accountId/chat/': typeof AccountIdChatIndexRoute
   '/$accountId/contact': typeof AccountIdContactIndexRoute
+  '/$accountId/chat/$chatId/info': typeof AccountIdChatChatIdInfoRoute
 }
 export interface FileRoutesByTo {
   '/$accountId': typeof AccountIdIndexRoute
-  '/$accountId/chat/$chatId': typeof AccountIdChatChatIdRoute
+  '/$accountId/chat/$chatId': typeof AccountIdChatChatIdRouteRouteWithChildren
   '/$accountId/chat': typeof AccountIdChatIndexRoute
   '/$accountId/contact': typeof AccountIdContactIndexRoute
+  '/$accountId/chat/$chatId/info': typeof AccountIdChatChatIdInfoRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -73,9 +82,10 @@ export interface FileRoutesById {
   '/$accountId': typeof AccountIdRouteRouteWithChildren
   '/$accountId/chat': typeof AccountIdChatRouteRouteWithChildren
   '/$accountId/': typeof AccountIdIndexRoute
-  '/$accountId/chat/$chatId': typeof AccountIdChatChatIdRoute
+  '/$accountId/chat/$chatId': typeof AccountIdChatChatIdRouteRouteWithChildren
   '/$accountId/chat/': typeof AccountIdChatIndexRoute
   '/$accountId/contact/': typeof AccountIdContactIndexRoute
+  '/$accountId/chat/$chatId/info': typeof AccountIdChatChatIdInfoRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -86,12 +96,14 @@ export interface FileRouteTypes {
     | '/$accountId/chat/$chatId'
     | '/$accountId/chat/'
     | '/$accountId/contact'
+    | '/$accountId/chat/$chatId/info'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/$accountId'
     | '/$accountId/chat/$chatId'
     | '/$accountId/chat'
     | '/$accountId/contact'
+    | '/$accountId/chat/$chatId/info'
   id:
     | '__root__'
     | '/'
@@ -101,6 +113,7 @@ export interface FileRouteTypes {
     | '/$accountId/chat/$chatId'
     | '/$accountId/chat/'
     | '/$accountId/contact/'
+    | '/$accountId/chat/$chatId/info'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -156,19 +169,40 @@ declare module '@tanstack/react-router' {
       id: '/$accountId/chat/$chatId'
       path: '/$chatId'
       fullPath: '/$accountId/chat/$chatId'
-      preLoaderRoute: typeof AccountIdChatChatIdRouteImport
+      preLoaderRoute: typeof AccountIdChatChatIdRouteRouteImport
       parentRoute: typeof AccountIdChatRouteRoute
+    }
+    '/$accountId/chat/$chatId/info': {
+      id: '/$accountId/chat/$chatId/info'
+      path: '/info'
+      fullPath: '/$accountId/chat/$chatId/info'
+      preLoaderRoute: typeof AccountIdChatChatIdInfoRouteImport
+      parentRoute: typeof AccountIdChatChatIdRouteRoute
     }
   }
 }
 
+interface AccountIdChatChatIdRouteRouteChildren {
+  AccountIdChatChatIdInfoRoute: typeof AccountIdChatChatIdInfoRoute
+}
+
+const AccountIdChatChatIdRouteRouteChildren: AccountIdChatChatIdRouteRouteChildren =
+  {
+    AccountIdChatChatIdInfoRoute: AccountIdChatChatIdInfoRoute,
+  }
+
+const AccountIdChatChatIdRouteRouteWithChildren =
+  AccountIdChatChatIdRouteRoute._addFileChildren(
+    AccountIdChatChatIdRouteRouteChildren,
+  )
+
 interface AccountIdChatRouteRouteChildren {
-  AccountIdChatChatIdRoute: typeof AccountIdChatChatIdRoute
+  AccountIdChatChatIdRouteRoute: typeof AccountIdChatChatIdRouteRouteWithChildren
   AccountIdChatIndexRoute: typeof AccountIdChatIndexRoute
 }
 
 const AccountIdChatRouteRouteChildren: AccountIdChatRouteRouteChildren = {
-  AccountIdChatChatIdRoute: AccountIdChatChatIdRoute,
+  AccountIdChatChatIdRouteRoute: AccountIdChatChatIdRouteRouteWithChildren,
   AccountIdChatIndexRoute: AccountIdChatIndexRoute,
 }
 

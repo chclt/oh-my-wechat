@@ -1,0 +1,37 @@
+@keyframes tween {
+	from {
+		transform: translateX(3rem);
+	}
+	to {
+		transform: translateX(-3rem);
+	}
+}
+
+.carouselItemContainer {
+	/* view-timeline-name: --carousel-item;
+	view-timeline-axis: inline; */
+}
+
+.carouselItem {
+	position: relative;
+	overflow: hidden;
+	height: 100%;
+
+	/* animation-name: tween;
+	animation-duration: auto;
+	animation-timing-function: linear;
+	animation-timeline: --carousel-item; */
+
+	img,
+	video {
+		position: absolute;
+		inset: 0;
+		margin: auto;
+
+		/* animation-name: tween;
+		animation-duration: auto;
+		animation-timing-function: linear;
+		animation-direction: reverse;
+		animation-timeline: --carousel-item; */
+	}
+}

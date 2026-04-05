@@ -6,6 +6,7 @@ import {
 	GetMessageVoiceRequest,
 } from "@repo/types/adapter";
 import type { UseQueryOptions } from "@tanstack/react-query";
+import { omit } from "es-toolkit";
 import { getDataAdapter } from "../data-adapter.ts";
 
 export function MessageImageQueryOptions(
@@ -17,6 +18,7 @@ export function MessageImageQueryOptions(
 			`chat: ${requestData.chat.id}`,
 			`message: ${requestData.message.local_id}`,
 			"image",
+			omit(requestData, ["account", "chat", "message"]),
 		],
 		queryFn: async () =>
 			await getDataAdapter()
@@ -34,6 +36,7 @@ export function MessageVideoQueryOptions(
 			`chat: ${requestData.chat.id}`,
 			`message: ${requestData.message.local_id}`,
 			"video",
+			omit(requestData, ["account", "chat", "message"]),
 		],
 		queryFn: () =>
 			getDataAdapter()

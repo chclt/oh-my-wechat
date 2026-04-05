@@ -4,12 +4,7 @@ import { ImageMessageReferenced } from "./image-message-referenced.tsx";
 import type { ImageMessageProps } from "./types.ts";
 
 export interface ImageMessageAutoProps extends ImageMessageProps {
-	variant:
-		| "default"
-		| "referenced"
-		| "abstract"
-		| "viewer_detail"
-		| "viewer_thumb";
+	variant: "default" | "referenced" | "abstract";
 }
 
 export function ImageMessageAuto({
@@ -21,10 +16,6 @@ export function ImageMessageAuto({
 		return <ImageMessageDefault message={message} {...props} />;
 	} else if (variant === "referenced") {
 		return <ImageMessageReferenced message={message} {...props} />;
-	} else if (variant === "viewer_detail") {
-		// TODO
-	} else if (variant === "viewer_thumb") {
-		return <div {...props}>TODO</div>;
 	} else if (variant === "abstract") {
 		return <ImageMessageAbstract message={message} {...props} />;
 	}

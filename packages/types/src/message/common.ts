@@ -72,11 +72,13 @@ export type ChatType = PrivateChatType | GroupChatType;
 
 export type ImageInfo = Partial<
 	Record<
-		"regular" | "thumbnail" | "hd",
+		"regular" | "thumbnail" | "hd" | "video",
 		{
-			src: string;
+			src?: string;
+			uri: string;
 			width?: number;
 			height?: number;
+			requiresReleaseAck?: boolean;
 		}
 	>
 >;

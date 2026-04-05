@@ -15,7 +15,7 @@
 	}
 
 	.Scrollbar {
-		@apply flex justify-center;
+		@apply flex;
 		&[data-orientation="vertical"] {
 			@apply w-1 md:w-[7px];
 		}
@@ -35,8 +35,17 @@
 		}
 
 		&::before {
-			@apply content-[''] absolute w-5 h-full;
+			@apply content-[''] absolute;
+		}
+
+		&[data-orientation="vertical"]::before {
+			@apply h-full w-5;
 			inset-inline-end: -0.125rem;
+		}
+
+		&[data-orientation="horizontal"]::before {
+			@apply h-5 w-full left-0 right-0 -bottom-2;
+			inset-block-end: -0.125rem;
 		}
 	}
 
