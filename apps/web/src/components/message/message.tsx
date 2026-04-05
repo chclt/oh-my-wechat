@@ -1,14 +1,17 @@
+import {
+	ContactMessage,
+	ImageMessage,
+	LocationMessage,
+	MailMessage,
+	MicroVideoMessage,
+	StickerMessage,
+	TextMessage,
+	VideoMessage,
+	VoiceMessage,
+} from "@/components/message";
 import ChatroomVoipMessage from "@/components/message/chatroom-voip-message.tsx";
-import ContactMessage from "@/components/message/contact-message.tsx";
-import LocationMessage from "@/components/message/location-message.tsx";
-import MailMessage from "@/components/message/mail-message.tsx";
-import MicroVideoMessage from "@/components/message/micro-video-message.tsx";
-import StickerMessage from "@/components/message/sticker-message.tsx";
 import SystemExtendedMessage from "@/components/message/system-extended-message.tsx";
 import SystemMessage from "@/components/message/system-message.tsx";
-import { TextMessage, ImageMessage } from "@/components/message";
-import VideoMessage from "@/components/message/video-message.tsx";
-import VoiceMessage from "@/components/message/voice-message.tsx";
 import VoipMessage from "@/components/message/voip-message.tsx";
 import WeComContactMessage from "@/components/message/wecom-contact-message.tsx";
 import OpenMessage from "@/components/open-message/open-message.tsx";
@@ -89,27 +92,43 @@ function MessageComponent({ message, variant, ...props }: MessageProp) {
 			);
 
 		case MessageTypeEnum.VOICE:
-			return <VoiceMessage message={message} variant={variant} {...props} />;
+			return (
+				<VoiceMessage.Auto message={message} variant={variant} {...props} />
+			);
 
 		case MessageTypeEnum.MAIL:
-			return <MailMessage message={message} variant={variant} {...props} />;
+			return (
+				<MailMessage.Auto message={message} variant={variant} {...props} />
+			);
 
 		case MessageTypeEnum.CONTACT:
-			return <ContactMessage message={message} variant={variant} {...props} />;
+			return (
+				<ContactMessage.Auto message={message} variant={variant} {...props} />
+			);
 
 		case MessageTypeEnum.VIDEO:
-			return <VideoMessage message={message} variant={variant} {...props} />;
+			return (
+				<VideoMessage.Auto message={message} variant={variant} {...props} />
+			);
 
 		case MessageTypeEnum.MICROVIDEO:
 			return (
-				<MicroVideoMessage message={message} variant={variant} {...props} />
+				<MicroVideoMessage.Auto
+					message={message}
+					variant={variant}
+					{...props}
+				/>
 			);
 
 		case MessageTypeEnum.STICKER:
-			return <StickerMessage message={message} variant={variant} {...props} />;
+			return (
+				<StickerMessage.Auto message={message} variant={variant} {...props} />
+			);
 
 		case MessageTypeEnum.LOCATION:
-			return <LocationMessage message={message} variant={variant} {...props} />;
+			return (
+				<LocationMessage.Auto message={message} variant={variant} {...props} />
+			);
 
 		case MessageTypeEnum.APP:
 			return <OpenMessage message={message} variant={variant} {...props} />;

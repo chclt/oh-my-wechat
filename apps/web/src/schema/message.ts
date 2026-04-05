@@ -1,15 +1,8 @@
 import type { ChatroomVoipMessageEntity } from "@/components/message/chatroom-voip-message.tsx";
-import type { ContactMessageEntity } from "@/components/message/contact-message.tsx";
-import type { LocationMessageEntity } from "@/components/message/location-message.tsx";
-import type { MailMessageEntity } from "@/components/message/mail-message.tsx";
-import type { MicroVideoMessageEntity } from "@/components/message/micro-video-message.tsx";
-import type { StickerMessageEntity } from "@/components/message/sticker-message.tsx";
 import type { SystemExtendedMessageEntity } from "@/components/message/system-extended-message.tsx";
 import type { SystemMessageEntity } from "@/components/message/system-message.tsx";
 import type { TextMessageEntity } from "@/components/message/text-message/types.ts";
 import type { VerityMessageEntity } from "@/components/message/verify-message.tsx";
-import type { VideoMessageEntity } from "@/components/message/video-message.tsx";
-import type { VoiceMessageEntity } from "@/components/message/voice-message.tsx";
 import type { VoipMessageEntity } from "@/components/message/voip-message.tsx";
 import type { WeComContactMessageEntity } from "@/components/message/wecom-contact-message.tsx";
 import type { OpenMessageEntity } from "@/components/open-message/open-message.tsx";
@@ -112,26 +105,227 @@ export type ImageMessageType = BasicMessageType<
 	MessageTypeEnum.IMAGE,
 	ImageMessageEntity
 >;
+
+export interface VoiceMessageEntity {
+	msg: {
+		voicemsg: {
+			"@_endflag": "0" | "1";
+			"@_cancelflag": "0" | "1";
+			"@_forwardflag": "0" | "1";
+			"@_voiceformat": string;
+			"@_voicelength": string;
+			"@_length": string;
+			"@_bufid": string;
+			"@_aeskey": string;
+			"@_voiceurl": string;
+			"@_voicemd5": string;
+			"@_clientmsgid": string;
+			"@_fromusername": string;
+		};
+	};
+}
+
 export type VoiceMessageType = BasicMessageType<
 	MessageTypeEnum.VOICE,
 	VoiceMessageEntity
 >;
+
+export interface MailMessageEntity {
+	msg: {
+		pushmail: {
+			content: {
+				subject: string; // 邮件主题
+				attach: boolean;
+				sender: string; // 发件人
+				digest: string; // e.g. "点击查看全文"
+				date: string; // e.g. "2021-03-10 17:17:43"
+				fromlist: {
+					item: {
+						name: string; // 发件人名字
+						addr: string; // 发件人邮箱
+					};
+					"@_count": string; // e.g. "1"
+				};
+				tolist: {
+					item: {
+						name: string; // 收件人名字
+						addr: string; // 收件人邮箱
+					};
+					"@_count": string; // e.g. "1"
+				};
+				cclist: {
+					"@_count": string; // e.g. "0"
+				};
+			};
+			mailid: string;
+			waplink: string; // 打开邮箱的链接
+		};
+	};
+}
+
 export type MailMessageType = BasicMessageType<
 	MessageTypeEnum.MAIL,
 	MailMessageEntity
 >;
+
+export interface ContactMessageEntity {
+	msg: {
+		"@_certflag": string; // 个人名片应该是 "0"
+		"@_certinfo": string; // 企业认证信息
+
+		"@_brandIconUrl": string;
+		"@_brandHomeUrl": string; // JSON 公众号相关配置
+		"@_brandSubscriptConfigUrl": string; // JSON 公众号相关配置
+		"@_brandFlags": "0" | "1";
+
+		"@_regionCode": string;
+
+		"@_biznamecardinfo": string; // unknown
+
+		"@_bigheadimgurl": string;
+		"@_smallheadimgurl": string;
+		"@_username": string;
+		"@_nickname": string;
+		"@_fullpy": string;
+		"@_shortpy": string;
+		"@_alias": string;
+		"@_imagestatus": string; // unknown
+		"@_scene": string;
+		"@_province": string;
+		"@_city": string;
+		"@_sign": string; // 个性签名
+		"@_sex": "0" | "1"; // TODO
+	};
+}
+
 export type ContactMessageType = BasicMessageType<
 	MessageTypeEnum.CONTACT,
 	ContactMessageEntity
 >;
+
+export interface VideoMessageEntity {
+	msg: {
+		videomsg: {
+			"@_length": string;
+			"@_playlength": string;
+			"@_offset": string;
+			"@_rawoffset": string;
+			"@_fromusername": string;
+			"@_status": string;
+			"@_cameratype": string;
+			"@_source": string;
+			"@_aeskey": string;
+
+			"@_cdnvideourl": string;
+
+			"@_cdnthumburl": string;
+			"@_cdnthumblength": string;
+			"@_cdnthumbwidth": string;
+			"@_cdnthumbheight": string;
+			"@_cdnthumbaeskey": string;
+
+			"@_encryver": string;
+			"@_fileparam": string;
+			"@_md5": string;
+			"@_newmd5": string;
+			"@_filekey": `${string}_${string}_${string}`;
+			"@_uploadcontinuecount": string;
+
+			"@_rawlength": string;
+			"@_rawmd5": string;
+			"@_cdnrawvideourl": string;
+			"@_cdnrawvideoaeskey": string;
+
+			"@_overwritemsgcreatetime": string;
+			"@_overwritenewmsgid": string;
+
+			"@_videouploadtoken": string;
+			"@_isplaceholder": string;
+			"@_rawuploadcontinuecount": string;
+		};
+	};
+}
+
 export type VideoMessageType = BasicMessageType<
 	MessageTypeEnum.VIDEO,
 	VideoMessageEntity
 >;
+
+export interface StickerMessageEntity {
+	msg: {
+		emoji: {
+			"@_fromusername": string;
+			"@_tousername": string;
+			"@_type": string;
+			"@_idbuffer": string;
+			"@_md5": string;
+			"@_len": string;
+			"@_productid": string;
+			"@_androidmd5": string;
+			"@_androidlen": string;
+
+			"@_s60v3md5": string;
+			"@_s60v3len": string;
+			"@_s60v5md5": string;
+			"@_s60v5len": string;
+
+			"@_cdnurl": string;
+			"@_designerid": string;
+			"@_thumburl": string;
+			"@_encrypturl": string;
+			"@_aeskey": string;
+
+			"@_externurl": string;
+			"@_externmd5": string;
+
+			"@_width": string;
+			"@_height": string;
+
+			"@_tpurl": string;
+			"@_tpauthkey": string;
+			"@_attachedtext": string;
+			"@_attachedtextcolor": string;
+			"@_lensid": string;
+			"@_emojiattr": string;
+			"@_linkid": string;
+			"@_desc": string; // base64 编码后的 protobuf 数据，包含表情描述等等
+		};
+
+		gameext: {
+			"@_type": string;
+			"@_content": string;
+		};
+	};
+}
+
 export type StickerMessageType = BasicMessageType<
 	MessageTypeEnum.STICKER,
 	StickerMessageEntity
 >;
+
+export interface LocationMessageEntity {
+	msg: {
+		location: {
+			"@_x": string; // 纬度
+			"@_y": string; // 经度
+			"@_scale": string; // ？缩放级别
+			"@_label": string;
+			"@_maptype": string;
+			"@_poiname": string;
+			"@_poiid": string;
+			"@_buildingId": string;
+			"@_floorName": string;
+			"@_poiCategoryTips": string;
+			"@_poiBusinessHour": string;
+			"@_poiPhone": string;
+			"@_poiPriceTips": string;
+			"@_isFromPoiList": "true" | "false";
+			"@_adcode": string;
+			"@_cityname": string;
+		};
+	};
+}
+
 export type LocationMessageType = BasicMessageType<
 	MessageTypeEnum.LOCATION,
 	LocationMessageEntity
@@ -148,6 +342,32 @@ export type VoipMessageType = BasicMessageType<
 	MessageTypeEnum.VOIP,
 	VoipMessageEntity
 >;
+
+export interface MicroVideoMessageEntity {
+	msg: {
+		videomsg: {
+			"@_clientmsgid": string;
+			"@_playlength": string;
+			"@_length": string;
+			"@_type": string;
+			"@_status": string;
+			"@_fromusername": string;
+			"@_aeskey": string;
+			"@_cdnvideourl": string;
+			"@_cdnthumburl": string;
+			"@_cdnthumblength": string;
+			"@_cdnthumbwidth": string;
+			"@_cdnthumbheight": string;
+			"@_cdnthumbaeskey": string;
+			"@_encryver": string;
+			"@_isplaceholder": string;
+			"@_rawlength": string;
+			"@_cdnrawvideourl": string;
+			"@_cdnrawvideoaeskey": string;
+		};
+	};
+}
+
 export type MicroVideoMessageType = BasicMessageType<
 	MessageTypeEnum.MICROVIDEO,
 	MicroVideoMessageEntity
