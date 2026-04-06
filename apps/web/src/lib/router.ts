@@ -4,6 +4,7 @@ import {
 	createRouteMask,
 	createRouter,
 } from "@tanstack/react-router";
+import { AccountSearchModalOptions } from "@/routes/$accountId/-types.ts";
 
 const memoryHistory = createMemoryHistory({
 	initialEntries: ["/"],
@@ -19,7 +20,7 @@ const accountContactModalToAccountRootMask = createRouteMask({
 		};
 	},
 	search: {
-		modal: "contact",
+		modal: AccountSearchModalOptions.CONTACT,
 	},
 });
 
