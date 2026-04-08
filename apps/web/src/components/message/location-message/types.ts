@@ -1,4 +1,4 @@
-import type { LocationMessageType } from "@/schema";
+import type { LocationMessageType } from "@repo/types";
 import type React from "react";
 
 export interface LocationMessageProps

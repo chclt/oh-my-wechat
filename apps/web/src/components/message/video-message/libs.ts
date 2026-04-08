@@ -1,4 +1,4 @@
-import { MessageDirection } from "@/schema";
+import { MessageDirection } from "@repo/types";
 import { cva } from "class-variance-authority";
 
 export const videoMessageVariants = cva(

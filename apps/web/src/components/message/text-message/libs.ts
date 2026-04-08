@@ -1,5 +1,5 @@
+import { MessageDirection } from "@repo/types";
 import { cva } from "class-variance-authority";
-import { MessageDirection } from "@/schema";
 
 export const textMessageVariants = cva(
 	[

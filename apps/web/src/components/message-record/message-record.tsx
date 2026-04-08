@@ -2,7 +2,7 @@ import LiveMessageRecord from "@/components/message-record/live-message-record.t
 import dialogClasses from "@/components/ui/dialog.module.css";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { type MessageType, RecordTypeEnum } from "@/schema";
+import { Dialog } from "@base-ui/react";
 import {
 	AttachMessageRecordType,
 	ChannelMessageRecordType,
@@ -14,14 +14,15 @@ import {
 	LiveMessageRecordType,
 	LocationMessageRecordType,
 	MessageRecordBaseType,
+	type MessageType,
 	MiniAppMessageRecordType,
 	MusicMessageRecordType,
 	NoteMessageRecordType,
+	RecordTypeEnum,
 	TextMessageRecordType,
 	TingMessageRecordType,
 	VideoMessageRecordType,
-} from "@/schema/message-record.ts";
-import { Dialog } from "@base-ui/react";
+} from "@repo/types";
 import type React from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { CircleQuestionmarkSolid } from "../icon";

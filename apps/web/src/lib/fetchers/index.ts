@@ -1,10 +1,10 @@
+import type { ImageInfo, VideoInfo, VoiceInfo } from "@repo/types";
 import {
 	GetMessageAttachRequest,
 	GetMessageImageRequest,
 	GetMessageVideoRequest,
 	GetMessageVoiceRequest,
-} from "@/adapters/adapter.ts";
-import type { ImageInfo, VideoInfo, VoiceInfo } from "@/schema";
+} from "@repo/types/adapter";
 import type { UseQueryOptions } from "@tanstack/react-query";
 import { getDataAdapter } from "../data-adapter.ts";
 

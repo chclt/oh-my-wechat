@@ -1,18 +1,18 @@
 import dialogClasses from "@/components/ui/dialog.module.css";
 import { ScrollArea } from "@/components/ui/scroll-area.tsx";
 import { cn } from "@/lib/utils.ts";
+import { Dialog } from "@base-ui/react";
 import {
 	AttachNoteRecordType,
 	AudioNoteRecordType,
 	ImageNoteRecordType,
 	LocationNoteRecordType,
+	NoteOpenMessageEntity,
 	NoteRecordType,
 	OpenMessageType,
 	RecordTypeEnum,
 	VideoNoteRecordType,
-} from "@/schema";
-import { NoteOpenMessageEntity } from "@/schema/open-message.ts";
-import { Dialog } from "@base-ui/react";
+} from "@repo/types";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import AttachNoteRecord from "./attach-note-record.tsx";

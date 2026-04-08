@@ -1,4 +1,4 @@
-import type { SystemMessageType } from "@/schema";
+import type { SystemMessageType } from "@repo/types";
 
 export function parseContent(message: SystemMessageType) {
 	return message.message_entity

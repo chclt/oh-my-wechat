@@ -1,3 +1,13 @@
 packages:
   - "apps/*"
   - "packages/*"
+
+catalog:
+  "@bufbuild/buf": "^1.56.0"
+  "@bufbuild/protobuf": "^2.7.0"
+  "date-fns": "^4.1.0"
+  "es-toolkit": "^1.39.8"
+  "fast-xml-parser": "^5.2.5"
+  "typescript": "^5.9.2"
+  "vite": "^7.0.6"
+  "vitest": "^4.0.6"

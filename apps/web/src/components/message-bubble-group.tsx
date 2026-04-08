@@ -1,11 +1,11 @@
+import { useChatUiConfig } from "@/components/chat-ui-config-provider.tsx";
 import User from "@/components/user.tsx";
 import { cn } from "@/lib/utils.ts";
-import type { MessageType } from "@/schema";
-import { MessageDirection, type UserType } from "@/schema";
+import type { MessageType } from "@repo/types";
+import { MessageDirection, type UserType } from "@repo/types";
 import type React from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import Message from "./message/message.tsx";
-import { useChatUiConfig } from "@/components/chat-ui-config-provider.tsx";
 
 interface BubbleGroupProps extends React.HTMLAttributes<HTMLDivElement> {
 	user: UserType;

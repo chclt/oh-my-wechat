@@ -1,7 +1,7 @@
-import type { UserType } from "@/schema";
-import { cn } from "@/lib/utils.ts";
-import type React from "react";
 import { Avatar } from "@/components/ui/avatar.tsx";
+import { cn } from "@/lib/utils.ts";
+import type { UserType } from "@repo/types";
+import type React from "react";
 
 interface UserProps extends React.HTMLProps<HTMLDivElement> {
 	user: UserType;

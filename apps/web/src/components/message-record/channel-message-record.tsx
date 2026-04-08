@@ -5,9 +5,9 @@ import {
 	CardFooter,
 	CardTitle,
 } from "@/components/ui/card.tsx";
-import type { MessageType } from "@/schema";
+import type { MessageType } from "@repo/types";
+import { ChannelMessageRecordType } from "@repo/types";
 import type React from "react";
-import { ChannelMessageRecordType } from "@/schema/message-record.ts";
 
 interface ChannelRecordProps extends React.HTMLAttributes<HTMLDivElement> {
 	message: MessageType;

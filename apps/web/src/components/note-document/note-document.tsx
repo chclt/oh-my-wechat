@@ -1,7 +1,10 @@
 import NoteRecord from "@/components/note-record/note-record";
 import { cn } from "@/lib/utils";
-import { NoteEntity, OpenMessageType } from "@/schema";
-import { NoteOpenMessageEntity } from "@/schema/open-message.ts";
+import {
+	NoteEntity,
+	NoteOpenMessageEntity,
+	OpenMessageType,
+} from "@repo/types";
 import { useQuery } from "@tanstack/react-query";
 import parse, { DOMNode, domToReact, Element } from "html-react-parser";
 

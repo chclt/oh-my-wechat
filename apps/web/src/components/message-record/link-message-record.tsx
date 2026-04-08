@@ -1,8 +1,8 @@
-import type { MessageType } from "@/schema";
+import type { MessageType } from "@repo/types";
+import { LinkMessageRecordType } from "@repo/types";
+import type React from "react";
 import Image from "../image";
 import { LinkCard } from "../link-card";
-import type React from "react";
-import { LinkMessageRecordType } from "@/schema/message-record.ts";
 
 interface LinkRecordProps extends React.HTMLAttributes<HTMLDivElement> {
 	message: MessageType;

@@ -1,5 +1,5 @@
-import { GetAccountRequest } from "@/adapters/adapter.ts";
-import type { AccountType } from "@/schema";
+import type { AccountType } from "@repo/types";
+import { GetAccountRequest } from "@repo/types/adapter";
 import type { UseSuspenseQueryOptions } from "@tanstack/react-query";
 import { getDataAdapter } from "../data-adapter.ts";
 

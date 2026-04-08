@@ -1,9 +1,9 @@
+import { type MessageType, VerityMessageType } from "@repo/types";
 import {
 	DataAdapterCursorPagination,
 	GetGreetingMessageListRequest,
 	GetMessageListRequest,
-} from "@/adapters/adapter.ts";
-import { type MessageType, VerityMessageType } from "@/schema";
+} from "@repo/types/adapter";
 import type {
 	DefaultError,
 	InfiniteData,

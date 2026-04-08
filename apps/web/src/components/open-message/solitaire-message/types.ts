@@ -1,5 +1,5 @@
-import { OpenMessageType } from "@/schema";
-import type { SolitaireOpenMessageEntity } from "@/schema/open-message";
+import type { SolitaireOpenMessageEntity } from "@repo/types";
+import { OpenMessageType } from "@repo/types";
 
 export interface SolitaireMessageProps
 	extends React.HTMLAttributes<HTMLElement> {

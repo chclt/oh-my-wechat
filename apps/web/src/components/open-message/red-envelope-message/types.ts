@@ -1,5 +1,5 @@
-import { OpenMessageType } from "@/schema";
-import type { RedEnvelopeOpenMessageEntity } from "@/schema/open-message";
+import type { RedEnvelopeOpenMessageEntity } from "@repo/types";
+import { OpenMessageType } from "@repo/types";
 
 export interface RedEnvelopeMessageProps
 	extends React.HTMLAttributes<HTMLElement> {

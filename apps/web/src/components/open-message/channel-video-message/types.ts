@@ -1,5 +1,5 @@
-import { OpenMessageType } from "@/schema";
-import type { ChannelVideoOpenMessageEntity } from "@/schema/open-message";
+import type { ChannelVideoOpenMessageEntity } from "@repo/types";
+import { OpenMessageType } from "@repo/types";
 
 export interface ChannelVideoMessageProps
 	extends React.HTMLAttributes<HTMLElement> {

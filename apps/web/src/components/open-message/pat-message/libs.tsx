@@ -1,11 +1,11 @@
+import { useAccount } from "@/components/account-provider.tsx";
 import TextPrettier from "@/components/text-prettier.tsx";
 import User from "@/components/user.tsx";
 import { UserListQueryOptions } from "@/lib/fetchers/user.ts";
-import type { ChatType, OpenMessageType } from "@/schema";
-import { PatOpenMessageEntity } from "@/schema/open-message.ts";
+import type { ChatType, OpenMessageType } from "@repo/types";
+import { PatOpenMessageEntity } from "@repo/types";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { useAccount } from "@/components/account-provider.tsx";
 
 export function useContentParser(
 	message: OpenMessageType<PatOpenMessageEntity>,

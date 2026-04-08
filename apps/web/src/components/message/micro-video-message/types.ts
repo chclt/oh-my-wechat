@@ -1,4 +1,4 @@
-import type { MicroVideoMessageType } from "@/schema";
+import type { MicroVideoMessageType } from "@repo/types";
 import type React from "react";
 
 export interface MicroVideoMessageProps

@@ -2,13 +2,13 @@ import { RecordFileQueryOptions } from "@/lib/fetchers/record.ts";
 import queryClient from "@/lib/query-client";
 import { cn, decodeUnicodeReferences } from "@/lib/utils.ts";
 import { Route } from "@/routes/$accountId/route.tsx";
-import type { MessageType, NoteEntity, OpenMessageType } from "@/schema";
+import { Dialog } from "@base-ui/react";
+import type { MessageType, NoteEntity, OpenMessageType } from "@repo/types";
 import {
 	MessageRecordBaseType,
 	NoteMessageRecordType,
-} from "@/schema/message-record.ts";
-import { NoteOpenMessageEntity } from "@/schema/open-message.ts";
-import { Dialog } from "@base-ui/react";
+	NoteOpenMessageEntity,
+} from "@repo/types";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { Suspense, useMemo, useState } from "react";

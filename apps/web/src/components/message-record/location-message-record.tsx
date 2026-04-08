@@ -1,9 +1,9 @@
-import type { MessageType } from "@/schema";
 import { cn } from "@/lib/utils";
+import type { MessageType } from "@repo/types";
+import { LocationMessageRecordType } from "@repo/types";
+import type React from "react";
 import { LocationIcon } from "../icon";
 import { locationMessageVariants } from "../message/location-message";
-import type React from "react";
-import { LocationMessageRecordType } from "@/schema/message-record.ts";
 
 interface LocationRecordProps extends React.HTMLAttributes<HTMLDivElement> {
 	message: MessageType;

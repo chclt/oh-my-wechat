@@ -10,8 +10,8 @@ import { GreetingMessageListQueryOptions } from "@/lib/fetchers/message.ts";
 import { cn } from "@/lib/utils.ts";
 import GreetingMessageItem from "@/routes/$accountId/contact/-components/contact-list/greeting-message-item.tsx";
 import { ContactListContctItem } from "@/routes/$accountId/contact/-components/contact-list/use-contact-list.ts";
-import { MessageTypeEnum } from "@/schema";
 import { useDisclosure } from "@mantine/hooks";
+import { MessageTypeEnum } from "@repo/types";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronLeftIcon } from "lucide-react";
 

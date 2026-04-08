@@ -1,4 +1,4 @@
-import type { SystemExtendedMessageType } from "@/schema";
+import type { SystemExtendedMessageType } from "@repo/types";
 import type React from "react";
 
 export interface SystemExtendedMessageProps

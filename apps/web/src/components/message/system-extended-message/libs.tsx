@@ -1,5 +1,5 @@
 import User from "@/components/user.tsx";
-import type { ChatType, SystemExtendedMessageType } from "@/schema";
+import type { ChatType, SystemExtendedMessageType } from "@repo/types";
 import { XMLParser } from "fast-xml-parser";
 import type { ReactNode } from "react";
 

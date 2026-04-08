@@ -1,4 +1,4 @@
-import type { DataAdapter } from "@/adapters/adapter";
+import type { DataAdapter } from "@repo/types/adapter";
 
 let dataAdapter: DataAdapter | undefined;
 

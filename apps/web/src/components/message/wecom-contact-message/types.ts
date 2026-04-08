@@ -1,4 +1,4 @@
-import type { WeComContactMessageType } from "@/schema";
+import type { WeComContactMessageType } from "@repo/types";
 import type React from "react";
 
 export interface WeComContactMessageProps

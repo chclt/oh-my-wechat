@@ -1,5 +1,5 @@
-import { OpenMessageType } from "@/schema";
-import type { AnnouncementOpenMessageEntity } from "@/schema/open-message";
+import type { AnnouncementOpenMessageEntity } from "@repo/types";
+import { OpenMessageType } from "@repo/types";
 
 export interface AnnouncementMessageProps
 	extends React.HTMLAttributes<HTMLElement> {

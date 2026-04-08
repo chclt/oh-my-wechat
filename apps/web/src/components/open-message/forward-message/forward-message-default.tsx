@@ -1,11 +1,12 @@
+import { ChatUiConfigProvider } from "@/components/chat-ui-config-provider.tsx";
 import { MessageBubbleGroup } from "@/components/message-bubble-group.tsx";
 import MessageInlineWrapper from "@/components/message-inline-wrapper.tsx";
 import MessageRecord from "@/components/message-record/message-record.tsx";
 import dialogClasses from "@/components/ui/dialog.module.css";
 import { ScrollArea } from "@/components/ui/scroll-area.tsx";
 import { cn, decodeUnicodeReferences } from "@/lib/utils.ts";
-import type { MessageType } from "@/schema";
 import { Dialog } from "@base-ui/react";
+import type { MessageType } from "@repo/types";
 import { XMLParser } from "fast-xml-parser";
 import {
 	type ForwardMessageContent,
@@ -13,7 +14,6 @@ import {
 	forwardMessageVariants,
 } from "./libs";
 import type { ForwardMessageProps } from "./types";
-import { ChatUiConfigProvider } from "@/components/chat-ui-config-provider.tsx";
 
 export function ForwardMessageDefault({
 	message,

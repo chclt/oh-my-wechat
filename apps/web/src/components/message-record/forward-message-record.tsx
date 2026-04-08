@@ -1,4 +1,4 @@
-import { MessageDirection, type MessageType } from "@/schema";
+import { MessageDirection, type MessageType } from "@repo/types";
 
 import { MessageBubbleGroup } from "@/components/message-bubble-group";
 
@@ -12,10 +12,10 @@ import type React from "react";
 import { ScrollArea } from "../ui/scroll-area";
 import MessageRecord from "./message-record.tsx";
 
-import dialogClasses from "@/components/ui/dialog.module.css";
-import { ForwardMessageRecordType } from "@/schema/message-record.ts";
-import { Dialog } from "@base-ui/react";
 import { ChatUiConfigProvider } from "@/components/chat-ui-config-provider.tsx";
+import dialogClasses from "@/components/ui/dialog.module.css";
+import { Dialog } from "@base-ui/react";
+import { ForwardMessageRecordType } from "@repo/types";
 
 interface ForwardMessageRecordProps
 	extends React.HTMLAttributes<HTMLDivElement> {

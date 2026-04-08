@@ -1,5 +1,5 @@
-import { OpenMessageType } from "@/schema";
-import type { PatOpenMessageEntity } from "@/schema/open-message";
+import type { PatOpenMessageEntity } from "@repo/types";
+import { OpenMessageType } from "@repo/types";
 
 export interface PatMessageProps extends React.HTMLAttributes<HTMLElement> {
 	message: OpenMessageType<PatOpenMessageEntity>;

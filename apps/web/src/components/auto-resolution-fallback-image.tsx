@@ -1,5 +1,5 @@
 import Image from "@/components/image.tsx";
-import type { ImageInfo } from "@/schema";
+import type { ImageInfo } from "@repo/types";
 import React, { useEffect, useState } from "react";
 
 export default function AutoResolutionFallbackImage({

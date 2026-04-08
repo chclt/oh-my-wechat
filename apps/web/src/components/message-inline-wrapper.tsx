@@ -1,7 +1,7 @@
-import type { MessageType } from "@/schema";
+import { useChatUiConfig } from "@/components/chat-ui-config-provider.tsx";
+import type { MessageType } from "@repo/types";
 import type React from "react";
 import User from "./user";
-import { useChatUiConfig } from "@/components/chat-ui-config-provider.tsx";
 
 interface MessageInlineWrapperProps
 	extends React.HTMLAttributes<HTMLParagraphElement> {

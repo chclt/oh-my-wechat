@@ -1,6 +1,6 @@
-import type { MessageType } from "@/schema";
+import type { MessageType } from "@repo/types";
+import { AttachMessageRecordType } from "@repo/types";
 import type React from "react";
-import { AttachMessageRecordType } from "@/schema/message-record.ts";
 
 interface AttachRecordProps extends React.HTMLAttributes<HTMLDivElement> {
 	message: MessageType;

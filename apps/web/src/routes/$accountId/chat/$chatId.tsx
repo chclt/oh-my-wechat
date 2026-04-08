@@ -1,3 +1,4 @@
+import { ChatUiConfigProvider } from "@/components/chat-ui-config-provider.tsx";
 import { LoaderIcon } from "@/components/icon";
 import { MessageBubbleGroup } from "@/components/message-bubble-group";
 import Message from "@/components/message/message";
@@ -8,14 +9,16 @@ import { MessageListInfiniteQueryOptions } from "@/lib/fetchers/message";
 import { UserSuspenseQueryOptions } from "@/lib/fetchers/user";
 import router from "@/lib/router";
 import { cn } from "@/lib/utils";
-import { MessageTypeEnum, type MessageType } from "@/schema";
-import { OpenMessageTypeEnum } from "@/schema/open-message.ts";
 import { ScrollArea as ScrollAreaBase } from "@base-ui/react";
+import {
+	MessageTypeEnum,
+	OpenMessageTypeEnum,
+	type MessageType,
+} from "@repo/types";
 import { useInfiniteQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { differenceInMinutes, format, isSameDay } from "date-fns";
 import React, { useEffect, useRef, type UIEventHandler } from "react";
-import { ChatUiConfigProvider } from "@/components/chat-ui-config-provider.tsx";
 
 export const Route = createFileRoute("/$accountId/chat/$chatId")({
 	component: RouteComponent,

@@ -1,5 +1,4 @@
-import { MessageDirection } from "@/schema";
-import { ForwardMessageRecordItemType } from "@/schema/message-record";
+import { ForwardMessageRecordItemType, MessageDirection } from "@repo/types";
 import { cva } from "class-variance-authority";
 
 export interface ForwardMessageContent {

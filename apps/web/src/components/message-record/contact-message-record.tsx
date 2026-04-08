@@ -5,10 +5,10 @@ import {
 	CardFooter,
 	CardTitle,
 } from "@/components/ui/card.tsx";
-import type { MessageType } from "@/schema";
+import type { MessageType } from "@repo/types";
+import { ContactMessageRecordType } from "@repo/types";
 import { XMLParser } from "fast-xml-parser";
 import type React from "react";
-import { ContactMessageRecordType } from "@/schema/message-record.ts";
 
 interface ContactRecordProps extends React.HTMLAttributes<HTMLDivElement> {
 	message: MessageType;

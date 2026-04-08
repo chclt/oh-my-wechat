@@ -3,7 +3,7 @@ import { LinkCard } from "@/components/link-card.tsx";
 import dialogClasses from "@/components/ui/dialog.module.css";
 import { ScrollArea } from "@/components/ui/scroll-area.tsx";
 import { cn } from "@/lib/utils.ts";
-import { MessageType, type OpenMessageType } from "@/schema";
+import { Dialog } from "@base-ui/react";
 import {
 	AnnouncementOpenMessageEntity,
 	Attach2OpenMessageEntity,
@@ -37,8 +37,8 @@ import {
 	UrlOpenMessageEntity,
 	VideoOpenMessageEntity,
 	VoiceOpenMessageEntity,
-} from "@/schema/open-message.ts";
-import { Dialog } from "@base-ui/react";
+	type OpenMessageType,
+} from "@repo/types";
 import {
 	AnnouncementMessage,
 	Attach2Message,

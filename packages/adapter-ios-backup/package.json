@@ -1,0 +1,42 @@
+{
+  "name": "@repo/adapter-ios-backup",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "exports": {
+    ".": "./src/index.ts",
+    "./queryOptions": "./src/fetchers.ts",
+    "./vite": "./src/vite/index.ts"
+  },
+  "dependencies": {
+    "@bufbuild/protobuf": "catalog:",
+    "@ffmpeg/core": "^0.12.10",
+    "@ffmpeg/ffmpeg": "^0.12.15",
+    "@ffmpeg/types": "^0.12.4",
+    "@ffmpeg/util": "^0.12.2",
+    "@tanstack/pacer": "^0.14.0",
+    "buffer": "^6.0.3",
+    "comlink": "^4.4.2",
+    "crypto-js": "^4.2.0",
+    "drizzle-orm": "^0.44.4",
+    "date-fns": "catalog:",
+    "fast-xml-parser": "catalog:",
+    "silk-wasm": "^3.7.1",
+    "sql.js": "^1.13.0"
+  },
+  "peerDependencies": {
+    "@tanstack/react-query": "^5.0.0"
+  },
+  "devDependencies": {
+    "@bufbuild/buf": "catalog:",
+    "@repo/types": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@types/crypto-js": "^4.2.2",
+    "@types/sql.js": "^1.4.9",
+    "@types/wicg-file-system-access": "^2023.10.6",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vite-plugin-wasm": "^3.5.0",
+    "vitest": "catalog:"
+  }
+}

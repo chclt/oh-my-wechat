@@ -1,5 +1,5 @@
-import { GetAccountContactListRequest } from "@/adapters/adapter.ts";
-import { ContactType } from "@/schema";
+import { ContactType } from "@repo/types";
+import { GetAccountContactListRequest } from "@repo/types/adapter";
 import { UseSuspenseQueryOptions } from "@tanstack/react-query";
 import { getDataAdapter } from "../data-adapter";
 

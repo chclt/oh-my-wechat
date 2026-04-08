@@ -1,5 +1,5 @@
-import { OpenMessageType } from "@/schema";
-import type { RealtimeLocationOpenMessageEntity } from "@/schema/open-message";
+import type { RealtimeLocationOpenMessageEntity } from "@repo/types";
+import { OpenMessageType } from "@repo/types";
 
 export interface RealtimeLocationMessageProps
 	extends React.HTMLAttributes<HTMLElement> {

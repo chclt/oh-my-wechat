@@ -1,5 +1,4 @@
-import { OpenMessageType } from "@/schema";
-import { AttachOpenMessageEntity } from "@/schema/open-message";
+import { AttachOpenMessageEntity, OpenMessageType } from "@repo/types";
 
 export interface AttachMessageProps extends React.HTMLAttributes<HTMLElement> {
 	message: OpenMessageType<AttachOpenMessageEntity>;

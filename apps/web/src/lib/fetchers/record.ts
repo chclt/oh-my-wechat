@@ -2,7 +2,7 @@ import {
 	GetRecordFileRequest,
 	GetRecordImageRequest,
 	GetRecordVideoRequest,
-} from "@/adapters/adapter.ts";
+} from "@repo/types/adapter";
 import { getDataAdapter } from "../data-adapter";
 
 export function RecordImageQueryOptions(requestData: GetRecordImageRequest) {

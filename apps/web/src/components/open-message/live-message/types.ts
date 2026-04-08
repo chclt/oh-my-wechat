@@ -1,5 +1,5 @@
-import { OpenMessageType } from "@/schema";
-import type { LiveOpenMessageEntity } from "@/schema/open-message";
+import type { LiveOpenMessageEntity } from "@repo/types";
+import { OpenMessageType } from "@repo/types";
 
 export interface LiveMessageProps extends React.HTMLAttributes<HTMLElement> {
 	message: OpenMessageType<LiveOpenMessageEntity>;

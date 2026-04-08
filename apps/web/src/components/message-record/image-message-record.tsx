@@ -2,9 +2,9 @@ import AutoResolutionFallbackImage from "@/components/auto-resolution-fallback-i
 import { RecordImageQueryOptions } from "@/lib/fetchers/record";
 import { cn } from "@/lib/utils.ts";
 import { Route } from "@/routes/$accountId/route.tsx";
-import type { MessageType } from "@/schema";
-import { ImageMessageRecordType } from "@/schema/message-record.ts";
 import { useInViewport } from "@mantine/hooks";
+import type { MessageType } from "@repo/types";
+import { ImageMessageRecordType } from "@repo/types";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 

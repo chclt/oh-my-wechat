@@ -1,4 +1,4 @@
-import { MessageDirection } from "@/schema";
+import { MessageDirection } from "@repo/types";
 import type { RedEnvelopeMessageProps } from "./types";
 
 export function AAMessageDefault({

@@ -1,5 +1,5 @@
-import { OpenMessageType } from "@/schema";
-import type { Forward2OpenMessageEntity } from "@/schema/open-message";
+import type { Forward2OpenMessageEntity } from "@repo/types";
+import { OpenMessageType } from "@repo/types";
 
 export interface ForwardMessage2Props
 	extends React.HTMLAttributes<HTMLElement> {
