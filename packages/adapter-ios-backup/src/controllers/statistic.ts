@@ -21,7 +21,7 @@ import * as MessageController from "./message";
 
 // TODO
 // import WechatEmojiTable from "../lib/wechat-emojis.ts";
-const WechatEmojiTable = {};
+const WechatEmojiTable: Record<string, string> = {};
 
 export interface ChatStatistics {
 	date_contact_added?: string;
