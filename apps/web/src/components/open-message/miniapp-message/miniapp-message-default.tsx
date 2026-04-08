@@ -1,12 +1,12 @@
+import { useInViewport } from "@mantine/hooks";
+import { useQuery } from "@tanstack/react-query";
+import { useAccount } from "@/components/account-provider.tsx";
 import AutoResolutionFallbackImage from "@/components/auto-resolution-fallback-image.tsx";
 import Image from "@/components/image.tsx";
 import { CardTitle } from "@/components/ui/card.tsx";
 import { MessageImageQueryOptions } from "@/lib/fetchers";
 import { cn, decodeUnicodeReferences } from "@/lib/utils.ts";
-import { useInViewport } from "@mantine/hooks";
-import { useQuery } from "@tanstack/react-query";
 import type { MiniappMessageProps } from "./types";
-import { useAccount } from "@/components/account-provider.tsx";
 
 export function MiniappMessageDefault({
 	message,

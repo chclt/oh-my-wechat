@@ -1,11 +1,11 @@
+import { useInViewport } from "@mantine/hooks";
+import { useQuery } from "@tanstack/react-query";
+import { useAccount } from "@/components/account-provider.tsx";
 import AutoResolutionFallbackImage from "@/components/auto-resolution-fallback-image.tsx";
 import Link from "@/components/link.tsx";
 import { MessageImageQueryOptions } from "@/lib/fetchers";
 import { cn, decodeUnicodeReferences } from "@/lib/utils.ts";
-import { useInViewport } from "@mantine/hooks";
-import { useQuery } from "@tanstack/react-query";
 import type { MusicMessageProps } from "./types";
-import { useAccount } from "@/components/account-provider.tsx";
 
 export function MusicMessageDefault({ message, ...props }: MusicMessageProps) {
 	const { accountId } = useAccount();

@@ -1,8 +1,8 @@
-import { ChatSuspenseQueryOptions } from "@/lib/fetchers/chat.ts";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { useAccount } from "@/components/account-provider.tsx";
+import { ChatSuspenseQueryOptions } from "@/lib/fetchers/chat.ts";
 import { parsePlainTextContent, parseXMLContent } from "./libs.tsx";
 import type { SystemExtendedMessageProps } from "./types.ts";
-import { useAccount } from "@/components/account-provider.tsx";
 
 export function SystemExtendedMessageAbstract({
 	message,

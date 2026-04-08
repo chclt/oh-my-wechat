@@ -1,3 +1,5 @@
+import { Slot } from "@radix-ui/react-slot";
+import type * as React from "react";
 import {
 	Card,
 	CardContent,
@@ -6,13 +8,10 @@ import {
 	CardTitle,
 } from "@/components/ui/card.tsx";
 import { cn } from "@/lib/utils";
-import { Slot } from "@radix-ui/react-slot";
-import type * as React from "react";
 import { ArrowShareRightSolid } from "./central-icon";
 import Link from "./link";
 
-export interface LinkCardProps
-	extends React.AnchorHTMLAttributes<HTMLDivElement> {
+export interface LinkCardProps extends React.AnchorHTMLAttributes<HTMLDivElement> {
 	heading?: string;
 	abstract?: string | React.ReactNode;
 	preview?: React.ReactNode;

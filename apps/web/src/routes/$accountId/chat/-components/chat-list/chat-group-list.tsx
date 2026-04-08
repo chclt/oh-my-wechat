@@ -1,3 +1,5 @@
+import { useDisclosure } from "@mantine/hooks";
+import { ChevronLeftIcon } from "lucide-react";
 import { useMiniRoute, useMiniRouter } from "@/components/mini-router";
 import {
 	MiniRoutePageContentClassName,
@@ -7,8 +9,6 @@ import { Avatar } from "@/components/ui/avatar.tsx";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils.ts";
-import { useDisclosure } from "@mantine/hooks";
-import { ChevronLeftIcon } from "lucide-react";
 import ChatListItem from "./chat-item";
 import { ChatListChatGroupItem } from "./use-chat-list";
 

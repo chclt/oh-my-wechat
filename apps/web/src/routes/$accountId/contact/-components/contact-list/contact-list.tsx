@@ -1,3 +1,7 @@
+import imageGreetingMessages from "/public/images/avatar/greeting_messages.png";
+import imageGroupChats from "/public/images/avatar/group_chats.png";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { ContactIconFill } from "@/components/icon";
 import {
 	MiniOutlet,
@@ -9,16 +13,12 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { AccountContactListSuspenseQueryOptions } from "@/lib/fetchers/contact";
 import { cn } from "@/lib/utils";
 import { GreetingMessageListMiniRouteState } from "@/routes/$accountId/contact/-components/contact-list/greeting-message-list.tsx";
-import { useSuspenseQuery } from "@tanstack/react-query";
-import { useState } from "react";
 import ContactAlphabetList, {
 	AlphabetNavigator,
 } from "./contact-alphabet-list";
 import ContactItem from "./contact-item";
 import useContactAlphabetList from "./use-contact-alphabet-list";
 import useContactList, { ContactListContctGroupItem } from "./use-contact-list";
-import imageGreetingMessages from "/public/images/avatar/greeting_messages.png";
-import imageGroupChats from "/public/images/avatar/group_chats.png";
 
 export interface ContactListMiniRouteState {
 	name: "root";

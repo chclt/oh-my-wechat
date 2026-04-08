@@ -1,9 +1,9 @@
-import { MessageVoiceQueryOptions } from "@/lib/fetchers";
-import { cn } from "@/lib/utils.ts";
 import { useInViewport } from "@mantine/hooks";
 import { useQuery } from "@tanstack/react-query";
-import type { VoiceMessageProps } from "./types.ts";
 import { useAccount } from "@/components/account-provider.tsx";
+import { MessageVoiceQueryOptions } from "@/lib/fetchers";
+import { cn } from "@/lib/utils.ts";
+import type { VoiceMessageProps } from "./types.ts";
 
 export function VoiceMessageDefault({ message, ...props }: VoiceMessageProps) {
 	const { accountId } = useAccount();

@@ -1,3 +1,14 @@
+import { Dialog } from "@base-ui/react";
+import {
+	MessageDirection,
+	MessageTypeEnum,
+	OpenMessageType,
+	type MessageType,
+} from "@repo/types";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import type React from "react";
+import { Suspense } from "react";
+import { ErrorBoundary } from "react-error-boundary";
 import { useAccount } from "@/components/account-provider.tsx";
 import {
 	ChatroomVoipMessage,
@@ -20,17 +31,6 @@ import dialogClasses from "@/components/ui/dialog.module.css";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { AccountSuspenseQueryOptions } from "@/lib/fetchers/account.ts";
 import { cn } from "@/lib/utils.ts";
-import { Dialog } from "@base-ui/react";
-import {
-	MessageDirection,
-	MessageTypeEnum,
-	OpenMessageType,
-	type MessageType,
-} from "@repo/types";
-import { useSuspenseQuery } from "@tanstack/react-query";
-import type React from "react";
-import { Suspense } from "react";
-import { ErrorBoundary } from "react-error-boundary";
 import { CircleQuestionmarkSolid } from "../icon";
 import { Card, CardContent, CardFooter, CardIndicator } from "../ui/card";
 

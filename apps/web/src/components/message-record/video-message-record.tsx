@@ -1,9 +1,9 @@
-import { RecordVideoQueryOptions } from "@/lib/fetchers/record.ts";
-import { cn } from "@/lib/utils";
-import { Route } from "@/routes/$accountId/route.tsx";
 import { useInViewport } from "@mantine/hooks";
 import { MessageType, VideoMessageRecordType } from "@repo/types";
 import { useQuery } from "@tanstack/react-query";
+import { RecordVideoQueryOptions } from "@/lib/fetchers/record.ts";
+import { cn } from "@/lib/utils";
+import { Route } from "@/routes/$accountId/route.tsx";
 import { videoMessageVariants } from "../message/video-message";
 
 interface VideoRecordProps extends React.HTMLAttributes<HTMLElement> {

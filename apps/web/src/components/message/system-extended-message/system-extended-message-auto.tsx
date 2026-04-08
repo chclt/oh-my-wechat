@@ -1,10 +1,9 @@
+import { useAccount } from "@/components/account-provider.tsx";
 import { SystemExtendedMessageAbstract } from "./system-extended-message-abstract.tsx";
 import { SystemExtendedMessageDefault } from "./system-extended-message-default.tsx";
 import type { SystemExtendedMessageProps } from "./types.ts";
-import { useAccount } from "@/components/account-provider.tsx";
 
-export interface SystemExtendedMessageAutoProps
-	extends SystemExtendedMessageProps {
+export interface SystemExtendedMessageAutoProps extends SystemExtendedMessageProps {
 	variant: "default" | "referenced" | "abstract";
 }
 

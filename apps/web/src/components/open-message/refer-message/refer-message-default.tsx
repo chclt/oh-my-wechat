@@ -4,10 +4,7 @@ import TextPrettier from "@/components/text-prettier.tsx";
 import { cn } from "@/lib/utils.ts";
 import type { ReferMessageProps } from "./types";
 
-export function ReferMessageDefault({
-	message,
-	...props
-}: ReferMessageProps) {
+export function ReferMessageDefault({ message, ...props }: ReferMessageProps) {
 	return (
 		<div
 			className={cn(

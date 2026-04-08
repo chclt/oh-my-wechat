@@ -1,6 +1,6 @@
+import { useAccount } from "@/components/account-provider.tsx";
 import MessageInlineWrapper from "@/components/message-inline-wrapper.tsx";
 import type { RedEnvelopeMessageProps } from "./types";
-import { useAccount } from "@/components/account-provider.tsx";
 
 export function RedEnvelopeMessageAbstract({
 	message,

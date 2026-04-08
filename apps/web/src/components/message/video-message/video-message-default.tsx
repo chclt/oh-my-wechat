@@ -1,8 +1,8 @@
+import { useInViewport } from "@mantine/hooks";
+import { useQuery } from "@tanstack/react-query";
 import { MessageVideoQueryOptions } from "@/lib/fetchers";
 import { cn } from "@/lib/utils.ts";
 import { Route } from "@/routes/$accountId/route.tsx";
-import { useInViewport } from "@mantine/hooks";
-import { useQuery } from "@tanstack/react-query";
 import { videoMessageVariants } from "./libs.ts";
 import type { VideoMessageProps } from "./types.ts";
 

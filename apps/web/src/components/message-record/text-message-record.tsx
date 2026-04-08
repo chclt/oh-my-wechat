@@ -1,11 +1,11 @@
-import { textMessageVariants } from "@/components/message/text-message/libs.ts";
-import { cn } from "@/lib/utils.ts";
 import {
 	MessageDirection,
 	TextMessageRecordType,
 	type MessageType,
 } from "@repo/types";
 import type React from "react";
+import { textMessageVariants } from "@/components/message/text-message/libs.ts";
+import { cn } from "@/lib/utils.ts";
 import TextPrettier from "../text-prettier.tsx";
 
 interface TextRecordProps extends React.HTMLAttributes<HTMLDivElement> {

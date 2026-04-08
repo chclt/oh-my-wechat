@@ -1,7 +1,7 @@
-import TextPrettier from "@/components/text-prettier.tsx";
 import type React from "react";
-import type { TextMessageProps } from "./types.ts";
+import TextPrettier from "@/components/text-prettier.tsx";
 import { textMessageVariants } from "./libs.ts";
+import type { TextMessageProps } from "./types.ts";
 
 export function TextMessageDefault({
 	message,

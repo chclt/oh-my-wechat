@@ -1,24 +1,20 @@
+import { Dialog } from "@base-ui/react";
 import { MessageDirection, type MessageType } from "@repo/types";
-
+import { ForwardMessageRecordType } from "@repo/types";
+import type React from "react";
+import { ChatUiConfigProvider } from "@/components/chat-ui-config-provider.tsx";
 import { MessageBubbleGroup } from "@/components/message-bubble-group";
-
 import MessageInlineWrapper from "@/components/message-inline-wrapper";
 import {
 	forwardMessageRecordVariants,
 	forwardMessageVariants,
 } from "@/components/open-message/forward-message";
+import dialogClasses from "@/components/ui/dialog.module.css";
 import { cn } from "@/lib/utils.ts";
-import type React from "react";
 import { ScrollArea } from "../ui/scroll-area";
 import MessageRecord from "./message-record.tsx";
 
-import { ChatUiConfigProvider } from "@/components/chat-ui-config-provider.tsx";
-import dialogClasses from "@/components/ui/dialog.module.css";
-import { Dialog } from "@base-ui/react";
-import { ForwardMessageRecordType } from "@repo/types";
-
-interface ForwardMessageRecordProps
-	extends React.HTMLAttributes<HTMLDivElement> {
+interface ForwardMessageRecordProps extends React.HTMLAttributes<HTMLDivElement> {
 	message: MessageType;
 	record: ForwardMessageRecordType;
 	variant: "default" | string;

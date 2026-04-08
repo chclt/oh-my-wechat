@@ -1,7 +1,3 @@
-import { RecordFileQueryOptions } from "@/lib/fetchers/record.ts";
-import queryClient from "@/lib/query-client";
-import { cn, decodeUnicodeReferences } from "@/lib/utils.ts";
-import { Route } from "@/routes/$accountId/route.tsx";
 import { Dialog } from "@base-ui/react";
 import type { MessageType, NoteEntity, OpenMessageType } from "@repo/types";
 import {
@@ -12,6 +8,10 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { Suspense, useMemo, useState } from "react";
+import { RecordFileQueryOptions } from "@/lib/fetchers/record.ts";
+import queryClient from "@/lib/query-client";
+import { cn, decodeUnicodeReferences } from "@/lib/utils.ts";
+import { Route } from "@/routes/$accountId/route.tsx";
 import { LoaderIcon } from "../icon";
 import NoteDocument from "../note-document/note-document";
 import NoteDocumentDialogContent from "../note-document/note-document-dialog";

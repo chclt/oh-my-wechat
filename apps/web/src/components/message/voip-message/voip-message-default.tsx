@@ -1,5 +1,5 @@
-import { CallIncoming, CallOutgoing } from "@/components/icon.tsx";
 import { MessageDirection } from "@repo/types";
+import { CallIncoming, CallOutgoing } from "@/components/icon.tsx";
 import type { VoipMessageProps } from "./types.ts";
 
 export function VoipMessageDefault({ message, ...props }: VoipMessageProps) {

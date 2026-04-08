@@ -1,9 +1,9 @@
-import { MiniRouter } from "@/components/mini-router";
 import { useMemo } from "react";
+import { MiniRouter } from "@/components/mini-router";
+import GreetingMessageList from "@/routes/$accountId/contact/-components/contact-list/greeting-message-list.tsx";
 import { Route } from "../../../route";
 import ContactGroupList from "./contact-group-list";
 import ContactList, { ContactListMiniRouteState } from "./contact-list";
-import GreetingMessageList from "@/routes/$accountId/contact/-components/contact-list/greeting-message-list.tsx";
 
 export default function ContactListMiniRouter() {
 	const { accountId } = Route.useParams();

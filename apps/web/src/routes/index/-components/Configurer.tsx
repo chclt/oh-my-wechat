@@ -1,14 +1,3 @@
-import { ChevronRightSmallLine } from "@/components/central-icon.tsx";
-import Image from "@/components/image.tsx";
-import { Button, buttonVariants } from "@/components/ui/button.tsx";
-import { useNavigate } from "@tanstack/react-router";
-// import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group.tsx";
-import { LoaderIcon } from "@/components/icon.tsx";
-import { RadioGroupItem } from "@/components/ui/radio-group";
-import { setDataAdapter } from "@/lib/data-adapter.ts";
-import { AccountListSuspenseQueryOptions } from "@/lib/fetchers/account";
-import queryClient from "@/lib/query-client";
-import { cn } from "@/lib/utils.ts";
 import { RadioGroup } from "@base-ui/react";
 import { useToggle } from "@mantine/hooks";
 import IosBackupAdapter from "@repo/adapter-ios-backup";
@@ -18,8 +7,19 @@ import {
 } from "@repo/adapter-ios-backup/queryOptions";
 import type { AccountType } from "@repo/types";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
+import { ChevronRightSmallLine } from "@/components/central-icon.tsx";
+// import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group.tsx";
+import { LoaderIcon } from "@/components/icon.tsx";
+import Image from "@/components/image.tsx";
+import { Button, buttonVariants } from "@/components/ui/button.tsx";
+import { RadioGroupItem } from "@/components/ui/radio-group";
+import { setDataAdapter } from "@/lib/data-adapter.ts";
+import { AccountListSuspenseQueryOptions } from "@/lib/fetchers/account";
+import queryClient from "@/lib/query-client";
+import { cn } from "@/lib/utils.ts";
 
 export default function Configurer(
 	props: React.HTMLAttributes<HTMLDivElement>,

@@ -1,5 +1,5 @@
-import { MiniappMessage } from "@/components/open-message/index.ts";
 import type { MiniAppOpenMessageEntity, OpenMessageType } from "@repo/types";
+import { MiniappMessage } from "@/components/open-message/index.ts";
 import type { MiniappMessage2Props } from "./types";
 
 export function MiniappMessage2Abstract({

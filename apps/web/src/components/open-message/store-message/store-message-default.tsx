@@ -2,10 +2,7 @@ import Image from "@/components/image.tsx";
 import { cn } from "@/lib/utils.ts";
 import type { StoreMessageProps } from "./types";
 
-export function StoreMessageDefault({
-	message,
-	...props
-}: StoreMessageProps) {
+export function StoreMessageDefault({ message, ...props }: StoreMessageProps) {
 	return (
 		<div
 			className={cn(

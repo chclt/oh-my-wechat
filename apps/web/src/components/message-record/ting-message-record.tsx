@@ -1,9 +1,9 @@
-import Image from "@/components/image.tsx";
-import Link from "@/components/link.tsx";
-import { cn } from "@/lib/utils";
 import type { MessageType } from "@repo/types";
 import { TingMessageRecordType } from "@repo/types";
 import type React from "react";
+import Image from "@/components/image.tsx";
+import Link from "@/components/link.tsx";
+import { cn } from "@/lib/utils";
 
 interface TingRecordProps extends React.HTMLAttributes<HTMLDivElement> {
 	message: MessageType;

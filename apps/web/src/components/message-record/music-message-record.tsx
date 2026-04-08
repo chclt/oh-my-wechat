@@ -1,7 +1,7 @@
-import Link from "@/components/link.tsx";
 import type { MessageType } from "@repo/types";
 import { MusicMessageRecordType } from "@repo/types";
 import type React from "react";
+import Link from "@/components/link.tsx";
 
 interface MusicRecordProps extends React.HTMLAttributes<HTMLDivElement> {
 	message: MessageType;

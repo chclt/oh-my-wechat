@@ -1,7 +1,7 @@
-import User from "@/components/user.tsx";
 import type { ChatType, SystemExtendedMessageType } from "@repo/types";
 import { XMLParser } from "fast-xml-parser";
 import type { ReactNode } from "react";
+import User from "@/components/user.tsx";
 
 export function parseXMLContent(
 	message: SystemExtendedMessageType,

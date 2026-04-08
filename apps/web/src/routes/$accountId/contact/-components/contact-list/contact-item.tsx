@@ -1,12 +1,12 @@
-import { useMiniRouter } from "@/components/mini-router";
 import { Link } from "@tanstack/react-router";
+import React from "react";
+import { useMiniRouter } from "@/components/mini-router";
+import { Avatar } from "@/components/ui/avatar.tsx";
 import { ContactGroupListMiniRouteState } from "./contact-group-list";
 import {
 	ContactListContctGroupItem,
 	ContactListContctItem,
 } from "./use-contact-list";
-import { Avatar } from "@/components/ui/avatar.tsx";
-import React from "react";
 
 type ContactItemProps = {
 	accountId: string;

@@ -1,8 +1,8 @@
-import type * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
-import { cn } from "@/lib/utils";
+import type * as React from "react";
 import Image from "@/components/image.tsx";
+import { cn } from "@/lib/utils";
 
 const avatarVariants = cva(
 	"[&_img:not([src])]:invisible [&_img[data-state='error']]:invisible",

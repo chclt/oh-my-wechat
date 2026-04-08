@@ -1,10 +1,10 @@
+import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { Suspense } from "react";
 import {
 	ResizableHandle,
 	ResizablePanel,
 	ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import { createFileRoute, Outlet } from "@tanstack/react-router";
-import { Suspense } from "react";
 import ChatListMiniRouter from "./-components/chat-list/chat-list-mini-router";
 
 export const Route = createFileRoute("/$accountId/chat")({

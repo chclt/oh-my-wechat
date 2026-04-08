@@ -1,5 +1,3 @@
-import NoteRecord from "@/components/note-record/note-record";
-import { cn } from "@/lib/utils";
 import {
 	NoteEntity,
 	NoteOpenMessageEntity,
@@ -7,6 +5,8 @@ import {
 } from "@repo/types";
 import { useQuery } from "@tanstack/react-query";
 import parse, { DOMNode, domToReact, Element } from "html-react-parser";
+import NoteRecord from "@/components/note-record/note-record";
+import { cn } from "@/lib/utils";
 
 interface NoteDocumentProps extends React.HTMLAttributes<HTMLElement> {
 	docUrl: string;

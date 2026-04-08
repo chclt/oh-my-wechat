@@ -1,13 +1,13 @@
+import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
+import { useAccount } from "@/components/account-provider.tsx";
 import FileTypeIcon from "@/components/filetype-icon";
 import { LoaderIcon } from "@/components/icon";
 import FileSizeFormatter from "@/components/ui/file-size-formatter";
 import { MessageAttachQueryOptions } from "@/lib/fetchers";
 import queryClient from "@/lib/query-client";
 import { cn, decodeUnicodeReferences } from "@/lib/utils";
-import { useQuery } from "@tanstack/react-query";
-import { useEffect } from "react";
 import { AttachMessageProps } from "./types";
-import { useAccount } from "@/components/account-provider.tsx";
 
 export function AttachMessageDefault({
 	message,

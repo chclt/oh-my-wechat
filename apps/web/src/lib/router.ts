@@ -1,10 +1,10 @@
-import { routeTree } from "@/routeTree.gen";
 import {
 	createMemoryHistory,
 	createRouteMask,
 	createRouter,
 } from "@tanstack/react-router";
 import { AccountSearchModalOptions } from "@/routes/$accountId/-types.ts";
+import { routeTree } from "@/routeTree.gen";
 
 const memoryHistory = createMemoryHistory({
 	initialEntries: ["/"],

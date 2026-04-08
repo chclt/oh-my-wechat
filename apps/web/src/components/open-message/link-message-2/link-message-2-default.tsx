@@ -1,5 +1,5 @@
-import { UrlMessage } from "@/components/open-message/index.ts";
 import type { OpenMessageType, UrlOpenMessageEntity } from "@repo/types";
+import { UrlMessage } from "@/components/open-message/index.ts";
 import type { LinkMessage2Props } from "./types";
 
 export function LinkMessage2Default({ message, ...props }: LinkMessage2Props) {

@@ -1,8 +1,8 @@
-import { MessageVideoQueryOptions } from "@/lib/fetchers";
 import { useInViewport } from "@mantine/hooks";
 import { useQuery } from "@tanstack/react-query";
-import type { MicroVideoMessageProps } from "./types.ts";
 import { useAccount } from "@/components/account-provider.tsx";
+import { MessageVideoQueryOptions } from "@/lib/fetchers";
+import type { MicroVideoMessageProps } from "./types.ts";
 
 export function MicroVideoMessageDefault({
 	message,

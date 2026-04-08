@@ -1,8 +1,3 @@
-import { AccountProvider } from "@/components/account-provider.tsx";
-import { CentralCrossLargeFilledOffStroke2Radius2 } from "@/components/central-icon";
-import { ChatIconFill, ContactIconFill } from "@/components/icon";
-import dialogClasses from "@/components/ui/dialog.module.css";
-import { cn } from "@/lib/utils";
 import { Dialog } from "@base-ui/react";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import {
@@ -13,6 +8,11 @@ import {
 	useNavigate,
 	useRouter,
 } from "@tanstack/react-router";
+import { AccountProvider } from "@/components/account-provider.tsx";
+import { CentralCrossLargeFilledOffStroke2Radius2 } from "@/components/central-icon";
+import { ChatIconFill, ContactIconFill } from "@/components/icon";
+import dialogClasses from "@/components/ui/dialog.module.css";
+import { cn } from "@/lib/utils";
 import { AccountSearchModalOptions } from "./-types";
 import ContactListMiniRouter from "./contact/-components/contact-list/contact-list-mini-router";
 

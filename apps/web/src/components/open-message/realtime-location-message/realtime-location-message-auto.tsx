@@ -2,8 +2,7 @@ import { RealtimeLocationMessageAbstract } from "./realtime-location-message-abs
 import { RealtimeLocationMessageDefault } from "./realtime-location-message-default";
 import type { RealtimeLocationMessageProps } from "./types";
 
-export interface RealtimeLocationMessageAutoProps
-	extends RealtimeLocationMessageProps {
+export interface RealtimeLocationMessageAutoProps extends RealtimeLocationMessageProps {
 	variant: "default" | "referenced" | "abstract";
 }
 

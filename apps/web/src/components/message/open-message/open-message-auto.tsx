@@ -1,8 +1,3 @@
-import { CircleQuestionmarkSolid } from "@/components/icon.tsx";
-import { LinkCard } from "@/components/link-card.tsx";
-import dialogClasses from "@/components/ui/dialog.module.css";
-import { ScrollArea } from "@/components/ui/scroll-area.tsx";
-import { cn } from "@/lib/utils.ts";
 import { Dialog } from "@base-ui/react";
 import {
 	AnnouncementOpenMessageEntity,
@@ -39,6 +34,11 @@ import {
 	VoiceOpenMessageEntity,
 	type OpenMessageType,
 } from "@repo/types";
+import { CircleQuestionmarkSolid } from "@/components/icon.tsx";
+import { LinkCard } from "@/components/link-card.tsx";
+import dialogClasses from "@/components/ui/dialog.module.css";
+import { ScrollArea } from "@/components/ui/scroll-area.tsx";
+import { cn } from "@/lib/utils.ts";
 import {
 	AnnouncementMessage,
 	Attach2Message,

@@ -1,3 +1,8 @@
+import { Dialog } from "@base-ui/react";
+import { MessageRecordBaseType, NoteEntity } from "@repo/types";
+import { useQuery } from "@tanstack/react-query";
+import { XMLParser } from "fast-xml-parser";
+import { Suspense, useMemo, useState } from "react";
 import { useAccount } from "@/components/account-provider.tsx";
 import { LoaderIcon } from "@/components/icon.tsx";
 import NoteDocumentDialogContent from "@/components/note-document/note-document-dialog.tsx";
@@ -5,11 +10,6 @@ import NoteDocument from "@/components/note-document/note-document.tsx";
 import { RecordFileQueryOptions } from "@/lib/fetchers/record.ts";
 import queryClient from "@/lib/query-client.ts";
 import { cn, decodeUnicodeReferences } from "@/lib/utils.ts";
-import { Dialog } from "@base-ui/react";
-import { MessageRecordBaseType, NoteEntity } from "@repo/types";
-import { useQuery } from "@tanstack/react-query";
-import { XMLParser } from "fast-xml-parser";
-import { Suspense, useMemo, useState } from "react";
 import type { NoteMessageProps } from "./types";
 
 /**

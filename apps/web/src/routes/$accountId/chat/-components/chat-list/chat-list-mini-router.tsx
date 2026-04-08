@@ -1,5 +1,5 @@
-import { MiniRouter } from "@/components/mini-router";
 import { useMemo } from "react";
+import { MiniRouter } from "@/components/mini-router";
 import { Route } from "../../route";
 import ChatGroupList from "./chat-group-list";
 import ChatList, { ChatListMiniRouteState } from "./chat-list";

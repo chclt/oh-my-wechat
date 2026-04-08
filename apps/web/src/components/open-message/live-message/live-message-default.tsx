@@ -1,10 +1,7 @@
 import Image from "@/components/image.tsx";
 import type { LiveMessageProps } from "./types";
 
-export function LiveMessageDefault({
-	message,
-	...props
-}: LiveMessageProps) {
+export function LiveMessageDefault({ message, ...props }: LiveMessageProps) {
 	return (
 		<div
 			className="relative w-48 min-h-16 rounded-lg overflow-hidden bg-neutral-400"

@@ -1,6 +1,6 @@
+import type React from "react";
 import MessageInlineWrapper from "@/components/message-inline-wrapper";
 import TextPrettier from "@/components/text-prettier.tsx";
-import type React from "react";
 import type { TextMessageProps } from "./types.ts";
 
 export function TextMessageAbstract({

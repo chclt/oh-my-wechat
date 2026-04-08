@@ -1,8 +1,8 @@
-import { ChatSuspenseQueryOptions } from "@/lib/fetchers/chat.ts";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { useAccount } from "@/components/account-provider.tsx";
+import { ChatSuspenseQueryOptions } from "@/lib/fetchers/chat.ts";
 import { useContentParser } from "./libs";
 import type { PatMessageProps } from "./types";
-import { useAccount } from "@/components/account-provider.tsx";
 
 export function PatMessageAbstract({ message, ...props }: PatMessageProps) {
 	const { accountId } = useAccount();

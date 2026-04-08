@@ -1,10 +1,10 @@
+import { useInViewport } from "@mantine/hooks";
+import { useQuery } from "@tanstack/react-query";
+import { useAccount } from "@/components/account-provider.tsx";
 import AutoResolutionFallbackImage from "@/components/auto-resolution-fallback-image.tsx";
 import { MessageImageQueryOptions } from "@/lib/fetchers";
 import { cn } from "@/lib/utils.ts";
-import { useInViewport } from "@mantine/hooks";
-import { useQuery } from "@tanstack/react-query";
 import type { GameMessageProps } from "./types";
-import { useAccount } from "@/components/account-provider.tsx";
 
 export function GameMessageDefault({ message, ...props }: GameMessageProps) {
 	const { accountId } = useAccount();

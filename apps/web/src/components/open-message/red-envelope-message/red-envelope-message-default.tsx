@@ -1,8 +1,8 @@
+import { fromBinary } from "@bufbuild/protobuf";
+import { OpenMessageRedEnvelopeCoverInfoSchema } from "@repo/types";
 import { useAccount } from "@/components/account-provider.tsx";
 import { RedEnvelopeIcon } from "@/components/icon.tsx";
 import { cn } from "@/lib/utils";
-import { fromBinary } from "@bufbuild/protobuf";
-import { OpenMessageRedEnvelopeCoverInfoSchema } from "@repo/types";
 import type { RedEnvelopeMessageProps } from "./types";
 
 export function RedEnvelopeMessageDefault({

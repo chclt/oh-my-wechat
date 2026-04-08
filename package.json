@@ -1,20 +1,20 @@
 {
-  "name": "oh-my-wechat",
-  "private": true,
-  "scripts": {
-    "typecheck": "turbo run typecheck",
+	"name": "oh-my-wechat",
+	"private": true,
+	"scripts": {
+		"typecheck": "turbo run typecheck",
 		"lint": "oxlint --type-aware",
 		"format": "oxfmt",
-    		"format:check": "oxfmt --check",
-    "build": "turbo run build",
-    "dev": "turbo run dev"
-  },
-  "devDependencies": {
-    		"oxfmt": "^0.32.0",
+		"format:check": "oxfmt --check",
+		"build": "turbo run build",
+		"dev": "turbo run dev"
+	},
+	"devDependencies": {
+		"oxfmt": "^0.32.0",
 		"oxlint": "^1.47.0",
 		"oxlint-tsgolint": "^0.13.0",
-    "turbo": "^2.5.5",
-    "typescript": "catalog:"
-  },
-  "packageManager": "pnpm@9.13.2"
+		"turbo": "^2.5.5",
+		"typescript": "catalog:"
+	},
+	"packageManager": "pnpm@9.13.2"
 }

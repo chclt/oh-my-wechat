@@ -1,11 +1,11 @@
-import { RecordVideoQueryOptions } from "@/lib/fetchers/record.ts";
-import { Route } from "@/routes/$accountId/route.tsx";
 import {
 	NoteOpenMessageEntity,
 	OpenMessageType,
 	VideoNoteRecordType,
 } from "@repo/types";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { RecordVideoQueryOptions } from "@/lib/fetchers/record.ts";
+import { Route } from "@/routes/$accountId/route.tsx";
 
 interface VideoNoteRecordProps extends React.HTMLAttributes<HTMLElement> {
 	message: OpenMessageType<NoteOpenMessageEntity>;

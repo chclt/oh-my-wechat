@@ -1,7 +1,7 @@
 import { TextMessageAbstract } from "./text-message-abstract.tsx";
-import type { TextMessageProps } from "./types.ts";
 import { TextMessageDefault } from "./text-message-default.tsx";
 import { TextMessageReferenced } from "./text-message-referenced.tsx";
+import type { TextMessageProps } from "./types.ts";
 
 export interface TextMessageAutoProps extends TextMessageProps {
 	variant: "default" | "referenced" | "abstract";

@@ -1,11 +1,11 @@
-import queryClient from "@/lib/query-client";
-import router from "@/lib/router";
-import { cn } from "@/lib/utils";
+import imageTanstack from "/tanstack-logo-black.svg";
 import * as Portal from "@radix-ui/react-portal";
 import { TanStackDevtools } from "@tanstack/react-devtools";
 import { ReactQueryDevtoolsPanel } from "@tanstack/react-query-devtools";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
-import imageTanstack from "/tanstack-logo-black.svg";
+import queryClient from "@/lib/query-client";
+import router from "@/lib/router";
+import { cn } from "@/lib/utils";
 
 export default function Devtools() {
 	return (

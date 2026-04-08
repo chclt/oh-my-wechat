@@ -1,8 +1,3 @@
-import FileTypeIcon from "@/components/filetype-icon.tsx";
-import FileSizeFormatter from "@/components/ui/file-size-formatter.tsx";
-import { getDataAdapter } from "@/lib/data-adapter.ts";
-import { cn } from "@/lib/utils.ts";
-import { Route } from "@/routes/$accountId/route.tsx";
 import {
 	AttachNoteRecordType,
 	FileInfo,
@@ -11,6 +6,11 @@ import {
 } from "@repo/types";
 import { useMutation } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
+import FileTypeIcon from "@/components/filetype-icon.tsx";
+import FileSizeFormatter from "@/components/ui/file-size-formatter.tsx";
+import { getDataAdapter } from "@/lib/data-adapter.ts";
+import { cn } from "@/lib/utils.ts";
+import { Route } from "@/routes/$accountId/route.tsx";
 
 interface AttachNoteRecordProps extends React.HTMLAttributes<HTMLElement> {
 	message: OpenMessageType<NoteOpenMessageEntity>;

@@ -1,11 +1,11 @@
-import AutoResolutionFallbackImage from "@/components/auto-resolution-fallback-image.tsx";
-import { MessageImageQueryOptions } from "@/lib/fetchers";
-import { cn } from "@/lib/utils.ts";
 import { useInViewport } from "@mantine/hooks";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
-import type { ImageMessageProps } from "./types.ts";
 import { useAccount } from "@/components/account-provider.tsx";
+import AutoResolutionFallbackImage from "@/components/auto-resolution-fallback-image.tsx";
+import { MessageImageQueryOptions } from "@/lib/fetchers";
+import { cn } from "@/lib/utils.ts";
+import type { ImageMessageProps } from "./types.ts";
 
 export function ImageMessageDefault({ message, ...props }: ImageMessageProps) {
 	const { accountId } = useAccount();

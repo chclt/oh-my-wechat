@@ -1,3 +1,4 @@
+import { useSuspenseQuery } from "@tanstack/react-query";
 import {
 	MiniOutlet,
 	useMiniRoute,
@@ -7,7 +8,6 @@ import { MiniRouteFirstPageContentClassName } from "@/components/mini-router/uti
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChatListSuspenseQueryOptions } from "@/lib/fetchers/chat";
 import { cn } from "@/lib/utils.ts";
-import { useSuspenseQuery } from "@tanstack/react-query";
 import ChatListItem from "./chat-item";
 import useChatList from "./use-chat-list";
 

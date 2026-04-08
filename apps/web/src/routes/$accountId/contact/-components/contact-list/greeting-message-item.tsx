@@ -1,11 +1,11 @@
-import { Avatar } from "@/components/ui/avatar.tsx";
-import { UserSuspenseQueryOptions } from "@/lib/fetchers/user.ts";
-import { Route } from "@/routes/$accountId/route.tsx";
 import { useInViewport } from "@mantine/hooks";
 import { MessageDirection, VerityMessageType } from "@repo/types";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { ArrowUpRightIcon } from "lucide-react";
+import { Avatar } from "@/components/ui/avatar.tsx";
+import { UserSuspenseQueryOptions } from "@/lib/fetchers/user.ts";
+import { Route } from "@/routes/$accountId/route.tsx";
 
 interface GreetingMessageItemProps extends React.HTMLAttributes<HTMLLIElement> {
 	message: VerityMessageType;

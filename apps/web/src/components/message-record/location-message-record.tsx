@@ -1,7 +1,7 @@
-import { cn } from "@/lib/utils";
 import type { MessageType } from "@repo/types";
 import { LocationMessageRecordType } from "@repo/types";
 import type React from "react";
+import { cn } from "@/lib/utils";
 import { LocationIcon } from "../icon";
 import { locationMessageVariants } from "../message/location-message";
 

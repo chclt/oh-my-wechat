@@ -1,11 +1,11 @@
-import Image from "@/components/image.tsx";
-import MessageInlineWrapper from "@/components/message-inline-wrapper";
-import { MessageImageQueryOptions } from "@/lib/fetchers";
 import { useInViewport } from "@mantine/hooks";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
-import type { ImageMessageProps } from "./types.ts";
 import { useAccount } from "@/components/account-provider.tsx";
+import Image from "@/components/image.tsx";
+import MessageInlineWrapper from "@/components/message-inline-wrapper";
+import { MessageImageQueryOptions } from "@/lib/fetchers";
+import type { ImageMessageProps } from "./types.ts";
 
 export function ImageMessageAbstract({ message, ...props }: ImageMessageProps) {
 	const { accountId } = useAccount();

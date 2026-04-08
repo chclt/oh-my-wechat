@@ -1,112 +1,112 @@
 import {
-  type MessageType,
-  type OpenMessageType,
-  type TextMessageType,
-  type UserType,
-  MessageDirection,
-  MessageTypeEnum,
-  OpenMessageTypeEnum,
-  ReferOpenMessageEntity,
+	type MessageType,
+	type OpenMessageType,
+	type TextMessageType,
+	type UserType,
+	MessageDirection,
+	MessageTypeEnum,
+	OpenMessageTypeEnum,
+	ReferOpenMessageEntity,
 } from "@repo/types";
 import type {
-  DataAdapterCursorPagination,
-  DataAdapterResponse,
-  GetStatisticRequest,
+	DataAdapterCursorPagination,
+	DataAdapterResponse,
+	GetStatisticRequest,
 } from "@repo/types/adapter";
 import CryptoJS from "crypto-js";
 import { getUnixTime } from "date-fns";
-import { countStringLength } from "../utils";
 // @ts-expect-error
 import WechatEmojiTable from "../lib/wechat-emojis.ts";
 import type { WCDatabases } from "../types";
+import { countStringLength } from "../utils";
 import * as MessageController from "./message";
 
 export interface ChatStatistics {
-  date_contact_added?: string;
-  earliest_message_date?: string;
-  user_message_count?: { user: UserType; message_count: number }[];
+	date_contact_added?: string;
+	earliest_message_date?: string;
+	user_message_count?: { user: UserType; message_count: number }[];
 
-  message_count?: number;
-  sent_message_count?: number;
-  received_message_count?: number;
+	message_count?: number;
+	sent_message_count?: number;
+	received_message_count?: number;
 
-  text_message_count?: number;
-  sent_text_message_count?: number;
-  received_text_message_count?: number;
+	text_message_count?: number;
+	sent_text_message_count?: number;
+	received_text_message_count?: number;
 
-  image_message_count?: number;
-  sent_image_message_count?: number;
-  received_image_message_count?: number;
+	image_message_count?: number;
+	sent_image_message_count?: number;
+	received_image_message_count?: number;
 
-  voice_message_count?: number;
-  sent_voice_message_count?: number;
-  received_voice_message_count?: number;
+	voice_message_count?: number;
+	sent_voice_message_count?: number;
+	received_voice_message_count?: number;
 
-  video_message_count?: number;
-  sent_video_message_count?: number;
-  received_video_message_count?: number;
+	video_message_count?: number;
+	sent_video_message_count?: number;
+	received_video_message_count?: number;
 
-  sticker_message_count?: number;
-  sent_sticker_message_count?: number;
-  received_sticker_message_count?: number;
+	sticker_message_count?: number;
+	sent_sticker_message_count?: number;
+	received_sticker_message_count?: number;
 
-  music_message_count?: number;
-  sent_music_message_count?: number;
-  received_music_message_count?: number;
+	music_message_count?: number;
+	sent_music_message_count?: number;
+	received_music_message_count?: number;
 
-  daily_message_count?: { date: string; message_count: number }[];
-  daily_sent_message_count?: { date: string; message_count: number }[];
-  daily_received_message_count?: { date: string; message_count: number }[];
+	daily_message_count?: { date: string; message_count: number }[];
+	daily_sent_message_count?: { date: string; message_count: number }[];
+	daily_received_message_count?: { date: string; message_count: number }[];
 
-  hourly_message_count?: { hour: number; message_count: number }[];
-  hourly_sent_message_count?: { hour: number; message_count: number }[];
-  hourly_received_message_count?: { hour: number; message_count: number }[];
+	hourly_message_count?: { hour: number; message_count: number }[];
+	hourly_sent_message_count?: { hour: number; message_count: number }[];
+	hourly_received_message_count?: { hour: number; message_count: number }[];
 
-  message_word_count?: number;
-  sent_message_word_count?: number;
-  received_message_word_count?: number;
+	message_word_count?: number;
+	sent_message_word_count?: number;
+	received_message_word_count?: number;
 
-  voice_message_total_duration?: number;
-  sent_voice_message_total_duration?: number;
-  received_voice_message_total_duration?: number;
+	voice_message_total_duration?: number;
+	sent_voice_message_total_duration?: number;
+	received_voice_message_total_duration?: number;
 
-  sent_sticker_usage?: {
-    md5: string;
-    count: number;
-  }[];
+	sent_sticker_usage?: {
+		md5: string;
+		count: number;
+	}[];
 
-  received_sticker_usage?: {
-    md5: string;
-    count: number;
-  }[];
+	received_sticker_usage?: {
+		md5: string;
+		count: number;
+	}[];
 
-  sent_wxemoji_usage?: {
-    key: string;
-    count: number;
-  }[];
+	sent_wxemoji_usage?: {
+		key: string;
+		count: number;
+	}[];
 
-  received_wxemoji_usage?: {
-    key: string;
-    count: number;
-  }[];
+	received_wxemoji_usage?: {
+		key: string;
+		count: number;
+	}[];
 }
 
 export type GetInput = [GetStatisticRequest, { databases: WCDatabases }];
 export type GetOutput = Promise<DataAdapterResponse<ChatStatistics>>;
 
 export async function get(...inputs: GetInput): GetOutput {
-  const [{ account, chat, startTime, endTime }, { databases }] = inputs;
+	const [{ account, chat, startTime, endTime }, { databases }] = inputs;
 
-  const dbs = databases.message;
-  if (!dbs) throw new Error("message databases is not found");
+	const dbs = databases.message;
+	if (!dbs) throw new Error("message databases is not found");
 
-  const sessionIdMd5 = CryptoJS.MD5(chat.id).toString();
-  const startTimestampUnix = getUnixTime(startTime);
-  const endTimestampUnix = getUnixTime(endTime);
+	const sessionIdMd5 = CryptoJS.MD5(chat.id).toString();
+	const startTimestampUnix = getUnixTime(startTime);
+	const endTimestampUnix = getUnixTime(endTime);
 
-  const statistics: ChatStatistics = {};
+	const statistics: ChatStatistics = {};
 
-  /*
+	/*
 	dbs.map((database) => {
 		try {
 			let databaseQueryResult = [];
@@ -463,152 +463,152 @@ export async function get(...inputs: GetInput): GetOutput {
 	});
 */
 
-  /* 字数和微信表情使用统计 */
+	/* 字数和微信表情使用统计 */
 
-  let result: DataAdapterCursorPagination<MessageType[]>;
-  let cursor;
-  const limit = 2000;
-  let sent_word_count = 0;
-  let received_word_count = 0;
+	let result: DataAdapterCursorPagination<MessageType[]>;
+	let cursor;
+	const limit = 2000;
+	let sent_word_count = 0;
+	let received_word_count = 0;
 
-  const sent_wxemoji_usage: ChatStatistics["sent_wxemoji_usage"] = [];
-  const received_wxemoji_usage: ChatStatistics["received_wxemoji_usage"] = [];
+	const sent_wxemoji_usage: ChatStatistics["sent_wxemoji_usage"] = [];
+	const received_wxemoji_usage: ChatStatistics["received_wxemoji_usage"] = [];
 
-  do {
-    result = await MessageController.all(
-      {
-        account: { id: account.id },
-        chat: { id: chat.id },
-        type: MessageTypeEnum.TEXT,
-        limit,
-      },
-      {
-        databases,
-      },
-    );
+	do {
+		result = await MessageController.all(
+			{
+				account: { id: account.id },
+				chat: { id: chat.id },
+				type: MessageTypeEnum.TEXT,
+				limit,
+			},
+			{
+				databases,
+			},
+		);
 
-    cursor = result.meta.cursor;
+		cursor = result.meta.cursor;
 
-    for (const message of result.data) {
-      if (message.date > endTimestampUnix || message.date < startTimestampUnix)
-        continue;
+		for (const message of result.data) {
+			if (message.date > endTimestampUnix || message.date < startTimestampUnix)
+				continue;
 
-      const length = countStringLength(
-        (message as TextMessageType).message_entity,
-      );
+			const length = countStringLength(
+				(message as TextMessageType).message_entity,
+			);
 
-      if (message.direction === MessageDirection.outgoing) {
-        sent_word_count += length;
-      } else {
-        received_word_count += length;
-      }
+			if (message.direction === MessageDirection.outgoing) {
+				sent_word_count += length;
+			} else {
+				received_word_count += length;
+			}
 
-      ((message as TextMessageType).message_entity.match(/\[\S+\]/g) ?? []).map(
-        (wxemojiKey) => {
-          if (WechatEmojiTable[wxemojiKey]) {
-            if (message.direction === MessageDirection.outgoing) {
-              let index = sent_wxemoji_usage.findIndex(
-                (i) => i.key === wxemojiKey,
-              );
-              if (index === -1)
-                index =
-                  sent_wxemoji_usage.push({ key: wxemojiKey, count: 0 }) - 1;
-              sent_wxemoji_usage[index].count++;
-            } else {
-              let index = received_wxemoji_usage.findIndex(
-                (i) => i.key === wxemojiKey,
-              );
-              if (index === -1)
-                index =
-                  received_wxemoji_usage.push({ key: wxemojiKey, count: 0 }) -
-                  1;
-              received_wxemoji_usage[index].count++;
-            }
-          }
-        },
-      );
-    }
-  } while (
-    result.data.length === limit &&
-    result.data[0].date > startTimestampUnix
-  );
+			((message as TextMessageType).message_entity.match(/\[\S+\]/g) ?? []).map(
+				(wxemojiKey) => {
+					if (WechatEmojiTable[wxemojiKey]) {
+						if (message.direction === MessageDirection.outgoing) {
+							let index = sent_wxemoji_usage.findIndex(
+								(i) => i.key === wxemojiKey,
+							);
+							if (index === -1)
+								index =
+									sent_wxemoji_usage.push({ key: wxemojiKey, count: 0 }) - 1;
+							sent_wxemoji_usage[index].count++;
+						} else {
+							let index = received_wxemoji_usage.findIndex(
+								(i) => i.key === wxemojiKey,
+							);
+							if (index === -1)
+								index =
+									received_wxemoji_usage.push({ key: wxemojiKey, count: 0 }) -
+									1;
+							received_wxemoji_usage[index].count++;
+						}
+					}
+				},
+			);
+		}
+	} while (
+		result.data.length === limit &&
+		result.data[0].date > startTimestampUnix
+	);
 
-  cursor = undefined;
+	cursor = undefined;
 
-  do {
-    result = await MessageController.all(
-      {
-        account: { id: account.id },
-        chat: { id: chat.id },
-        type: MessageTypeEnum.APP,
-        type_app: OpenMessageTypeEnum.REFER,
-        limit,
-      },
-      {
-        databases,
-      },
-    );
+	do {
+		result = await MessageController.all(
+			{
+				account: { id: account.id },
+				chat: { id: chat.id },
+				type: MessageTypeEnum.APP,
+				type_app: OpenMessageTypeEnum.REFER,
+				limit,
+			},
+			{
+				databases,
+			},
+		);
 
-    for (const message of result.data) {
-      if (message.date > endTimestampUnix || message.date < startTimestampUnix)
-        continue;
+		for (const message of result.data) {
+			if (message.date > endTimestampUnix || message.date < startTimestampUnix)
+				continue;
 
-      let length = 0;
+			let length = 0;
 
-      try {
-        length = countStringLength(
-          (message as OpenMessageType<ReferOpenMessageEntity>).message_entity
-            .msg.appmsg.title,
-        );
-      } catch (error) {
-        continue;
-      }
+			try {
+				length = countStringLength(
+					(message as OpenMessageType<ReferOpenMessageEntity>).message_entity
+						.msg.appmsg.title,
+				);
+			} catch (error) {
+				continue;
+			}
 
-      if (message.direction === MessageDirection.outgoing) {
-        sent_word_count += length;
-      } else {
-        received_word_count += length;
-      }
+			if (message.direction === MessageDirection.outgoing) {
+				sent_word_count += length;
+			} else {
+				received_word_count += length;
+			}
 
-      (
-        (
-          message as OpenMessageType<ReferOpenMessageEntity>
-        ).message_entity.msg.appmsg.title.match(/\[\S+\]/g) ?? []
-      ).map((wxemojiKey) => {
-        if (WechatEmojiTable[wxemojiKey]) {
-          if (message.direction === MessageDirection.outgoing) {
-            let index = sent_wxemoji_usage.findIndex(
-              (i) => i.key === wxemojiKey,
-            );
-            if (index === -1)
-              index =
-                sent_wxemoji_usage.push({ key: wxemojiKey, count: 0 }) - 1;
-            sent_wxemoji_usage[index].count++;
-          } else {
-            let index = received_wxemoji_usage.findIndex(
-              (i) => i.key === wxemojiKey,
-            );
-            if (index === -1)
-              index =
-                received_wxemoji_usage.push({ key: wxemojiKey, count: 0 }) - 1;
-            received_wxemoji_usage[index].count++;
-          }
-        }
-      });
-    }
-  } while (
-    result.data.length === limit &&
-    result.data[0].date > startTimestampUnix
-  );
+			(
+				(
+					message as OpenMessageType<ReferOpenMessageEntity>
+				).message_entity.msg.appmsg.title.match(/\[\S+\]/g) ?? []
+			).map((wxemojiKey) => {
+				if (WechatEmojiTable[wxemojiKey]) {
+					if (message.direction === MessageDirection.outgoing) {
+						let index = sent_wxemoji_usage.findIndex(
+							(i) => i.key === wxemojiKey,
+						);
+						if (index === -1)
+							index =
+								sent_wxemoji_usage.push({ key: wxemojiKey, count: 0 }) - 1;
+						sent_wxemoji_usage[index].count++;
+					} else {
+						let index = received_wxemoji_usage.findIndex(
+							(i) => i.key === wxemojiKey,
+						);
+						if (index === -1)
+							index =
+								received_wxemoji_usage.push({ key: wxemojiKey, count: 0 }) - 1;
+						received_wxemoji_usage[index].count++;
+					}
+				}
+			});
+		}
+	} while (
+		result.data.length === limit &&
+		result.data[0].date > startTimestampUnix
+	);
 
-  statistics.sent_message_word_count = sent_word_count;
-  statistics.received_message_word_count = received_word_count;
-  statistics.message_word_count = sent_word_count + received_word_count;
+	statistics.sent_message_word_count = sent_word_count;
+	statistics.received_message_word_count = received_word_count;
+	statistics.message_word_count = sent_word_count + received_word_count;
 
-  statistics.sent_wxemoji_usage = sent_wxemoji_usage;
-  statistics.received_wxemoji_usage = received_wxemoji_usage;
+	statistics.sent_wxemoji_usage = sent_wxemoji_usage;
+	statistics.received_wxemoji_usage = received_wxemoji_usage;
 
-  return {
-    data: statistics,
-  };
+	return {
+		data: statistics,
+	};
 }

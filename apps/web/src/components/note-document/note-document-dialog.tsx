@@ -1,8 +1,8 @@
+import { Dialog, ScrollArea } from "@base-ui/react";
+import { useRef } from "react";
 import dialogClasses from "@/components/ui/dialog.module.css";
 import scrollAreaClasses from "@/components/ui/scroll-area.module.css";
 import { cn } from "@/lib/utils";
-import { Dialog, ScrollArea } from "@base-ui/react";
-import { useRef } from "react";
 export default function NoteDocumentDialogContent({
 	children,
 }: {
@@ -12,7 +12,7 @@ export default function NoteDocumentDialogContent({
 
 	return (
 		<Dialog.Portal>
-			<Dialog.Backdrop 
+			<Dialog.Backdrop
 				className={cn(
 					dialogClasses.Backdrop,
 					"backdrop-blur-[2px]",

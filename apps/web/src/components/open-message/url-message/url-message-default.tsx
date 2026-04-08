@@ -1,12 +1,12 @@
+import { useInViewport } from "@mantine/hooks";
+import { useQuery } from "@tanstack/react-query";
+import { useAccount } from "@/components/account-provider.tsx";
 import AutoResolutionFallbackImage from "@/components/auto-resolution-fallback-image.tsx";
 import Image from "@/components/image.tsx";
 import { LinkCard } from "@/components/link-card.tsx";
 import { MessageImageQueryOptions } from "@/lib/fetchers";
 import { decodeUnicodeReferences } from "@/lib/utils.ts";
-import { useInViewport } from "@mantine/hooks";
-import { useQuery } from "@tanstack/react-query";
 import type { UrlMessageProps } from "./types";
-import { useAccount } from "@/components/account-provider.tsx";
 
 export function UrlMessageDefault({ message, ...props }: UrlMessageProps) {
 	const { accountId } = useAccount();

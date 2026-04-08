@@ -1,8 +1,8 @@
+import type React from "react";
+import type { ReactNode } from "react";
 import Link from "@/components/link.tsx";
 import WechatEmoji from "@/components/wechat-emoji.tsx";
 import WechatEmojiTable from "@/lib/wechat-emojis.ts";
-import type React from "react";
-import type { ReactNode } from "react";
 
 interface TextPrettierProps extends React.HTMLProps<HTMLParagraphElement> {
 	text: string;

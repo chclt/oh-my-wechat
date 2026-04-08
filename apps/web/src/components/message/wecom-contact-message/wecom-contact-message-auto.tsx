@@ -1,6 +1,6 @@
+import type { WeComContactMessageProps } from "./types.ts";
 import { WeComContactMessageAbstract } from "./wecom-contact-message-abstract.tsx";
 import { WeComContactMessageDefault } from "./wecom-contact-message-default.tsx";
-import type { WeComContactMessageProps } from "./types.ts";
 
 export interface WeComContactMessageAutoProps extends WeComContactMessageProps {
 	variant: "default" | "referenced" | "abstract";
