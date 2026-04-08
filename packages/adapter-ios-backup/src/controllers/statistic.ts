@@ -15,11 +15,13 @@ import type {
 } from "@repo/types/adapter";
 import CryptoJS from "crypto-js";
 import { getUnixTime } from "date-fns";
-// @ts-expect-error
-import WechatEmojiTable from "../lib/wechat-emojis.ts";
 import type { WCDatabases } from "../types";
 import { countStringLength } from "../utils";
 import * as MessageController from "./message";
+
+// TODO
+// import WechatEmojiTable from "../lib/wechat-emojis.ts";
+const WechatEmojiTable = {};
 
 export interface ChatStatistics {
 	date_contact_added?: string;
