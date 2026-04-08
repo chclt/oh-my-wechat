@@ -85,7 +85,7 @@ export default function TextPrettier({
 		];
 		paragraphChildren = paragraphChildren.flatMap((segment) => {
 			if (typeof segment === "string") {
-				return [...segment]
+				return Array.from(segment)
 					.map((char, index, string) => {
 						if (index === string.length - 1) {
 							if (punctuation.includes(char)) {

@@ -74,7 +74,7 @@ function NoteRecordDefault({
 		!isNoteDocumentPending && !noteDocumentFile ? true : undefined;
 	const [isNoteDocumentDialogOpen, setIsNoteDocumentDialogOpen] =
 		useState(false);
-	const handleOpenNoteDocument = () => {
+	const handleOpenNoteDocument = () =>
 		queryClient
 			.ensureQueryData(NoteDocumentQueryOptions)
 			.then((noteDocumentFile) => {
@@ -82,7 +82,6 @@ function NoteRecordDefault({
 					setIsNoteDocumentDialogOpen(true);
 				}
 			});
-	};
 
 	const renderNoteDocument = useMemo(() => {
 		if (!noteDocumentFile) return null;

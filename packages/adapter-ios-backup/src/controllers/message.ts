@@ -952,8 +952,8 @@ export async function allVerify(...inputs: allVerifyInput): allVerifyOutput {
 		throw new Error("message databases are not found");
 	}
 
-	const rows = [
-		...dbs.map((database) => {
+	const rows = dbs
+		.map((database) => {
 			try {
 				const databaseTables = database
 					.select({
@@ -973,8 +973,8 @@ export async function allVerify(...inputs: allVerifyInput): allVerifyOutput {
 			} catch (error) {
 				return [];
 			}
-		}),
-	].filter((row) => row.length > 0)[0];
+		})
+		.filter((row) => row.length > 0)[0];
 
 	return {
 		data: transformHelloTableRowToMessage(rows),
