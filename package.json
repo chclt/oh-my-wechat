@@ -3,13 +3,16 @@
   "private": true,
   "scripts": {
     "typecheck": "turbo run typecheck",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "lint": "turbo run lint",
+		"lint": "oxlint --type-aware",
+		"format": "oxfmt",
+    		"format:check": "oxfmt --check",
     "build": "turbo run build",
     "dev": "turbo run dev"
   },
   "devDependencies": {
-    "prettier": "^3.6.2",
+    		"oxfmt": "^0.32.0",
+		"oxlint": "^1.47.0",
+		"oxlint-tsgolint": "^0.13.0",
     "turbo": "^2.5.5",
     "typescript": "catalog:"
   },

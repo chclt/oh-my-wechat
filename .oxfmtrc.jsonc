@@ -1,0 +1,20 @@
+{
+	"$schema": "./node_modules/oxfmt/configuration_schema.json",
+	"useTabs": true,
+	"tabWidth": 2,
+	"printWidth": 80,
+	"insertFinalNewline": true,
+	"experimentalSortImports": {
+		"groups": [
+			["side-effect"],
+			["builtin"],
+			["external", "type-external"],
+			["internal", "type-internal"],
+			["parent", "type-parent"],
+			["sibling", "type-sibling"],
+			["index", "type-index"],
+		],
+		"newlinesBetween": false,
+	},
+	"ignorePatterns": ["routeTree.gen.ts", "*_pb.ts"],
+}

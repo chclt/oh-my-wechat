@@ -5,7 +5,6 @@
 	"type": "module",
 	"scripts": {
 		"typecheck": "tsc -b --noEmit",
-		"lint": "eslint .",
 		"test": "vitest",
 		"dev": "vite",
 		"build": "tsc -b --noEmit && vite build",
@@ -42,8 +41,6 @@
 	"devDependencies": {
 		"@bufbuild/buf": "catalog:",
 		"@bufbuild/protoc-gen-es": "^2.7.0",
-		"@eslint/js": "^9.32.0",
-		"@repo/eslint-config": "workspace:*",
 		"@repo/types": "workspace:*",
 		"@repo/typescript-config": "workspace:*",
 		"@tailwindcss/typography": "^0.5.19",
@@ -55,15 +52,10 @@
 		"@types/wicg-file-system-access": "^2023.10.6",
 		"@vitejs/plugin-react": "^4.7.0",
 		"autoprefixer": "^10.4.21",
-		"eslint": "^9.32.0",
-		"eslint-config-prettier": "^10.1.1",
-		"eslint-plugin-react-hooks": "^5.2.0",
-		"eslint-plugin-react-refresh": "^0.4.20",
 		"globals": "^16.3.0",
 		"prettier": "^3.6.2",
 		"tailwindcss": "^4.1.11",
 		"typescript": "catalog:",
-		"typescript-eslint": "^8.39.0",
 		"vite": "catalog:",
 		"vitest": "catalog:"
 	}

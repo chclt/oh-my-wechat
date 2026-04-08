@@ -1,9 +1,9 @@
 {
-  "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": "explicit",
-    "source.organizeImports": "explicit"
-  },
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "editor.formatOnSave": true,
-  "typescript.tsdk": "node_modules/typescript/lib"
+	"js/ts.tsdk.path": "node_modules/typescript/lib",
+	"editor.defaultFormatter": "oxc.oxc-vscode",
+	"editor.formatOnSave": true,
+	"oxc.typeAware": true,
+	"oxc.enable": true,
+	"oxc.enable.oxfmt": true,
+	"oxc.enable.oxlint": true
 }
