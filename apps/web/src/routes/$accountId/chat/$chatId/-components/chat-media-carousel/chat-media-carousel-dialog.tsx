@@ -1,188 +1,104 @@
 import { Dialog } from "@base-ui/react";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
-import React, { useLayoutEffect, useMemo, useRef, useState } from "react";
+import { MessageType } from "@repo/types";
 import dialogClasses from "@/components/ui/dialog.module.css";
 import { cn } from "@/lib/utils";
+import { CarouselScrollViewportContext } from "./carousel-scroll-viewport-context.tsx";
+import { useChatMediaCarouselContext } from "./chat-media-carousel-context.tsx";
 import DetailCarousel from "./detail-carousel";
 import ThumbCarousel from "./thumb-carousel";
-import {
-  ChatMediaCarouselContext,
-  useChatMediaCarouselContext,
-} from "@/routes/$accountId/chat/$chatId/-components/chat-media-carousel/chat-media-carousel-context.tsx";
-import { useAccount } from "@/components/account-provider.tsx";
-import { ScrollAreaViewportRelativePosition } from "@/routes/$accountId/chat/$chatId/-components/chat-media-carousel/types.ts";
-import { createMessageURI } from "@/routes/$accountId/chat/$chatId/-components/chat-media-carousel/utils.ts";
-import { Virtualizer } from "@tanstack/react-virtual";
-import { MessageType } from "@repo/types";
+import { useMediaCarousel } from "./use-media-carousel";
 
-export default function ChatMediaCarouselDialog({}) {
-  const {
-    account,
-    chat,
+export default function ChatMediaCarouselDialog() {
+	const { account, chat, isDialogOpen, setIsDialogOpen, initialMessageRef } =
+		useChatMediaCarouselContext();
 
-    isDialogOpen,
-    setIsDialogOpen,
-    messageListInfiniteQueryResult,
+	return (
+		<Dialog.Root
+			open={isDialogOpen}
+			onOpenChange={(open) => setIsDialogOpen(open)}
+		>
+			<Dialog.Portal>
+				<Dialog.Backdrop
+					className={cn(dialogClasses.Backdrop, "bg-black/90")}
+				/>
+				<Dialog.Viewport className={dialogClasses.Viewport}>
+					<Dialog.Popup
+						className={cn(
+							"absolute inset-0 grid grid-cols-1 grid-rows-[1fr_min-content]",
+						)}
+					>
+						<VisuallyHidden>
+							<Dialog.Title>媒体文件浏览器</Dialog.Title>
+							<Dialog.Description>媒体文件浏览器</Dialog.Description>
+						</VisuallyHidden>
 
-    initialMessageRef,
-  } = useChatMediaCarouselContext();
+						{isDialogOpen && (
+							<MediaCarouselDialogContent
+								account={account}
+								chat={chat}
+								isDialogOpen={isDialogOpen}
+								initialMessageRef={initialMessageRef}
+							/>
+						)}
+					</Dialog.Popup>
+				</Dialog.Viewport>
+			</Dialog.Portal>
+		</Dialog.Root>
+	);
+}
 
-  const { isLoading: isFirstFetching } = messageListInfiniteQueryResult;
+interface MediaCarouselDialogContentProps {
+	account: { id: string };
+	chat: { id: string };
+	isDialogOpen: boolean;
+	initialMessageRef: React.RefObject<MessageType | null>;
+}
 
-  const messages = useMemo<MessageType[]>(
-    () =>
-      (messageListInfiniteQueryResult.data?.pages ?? []).flatMap(
-        (page) => page.data,
-      ),
-    [messageListInfiniteQueryResult.data?.pages],
-  );
+/**
+ * 把 dialog 的“内容”和“开关”分成两个组件，
+ * 这样每次 dialog 关闭再打开时 useMediaCarousel 会被整体重建，
+ * 内部的两个 virtualizer 也跟着重建——和 “每次打开都是全新状态机” 的语义保持一致。
+ *
+ * TODO: 后续如果要跨打开复用 measurements 缓存，
+ * 把 hook 上提到外层组件并保留 ref，再把缓存传进 useVirtualizer 的 initialMeasurementsCache。
+ */
+function MediaCarouselDialogContent({
+	account,
+	chat,
+	isDialogOpen,
+	initialMessageRef,
+}: MediaCarouselDialogContentProps) {
+	const carousel = useMediaCarousel({
+		account,
+		chat,
+		isDialogOpen,
+		initialMessage: initialMessageRef.current,
+		// debug: true,
+	});
 
-  const [detailVirtualizer, setDetailVirtualizer] = useState<Virtualizer<
-    HTMLDivElement,
-    Element
-  > | null>(null);
+	return (
+		<CarouselScrollViewportContext value={carousel.scrollLockContextValue}>
+			<DetailCarousel
+				account={account}
+				virtualizer={carousel.detail.virtualizer}
+				viewportRef={carousel.detail.viewportRef}
+				itemSize={carousel.detail.itemSize}
+				onScroll={carousel.detail.onScroll}
+				messages={carousel.messages}
+				hasPreviousPage={carousel.hasPreviousPage}
+				hasNextPage={carousel.hasNextPage}
+			/>
 
-  const [thumbVirtualizer, setThumbVirtualizer] = useState<Virtualizer<
-    HTMLDivElement,
-    Element
-  > | null>(null);
-
-  const [isDetailReadyForScroll, setIsDetailReadyForScroll] = useState(false);
-  const [isThumbReadyForScroll, setIsThumbReadyForScroll] = useState(false);
-
-  const detailScrollEventReasonRef = useRef<"self" | "controller">("self");
-  const thumbScrollEventReasonRef = useRef<"self" | "controller">("self");
-
-  const onDetailCarouselScrollPositionChange: (
-    position: ScrollAreaViewportRelativePosition,
-  ) => void = (position) => {
-    if (!thumbVirtualizer) return;
-
-    if (detailScrollEventReasonRef.current === "controller") {
-      detailScrollEventReasonRef.current = "self";
-      return;
-    }
-
-    // TODO: 使用 measurementsCache 是为了能找到当前不存在 DOM 中的项，但感觉使用这个 API 并不是被推荐的
-    const targetIndex = messages.findIndex(
-      (message) =>
-        createMessageURI({ message, account }) === position.referenceMessageUri,
-    );
-    const targtItem = thumbVirtualizer.measurementsCache[targetIndex];
-    if (!targtItem) return;
-
-    const scrollLeft =
-      targtItem.start + targtItem.size * (position.offsetProgress + 0.5);
-
-    thumbScrollEventReasonRef.current = "controller";
-
-    thumbVirtualizer.scrollToOffset(scrollLeft, {
-      align: "center",
-      behavior: "instant",
-    });
-  };
-
-  const onThumbCarouselScrollPositionChange: (
-    position: ScrollAreaViewportRelativePosition,
-  ) => void = (position) => {
-    if (!detailVirtualizer) return;
-
-    if (thumbScrollEventReasonRef.current === "controller") {
-      thumbScrollEventReasonRef.current = "self";
-      return;
-    }
-
-    // TODO: 使用 measurementsCache 是为了能找到当前不存在 DOM 中的项，但感觉使用这个 API 并不是被推荐的
-    const targetIndex = messages.findIndex(
-      (message) =>
-        createMessageURI({ message, account }) === position.referenceMessageUri,
-    );
-    const targetItem = detailVirtualizer.measurementsCache[targetIndex];
-
-    if (!targetItem) return;
-
-    const scrollLeft =
-      targetItem.start + targetItem.size * (position.offsetProgress + 0.5);
-
-    detailScrollEventReasonRef.current = "controller";
-
-    detailVirtualizer.scrollToOffset(scrollLeft, {
-      align: "center",
-      behavior: "instant",
-    });
-  };
-
-  // 打开时定位到指定消息
-  useLayoutEffect(() => {
-    if (
-      isFirstFetching ||
-      !detailVirtualizer ||
-      !thumbVirtualizer ||
-      !isDetailReadyForScroll ||
-      !isThumbReadyForScroll
-    )
-      return;
-
-    if (initialMessageRef.current) {
-      const targetIndex = messages.findIndex(
-        (message) =>
-          createMessageURI({ message, account }) ===
-          createMessageURI({
-            message: initialMessageRef.current!,
-            account,
-          }),
-      );
-
-      if (targetIndex >= 0) {
-        detailScrollEventReasonRef.current = "controller";
-        detailVirtualizer.scrollToIndex(targetIndex, {
-          align: "center",
-          behavior: "instant",
-        });
-
-        thumbScrollEventReasonRef.current = "controller";
-        thumbVirtualizer.scrollToIndex(targetIndex, {
-          align: "center",
-          behavior: "instant",
-        });
-      }
-    }
-  }, [isFirstFetching, isDetailReadyForScroll, isThumbReadyForScroll]);
-
-  return (
-    <Dialog.Root
-      open={isDialogOpen}
-      onOpenChange={(open) => setIsDialogOpen(open)}
-    >
-      <Dialog.Portal>
-        <Dialog.Backdrop
-          className={cn(dialogClasses.Backdrop, "bg-black/90")}
-        />
-        <Dialog.Viewport className={dialogClasses.Viewport}>
-          <Dialog.Popup
-            className={cn(
-              "absolute inset-0 grid grid-cols-1 grid-rows-[1fr_min-content]",
-            )}
-          >
-            <VisuallyHidden>
-              <Dialog.Title>媒体文件浏览器</Dialog.Title>
-              <Dialog.Description>媒体文件浏览器</Dialog.Description>
-            </VisuallyHidden>
-
-            <DetailCarousel
-              setVirtualizerInstance={setDetailVirtualizer}
-              onVirtualizerReadyForScrollChange={setIsDetailReadyForScroll}
-              onScrollPositionChange={onDetailCarouselScrollPositionChange}
-            />
-
-            <ThumbCarousel
-              setVirtualizerInstance={setThumbVirtualizer}
-              onVirtualizerReadyForScrollChange={setIsThumbReadyForScroll}
-              onScrollPositionChange={onThumbCarouselScrollPositionChange}
-            />
-          </Dialog.Popup>
-        </Dialog.Viewport>
-      </Dialog.Portal>
-    </Dialog.Root>
-  );
+			<ThumbCarousel
+				account={account}
+				virtualizer={carousel.thumb.virtualizer}
+				viewportRef={carousel.thumb.viewportRef}
+				onScroll={carousel.thumb.onScroll}
+				messages={carousel.messages}
+				hasPreviousPage={carousel.hasPreviousPage}
+				hasNextPage={carousel.hasNextPage}
+			/>
+		</CarouselScrollViewportContext>
+	);
 }

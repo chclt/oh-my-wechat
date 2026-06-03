@@ -1,7 +1,8 @@
 export interface ScrollAreaViewportRelativePosition {
-  referenceMessageUri: string;
-  /**
-   * 相对于 referenceMessageUri 的偏移进度，范围 [0, 1]，0 表示正中，1 表示完全从左边离开视野。
-   */
-  offsetProgress: number;
+	referenceMessageUri: string;
+	/**
+	 * viewport 中心相对 referenceMessageUri 对应 item 中心的归一化偏移。
+	 * 0 表示两个中心对齐，-1 / 1 表示 viewport 中心位于该 item 的左 / 右边缘。
+	 */
+	offsetProgress: number;
 }
