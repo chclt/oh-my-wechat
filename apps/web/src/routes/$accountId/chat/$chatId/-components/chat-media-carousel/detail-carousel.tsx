@@ -6,7 +6,6 @@ import { ImageMessage, VideoMessage } from "@/components/message";
 import scrollAreaClasses from "@/components/ui/scroll-area.module.css";
 import { cn } from "@/lib/utils";
 import { CarouselScrollViewport } from "./carousel-scroll-viewport";
-import classes from "./index.module.css";
 import { createMessageURI } from "./utils";
 
 interface DetailCarouselProps {
@@ -71,16 +70,16 @@ export default function DetailCarousel({
 			<CarouselScrollViewport
 				ref={viewportRef}
 				slice="detail"
-				className={cn(
-					scrollAreaClasses.Viewport,
-					"pb-2",
-					classes.detailScrollAreaViewport,
-					classes.carouselScrollAreaViewport,
-				)}
+				className={cn(scrollAreaClasses.Viewport, "pb-2")}
 				onScroll={onScroll}
 			>
 				<BaseScrollArea.Content
-					className={cn(scrollAreaClasses.Content, "h-full relative")}
+					className={cn(
+						scrollAreaClasses.Content,
+						"h-full relative",
+						"[&_.carouselWrapper]:-translate-x-[calc((var(--carousel-scroll-start)-var(--carousel-start))/var(--carousel-size)*3rem)]",
+						"[&_.carouselContent]:-translate-x-[calc((var(--carousel-scroll-start)-var(--carousel-start))/var(--carousel-size)*-3rem)]",
+					)}
 					style={{ width: virtualizer.getTotalSize() }}
 				>
 					<div
@@ -102,26 +101,41 @@ export default function DetailCarousel({
 								className={cn(
 									"absolute top-0 h-full",
 									"snap-normal snap-center",
-									classes.carouselItemContainer,
 								)}
 								style={{
 									left: 0,
 									width: virtualItem.size,
 									transform: `translateX(${virtualItem.start}px)`,
+									...({
+										"--carousel-start": `${virtualItem.start}px`,
+										"--carousel-end": `${virtualItem.end}px`,
+										"--carousel-size": `${virtualItem.size}px`,
+									} as React.CSSProperties),
 								}}
 							>
-								<div className={classes.carouselItem}>
+								<div
+									className={cn(
+										"carouselWrapper",
+										"relative overflow-hidden h-full",
+									)}
+								>
 									{message.type === MessageTypeEnum.IMAGE ? (
 										<ImageMessage.Plain
 											message={message}
 											sizes={["hd", "regular", "thumbnail"]}
-											className="max-w-full max-h-full"
+											className={cn(
+												"carouselContent",
+												"absolute inset-0 m-auto max-w-full max-h-full",
+											)}
 										/>
 									) : message.type === MessageTypeEnum.VIDEO ? (
 										<VideoMessage.Plain
 											message={message}
 											muted
-											className="max-w-full max-h-full"
+											className={cn(
+												"carouselContent",
+												"absolute inset-0 m-auto max-w-full max-h-full",
+											)}
 										/>
 									) : null}
 								</div>

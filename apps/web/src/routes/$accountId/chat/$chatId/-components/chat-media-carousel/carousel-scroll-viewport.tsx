@@ -20,6 +20,7 @@ export function CarouselScrollViewport({
 	const composedStyle = {
 		"--carousel-padding-start": `${lockState.carouselPaddingStart}px`,
 		"--carousel-padding-end": `${lockState.carouselPaddingEnd}px`,
+		"--carousel-scroll-start": `var(--scroll-area-overflow-x-start)`,
 		scrollSnapType: "x mandatory",
 		...style,
 		...(lockState.isLocked
