@@ -272,16 +272,19 @@ export function useMediaCarousel(
 	});
 
 	// ----------------------------------------------------------
-	// prefetch（受 phase 与 anchor 校正状态短路）
+	// prefetch（受 phase、滚动状态与 anchor 校正状态短路）
 	// ----------------------------------------------------------
 
 	const thumbVirtualIndexes = thumbVirtualizer.getVirtualIndexes();
 	const thumbFirstIndex = thumbVirtualIndexes[0];
 	const thumbLastIndex = thumbVirtualIndexes[thumbVirtualIndexes.length - 1];
+	const isAnyCarouselScrolling =
+		detailVirtualizer.isScrolling || thumbVirtualizer.isScrolling;
 
 	useEffect(() => {
 		if (phase !== "ready") return;
 		if (messages.length === 0) return;
+		if (isAnyCarouselScrolling) return;
 		if (isSnapDisabled) return;
 
 		if (thumbFirstIndex === 0 && hasPreviousPage && !isFetchingPreviousPage) {
@@ -297,6 +300,7 @@ export function useMediaCarousel(
 		}
 	}, [
 		phase,
+		isAnyCarouselScrolling,
 		isSnapDisabled,
 		thumbFirstIndex,
 		thumbLastIndex,
