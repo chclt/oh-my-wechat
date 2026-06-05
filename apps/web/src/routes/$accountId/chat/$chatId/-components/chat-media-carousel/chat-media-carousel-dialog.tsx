@@ -1,6 +1,7 @@
-import { Dialog } from "@base-ui/react";
+import { Button, Dialog } from "@base-ui/react";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { MessageType } from "@repo/types";
+import { CrossCircleSolid } from "@/components/icon.tsx";
 import dialogClasses from "@/components/ui/dialog.module.css";
 import { cn } from "@/lib/utils";
 import { CarouselScrollViewportContext } from "./carousel-scroll-viewport-context.tsx";
@@ -41,6 +42,10 @@ export default function ChatMediaCarouselDialog() {
 								initialMessageRef={initialMessageRef}
 							/>
 						)}
+
+						<Dialog.Close className="absolute top-4 end-4 p-4 cursor-pointer text-white/50 hover:text-white/80">
+							<CrossCircleSolid className="size-8 inset-0 m-auto" />
+						</Dialog.Close>
 					</Dialog.Popup>
 				</Dialog.Viewport>
 			</Dialog.Portal>

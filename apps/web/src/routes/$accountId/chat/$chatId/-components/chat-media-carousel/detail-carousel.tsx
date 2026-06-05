@@ -1,7 +1,11 @@
 import { Button, ScrollArea as BaseScrollArea } from "@base-ui/react";
 import { MessageType, MessageTypeEnum } from "@repo/types";
 import { Virtualizer } from "@tanstack/react-virtual";
-import { LoaderIcon } from "@/components/icon";
+import {
+	ChevronLeftCircleSolid,
+	ChevronRightCircleSolid,
+	LoaderIcon,
+} from "@/components/icon";
 import { ImageMessage, VideoMessage } from "@/components/message";
 import scrollAreaClasses from "@/components/ui/scroll-area.module.css";
 import { cn } from "@/lib/utils";
@@ -99,7 +103,7 @@ export default function DetailCarousel({
 								key={virtualItem.key}
 								data-message-uri={createMessageURI({ message, account })}
 								className={cn(
-									"absolute top-0 h-full",
+									"absolute top-0 h-full px-24",
 									"snap-normal snap-center",
 								)}
 								style={{
@@ -158,15 +162,15 @@ export default function DetailCarousel({
 
 			<Button
 				onClick={handleScrollToPreviousIndex}
-				className="absolute start-4 inset-y-0 my-auto size-16 bg-red-400 z-10"
+				className="absolute start-0 inset-y-0 my-auto w-24 h-full cursor-pointer text-white/50 hover:text-white/80"
 			>
-				上一张
+				<ChevronLeftCircleSolid className="size-8 absolute inset-0 m-auto" />
 			</Button>
 			<Button
 				onClick={handleScrollToNextIndex}
-				className="absolute end-4 inset-y-0 my-auto size-16 bg-red-400 z-10"
+				className="absolute end-0 inset-y-0 my-auto w-24 h-full cursor-pointer text-white/50 hover:text-white/80"
 			>
-				下一张
+				<ChevronRightCircleSolid className="size-8 absolute inset-0 m-auto" />
 			</Button>
 		</BaseScrollArea.Root>
 	);
