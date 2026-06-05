@@ -1,5 +1,5 @@
-import imageGreetingMessages from "/public/images/avatar/greeting_messages.png";
-import imageGroupChats from "/public/images/avatar/group_chats.png";
+import imageGreetingMessages from "/images/avatar/greeting_messages.png";
+import imageGroupChats from "/images/avatar/group_chats.png";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { ContactIconFill } from "@/components/icon";
