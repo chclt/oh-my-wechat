@@ -8,8 +8,10 @@ import {
 } from "@/components/central-icon.tsx";
 import Image from "@/components/image.tsx";
 import Link from "@/components/link.tsx";
+import { Button } from "@/components/ui/button";
 import Configurer from "./-components/Configurer";
 import ConfigurerErrorFallback from "./-components/ConfigurerErrorFallback";
+import DemoDataConfigurer from "./-components/DemoDataConfigurer";
 
 export const Route = createFileRoute("/")({
 	component: RouteComponent,
@@ -29,7 +31,14 @@ function RouteComponent() {
 						height={48}
 					/>
 
-					<Configurer className="mt-6 w-full" />
+					<Configurer className="mt-5 w-full" />
+
+					<p className={"mt-7 flex items-center text-sm text-muted-foreground"}>
+						还没有准备好备份文件？
+						<Button asChild variant="link" className="ml-1 p-0 text-inherit">
+							<DemoDataConfigurer>使用演示数据先体验。</DemoDataConfigurer>
+						</Button>
+					</p>
 
 					<p
 						className={"mt-10 flex items-center text-sm text-muted-foreground"}
