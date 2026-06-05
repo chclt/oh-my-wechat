@@ -2,7 +2,7 @@ import { useElementSize } from "@mantine/hooks";
 import { MessageType, MessageTypeEnum } from "@repo/types";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useVirtualizer, Virtualizer } from "@tanstack/react-virtual";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MessageListInfiniteQueryOptions } from "@/lib/fetchers/message";
 import { CarouselScrollViewportContextValue } from "./carousel-scroll-viewport-context";
 import { useMediaCarouselPreparePhase } from "./use-media-carousel-prepare-phase";
@@ -73,7 +73,12 @@ export function useMediaCarousel(
 			if (payload === undefined) {
 				console.log(`[useMediaCarousel] ${label}`);
 			} else {
-				console.log(`[useMediaCarousel] ${label}`, payload);
+				console.log(
+					`[useMediaCarousel] ${label}`,
+					typeof payload === "object"
+						? JSON.stringify(payload, null, 2)
+						: payload,
+				);
 			}
 		},
 		[debug],
@@ -202,7 +207,16 @@ export function useMediaCarousel(
 			createMessageURI({ message: messages[index], account }),
 		initialOffset: () => detailInitialOffsetRef.current,
 		initialRect: { width: detailViewportWidth, height: 0 },
-		overscan: 2,
+		/**
+		 * 在 @tanstack/react-virtual 3.13.26 下
+		 * anchorTo: "end" 会在滚动位置因前面有新元素插入而改变后，修正滚动位置，
+		 * 但因为滚动位置改变时，原本在 viewport 范围内的 item 会因为超出 overscan 范围而被卸载
+		 * （尤其在此处，itemSize 等于 viewport size, 前方有新 item 插入后，很容易超出 overscan）
+		 * 滚动位置被修正后，item 重新挂载，视觉上出现闪烁的现象（图片等元素尤其）
+		 * 因此最简单的解决办法是将 overscan 设置为一个大于等于数据 page size 的值
+		 * （这些判断不一定正确，因为在调试中发现在开发者工具中观察，元素持续存在着）
+		 */
+		overscan: 5,
 	});
 
 	const thumbVirtualizer = useVirtualizer({
@@ -231,23 +245,51 @@ export function useMediaCarousel(
 	}, [thumbSpacerWidth, thumbItemSize, thumbVirtualizer]);
 
 	// ----------------------------------------------------------
-	// prefetch（受 phase 短路）
+	// isSnapDisabled
+	//
+	// prepend 后短暂关闭 snap，等 react-virtual 完成 anchor 校正再恢复。
+	// 该状态也用于阻止校正期间重复触发分页。
+	// ----------------------------------------------------------
+	const [isSnapDisabled, setIsSnapDisabled] = useState(false);
+	const lastSeenMessagesLengthRef = useRef(messages.length);
+	if (lastSeenMessagesLengthRef.current !== messages.length) {
+		lastSeenMessagesLengthRef.current = messages.length;
+		if (!isSnapDisabled) {
+			setIsSnapDisabled(true);
+		}
+	}
+	useEffect(() => {
+		if (!isSnapDisabled) return;
+		const detailAdj = (
+			detailVirtualizer as unknown as { scrollAdjustments: number }
+		).scrollAdjustments;
+		const thumbAdj = (
+			thumbVirtualizer as unknown as { scrollAdjustments: number }
+		).scrollAdjustments;
+		if (detailAdj === 0 && thumbAdj === 0) {
+			setIsSnapDisabled(false);
+		}
+	});
+
+	// ----------------------------------------------------------
+	// prefetch（受 phase 与 anchor 校正状态短路）
 	// ----------------------------------------------------------
 
-	const detailVirtualIndexes = detailVirtualizer.getVirtualIndexes();
-	const detailFirstIndex = detailVirtualIndexes[0];
-	const detailLastIndex = detailVirtualIndexes[detailVirtualIndexes.length - 1];
+	const thumbVirtualIndexes = thumbVirtualizer.getVirtualIndexes();
+	const thumbFirstIndex = thumbVirtualIndexes[0];
+	const thumbLastIndex = thumbVirtualIndexes[thumbVirtualIndexes.length - 1];
 
 	useEffect(() => {
 		if (phase !== "ready") return;
 		if (messages.length === 0) return;
+		if (isSnapDisabled) return;
 
-		if (detailFirstIndex === 0 && hasPreviousPage && !isFetchingPreviousPage) {
+		if (thumbFirstIndex === 0 && hasPreviousPage && !isFetchingPreviousPage) {
 			fetchPreviousPage();
 		}
 
 		if (
-			detailLastIndex === messages.length - 1 &&
+			thumbLastIndex === messages.length - 1 &&
 			hasNextPage &&
 			!isFetchingNextPage
 		) {
@@ -255,8 +297,9 @@ export function useMediaCarousel(
 		}
 	}, [
 		phase,
-		detailFirstIndex,
-		detailLastIndex,
+		isSnapDisabled,
+		thumbFirstIndex,
+		thumbLastIndex,
 		messages.length,
 		hasPreviousPage,
 		hasNextPage,
@@ -287,11 +330,13 @@ export function useMediaCarousel(
 	const scrollLockContextValue: CarouselScrollViewportContextValue = {
 		detail: {
 			isLocked,
+			isSnapDisabled,
 			carouselPaddingStart: detailPaddingStart,
 			carouselPaddingEnd: detailPaddingStart,
 		},
 		thumb: {
 			isLocked,
+			isSnapDisabled,
 			carouselPaddingStart: thumbSpacerWidth,
 			carouselPaddingEnd: thumbSpacerWidth,
 		},

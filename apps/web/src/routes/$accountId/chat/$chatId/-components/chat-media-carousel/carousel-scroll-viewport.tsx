@@ -10,6 +10,16 @@ type CarouselScrollViewportProps = React.ComponentProps<
 	slice: CarouselSlice;
 };
 
+type CarouselScrollViewportStyle = NonNullable<
+	CarouselScrollViewportProps["style"]
+>;
+type CarouselScrollViewportStyleFunction = Extract<
+	CarouselScrollViewportStyle,
+	(...args: never[]) => unknown
+>;
+type CarouselScrollViewportStyleState =
+	Parameters<CarouselScrollViewportStyleFunction>[0];
+
 export function CarouselScrollViewport({
 	slice,
 	style,
@@ -17,16 +27,24 @@ export function CarouselScrollViewport({
 }: CarouselScrollViewportProps) {
 	const lockState = useCarouselScrollViewportContext()[slice];
 
-	const composedStyle = {
-		"--carousel-padding-start": `${lockState.carouselPaddingStart}px`,
-		"--carousel-padding-end": `${lockState.carouselPaddingEnd}px`,
-		"--carousel-scroll-start": `var(--scroll-area-overflow-x-start)`,
-		scrollSnapType: "x mandatory",
-		...style,
-		...(lockState.isLocked
-			? { overflow: "hidden", scrollSnapType: "none" }
-			: undefined),
-	} as unknown as CSSProperties;
+	const composeStyle = (resolvedStyle?: CSSProperties) =>
+		({
+			"--carousel-padding-start": `${lockState.carouselPaddingStart}px`,
+			"--carousel-padding-end": `${lockState.carouselPaddingEnd}px`,
+			"--carousel-scroll-start": `var(--scroll-area-overflow-x-start)`,
+			scrollSnapType: "x mandatory",
+			...resolvedStyle,
+			...(lockState.isLocked
+				? { overflow: "hidden", scrollSnapType: "none" }
+				: lockState.isSnapDisabled
+					? { scrollSnapType: "none" }
+					: undefined),
+		}) as unknown as CSSProperties;
+
+	const composedStyle =
+		typeof style === "function"
+			? (state: CarouselScrollViewportStyleState) => composeStyle(style(state))
+			: composeStyle(style);
 
 	return <BaseScrollArea.Viewport style={composedStyle} {...rest} />;
 }

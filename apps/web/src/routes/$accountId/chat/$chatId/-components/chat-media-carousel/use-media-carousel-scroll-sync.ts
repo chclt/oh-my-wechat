@@ -33,6 +33,20 @@ export function useMediaCarouselScrollSync(
 	const detailScrollEventReasonRef = useRef<"self" | "controller">("self");
 	const thumbScrollEventReasonRef = useRef<"self" | "controller">("self");
 
+	/**
+	 * prepend 后 react-virtual 会用 scrollAdjustments 标记内部 anchor 校正。
+	 * React onScroll 早于库自己的 native listener，因此这里能用它跳过
+	 * 这一次非用户滚动，避免把校正同步到另一个 carousel。
+	 */
+	const getScrollAdjustments = (
+		virtualizer: Virtualizer<HTMLDivElement, Element>,
+	): number =>
+		(virtualizer as unknown as { scrollAdjustments: number }).scrollAdjustments;
+
+	const isInternalAnchorAdjustment = (
+		virtualizer: Virtualizer<HTMLDivElement, Element>,
+	): boolean => getScrollAdjustments(virtualizer) !== 0;
+
 	const reportDetailScrollPosition = (
 		position: ScrollAreaViewportRelativePosition,
 	) => {
@@ -103,6 +117,8 @@ export function useMediaCarouselScrollSync(
 			return;
 		}
 
+		if (isInternalAnchorAdjustment(detailVirtualizer)) return;
+
 		const currentScrollOffset = event.currentTarget.scrollLeft;
 		const viewportCenterOffset =
 			currentScrollOffset + detailVirtualizer.scrollRect.width / 2;
@@ -129,6 +145,8 @@ export function useMediaCarouselScrollSync(
 			thumbScrollEventReasonRef.current = "self";
 			return;
 		}
+
+		if (isInternalAnchorAdjustment(thumbVirtualizer)) return;
 
 		const currentScrollOffset = event.currentTarget.scrollLeft;
 		const viewportCenterOffset =

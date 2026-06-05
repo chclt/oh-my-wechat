@@ -1,4 +1,4 @@
-import { Button, Dialog } from "@base-ui/react";
+import { Dialog } from "@base-ui/react";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { MessageType } from "@repo/types";
 import { CrossCircleSolid } from "@/components/icon.tsx";
