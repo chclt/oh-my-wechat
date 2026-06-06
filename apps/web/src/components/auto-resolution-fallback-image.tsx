@@ -1,6 +1,13 @@
 import type { ImageInfo } from "@repo/types";
+import { useMutation } from "@tanstack/react-query";
 import React, { useEffect, useState } from "react";
 import Image from "@/components/image.tsx";
+import {
+	ReleaseMessageImageMutationOptions,
+	ResolveMessageImageMutationOptions,
+} from "@/lib/fetchers/message-image";
+
+const resolutionOrder: (keyof ImageInfo)[] = ["hd", "regular", "thumbnail"];
 
 export default function AutoResolutionFallbackImage({
 	image,
@@ -10,12 +17,21 @@ export default function AutoResolutionFallbackImage({
 	image?: ImageInfo | null;
 	ref?: React.Ref<HTMLImageElement>;
 } & React.ImgHTMLAttributes<HTMLImageElement>) {
-	const resolutionOrder: (keyof ImageInfo)[] = ["hd", "regular", "thumbnail"];
+	const { mutateAsync: resolveMessageImage } = useMutation(
+		ResolveMessageImageMutationOptions(),
+	);
+	const { mutateAsync: releaseMessageImage } = useMutation(
+		ReleaseMessageImageMutationOptions(),
+	);
 
 	const [displayResolutionIndex, setDisplayResolutionIndex] = useState(-1);
+	const [resolvedSrc, setResolvedSrc] = useState<string>();
 
 	useEffect(() => {
-		if (!image) return;
+		if (!image) {
+			setDisplayResolutionIndex(-1);
+			return;
+		}
 		const firstResolutionIndex = resolutionOrder.findIndex(
 			(resolution) => image && image[resolution],
 		);
@@ -30,6 +46,37 @@ export default function AutoResolutionFallbackImage({
 		thumbnail: "",
 		hd: "",
 	});
+
+	const currentEntry =
+		displayResolutionIndex >= 0
+			? image?.[resolutionOrder[displayResolutionIndex]]
+			: undefined;
+	const currentUri = currentEntry?.uri;
+
+	// 仅在真正需要显示某个分辨率时才向适配器解析其 src（懒加载），
+	// 卸载或切换分辨率时释放，由适配器内部引用计数决定何时真正回收资源。
+	useEffect(() => {
+		setResolvedSrc(undefined);
+		if (!currentUri) return;
+
+		let isActive = true;
+
+		resolveMessageImage({ uri: currentUri })
+			.then((res) => {
+				if (isActive) setResolvedSrc(res.data.src);
+			})
+			.catch((error) => {
+				console.error(
+					`[AutoResolutionFallbackImage] Failed to resolve ${currentUri}:`,
+					error,
+				);
+			});
+
+		return () => {
+			isActive = false;
+			releaseMessageImage({ uri: currentUri }).catch(() => {});
+		};
+	}, [currentUri]);
 
 	const onImageError = (
 		error: React.SyntheticEvent<HTMLImageElement, Event>,
@@ -53,9 +100,9 @@ export default function AutoResolutionFallbackImage({
 	return (
 		<Image
 			ref={ref}
-			src={image?.[resolutionOrder[displayResolutionIndex]]?.src}
-			width={image?.[resolutionOrder[displayResolutionIndex]]?.width}
-			height={image?.[resolutionOrder[displayResolutionIndex]]?.height}
+			src={resolvedSrc}
+			width={currentEntry?.width}
+			height={currentEntry?.height}
 			loading="lazy"
 			onError={onImageError}
 			{...props}

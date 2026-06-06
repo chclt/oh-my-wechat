@@ -1,4 +1,4 @@
-import type { ImageInfo } from "@repo/types";
+import type { ImageInfo, ImageMessageEntity } from "@repo/types";
 import {
 	GetMessageImageRequest,
 	GetMessageImageResponse,
@@ -6,32 +6,7 @@ import {
 import CryptoJS from "crypto-js";
 import { WCDatabases } from "../types";
 import { getFilesFromManifast } from "../utils";
-import { convertWxgfToJpg } from "../utils/wxgf";
-import { isWxgf } from "../utils/wxgf/utils";
-import { adapterWorker } from "../worker";
-
-const createImageFileUri = ({
-	accountId,
-	chatId,
-	messageLocalId,
-	filename,
-}: {
-	accountId: string;
-	chatId: string;
-	messageLocalId: string;
-	filename: string;
-}) => {
-	return `ios-backup:account:${accountId}:chat:${chatId}:message:${messageLocalId}:image:${filename}`;
-};
-
-async function getImageSrc(file: File): Promise<string> {
-	const header = new Uint8Array(await file.slice(0, 4).arrayBuffer());
-	if (isWxgf(header)) {
-		const data = new Uint8Array(await file.arrayBuffer());
-		return convertWxgfToJpg(data);
-	}
-	return URL.createObjectURL(file);
-}
+import { createImageUri } from "./image/utils";
 
 export type GetInput = [
 	GetMessageImageRequest,
@@ -80,108 +55,36 @@ export async function get(...inputs: GetInput): GetOutput {
 
 	for (const file of files) {
 		if (file.filename.endsWith(".pic_hd")) {
+			if (!sizeIncludeMap.hd) continue;
 			result.hd = {
-				uri: createImageFileUri({
-					accountId: adapterWorker._getStoreItem("account").id,
-					chatId: chat.id,
-					messageLocalId: message.local_id,
-					filename: file.filename,
-				}),
+				uri: createImageUri(file.relativePath),
 				requiresReleaseAck: true,
 			};
-			if (sizeIncludeMap.hd) {
-				try {
-					result.hd.src = await getImageSrc(file.file);
-				} catch (error) {
-					console.error(
-						`[message-image] Failed to load ${file.filename}:`,
-						error,
-					);
-				}
-			}
 		} else if (file.filename.endsWith(".pic")) {
+			if (!sizeIncludeMap.regular) continue;
 			result.regular = {
-				uri: createImageFileUri({
-					accountId: adapterWorker._getStoreItem("account").id,
-					chatId: chat.id,
-					messageLocalId: message.local_id,
-					filename: file.filename,
-				}),
+				uri: createImageUri(file.relativePath),
 				requiresReleaseAck: true,
 			};
-			if (sizeIncludeMap.regular) {
-				try {
-					result.regular.src = await getImageSrc(file.file);
-				} catch (error) {
-					console.error(
-						`[message-image] Failed to load ${file.filename}:`,
-						error,
-					);
-				}
-			}
 		} else if (file.filename.endsWith(".pic_thum")) {
+			if (!sizeIncludeMap.thumbnail) continue;
 			result.thumbnail = {
-				uri: createImageFileUri({
-					accountId: adapterWorker._getStoreItem("account").id,
-					chatId: chat.id,
-					messageLocalId: message.local_id,
-					filename: file.filename,
-				}),
+				uri: createImageUri(file.relativePath),
 				requiresReleaseAck: true,
 			};
-			if (sizeIncludeMap.thumbnail) {
-				try {
-					result.thumbnail.src = await getImageSrc(file.file);
-				} catch (error) {
-					console.error(
-						`[message-image] Failed to load ${file.filename}:`,
-						error,
-					);
-				}
-			}
-			// width: Number.parseInt(messageEntity.msg.img["@_cdnthumbwidth"]),
-			// height: Number.parseInt(messageEntity.msg.img["@_cdnthumbheight"]),
 		} else if (file.filename.endsWith(".pic_thum.tmp")) {
+			if (!sizeIncludeMap.thumbnail) continue;
 			if (result.thumbnail) continue; // .pic_thum 优先级更高
 			result.thumbnail = {
-				uri: createImageFileUri({
-					accountId: adapterWorker._getStoreItem("account").id,
-					chatId: chat.id,
-					messageLocalId: message.local_id,
-					filename: file.filename,
-				}),
+				uri: createImageUri(file.relativePath),
 				requiresReleaseAck: true,
 			};
-			if (sizeIncludeMap.thumbnail) {
-				try {
-					result.thumbnail.src = await getImageSrc(file.file);
-				} catch (error) {
-					console.error(
-						`[message-image] Failed to load ${file.filename}:`,
-						error,
-					);
-				}
-			}
 		} else if (file.filename.endsWith(".pic.mp4")) {
+			if (!sizeIncludeMap.video) continue;
 			result.video = {
-				uri: createImageFileUri({
-					accountId: adapterWorker._getStoreItem("account").id,
-					chatId: chat.id,
-					messageLocalId: message.local_id,
-					filename: file.filename,
-				}),
+				uri: createImageUri(file.relativePath),
 				requiresReleaseAck: true,
 			};
-			if (sizeIncludeMap.video) {
-				try {
-					result.video.src = URL.createObjectURL(file.file);
-				} catch (error) {
-					console.error(
-						`[message-image] Failed to load ${file.filename}:`,
-						error,
-					);
-				}
-			}
 		}
 	}
 

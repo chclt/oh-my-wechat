@@ -95,6 +95,20 @@ export type GetMessageImageResponse = Promise<
 	DataAdapterResponse<ImageInfo | undefined>
 >;
 
+export interface ResolveMessageImageRequest {
+	uri: string;
+}
+
+export type ResolveMessageImageResponse = Promise<
+	DataAdapterResponse<{ src: string }>
+>;
+
+export interface ReleaseMessageImageRequest {
+	uri: string;
+}
+
+export type ReleaseMessageImageResponse = Promise<DataAdapterResponse<void>>;
+
 export interface GetMessageVideoRequest {
 	account: Pick<AccountType, "id">;
 	chat: Pick<ChatType, "id">;
@@ -196,6 +210,14 @@ export interface DataAdapter {
 	getMessageImage: (
 		requestData: GetMessageImageRequest,
 	) => GetMessageImageResponse;
+
+	resolveMessageImage: (
+		requestData: ResolveMessageImageRequest,
+	) => ResolveMessageImageResponse;
+
+	releaseMessageImage: (
+		requestData: ReleaseMessageImageRequest,
+	) => ReleaseMessageImageResponse;
 
 	getMessageVideo: (
 		requestData: GetMessageVideoRequest,

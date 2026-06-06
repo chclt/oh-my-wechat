@@ -7,6 +7,7 @@ import { drizzle } from "drizzle-orm/sql-js";
 import initSqlJs from "sql.js";
 import sqliteUrl from "sql.js/dist/sql-wasm.wasm?url";
 import * as ChatController from "./controllers/chat";
+import * as ImageController from "./controllers/image";
 import * as MessageController from "./controllers/message";
 import * as MessageAttachController from "./controllers/message-attach.ts";
 import * as MessageImageController from "./controllers/message-image.ts";
@@ -79,6 +80,14 @@ export interface AdapterWorkerType extends Record<
 	getMessageImage: (
 		controllerInput: MessageImageController.GetInput[0],
 	) => MessageImageController.GetOutput;
+
+	resolveMessageImage: (
+		controllerInput: ImageController.ResolveInput[0],
+	) => Promise<DataAdapterResponse<{ src: string }>>;
+
+	releaseMessageImage: (
+		controllerInput: ImageController.ReleaseInput[0],
+	) => Promise<DataAdapterResponse<void>>;
 
 	getMessageVideo: (
 		controllerInput: MessageVideoController.GetInput[0],
@@ -343,6 +352,20 @@ export const adapterWorker: AdapterWorkerType = {
 
 	getMessageImage: async (controllerInput) => {
 		return await MessageImageController.get(controllerInput, {
+			directory: adapterWorker._getStoreItem("directory"),
+			databases: adapterWorker._getStoreItem("databases"),
+		});
+	},
+
+	resolveMessageImage: async (controllerInput) => {
+		return await ImageController.resolve(controllerInput, {
+			directory: adapterWorker._getStoreItem("directory"),
+			databases: adapterWorker._getStoreItem("databases"),
+		});
+	},
+
+	releaseMessageImage: async (controllerInput) => {
+		return await ImageController.release(controllerInput, {
 			directory: adapterWorker._getStoreItem("directory"),
 			databases: adapterWorker._getStoreItem("databases"),
 		});

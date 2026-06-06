@@ -18,6 +18,8 @@ import {
 	GetStatisticRequest,
 	GetUserListRequest,
 	GetUserRequest,
+	ReleaseMessageImageRequest,
+	ResolveMessageImageRequest,
 } from "@repo/types/adapter";
 import * as Comlink from "comlink";
 import type { AdapterWorkerType } from "./worker.ts";
@@ -137,6 +139,20 @@ export default class IosBackupAdapter implements DataAdapter {
 		return withCommonWrapper(
 			() => this._workerAdapter.getMessageImage(input),
 			"getMessageImage",
+		);
+	}
+
+	async resolveMessageImage(input: ResolveMessageImageRequest) {
+		return withCommonWrapper(
+			() => this._workerAdapter.resolveMessageImage(input),
+			"resolveMessageImage",
+		);
+	}
+
+	async releaseMessageImage(input: ReleaseMessageImageRequest) {
+		return withCommonWrapper(
+			() => this._workerAdapter.releaseMessageImage(input),
+			"releaseMessageImage",
 		);
 	}
 

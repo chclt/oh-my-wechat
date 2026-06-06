@@ -11,6 +11,10 @@ export async function getFilesFromManifast(
 ): Promise<
 	{
 		filename: string;
+		/**
+		 * 在 manifest.db 中，这一列就叫作 relativePath，以 `Documents/` 开头
+		 */
+		relativePath: string;
 		file: File;
 	}[]
 > {
@@ -33,15 +37,20 @@ export async function getFilesFromManifast(
 
 	for (const row of rows) {
 		const manifestFileName = row.fileID;
-		const fileFullName = row.relativePath!;
-		const fileName = fileFullName.split("/").pop() as string;
+		const filePathname = row.relativePath!;
+		const fileName = filePathname.split("/").pop() as string;
 		if (manifestFileName.length === 0) continue;
 		const filePrefix = manifestFileName.substring(0, 2);
 		const file = await getFileFromDirectory(directory, [
 			filePrefix,
 			manifestFileName,
 		]);
-		if (file) fileList.push({ filename: fileName, file });
+		if (file)
+			fileList.push({
+				filename: fileName,
+				relativePath: filePathname,
+				file,
+			});
 	}
 
 	return fileList;
