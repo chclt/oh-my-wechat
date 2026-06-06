@@ -1,8 +1,8 @@
 import type {
-	ReleaseMessageImageRequest,
-	ReleaseMessageImageResponse,
-	ResolveMessageImageRequest,
-	ResolveMessageImageResponse,
+	ReleaseMessageFileRequest,
+	ReleaseMessageFileResponse,
+	ResolveMessageFileRequest,
+	ResolveMessageFileResponse,
 } from "@repo/types/adapter";
 import { and, eq } from "drizzle-orm";
 import { filesTable } from "../../database/_manifest.ts";
@@ -75,11 +75,11 @@ async function loadSrc(
 }
 
 export type ResolveInput = [
-	ResolveMessageImageRequest,
+	ResolveMessageFileRequest,
 	{ directory: FileSystemDirectoryHandle | FileList; databases: WCDatabases },
 ];
 
-export type ResolveOutput = ResolveMessageImageResponse;
+export type ResolveOutput = ResolveMessageFileResponse;
 
 export async function resolve(...input: ResolveInput): ResolveOutput {
 	const [{ uri }, ctx] = input;
@@ -122,11 +122,11 @@ export async function resolve(...input: ResolveInput): ResolveOutput {
 }
 
 export type ReleaseInput = [
-	ReleaseMessageImageRequest,
+	ReleaseMessageFileRequest,
 	{ directory: FileSystemDirectoryHandle | FileList; databases: WCDatabases },
 ];
 
-export type ReleaseOutput = ReleaseMessageImageResponse;
+export type ReleaseOutput = ReleaseMessageFileResponse;
 
 export async function release(...input: ReleaseInput): ReleaseOutput {
 	const [{ uri }] = input;

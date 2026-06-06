@@ -18,8 +18,8 @@ import {
 	GetStatisticRequest,
 	GetUserListRequest,
 	GetUserRequest,
-	ReleaseMessageImageRequest,
-	ResolveMessageImageRequest,
+	ReleaseMessageFileRequest,
+	ResolveMessageFileRequest,
 } from "@repo/types/adapter";
 import * as Comlink from "comlink";
 import type { AdapterWorkerType } from "./worker.ts";
@@ -142,17 +142,17 @@ export default class IosBackupAdapter implements DataAdapter {
 		);
 	}
 
-	async resolveMessageImage(input: ResolveMessageImageRequest) {
+	async resolveMessageFile(input: ResolveMessageFileRequest) {
 		return withCommonWrapper(
-			() => this._workerAdapter.resolveMessageImage(input),
-			"resolveMessageImage",
+			() => this._workerAdapter.resolveMessageFile(input),
+			"resolveMessageFile",
 		);
 	}
 
-	async releaseMessageImage(input: ReleaseMessageImageRequest) {
+	async releaseMessageFile(input: ReleaseMessageFileRequest) {
 		return withCommonWrapper(
-			() => this._workerAdapter.releaseMessageImage(input),
-			"releaseMessageImage",
+			() => this._workerAdapter.releaseMessageFile(input),
+			"releaseMessageFile",
 		);
 	}
 

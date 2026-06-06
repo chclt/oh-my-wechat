@@ -2,6 +2,7 @@ import { useInViewport } from "@mantine/hooks";
 import { useQuery } from "@tanstack/react-query";
 import { useAccount } from "@/components/account-provider.tsx";
 import Image from "@/components/image.tsx";
+import { useResolveMessageFile } from "@/hooks/use-resolve-message-file.ts";
 import { MessageVideoQueryOptions } from "@/lib/fetchers";
 import type { VideoMessageProps } from "./types.ts";
 
@@ -30,10 +31,12 @@ export function VideoMessagePlainCover({
 		}),
 	});
 
+	const coverSrc = useResolveMessageFile(video?.cover?.uri);
+
 	return (
 		<Image
 			ref={videoRef}
-			src={video?.cover?.src}
+			src={coverSrc}
 			width={video?.cover?.width}
 			height={video?.cover?.height}
 			{...props}

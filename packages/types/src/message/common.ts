@@ -74,17 +74,15 @@ export type ImageInfo = Partial<
 	Record<
 		"regular" | "thumbnail" | "hd" | "video",
 		{
-			src?: string;
 			uri: string;
 			width?: number;
 			height?: number;
-			requiresReleaseAck?: boolean;
 		}
 	>
 >;
 
 export interface VideoInfo {
-	src: string;
+	uri: string;
 	width?: number;
 	height?: number;
 	cover?: ImageInfo[keyof ImageInfo];

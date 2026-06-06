@@ -1,6 +1,7 @@
 import { useInViewport } from "@mantine/hooks";
 import { useQuery } from "@tanstack/react-query";
 import { useAccount } from "@/components/account-provider.tsx";
+import { useResolveMessageFile } from "@/hooks/use-resolve-message-file.ts";
 import { MessageVideoQueryOptions } from "@/lib/fetchers";
 import type { VideoMessageProps } from "./types.ts";
 
@@ -28,11 +29,14 @@ export function VideoMessagePlain({
 		}),
 	});
 
+	const videoSrc = useResolveMessageFile(video?.uri);
+	const coverSrc = useResolveMessageFile(video?.cover?.uri);
+
 	return (
 		<video
 			ref={videoRef}
-			src={video?.src}
-			poster={video?.cover?.src}
+			src={videoSrc}
+			poster={coverSrc}
 			controls
 			// width={result?.[0]?.width}
 			// height={result?.[0]?.height}

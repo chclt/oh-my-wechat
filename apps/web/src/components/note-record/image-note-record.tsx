@@ -4,6 +4,7 @@ import {
 	OpenMessageType,
 } from "@repo/types";
 import { useSuspenseQuery } from "@tanstack/react-query";
+import { useResolveMessageFile } from "@/hooks/use-resolve-message-file.ts";
 import { RecordImageQueryOptions } from "@/lib/fetchers/record.ts";
 import { Route } from "@/routes/$accountId/route.tsx";
 import Image from "../image.tsx";
@@ -30,15 +31,14 @@ export default function ImageNoteRecord({
 		}),
 	);
 
+	const imageSrc = useResolveMessageFile(
+		image.regular?.uri ?? image.thumbnail?.uri,
+	);
+
 	return (
 		<>
 			{Object.keys(image).length ? (
-				<Image
-					src={image.regular?.src ?? image.thumbnail?.src}
-					alt="image"
-					className={className}
-					{...props}
-				/>
+				<Image src={imageSrc} alt="image" className={className} {...props} />
 			) : (
 				"图片"
 			)}

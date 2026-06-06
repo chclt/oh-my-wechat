@@ -6,6 +6,7 @@ import {
 import CryptoJS from "crypto-js";
 import { WCDatabases } from "../types";
 import { getFilesFromManifast } from "../utils";
+import { createImageUri } from "./file/utils";
 
 export type GetInput = [
 	GetMessageVideoRequest,
@@ -36,14 +37,14 @@ export async function get(...inputs: GetInput): GetOutput {
 		cover: !include || include.includes("cover"),
 	};
 
-	let result: VideoInfo = { src: "" };
+	let result: VideoInfo = { uri: "" };
 
 	for (const file of files) {
 		if (file.filename.endsWith(".mp4")) {
 			if (!includeMap.video) continue;
 			result = {
 				...result,
-				src: URL.createObjectURL(file.file),
+				uri: createImageUri(file.relativePath),
 			};
 		}
 
@@ -51,7 +52,7 @@ export async function get(...inputs: GetInput): GetOutput {
 			if (!includeMap.cover) continue;
 			result = {
 				...result,
-				cover: { src: URL.createObjectURL(file.file) },
+				cover: { uri: createImageUri(file.relativePath) },
 			};
 		}
 	}

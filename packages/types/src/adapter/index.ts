@@ -95,19 +95,19 @@ export type GetMessageImageResponse = Promise<
 	DataAdapterResponse<ImageInfo | undefined>
 >;
 
-export interface ResolveMessageImageRequest {
+export interface ResolveMessageFileRequest {
 	uri: string;
 }
 
-export type ResolveMessageImageResponse = Promise<
+export type ResolveMessageFileResponse = Promise<
 	DataAdapterResponse<{ src: string }>
 >;
 
-export interface ReleaseMessageImageRequest {
+export interface ReleaseMessageFileRequest {
 	uri: string;
 }
 
-export type ReleaseMessageImageResponse = Promise<DataAdapterResponse<void>>;
+export type ReleaseMessageFileResponse = Promise<DataAdapterResponse<void>>;
 
 export interface GetMessageVideoRequest {
 	account: Pick<AccountType, "id">;
@@ -211,13 +211,13 @@ export interface DataAdapter {
 		requestData: GetMessageImageRequest,
 	) => GetMessageImageResponse;
 
-	resolveMessageImage: (
-		requestData: ResolveMessageImageRequest,
-	) => ResolveMessageImageResponse;
+	resolveMessageFile: (
+		requestData: ResolveMessageFileRequest,
+	) => ResolveMessageFileResponse;
 
-	releaseMessageImage: (
-		requestData: ReleaseMessageImageRequest,
-	) => ReleaseMessageImageResponse;
+	releaseMessageFile: (
+		requestData: ReleaseMessageFileRequest,
+	) => ReleaseMessageFileResponse;
 
 	getMessageVideo: (
 		requestData: GetMessageVideoRequest,

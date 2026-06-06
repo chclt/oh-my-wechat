@@ -6,6 +6,7 @@ import {
 import CryptoJS from "crypto-js";
 import { WCDatabases } from "../types";
 import { getFilesFromManifast } from "../utils";
+import { createImageUri } from "./file/utils";
 
 export type GetInput = [
 	GetRecordVideoRequest,
@@ -25,20 +26,20 @@ export async function get(...inputs: GetInput): GetOutput {
 		`Documents/${CryptoJS.MD5(account.id).toString()}/OpenData/${CryptoJS.MD5(chat.id).toString()}/${message.local_id}/${record["@_dataid"]}.%`,
 	);
 
-	let result: VideoInfo = { src: "" };
+	let result: VideoInfo = { uri: "" };
 
 	for (const file of files) {
 		if (file.filename.endsWith(".mp4")) {
 			result = {
 				...result,
-				src: URL.createObjectURL(file.file),
+				uri: createImageUri(file.relativePath),
 			};
 		}
 
 		if (file.filename.endsWith(".record_thumb")) {
 			result = {
 				...result,
-				cover: { src: URL.createObjectURL(file.file) },
+				cover: { uri: createImageUri(file.relativePath) },
 			};
 		}
 	}

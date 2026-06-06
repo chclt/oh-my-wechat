@@ -1,6 +1,7 @@
 import { useInViewport } from "@mantine/hooks";
 import { MessageType, VideoMessageRecordType } from "@repo/types";
 import { useQuery } from "@tanstack/react-query";
+import { useResolveMessageFile } from "@/hooks/use-resolve-message-file.ts";
 import { RecordVideoQueryOptions } from "@/lib/fetchers/record.ts";
 import { cn } from "@/lib/utils";
 import { Route } from "@/routes/$accountId/route.tsx";
@@ -45,6 +46,9 @@ function VideoRecordDefault({
 		enabled: inViewport,
 	});
 
+	const videoSrc = useResolveMessageFile(video?.uri);
+	const coverSrc = useResolveMessageFile(video?.cover?.uri);
+
 	return (
 		<div
 			ref={ref}
@@ -58,12 +62,7 @@ function VideoRecordDefault({
 			{...props}
 		>
 			<div className="relative">
-				<video
-					src={video?.src}
-					poster={video?.cover?.src}
-					controls
-					className="w-full"
-				/>
+				<video src={videoSrc} poster={coverSrc} controls className="w-full" />
 			</div>
 		</div>
 	);

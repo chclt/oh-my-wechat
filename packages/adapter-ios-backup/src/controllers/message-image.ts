@@ -1,4 +1,4 @@
-import type { ImageInfo, ImageMessageEntity } from "@repo/types";
+import type { ImageInfo } from "@repo/types";
 import {
 	GetMessageImageRequest,
 	GetMessageImageResponse,
@@ -6,7 +6,7 @@ import {
 import CryptoJS from "crypto-js";
 import { WCDatabases } from "../types";
 import { getFilesFromManifast } from "../utils";
-import { createImageUri } from "./image/utils";
+import { createImageUri } from "./file/utils";
 
 export type GetInput = [
 	GetMessageImageRequest,
@@ -58,32 +58,27 @@ export async function get(...inputs: GetInput): GetOutput {
 			if (!sizeIncludeMap.hd) continue;
 			result.hd = {
 				uri: createImageUri(file.relativePath),
-				requiresReleaseAck: true,
 			};
 		} else if (file.filename.endsWith(".pic")) {
 			if (!sizeIncludeMap.regular) continue;
 			result.regular = {
 				uri: createImageUri(file.relativePath),
-				requiresReleaseAck: true,
 			};
 		} else if (file.filename.endsWith(".pic_thum")) {
 			if (!sizeIncludeMap.thumbnail) continue;
 			result.thumbnail = {
 				uri: createImageUri(file.relativePath),
-				requiresReleaseAck: true,
 			};
 		} else if (file.filename.endsWith(".pic_thum.tmp")) {
 			if (!sizeIncludeMap.thumbnail) continue;
 			if (result.thumbnail) continue; // .pic_thum 优先级更高
 			result.thumbnail = {
 				uri: createImageUri(file.relativePath),
-				requiresReleaseAck: true,
 			};
 		} else if (file.filename.endsWith(".pic.mp4")) {
 			if (!sizeIncludeMap.video) continue;
 			result.video = {
 				uri: createImageUri(file.relativePath),
-				requiresReleaseAck: true,
 			};
 		}
 	}

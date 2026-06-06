@@ -6,6 +6,7 @@ import {
 import CryptoJS from "crypto-js";
 import { WCDatabases } from "../types";
 import { getFilesFromManifast } from "../utils";
+import { createImageUri } from "./file/utils";
 
 export type GetInput = [
 	GetRecordImageRequest,
@@ -29,9 +30,9 @@ export async function get(...inputs: GetInput): GetOutput {
 
 	for (const file of files) {
 		if (file.filename.endsWith(".record_dat")) {
-			result.regular = { src: URL.createObjectURL(file.file) };
+			result.regular = { uri: createImageUri(file.relativePath) };
 		} else if (file.filename.endsWith(".record_thumb")) {
-			result.regular = { src: URL.createObjectURL(file.file) };
+			result.regular = { uri: createImageUri(file.relativePath) };
 		}
 	}
 

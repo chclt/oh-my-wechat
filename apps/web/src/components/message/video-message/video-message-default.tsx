@@ -1,5 +1,6 @@
 import { useInViewport } from "@mantine/hooks";
 import { useQuery } from "@tanstack/react-query";
+import { useResolveMessageFile } from "@/hooks/use-resolve-message-file.ts";
 import { MessageVideoQueryOptions } from "@/lib/fetchers";
 import { cn } from "@/lib/utils.ts";
 import { Route } from "@/routes/$accountId/route.tsx";
@@ -24,6 +25,8 @@ export function VideoMessageDefault({
 		}),
 	});
 
+	const videoSrc = useResolveMessageFile(video?.uri);
+	const coverSrc = useResolveMessageFile(video?.cover?.uri);
 	return (
 		<div
 			className={videoMessageVariants({
@@ -36,8 +39,8 @@ export function VideoMessageDefault({
 			<div className={"relative"}>
 				<video
 					ref={videoRef}
-					src={video?.src}
-					poster={video?.cover?.src}
+					src={videoSrc}
+					poster={coverSrc}
 					controls
 					// width={result?.[0]?.width}
 					// height={result?.[0]?.height}
