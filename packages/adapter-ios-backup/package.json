@@ -6,7 +6,10 @@
 	"exports": {
 		".": "./src/index.ts",
 		"./queryOptions": "./src/fetchers.ts",
-		"./vite": "./src/vite/index.ts"
+		"./vite": {
+			"types": "./src/vite/index.ts",
+			"default": "./src/vite/index.mjs"
+		}
 	},
 	"dependencies": {
 		"@bufbuild/protobuf": "catalog:",

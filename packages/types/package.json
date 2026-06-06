@@ -6,7 +6,10 @@
 	"exports": {
 		".": "./src/message/index.ts",
 		"./adapter": "./src/adapter/index.ts",
-		"./vite": "./src/vite/index.ts"
+		"./vite": {
+			"types": "./src/vite/index.ts",
+			"default": "./src/vite/index.mjs"
+		}
 	},
 	"dependencies": {
 		"@bufbuild/protobuf": "catalog:"
