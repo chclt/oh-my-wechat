@@ -1,5 +1,4 @@
-import { ChatType, ContactType, UserType } from "@/schema";
-import { shuffle } from "es-toolkit";
+import { ChatType, ContactType, UserType } from "@repo/types";
 import {
 	user_1,
 	user_10,
@@ -99,7 +98,7 @@ export const user_13_chat: ChatType = transformContactToChat(
 	user_13,
 );
 
-export const ChatList = shuffle([
+export const ChatList = [
 	user_1_chat,
 	user_2_chat,
 	user_3_chat,
@@ -113,4 +112,4 @@ export const ChatList = shuffle([
 	user_11_chat,
 	user_12_chat,
 	user_13_chat,
-]);
+];

@@ -1,4 +1,4 @@
-import { ContactType, UserType } from "@/schema";
+import { ContactType, UserType } from "@repo/types";
 
 export const user_0: UserType = {
 	id: "wxid_00000000000000",

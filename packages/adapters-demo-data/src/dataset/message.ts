@@ -1,4 +1,4 @@
-import { MessageType, SystemMessageType } from "@/schema";
+import { MessageType, SystemMessageType } from "@repo/types";
 import { user_1_chat } from "./chat";
 import { user_1 } from "./user";
 

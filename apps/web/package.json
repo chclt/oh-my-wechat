@@ -17,6 +17,7 @@
 		"@radix-ui/react-portal": "^1.1.10",
 		"@radix-ui/react-slot": "^1.2.3",
 		"@radix-ui/react-visually-hidden": "^1.2.3",
+		"@repo/adapter-demo-data": "workspace:*",
 		"@repo/adapter-ios-backup": "workspace:*",
 		"@tailwindcss/vite": "^4.1.11",
 		"@tanstack/react-devtools": "^0.8.6",

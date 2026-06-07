@@ -1,12 +1,12 @@
-import DemoDataAdapter from "@/adapters/demo-data";
-import { setDataAdapter } from "@/lib/data-adapter.ts";
-import { AccountListSuspenseQueryOptions } from "@/lib/fetchers/account";
-import queryClient from "@/lib/query-client";
-import type { AccountType } from "@/schema";
+import DemoDataAdapter from "@repo/adapter-demo-data";
+import type { AccountType } from "@repo/types";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
+import { setDataAdapter } from "@/lib/data-adapter.ts";
+import { AccountListSuspenseQueryOptions } from "@/lib/fetchers/account";
+import queryClient from "@/lib/query-client";
 
 export default function DemoDataConfigurer(
 	props: React.HTMLAttributes<HTMLButtonElement>,

@@ -1,0 +1,26 @@
+{
+	"name": "@repo/adapter-demo-data",
+	"version": "0.0.0",
+	"private": true,
+	"license": "MIT",
+	"exports": {
+		".": "./src/index.ts",
+		"./queryOptions": "./src/fetchers.ts",
+		"./vite": {
+			"types": "./src/vite/index.ts",
+			"default": "./src/vite/index.mjs"
+		}
+	},
+	"dependencies": {},
+	"devDependencies": {
+		"@repo/types": "workspace:*",
+		"@repo/typescript-config": "workspace:*",
+		"typescript": "catalog:",
+		"vite": "catalog:",
+		"vite-plugin-wasm": "^3.5.0",
+		"vitest": "catalog:"
+	},
+	"peerDependencies": {
+		"@tanstack/react-query": "^5.0.0"
+	}
+}

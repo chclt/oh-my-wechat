@@ -1,32 +1,31 @@
-import {
-	ContactList,
-	user_0,
-	UserList,
-} from "@/adapters/demo-data/dataset/user.ts";
+import { MessageTypeEnum } from "@repo/types";
 import type {
 	AccountType,
 	ChatType,
 	ContactType,
 	MessageType,
 	UserType,
-} from "@/schema";
+} from "@repo/types";
 import {
 	DataAdapter,
 	DataAdapterCursorPagination,
 	DataAdapterResponse,
-	GetAttachRequest,
 	GetChatRequest,
 	GetGreetingMessageListRequest,
-	GetImageRequest,
+	GetMessageAttachRequest,
+	GetMessageImageRequest,
 	GetMessageListRequest,
+	GetMessageVideoRequest,
+	GetMessageVoiceRequest,
 	GetStatisticRequest,
 	GetUserListRequest,
 	GetUserRequest,
-	GetVideoRequest,
-	GetVoiceRequest,
-} from "../adapter.ts";
+	ReleaseMessageFileRequest,
+	ResolveMessageFileRequest,
+} from "@repo/types/adapter";
 import { ChatList } from "./dataset/chat.ts";
-import { user_1_message } from "./dataset/message.ts";
+import { ContactList, user_0, UserList } from "./dataset/user.ts";
+import { user_1_message } from "./dataset/user_1/messages.ts";
 
 export default class DemoDataAdapter implements DataAdapter {
 	constructor() {}
@@ -48,7 +47,7 @@ export default class DemoDataAdapter implements DataAdapter {
 	async getUserList(input: GetUserListRequest) {}
 
 	async getUser(input: GetUserRequest) {
-		const user = UserList.find((user) => user.id === input.userId);
+		const user = UserList.find((user) => user.id === input.user.id);
 
 		if (!user) {
 			throw new Error("User not found");
@@ -86,13 +85,29 @@ export default class DemoDataAdapter implements DataAdapter {
 
 	async getGreetingMessageList(input: GetGreetingMessageListRequest) {}
 
-	async getImage(input: GetImageRequest) {}
+	async getMessageImage(input: GetMessageImageRequest) {
+		const message = user_1_message.find(
+			(m) => m.local_id === input.message.local_id,
+		);
+		if (message?.type === MessageTypeEnum.IMAGE) {
+			const uri = (message.message_entity as any)?.msg?.MMAsset
+				?.m_assetUrlForSystem as string | undefined;
+			if (uri) return { data: { regular: { uri } } };
+		}
+		return { data: undefined };
+	}
 
-	async getVideo(input: GetVideoRequest) {}
+	async resolveMessageFile(input: ResolveMessageFileRequest) {
+		return { data: { src: input.uri } };
+	}
 
-	async getVoice(input: GetVoiceRequest) {}
+	async releaseMessageFile(input: ReleaseMessageFileRequest) {}
 
-	async getAttach(input: GetAttachRequest) {}
+	async getMessageVideo(input: GetMessageVideoRequest) {}
+
+	async getMessageVoice(input: GetMessageVoiceRequest) {}
+
+	async getMessageAttach(input: GetMessageAttachRequest) {}
 
 	async getStatistic(input: GetStatisticRequest) {}
 }
