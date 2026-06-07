@@ -9,7 +9,7 @@ import { filesTable } from "../../database/_manifest.ts";
 import { WCDatabases } from "../../types.ts";
 import { MANIFEST_DOMAIN, URI_PREFIX } from "../../utils/constants.ts";
 import { getFileFromDirectory } from "../../utils/index.ts";
-import { convertWxgfToJpg } from "../../utils/wxgf/index.ts";
+import { convertWxgfToImage } from "../../utils/wxgf/index.ts";
 import { isWxgf } from "../../utils/wxgf/utils.ts";
 
 interface RegistryEntry {
@@ -25,7 +25,7 @@ async function createSrcFromFile(file: File): Promise<string> {
 	const header = new Uint8Array(await file.slice(0, 4).arrayBuffer());
 	if (isWxgf(header)) {
 		const data = new Uint8Array(await file.arrayBuffer());
-		return convertWxgfToJpg(data);
+		return convertWxgfToImage(data);
 	}
 	return URL.createObjectURL(file);
 }
