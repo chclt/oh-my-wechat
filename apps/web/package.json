@@ -24,7 +24,7 @@
 		"@tanstack/react-query-devtools": "^5.84.1",
 		"@tanstack/react-router": "^1.139.10",
 		"@tanstack/react-router-devtools": "^1.139.10",
-		"@tanstack/react-virtual": "^3.13.26",
+		"@tanstack/react-virtual": "^3.14.2",
 		"class-variance-authority": "^0.7.1",
 		"clsx": "^2.1.1",
 		"date-fns": "catalog:",

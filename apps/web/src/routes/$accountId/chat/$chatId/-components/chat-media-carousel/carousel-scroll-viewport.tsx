@@ -36,9 +36,7 @@ export function CarouselScrollViewport({
 			...resolvedStyle,
 			...(lockState.isLocked
 				? { overflow: "hidden", scrollSnapType: "none" }
-				: lockState.isSnapDisabled
-					? { scrollSnapType: "none" }
-					: undefined),
+				: undefined),
 		}) as unknown as CSSProperties;
 
 	const composedStyle =
