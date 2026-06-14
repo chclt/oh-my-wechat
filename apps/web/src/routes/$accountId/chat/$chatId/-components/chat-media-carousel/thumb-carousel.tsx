@@ -27,6 +27,8 @@ export default function ThumbCarousel({
 	hasPreviousPage,
 	hasNextPage,
 }: ThumbCarouselProps) {
+	"use no memo";
+
 	// virtualizer enabled=false 时返回空数组，无需额外 gate。
 	const virtualItems = virtualizer.getVirtualItems();
 
