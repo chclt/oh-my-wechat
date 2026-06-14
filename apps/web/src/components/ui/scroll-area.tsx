@@ -5,10 +5,17 @@ import classes from "./scroll-area.module.css";
 
 export function ScrollArea({
 	className,
+	classNames,
 	children,
 	ref: viewportRef,
 	...props
-}: ScrollAreaBase.Root.Props & { ref?: React.Ref<HTMLDivElement> }) {
+}: ScrollAreaBase.Root.Props & {
+	classNames?: {
+		content?: string;
+		scrollBar?: string;
+	};
+	ref?: React.Ref<HTMLDivElement>;
+}) {
 	return (
 		<ScrollAreaBase.Root
 			data-slot="scroll-area"
@@ -16,11 +23,13 @@ export function ScrollArea({
 			{...props}
 		>
 			<ScrollAreaBase.Viewport ref={viewportRef} className={classes.Viewport}>
-				<ScrollAreaBase.Content className={classes.Content}>
+				<ScrollAreaBase.Content
+					className={cn(classes.Content, classNames?.content)}
+				>
 					{children}
 				</ScrollAreaBase.Content>
 			</ScrollAreaBase.Viewport>
-			<ScrollAreaScrollBar />
+			<ScrollAreaScrollBar className={classNames?.scrollBar} />
 			<ScrollAreaBase.Corner />
 		</ScrollAreaBase.Root>
 	);

@@ -180,6 +180,41 @@ export interface GetStatisticRequest {
 
 export type GetStatisticResponse = Promise<DataAdapterResponse<ChatStatistics>>;
 
+export interface SearchMessagesRequest {
+	account: Pick<AccountType, "id">;
+	chat?: Pick<ChatType, "id">;
+	searchText?: string;
+	user?: Pick<UserType, "id">;
+	startTime?: string;
+	endTime?: string;
+	offset: number;
+	limit: number;
+}
+
+export type SearchMessagesResponse = Promise<
+	DataAdapterPagination<
+		{
+			chatId: string;
+			userId?: string;
+			messageLocalId: string;
+			createTime: number;
+			messagePlainText: string;
+			relevance: number;
+		}[]
+	>
+>;
+
+export interface GetMessageSearchIndexStatusRequest {
+	account: Pick<AccountType, "id">;
+}
+
+export type GetMessageSearchIndexStatusResponse = Promise<
+	| { phase: "idle" }
+	| { phase: "building"; indexedMessageCount: number }
+	| { phase: "ready"; indexedMessageCount: number }
+	| { phase: "failed"; errorMessage: string }
+>;
+
 export interface DataAdapter {
 	init: () => void;
 
@@ -243,11 +278,29 @@ export interface DataAdapter {
 	getRecordFile: (requestData: GetRecordFileRequest) => GetRecordFileResponse;
 
 	getStatistic: (requestData: GetStatisticRequest) => GetStatisticResponse;
+
+	searchMessages: (
+		requestData: SearchMessagesRequest,
+	) => SearchMessagesResponse;
+
+	getMessageSearchIndexStatus: (
+		requestData: GetMessageSearchIndexStatusRequest,
+	) => GetMessageSearchIndexStatusResponse;
 }
 
 export interface DataAdapterResponse<DataType> {
 	data: DataType;
 	meta?: Record<string, any>;
+}
+
+export interface DataAdapterPagination<
+	DataType,
+> extends DataAdapterResponse<DataType> {
+	meta: {
+		total: number;
+		offset: number;
+		limit: number;
+	};
 }
 
 export interface DataAdapterCursorPagination<

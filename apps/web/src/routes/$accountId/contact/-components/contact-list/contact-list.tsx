@@ -76,7 +76,7 @@ export default function ContactList() {
 						"[&_[data-slot='scroll-area-scrollbar']]:z-30 [&_[data-slot='scroll-area-scrollbar']]:top-16!",
 					)}
 				>
-					<header className="sticky z-30 top-0 h-16 px-5 flex items-center bg-background/80 border-b border-muted backdrop-blur-xl">
+					<header className="sticky z-30 top-0 h-16 px-5 flex items-center texture border-b border-muted">
 						<div className="size-11 flex items-center justify-center text-[#FF970A] bg-background clothoid-corner-[18.18%] shrink-0">
 							<ContactIconFill className="size-8" />
 						</div>

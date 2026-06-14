@@ -10,10 +10,10 @@ import CryptoJS from "crypto-js";
 import { desc, inArray } from "drizzle-orm";
 import { sessionAbstractTable } from "../database/session";
 import type { WCDatabases } from "../types";
-import { adapterWorker } from "../worker";
 import * as UserController from "./user.ts";
 
 async function parseSessionDatabaseSessionAbstractTableRows(
+	account: UserType,
 	databases: WCDatabases,
 	rows: (typeof sessionAbstractTable.$inferSelect)[],
 ): Promise<ChatType[]> {
@@ -22,7 +22,7 @@ async function parseSessionDatabaseSessionAbstractTableRows(
 			{
 				ids: rows.map((row) => row.UsrName),
 			},
-			{ databases },
+			{ account, databases },
 		)
 	).data;
 
@@ -77,7 +77,7 @@ async function parseSessionDatabaseSessionAbstractTableRows(
 							(contactInfo as UserType)._is_pinned
 						: false, // todo
 					is_collapsed: false,
-					members: [adapterWorker._getStoreItem("account"), contactInfo],
+					members: [account, contactInfo],
 
 					user: contactInfo,
 
@@ -98,33 +98,40 @@ async function parseSessionDatabaseSessionAbstractTableRows(
 	return result;
 }
 
-export type AllInput = [{ databases: WCDatabases }];
+export type AllInput = [{ account: UserType; databases: WCDatabases }];
 export type AllOutput = Promise<DataAdapterResponse<ChatType[]>>;
 
 export async function all(...inputs: AllInput): AllOutput {
-	const [{ databases }] = inputs;
+	const [{ account, databases }] = inputs;
 
 	const db = databases.session;
 	if (!db) {
 		throw new Error("session database is not found");
 	}
 
-	const rows = db
+	const rows = await db
 		.select()
 		.from(sessionAbstractTable)
 		.orderBy(desc(sessionAbstractTable.CreateTime))
 		.all();
 
 	return {
-		data: await parseSessionDatabaseSessionAbstractTableRows(databases, rows),
+		data: await parseSessionDatabaseSessionAbstractTableRows(
+			account,
+			databases,
+			rows,
+		),
 	};
 }
 
-export type FindInput = [{ ids: string[] }, { databases: WCDatabases }];
+export type FindInput = [
+	{ ids: string[] },
+	{ account: UserType; databases: WCDatabases },
+];
 export type FindOutput = Promise<DataAdapterResponse<ChatType[]>>;
 
 export async function find(...inputs: FindInput): FindOutput {
-	const [{ ids }, { databases }] = inputs;
+	const [{ ids }, { account, databases }] = inputs;
 
 	const db = databases.session;
 	if (!db) {
@@ -133,7 +140,7 @@ export async function find(...inputs: FindInput): FindOutput {
 
 	if (ids.length === 0) return { data: [] };
 
-	const rows = db
+	const rows = await db
 		.select()
 		.from(sessionAbstractTable)
 		.where(inArray(sessionAbstractTable.UsrName, ids))
@@ -141,6 +148,10 @@ export async function find(...inputs: FindInput): FindOutput {
 		.all();
 
 	return {
-		data: await parseSessionDatabaseSessionAbstractTableRows(databases, rows),
+		data: await parseSessionDatabaseSessionAbstractTableRows(
+			account,
+			databases,
+			rows,
+		),
 	};
 }

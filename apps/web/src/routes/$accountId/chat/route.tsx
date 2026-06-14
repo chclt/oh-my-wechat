@@ -5,22 +5,43 @@ import {
 	ResizablePanel,
 	ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import ChatListMiniRouter from "./-components/chat-list/chat-list-mini-router";
+import { parseOptionalBoolean, parseOptionalString } from "@/lib/utils";
+import ChatListMiniRouter from "./-components/chat-list/mini-router";
+
+export interface ChatRouteSearchParams {
+	search?: boolean;
+	searchQuery?: string;
+	searchFromChat?: string;
+	searchFromUser?: string;
+	searchStartTime?: string;
+	searchEndTime?: string;
+}
 
 export const Route = createFileRoute("/$accountId/chat")({
+	validateSearch: (search): ChatRouteSearchParams => ({
+		search: parseOptionalBoolean(search.search),
+		searchQuery: parseOptionalString(search.searchQuery),
+		searchFromChat: parseOptionalString(search.searchFromChat),
+		searchFromUser: parseOptionalString(search.searchFromUser),
+		searchStartTime: parseOptionalString(search.searchStartTime),
+		searchEndTime: parseOptionalString(search.searchEndTime),
+	}),
 	component: RouteComponent,
 });
 
 function RouteComponent() {
+	const { search: isSearchMode } = Route.useSearch();
+
 	return (
 		<ResizablePanelGroup
-			direction="horizontal"
+			orientation="horizontal"
 			className="min-h-screen max-h-screen items-stretch"
 		>
 			<ResizablePanel
-				defaultSize={25}
-				minSize={10}
-				maxSize={80}
+				defaultSize="25%"
+				minSize={isSearchMode ? 240 : 68}
+				maxSize={480}
+				groupResizeBehavior="preserve-pixel-size"
 				className="flex"
 			>
 				<Suspense>

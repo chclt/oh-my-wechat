@@ -22,7 +22,7 @@ export default function ContactAlphabetList({
 				<div key={alphabetLetter.alphabet}>
 					<div
 						data-alphabet={alphabetLetter.alphabet}
-						className="sticky z-10 top-16 h-11 ps-5 flex items-center bg-background/80 backdrop-blur-xl"
+						className="sticky z-10 top-16 h-11 ps-5 flex items-center texture"
 					>
 						<div className="h-full w-full ps-0.5 pe-5 flex items-center border-b border-muted">
 							{alphabetLetter.alphabet}

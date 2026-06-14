@@ -1,15 +1,12 @@
 import type { UserType } from "@repo/types";
 import { GetUserRequest } from "@repo/types/adapter";
-import type {
-	UseQueryOptions,
-	UseSuspenseQueryOptions,
-} from "@tanstack/react-query";
+import type { UseSuspenseQueryOptions } from "@tanstack/react-query";
 import { getDataAdapter } from "@/lib/data-adapter.ts";
 
 export function UserListQueryOptions(
 	accountId: string,
 	userIds: string[],
-): UseQueryOptions<UserType[]> {
+): UseSuspenseQueryOptions<UserType[]> {
 	return {
 		queryKey: [`account: ${accountId}`, `userList: ${userIds.join(",")}`],
 		queryFn: () =>

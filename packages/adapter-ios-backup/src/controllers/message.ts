@@ -76,7 +76,6 @@ import WCDB, {
 	WCDBDatabaseSeriesName,
 	WCDBTableSeriesName,
 } from "../utils/wcdb.ts";
-import { adapterWorker } from "../worker.ts";
 import * as ChatController from "./chat.ts";
 import * as UserController from "./user.ts";
 
@@ -91,13 +90,24 @@ export function fallbackUnsupportedMessageQueryRows<
 	return result;
 }
 
+function isNoSuchTableError(error: unknown): boolean {
+	let current: unknown = error;
+	while (current instanceof Error) {
+		if (current.message.includes("no such table")) return true;
+		current = current.cause;
+	}
+	return false;
+}
+
 async function parseMessageDatabaseChatTableRows(
 	rows: ChatTableSelectInfer[],
 	{
+		account,
 		chat,
 		databases,
 		parseReplyMessage = true,
 	}: {
+		account: UserType;
 		chat: ChatType;
 		databases: WCDatabases;
 		parseReplyMessage?: boolean;
@@ -129,7 +139,7 @@ async function parseMessageDatabaseChatTableRows(
 
 				if (raw_message_row.Des === MessageDirection.outgoing) {
 					rawMessageContent = raw_message_row.Message;
-					senderId = adapterWorker._getStoreItem("account").id;
+					senderId = account.id;
 				} else if (
 					raw_message_row.Type === MessageTypeEnum.SYSTEM ||
 					raw_message_row.Message.startsWith("<") ||
@@ -169,12 +179,15 @@ async function parseMessageDatabaseChatTableRows(
 			if (chat && chat.type === "private") {
 				return raw_message_row.Des === MessageDirection.incoming
 					? chat.id
-					: adapterWorker._getStoreItem("account").id;
+					: account.id;
 			}
 		})
 		.filter((i) => i !== undefined);
 	const usersArray = (
-		await UserController.findAll({ ids: messageSenderIds }, { databases })
+		await UserController.findAll(
+			{ ids: messageSenderIds },
+			{ account, databases },
+		)
 	).data as UserType[];
 	const usersTable: Record<string, UserType> = {};
 	usersArray.map((user) => {
@@ -196,8 +209,7 @@ async function parseMessageDatabaseChatTableRows(
 			direction:
 				// 有些消息比如通话记录的发消息的人，但是记录消息方向不是想要的，可能因为这算系统消息
 				(messageSenderIds[index]
-					? messageSenderIds[index] ===
-						adapterWorker._getStoreItem("account").id
+					? messageSenderIds[index] === account.id
 						? MessageDirection.outgoing
 						: MessageDirection.incoming
 					: undefined) ?? raw_message_row.Des,
@@ -413,7 +425,7 @@ async function parseMessageDatabaseChatTableRows(
 					chat,
 					messageIds: replyMessageIds,
 				},
-				{ databases },
+				{ account, databases },
 			)
 		).data;
 
@@ -439,6 +451,7 @@ async function parseMessageDatabaseChatTableRows(
 export type AllInput = [
 	GetMessageListRequest,
 	{
+		account: UserType;
 		databases: WCDatabases;
 	},
 ];
@@ -446,7 +459,7 @@ export type AllInput = [
 export type AllOutput = Promise<DataAdapterCursorPagination<MessageType[]>>;
 
 export async function all(...inputs: AllInput): AllOutput {
-	const [{ account, chat, type, type_app, cursor, limit = 50 }, { databases }] =
+	const [{ chat, type, type_app, cursor, limit = 50 }, { account, databases }] =
 		inputs;
 
 	const cursorObject: Partial<ControllerPaginatorCursor> = {};
@@ -557,7 +570,7 @@ export async function all(...inputs: AllInput): AllOutput {
 								.from(bastQuery)
 								.orderBy(asc(bastQuery.CreateTime));
 
-							const rows = query.all();
+							const rows = await query.all();
 
 							return fallbackUnsupportedMessageQueryRows(
 								await WCDB.postProcess(rows, {
@@ -573,7 +586,7 @@ export async function all(...inputs: AllInput): AllOutput {
 								.orderBy(asc(chatTable.CreateTime))
 								.limit(query_limit);
 
-							const rows = query.all();
+							const rows = await query.all();
 
 							return fallbackUnsupportedMessageQueryRows(
 								await WCDB.postProcess(rows, {
@@ -630,7 +643,8 @@ export async function all(...inputs: AllInput): AllOutput {
 								.from(baseQuery)
 								.orderBy(asc(baseQuery.CreateTime));
 
-							const rows = query.all() as unknown as ChatTableSelectInfer[];
+							const rows =
+								(await query.all()) as unknown as ChatTableSelectInfer[];
 
 							return fallbackUnsupportedMessageQueryRows(
 								await WCDB.postProcess(rows, {
@@ -656,7 +670,7 @@ export async function all(...inputs: AllInput): AllOutput {
 							.from(baseQuery)
 							.orderBy(asc(baseQuery.CreateTime));
 
-						const rows = query.all();
+						const rows = await query.all();
 
 						return fallbackUnsupportedMessageQueryRows(
 							await WCDB.postProcess(rows, {
@@ -666,9 +680,7 @@ export async function all(...inputs: AllInput): AllOutput {
 						);
 					}
 				} catch (e) {
-					if (e instanceof Error && e.message.startsWith("no such table")) {
-						//
-					} else {
+					if (!isNoSuchTableError(e)) {
 						console.error(e);
 					}
 					return [];
@@ -835,11 +847,15 @@ export async function all(...inputs: AllInput): AllOutput {
 		console.error("cursor_value and cursor_condition are not set correctly");
 	}
 
-	const chats = await ChatController.find({ ids: [chat.id] }, { databases });
+	const chats = await ChatController.find(
+		{ ids: [chat.id] },
+		{ account, databases },
+	);
 	const chatDetail = chats.data[0];
 
 	return {
 		data: await parseMessageDatabaseChatTableRows(rows, {
+			account,
 			chat: chatDetail,
 			databases,
 		}),
@@ -870,6 +886,7 @@ export type findInput = [
 		parseReplyMessage?: boolean;
 	},
 	{
+		account: UserType;
 		databases: WCDatabases;
 	},
 ];
@@ -877,8 +894,10 @@ export type findInput = [
 export type findOutput = Promise<DataAdapterResponse<MessageType[]>>;
 
 export async function find(...inputs: findInput): findOutput {
-	const [{ chat, messageIds, parseReplyMessage = true }, { databases }] =
-		inputs;
+	const [
+		{ chat, messageIds, parseReplyMessage = true },
+		{ account, databases },
+	] = inputs;
 
 	const dbs = databases.message;
 	if (!dbs) throw new Error("message databases are not found");
@@ -897,7 +916,7 @@ export async function find(...inputs: findInput): findOutput {
 						// @ts-ignore CAST 语句已经将 MesSvrID 转换为字符串
 						.where(inArray(chatTable.MesSvrID, messageIds));
 
-					const rows = query.all();
+					const rows = await query.all();
 
 					return fallbackUnsupportedMessageQueryRows(
 						await WCDB.postProcess(rows, {
@@ -928,6 +947,7 @@ export async function find(...inputs: findInput): findOutput {
 
 	return {
 		data: await parseMessageDatabaseChatTableRows(rows, {
+			account,
 			chat,
 			databases,
 			parseReplyMessage,
@@ -952,29 +972,31 @@ export async function allVerify(...inputs: allVerifyInput): allVerifyOutput {
 		throw new Error("message databases are not found");
 	}
 
-	const rows = dbs
-		.map((database) => {
-			try {
-				const databaseTables = database
-					.select({
-						name: sql<string>`name`,
-					})
-					.from(sql`sqlite_master`)
-					.where(and(eq(sql`type`, "table"), like(sql`name`, "Hello_%")))
-					.all();
+	const rows = (
+		await Promise.all(
+			dbs.map(async (database) => {
+				try {
+					const databaseTables = await database
+						.select({
+							name: sql<string>`name`,
+						})
+						.from(sql`sqlite_master`)
+						.where(and(eq(sql`type`, "table"), like(sql`name`, "Hello_%")))
+						.all();
 
-				const helloTable = getHelloTable(databaseTables[0].name);
+					const helloTable = getHelloTable(databaseTables[0].name);
 
-				return database
-					.select(helloTableSelect(helloTable))
-					.from(helloTable)
-					.orderBy(desc(helloTable.CreateTime))
-					.all();
-			} catch (error) {
-				return [];
-			}
-		})
-		.filter((row) => row.length > 0)[0];
+					return await database
+						.select(helloTableSelect(helloTable))
+						.from(helloTable)
+						.orderBy(desc(helloTable.CreateTime))
+						.all();
+				} catch (error) {
+					return [];
+				}
+			}),
+		)
+	).filter((row) => row.length > 0)[0];
 
 	return {
 		data: transformHelloTableRowToMessage(rows),
