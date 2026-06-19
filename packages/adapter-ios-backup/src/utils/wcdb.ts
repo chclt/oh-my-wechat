@@ -29,10 +29,7 @@ interface WCDBType {
 			databaseSeries: WCDBDatabaseSeriesName;
 			tableSeries: WCDBTableSeriesName;
 		},
-	) => Promise<{
-		result: DataType;
-		errors: { rowIndex: number }[];
-	}>;
+	) => Promise<{ result: DataType; errors: { rowIndex: number }[] }>;
 }
 
 const WCDB: WCDBType = {

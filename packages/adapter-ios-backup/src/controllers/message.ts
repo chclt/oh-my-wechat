@@ -575,12 +575,12 @@ export async function all(...inputs: AllInput): AllOutput {
 
 							const rows = query.all();
 
-              return fallbackUnsupportedMessageQueryRows(
-                await WCDB.postProcess(rows, {
-                  databaseSeries: WCDBDatabaseSeriesName.Message,
-                  tableSeries: WCDBTableSeriesName.Chat,
-                }),
-              );
+							return fallbackUnsupportedMessageQueryRows(
+								await WCDB.postProcess(rows, {
+									databaseSeries: WCDBDatabaseSeriesName.Message,
+									tableSeries: WCDBTableSeriesName.Chat,
+								}),
+							);
 						} else if (cursor_condition === "<>") {
 							const baseLeftQueryWhereSegmentConditions = [
 								sql`${chatTable.CreateTime} < ${cursor_value}`,
@@ -632,12 +632,12 @@ export async function all(...inputs: AllInput): AllOutput {
 
 							const rows = query.all() as unknown as ChatTableSelectInfer[];
 
-              return fallbackUnsupportedMessageQueryRows(
-                await WCDB.postProcess(rows, {
-                  databaseSeries: WCDBDatabaseSeriesName.Message,
-                  tableSeries: WCDBTableSeriesName.Chat,
-                }),
-              );
+							return fallbackUnsupportedMessageQueryRows(
+								await WCDB.postProcess(rows, {
+									databaseSeries: WCDBDatabaseSeriesName.Message,
+									tableSeries: WCDBTableSeriesName.Chat,
+								}),
+							);
 						}
 					} else {
 						// 没有游标的时候查询最新的数据但是按时间正序排列
@@ -658,12 +658,12 @@ export async function all(...inputs: AllInput): AllOutput {
 
 						const rows = query.all();
 
-            return fallbackUnsupportedMessageQueryRows(
-              await WCDB.postProcess(rows, {
-                databaseSeries: WCDBDatabaseSeriesName.Message,
-                tableSeries: WCDBTableSeriesName.Chat,
-              }),
-            );
+						return fallbackUnsupportedMessageQueryRows(
+							await WCDB.postProcess(rows, {
+								databaseSeries: WCDBDatabaseSeriesName.Message,
+								tableSeries: WCDBTableSeriesName.Chat,
+							}),
+						);
 					}
 				} catch (e) {
 					if (e instanceof Error && e.message.startsWith("no such table")) {
@@ -903,7 +903,7 @@ export async function find(...inputs: findInput): findOutput {
 						await WCDB.postProcess(rows, {
 							databaseSeries: WCDBDatabaseSeriesName.Message,
 							tableSeries: WCDBTableSeriesName.Chat,
-            }),
+						}),
 					);
 				} catch (error) {
 					return [];
