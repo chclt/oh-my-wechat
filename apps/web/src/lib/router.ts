@@ -26,7 +26,7 @@ const accountContactModalToAccountRootMask = createRouteMask({
 
 const router = createRouter({
 	routeTree,
-	history: memoryHistory,
+	...(import.meta.env.DEV ? {} : { history: memoryHistory }),
 	routeMasks: [accountContactModalToAccountRootMask],
 });
 

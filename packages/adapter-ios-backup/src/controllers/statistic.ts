@@ -93,11 +93,17 @@ export interface ChatStatistics {
 	}[];
 }
 
-export type GetInput = [GetStatisticRequest, { databases: WCDatabases }];
+export type GetInput = [
+	GetStatisticRequest,
+	{ account: UserType; databases: WCDatabases },
+];
 export type GetOutput = Promise<DataAdapterResponse<ChatStatistics>>;
 
 export async function get(...inputs: GetInput): GetOutput {
-	const [{ account, chat, startTime, endTime }, { databases }] = inputs;
+	const [
+		{ account, chat, startTime, endTime },
+		{ account: currentAccount, databases },
+	] = inputs;
 
 	const dbs = databases.message;
 	if (!dbs) throw new Error("message databases is not found");
@@ -485,6 +491,7 @@ export async function get(...inputs: GetInput): GetOutput {
 				limit,
 			},
 			{
+				account: currentAccount,
 				databases,
 			},
 		);
@@ -547,6 +554,7 @@ export async function get(...inputs: GetInput): GetOutput {
 				limit,
 			},
 			{
+				account: currentAccount,
 				databases,
 			},
 		);

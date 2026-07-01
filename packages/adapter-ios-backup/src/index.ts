@@ -15,11 +15,14 @@ import {
 	GetRecordFileRequest,
 	GetRecordImageRequest,
 	GetRecordVideoRequest,
+	GetMessageSearchIndexStatusRequest,
+	GetMessageSearchIndexStatusResponse,
 	GetStatisticRequest,
 	GetUserListRequest,
 	GetUserRequest,
 	ReleaseMessageFileRequest,
 	ResolveMessageFileRequest,
+	SearchMessagesRequest,
 } from "@repo/types/adapter";
 import * as Comlink from "comlink";
 import type { AdapterWorkerType } from "./worker.ts";
@@ -202,6 +205,23 @@ export default class IosBackupAdapter implements DataAdapter {
 		return withCommonWrapper(
 			() => this._workerAdapter.getStatistic(input),
 			"getStatistic",
+		);
+	}
+
+	async searchMessages(input: SearchMessagesRequest) {
+		return withCommonWrapper(
+			() => this._workerAdapter.searchMessages(input),
+			"searchMessages",
+		);
+	}
+
+	async getMessageSearchIndexStatus(
+		_input: GetMessageSearchIndexStatusRequest,
+	): GetMessageSearchIndexStatusResponse {
+		return withCommonWrapper(
+			() =>
+				this._workerAdapter.getMessageSearchIndexStatus() as GetMessageSearchIndexStatusResponse,
+			"getMessageSearchIndexStatus",
 		);
 	}
 }

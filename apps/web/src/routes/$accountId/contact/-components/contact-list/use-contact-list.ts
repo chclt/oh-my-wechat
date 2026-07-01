@@ -1,7 +1,10 @@
 import { ContactType } from "@repo/types";
 import specialBrandIdRaw from "@/assets/specialBrandUserNames.csv?raw";
 
-const specialBrandIds = specialBrandIdRaw.split("\n").map((i) => i.trim());
+// TODO: 从这里导出不合适
+export const specialBrandIds = specialBrandIdRaw
+	.split("\n")
+	.map((i) => i.trim());
 
 export type ContactListContctItem = {
 	type: "contact";
@@ -32,7 +35,8 @@ type UseContactListReturnValue = {
 	serviceAccount: ContactListContctItem[];
 };
 
-const IgnoredContactIds = [
+// TODO: 从这里导出不合适
+export const IgnoredContactIds = [
 	"chatroom_session_box", // 折叠的聊天
 	"brandsessionholder", // 订阅号消息
 	"brandservicesessionholder", // 服务号消息

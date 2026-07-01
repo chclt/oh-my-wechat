@@ -25,7 +25,11 @@ export default defineConfig({
 			autoCodeSplitting: true,
 		}),
 		tailwindcss(),
-		react(),
+		react({
+			babel: {
+				plugins: ["babel-plugin-react-compiler"],
+			},
+		}),
 	],
 	resolve: {
 		alias: {

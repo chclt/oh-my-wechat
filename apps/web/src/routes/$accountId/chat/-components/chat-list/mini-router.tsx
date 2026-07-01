@@ -2,7 +2,9 @@ import { useMemo } from "react";
 import { MiniRouter } from "@/components/mini-router";
 import { Route } from "../../route";
 import ChatGroupList from "./chat-group-list";
-import ChatList, { ChatListMiniRouteState } from "./chat-list";
+import ChatListWithContentSearch, {
+	ChatListMiniRouteState,
+} from "./chat-list-with-content-search";
 
 export default function ChatListMiniRouter() {
 	const { accountId } = Route.useParams();
@@ -10,7 +12,7 @@ export default function ChatListMiniRouter() {
 	const miniRoutes = {
 		root: {
 			name: "root",
-			routeComponent: <ChatList />,
+			routeComponent: <ChatListWithContentSearch />,
 		},
 		chatGroupList: {
 			name: "chatGroupList",

@@ -1,10 +1,12 @@
-import { SQLJsDatabase } from "drizzle-orm/sql-js";
+import type { SqliteRemoteDatabase } from "drizzle-orm/sqlite-proxy";
+
+type SQLiteDatabase = SqliteRemoteDatabase<Record<string, never>>;
 
 export interface WCDatabases {
-	manifest?: SQLJsDatabase;
-	session?: SQLJsDatabase;
-	message?: SQLJsDatabase[];
-	WCDB_Contact?: SQLJsDatabase;
+	manifest?: SQLiteDatabase;
+	session?: SQLiteDatabase;
+	message?: SQLiteDatabase[];
+	WCDB_Contact?: SQLiteDatabase;
 }
 
 export type WCDatabaseNames = keyof WCDatabases;

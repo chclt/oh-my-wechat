@@ -10,11 +10,18 @@ import { ChatSuspenseQueryOptions } from "@/lib/fetchers/chat";
 import { MessageListInfiniteQueryOptions } from "@/lib/fetchers/message";
 import { UserSuspenseQueryOptions } from "@/lib/fetchers/user";
 import router from "@/lib/router";
-import { cn } from "@/lib/utils";
+import { cn, parseOptionalString } from "@/lib/utils";
 import { ChatMediaCarousel } from "./-components/chat-media-carousel";
 import MessageList from "./-components/message-list";
 
+export interface RouteSearchParams {
+	messageLocalId?: string;
+}
+
 export const Route = createFileRoute("/$accountId/chat/$chatId")({
+	validateSearch: (search): RouteSearchParams => ({
+		messageLocalId: parseOptionalString(search.messageLocalId),
+	}),
 	component: RouteComponent,
 	pendingComponent: () => <RoutePlaceholderComponent message="加载中" />,
 	errorComponent: () => <RoutePlaceholderComponent />,

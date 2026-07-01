@@ -3,6 +3,22 @@ import type { UseSuspenseQueryOptions } from "@tanstack/react-query";
 import { getDataAdapter } from "../data-adapter.ts";
 import queryClient from "../query-client";
 
+export function ChatListQueryOptions(
+	accountId: string,
+	chatIds?: string[],
+): UseSuspenseQueryOptions<ChatType[]> {
+	return {
+		queryKey: [
+			`account: ${accountId}`,
+			chatIds ? `chatList: ${chatIds.join(",")}` : "chatList",
+		],
+		queryFn: () =>
+			getDataAdapter()
+				.getChatList(chatIds ? { userIds: chatIds } : {})
+				.then((res) => res.data),
+	};
+}
+
 export function ChatListSuspenseQueryOptions(
 	accountId: string,
 ): UseSuspenseQueryOptions<ChatType[]> {

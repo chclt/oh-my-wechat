@@ -67,7 +67,7 @@ export default function GreetingMessageList() {
 						"[&_[data-slot='scroll-area-scrollbar']]:z-30 [&_[data-slot='scroll-area-scrollbar']]:top-16!",
 					)}
 				>
-					<header className="sticky z-30 top-0 h-16 px-5 ps-2.5 flex items-center bg-background/80 border-b border-muted backdrop-blur-xl">
+					<header className="sticky z-30 top-0 h-16 px-5 ps-2.5 flex items-center texture border-b border-muted">
 						<Button
 							size="icon"
 							variant="ghost"
