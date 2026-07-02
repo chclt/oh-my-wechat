@@ -6,12 +6,10 @@ import { devtools } from "@tanstack/devtools-vite";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
-import htmlSecurity from "./vite/html-security";
 
 // https://vitejs.dev/config/
 export default defineConfig({
 	plugins: [
-		htmlSecurity(),
 		typesPresets(),
 		adapterIosBackupVitePresets(),
 		devtools({
