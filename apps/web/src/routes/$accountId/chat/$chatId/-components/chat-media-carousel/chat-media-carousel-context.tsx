@@ -1,11 +1,5 @@
 import { MessageType } from "@repo/types";
-import {
-	createContext,
-	Dispatch,
-	RefObject,
-	SetStateAction,
-	useContext,
-} from "react";
+import { createContext, useContext } from "react";
 
 interface ChatMediaCarouselContextApi {
 	openChatMediaCarousel: (message: MessageType) => void;
@@ -15,10 +9,8 @@ export interface ChatMediaCarouselContextProps extends ChatMediaCarouselContextA
 	account: { id: string };
 	chat: { id: string };
 
-	isDialogOpen: boolean;
-	setIsDialogOpen: Dispatch<SetStateAction<boolean>>;
-
-	initialMessageRef: RefObject<MessageType | null>;
+	initialMessage: MessageType | null;
+	closeChatMediaCarousel: () => void;
 }
 
 export const ChatMediaCarouselContext =

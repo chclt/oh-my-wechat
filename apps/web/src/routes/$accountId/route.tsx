@@ -3,6 +3,7 @@ import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import {
 	createFileRoute,
 	Link,
+	Navigate,
 	Outlet,
 	useCanGoBack,
 	useNavigate,
@@ -32,6 +33,11 @@ export const Route = createFileRoute("/$accountId")({
 
 		return validatedSearch;
 	},
+
+	errorComponent: ({ error }) =>
+		error.message === "Data adapter not set" ? (
+			<Navigate to="/" replace />
+		) : null,
 });
 
 function RouteComponent() {
@@ -45,9 +51,10 @@ function RouteComponent() {
 	const handleNavigateToContact = () => {
 		navigate({
 			to: ".",
-			search: {
+			search: (search) => ({
+				...search,
 				modal: AccountSearchModalOptions.CONTACT,
-			},
+			}),
 			mask: {
 				to: "/$accountId/contact",
 				params: { accountId },

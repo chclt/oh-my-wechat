@@ -1,8 +1,31 @@
-export interface ScrollAreaViewportRelativePosition {
-	referenceMessageUri: string;
-	/**
-	 * viewport 中心相对 referenceMessageUri 对应 item 中心的归一化偏移。
-	 * 0 表示两个中心对齐，-1 / 1 表示 viewport 中心位于该 item 的左 / 右边缘。
-	 */
-	offsetProgress: number;
+import type { Virtualizer } from "@tanstack/react-virtual";
+import type { UIEventHandler } from "react";
+
+export type CarouselKind = "detail" | "thumb";
+export type CarouselVirtualizer = Virtualizer<HTMLDivElement, Element>;
+
+export interface CarouselGeometry {
+	itemSize: number;
+	viewportSize: number;
+	padding: number;
+}
+
+/** A stable message identity plus the viewport center's offset in item widths. */
+export interface CarouselPosition {
+	messageKey: string;
+	progress: number;
+}
+
+export interface CarouselViewportBindings {
+	ref: (element: HTMLDivElement | null) => void;
+	onScroll: UIEventHandler<HTMLDivElement>;
+	onInteraction: () => void;
+	isReady: boolean;
+	isSnapEnabled: boolean;
+	padding: number;
+}
+
+export interface CarouselView {
+	virtualizer: CarouselVirtualizer;
+	viewport: CarouselViewportBindings;
 }

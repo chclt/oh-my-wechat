@@ -7,6 +7,8 @@ import type { RedEnvelopeMessageProps } from "./types";
 
 export function RedEnvelopeMessageDefault({
 	message,
+	className,
+	style,
 	...props
 }: RedEnvelopeMessageProps) {
 	const { accountId } = useAccount();
@@ -37,8 +39,12 @@ export function RedEnvelopeMessageDefault({
 	if (hasRedEnvelopeCover) {
 		return (
 			<div
-				className="w-64"
-				data-red-envelope-decoration={hasCoverDecoration}
+				className={cn(
+					"w-64 max-w-full",
+					hasCoverDecoration && "data-[show-username=true]:-mt-[8.33333333%]",
+					className,
+				)}
+				style={style}
 				{...props}
 			>
 				<div className={cn(hasCoverDecoration && "pt-[8.33333333%]")}>
@@ -90,7 +96,11 @@ export function RedEnvelopeMessageDefault({
 	} else {
 		return (
 			<div
-				className="max-w-[20em] w-fit py-4 pl-4 pr-6 flex gap-4 items-center bg-white rounded-2xl border border-neutral-200"
+				className={cn(
+					"max-w-[20em] w-fit py-4 pl-4 pr-6 flex gap-4 items-center bg-white rounded-2xl border border-neutral-200",
+					className,
+				)}
+				style={style}
 				{...props}
 			>
 				<div className={"shrink-0 size-10"}>

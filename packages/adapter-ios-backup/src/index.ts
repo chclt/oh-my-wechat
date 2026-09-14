@@ -15,11 +15,15 @@ import {
 	GetRecordFileRequest,
 	GetRecordImageRequest,
 	GetRecordVideoRequest,
+	GetMessageSearchIndexStatusRequest,
+	GetMessageSearchIndexStatusResponse,
 	GetStatisticRequest,
 	GetUserListRequest,
 	GetUserRequest,
 	ReleaseMessageFileRequest,
 	ResolveMessageFileRequest,
+	SearchChatsRequest,
+	SearchMessagesRequest,
 } from "@repo/types/adapter";
 import * as Comlink from "comlink";
 import type { AdapterWorkerType } from "./worker.ts";
@@ -104,6 +108,13 @@ export default class IosBackupAdapter implements DataAdapter {
 		return withCommonWrapper(
 			() => this._workerAdapter.getChatList(input),
 			"getChatList",
+		);
+	}
+
+	async searchChats(input: SearchChatsRequest) {
+		return withCommonWrapper(
+			() => this._workerAdapter.searchChats(input),
+			"searchChats",
 		);
 	}
 
@@ -202,6 +213,22 @@ export default class IosBackupAdapter implements DataAdapter {
 		return withCommonWrapper(
 			() => this._workerAdapter.getStatistic(input),
 			"getStatistic",
+		);
+	}
+
+	async searchMessages(input: SearchMessagesRequest) {
+		return withCommonWrapper(
+			() => this._workerAdapter.searchMessages(input),
+			"searchMessages",
+		);
+	}
+
+	async getMessageSearchIndexStatus(
+		input: GetMessageSearchIndexStatusRequest,
+	): GetMessageSearchIndexStatusResponse {
+		return withCommonWrapper<Awaited<GetMessageSearchIndexStatusResponse>>(
+			() => this._workerAdapter.getMessageSearchIndexStatus(input),
+			"getMessageSearchIndexStatus",
 		);
 	}
 }

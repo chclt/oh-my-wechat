@@ -1,23 +1,25 @@
 import { Dialog } from "@base-ui/react";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { MessageType } from "@repo/types";
-import { CrossCircleSolid } from "@/components/icon.tsx";
+import { CrossCircleSolid, LoaderIcon } from "@/components/icon.tsx";
 import dialogClasses from "@/components/ui/dialog.module.css";
 import { cn } from "@/lib/utils";
-import { CarouselScrollViewportContext } from "./carousel-scroll-viewport-context.tsx";
 import { useChatMediaCarouselContext } from "./chat-media-carousel-context.tsx";
 import DetailCarousel from "./detail-carousel";
 import ThumbCarousel from "./thumb-carousel";
 import { useMediaCarousel } from "./use-media-carousel";
+import { createMessageURI } from "./utils";
 
 export default function ChatMediaCarouselDialog() {
-	const { account, chat, isDialogOpen, setIsDialogOpen, initialMessageRef } =
+	const { account, chat, initialMessage, closeChatMediaCarousel } =
 		useChatMediaCarouselContext();
 
 	return (
 		<Dialog.Root
-			open={isDialogOpen}
-			onOpenChange={(open) => setIsDialogOpen(open)}
+			open={initialMessage !== null}
+			onOpenChange={(open) => {
+				if (!open) closeChatMediaCarousel();
+			}}
 		>
 			<Dialog.Portal>
 				<Dialog.Backdrop
@@ -34,16 +36,19 @@ export default function ChatMediaCarouselDialog() {
 							<Dialog.Description>媒体文件浏览器</Dialog.Description>
 						</VisuallyHidden>
 
-						{isDialogOpen && (
+						{initialMessage && (
 							<MediaCarouselDialogContent
 								account={account}
 								chat={chat}
-								isDialogOpen={isDialogOpen}
-								initialMessageRef={initialMessageRef}
+								key={createMessageURI({ account, message: initialMessage })}
+								initialMessage={initialMessage}
 							/>
 						)}
 
-						<Dialog.Close className="absolute top-4 end-4 p-4 cursor-pointer text-white/50 hover:text-white/80">
+						<Dialog.Close
+							aria-label="关闭媒体浏览器"
+							className="absolute top-4 end-4 p-4 cursor-pointer text-white/50 hover:text-white/80"
+						>
 							<CrossCircleSolid className="size-8 inset-0 m-auto" />
 						</Dialog.Close>
 					</Dialog.Popup>
@@ -56,54 +61,53 @@ export default function ChatMediaCarouselDialog() {
 interface MediaCarouselDialogContentProps {
 	account: { id: string };
 	chat: { id: string };
-	isDialogOpen: boolean;
-	initialMessageRef: React.RefObject<MessageType | null>;
+	initialMessage: MessageType;
 }
 
-/**
- * 把 dialog 的“内容”和“开关”分成两个组件，
- * 这样每次 dialog 关闭再打开时 useMediaCarousel 会被整体重建，
- * 内部的两个 virtualizer 也跟着重建——和 “每次打开都是全新状态机” 的语义保持一致。
- *
- * TODO: 后续如果要跨打开复用 measurements 缓存，
- * 把 hook 上提到外层组件并保留 ref，再把缓存传进 useVirtualizer 的 initialMeasurementsCache。
- */
-function MediaCarouselDialogContent({
-	account,
-	chat,
-	isDialogOpen,
-	initialMessageRef,
-}: MediaCarouselDialogContentProps) {
-	const carousel = useMediaCarousel({
-		account,
-		chat,
-		isDialogOpen,
-		initialMessage: initialMessageRef.current,
-		// debug: true,
-	});
-
+// Mounting starts one browsing session; closing or opening a different message
+// disposes its virtualizers and position controller together.
+function MediaCarouselDialogContent(props: MediaCarouselDialogContentProps) {
+	const carousel = useMediaCarousel(props);
 	return (
-		<CarouselScrollViewportContext value={carousel.scrollLockContextValue}>
+		<>
 			<DetailCarousel
-				account={account}
-				virtualizer={carousel.detail.virtualizer}
-				viewportRef={carousel.detail.viewportRef}
-				itemSize={carousel.detail.itemSize}
-				onScroll={carousel.detail.onScroll}
+				view={carousel.detail}
 				messages={carousel.messages}
 				hasPreviousPage={carousel.hasPreviousPage}
 				hasNextPage={carousel.hasNextPage}
+				onPrevious={carousel.previous}
+				onNext={carousel.next}
 			/>
-
 			<ThumbCarousel
-				account={account}
-				virtualizer={carousel.thumb.virtualizer}
-				viewportRef={carousel.thumb.viewportRef}
-				onScroll={carousel.thumb.onScroll}
+				view={carousel.thumb}
 				messages={carousel.messages}
 				hasPreviousPage={carousel.hasPreviousPage}
 				hasNextPage={carousel.hasNextPage}
 			/>
-		</CarouselScrollViewportContext>
+			{carousel.error ? (
+				<div
+					role="alert"
+					className="absolute top-6 inset-x-24 flex items-center justify-center gap-3 text-sm text-white"
+				>
+					<span>{carousel.error}</span>
+					<button
+						type="button"
+						onClick={carousel.retry}
+						disabled={carousel.isFetching}
+						className="underline cursor-pointer disabled:opacity-50"
+					>
+						重试
+					</button>
+				</div>
+			) : carousel.isLoading ? (
+				<div
+					role="status"
+					className="absolute inset-0 m-auto size-8 text-white pointer-events-none"
+				>
+					<LoaderIcon className="size-8 animate-spin" />
+					<span className="sr-only">正在加载媒体</span>
+				</div>
+			) : null}
+		</>
 	);
 }

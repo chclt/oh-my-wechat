@@ -1,5 +1,5 @@
 import { MessageType } from "@repo/types";
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import {
 	ChatMediaCarouselContext,
 	ChatMediaCarouselContextProps,
@@ -17,24 +17,20 @@ export default function ChatMediaCarouselRoot({
 	chat,
 	children,
 }: ChatMediaCarouselRootProps) {
-	const [isDialogOpen, setIsDialogOpen] = useState(false);
-
-	const initialMessageRef = useRef<MessageType | null>(null);
-
+	const [initialMessage, setInitialMessage] = useState<MessageType | null>(
+		null,
+	);
 	const openChatMediaCarousel: ChatMediaCarouselContextProps["openChatMediaCarousel"] =
-		(message) => {
-			initialMessageRef.current = message;
-			setIsDialogOpen(true);
-		};
+		setInitialMessage;
+	const closeChatMediaCarousel = () => setInitialMessage(null);
 
 	return (
 		<ChatMediaCarouselContext
 			value={{
 				account,
 				chat,
-				isDialogOpen,
-				setIsDialogOpen,
-				initialMessageRef,
+				initialMessage,
+				closeChatMediaCarousel,
 				openChatMediaCarousel,
 			}}
 		>

@@ -1,168 +1,339 @@
-import {
-	OpenMessageTypeEnum,
-	MessageTypeEnum,
-	type MessageType,
-} from "@repo/types";
-import { DataAdapterCursorPagination } from "@repo/types/adapter";
-import {
+import { MessageDirection, type MessageType } from "@repo/types";
+import type { DataAdapterCursorPagination } from "@repo/types/adapter";
+import type {
 	InfiniteData,
 	UseInfiniteQueryResult,
-	useSuspenseQuery,
 } from "@tanstack/react-query";
-import { differenceInMinutes, format, isSameDay } from "date-fns";
-import React, { HTMLAttributes } from "react";
-import { MessageBubbleGroup } from "@/components/message-bubble-group";
+import { format } from "date-fns";
+import { Fragment, useMemo, useRef, useState, type RefObject } from "react";
+import { useChatUiConfig } from "@/components/chat-ui-config-provider";
+import { LoaderIcon } from "@/components/icon";
 import Message from "@/components/message/message";
-import { ChatSuspenseQueryOptions } from "@/lib/fetchers/chat";
-import { Route } from "../route";
-import { useChatMediaCarouselContext } from "./chat-media-carousel/chat-media-carousel-context";
+import User from "@/components/user";
+import { cn } from "@/lib/utils";
+import {
+	getMessageTargetKey,
+	type MessageListTarget,
+} from "../../-lib/message-target";
+import { MessageListHighlight } from "./message-list-highlight";
+import {
+	createMessageListItems,
+	getMessageAvatarBounds,
+	getMessageHighlightBounds,
+	MESSAGE_LIST_ITEM_PADDING,
+	MESSAGE_LIST_USERNAME_HEIGHT,
+} from "./message-list-items";
+import { createMessageListLayout } from "./message-list-layout";
+import type { MessageScrollOrigin } from "./message-list-scroll";
+import { useMessageListPagination } from "./use-message-list-pagination";
+import {
+	matchesPositionRequest,
+	useMessageListPosition,
+	type PositionRequest,
+} from "./use-message-list-position";
+import {
+	useMessageListVirtualizer,
+	type MessageListGeometry,
+} from "./use-message-list-virtualizer";
 
-interface MessageListProps extends HTMLAttributes<HTMLDivElement> {
+interface MessageListProps {
 	messageListInfiniteQueryResult: UseInfiniteQueryResult<
 		InfiniteData<DataAdapterCursorPagination<MessageType[]>, unknown>,
 		Error
 	>;
+	viewport: HTMLDivElement | null;
+	target?: MessageListTarget;
+	positionRequestId?: string;
+	scrollOriginRef?: RefObject<MessageScrollOrigin | null>;
+	positionEnabled?: boolean;
+	visible?: boolean;
+	onPrepared?: (valid: boolean) => void;
 }
 
 export default function MessageList({
-	messageListInfiniteQueryResult,
+	messageListInfiniteQueryResult: query,
+	viewport,
+	target,
+	positionRequestId,
+	scrollOriginRef,
+	positionEnabled = true,
+	visible = true,
+	onPrepared,
 }: MessageListProps) {
-	const { accountId, chatId } = Route.useParams();
-
-	const { data: chat } = useSuspenseQuery(
-		ChatSuspenseQueryOptions(accountId, chatId),
+	"use no memo";
+	const { showUsername, showPhoto } = useChatUiConfig();
+	const layout = useMemo(
+		() =>
+			createMessageListLayout(
+				query.data?.pages.flatMap((page) => page.data) ?? [],
+			),
+		[query.data?.pages],
+	);
+	const { items, avatars } = useMemo(
+		() => createMessageListItems(layout, showUsername),
+		[layout, showUsername],
+	);
+	const targetKey = getMessageTargetKey(target);
+	const targetIndex = useMemo(
+		() =>
+			target
+				? layout.rows.findIndex(
+						(row) => row.message.local_id === target.messageLocalId,
+					)
+				: -1,
+		[layout.rows, target],
+	);
+	const geometryRef = useRef<MessageListGeometry | null>(null);
+	const [highlight, setHighlight] = useState<PositionRequest | null>(null);
+	const position = useMessageListPosition(
+		geometryRef,
+		viewport,
+		targetKey,
+		targetIndex,
+		items,
+		positionRequestId,
+		{
+			enabled: positionEnabled,
+			visible,
+			scrollOriginRef,
+			onPrepared,
+			onTargetReady: setHighlight,
+		},
+	);
+	const geometry = useMessageListVirtualizer(items, viewport, {
+		targetIndex,
+		positioning: position.pending,
+		behavior: position.behavior,
+		initialDirection: position.initialDirection,
+		scrollToFn: position.scrollToFn,
+		onScroll: position.onScroll,
+	});
+	geometryRef.current = geometry;
+	const { virtualizer, retainFocusedItem } = geometry;
+	const highlightedTarget =
+		positionEnabled &&
+		matchesPositionRequest(highlight, targetKey, positionRequestId)
+			? highlight
+			: null;
+	const virtualItems = virtualizer.getVirtualItems();
+	const highlightedItem = highlightedTarget
+		? virtualizer.measurementsCache[targetIndex]
+		: undefined;
+	const highlightBounds = highlightedItem
+		? getMessageHighlightBounds(
+				targetIndex,
+				items,
+				virtualizer.measurementsCache,
+			)
+		: undefined;
+	const visibleGroups = new Set(
+		virtualItems.flatMap(({ index }) => {
+			const group = items[index].row.senderGroupIndex;
+			return group === undefined ? [] : [group];
+		}),
 	);
 
-	const isChatroom = chat.type === "chatroom";
-
-	const { data = { pages: [], pageParams: [] } } =
-		messageListInfiniteQueryResult;
-
-	const { openChatMediaCarousel } = useChatMediaCarouselContext();
+	useMessageListPagination(
+		query,
+		visible && !position.pending,
+		virtualizer.range?.startIndex,
+		virtualizer.range?.endIndex,
+		items.length,
+	);
 
 	return (
-		<>
-			{data.pages
-				.flatMap((pageData) => pageData.data)
-				.reduce(
-					(messagesGroupByTimeAndUser, message, index, messageArray) => {
-						const prevMessage = messageArray[index - 1];
+		<div
+			role="list"
+			aria-label="聊天记录"
+			aria-busy={position.pending}
+			className="relative isolate mx-auto max-w-3xl"
+			style={{
+				height: virtualizer.getTotalSize(),
+				visibility: position.hidden ? "hidden" : undefined,
+			}}
+		>
+			{highlightBounds && highlightedTarget && (
+				<MessageListHighlight
+					key={JSON.stringify([
+						highlightedTarget.targetKey,
+						highlightedTarget.requestId,
+					])}
+					{...highlightBounds}
+				/>
+			)}
+			{query.hasPreviousPage && (
+				<PageStatus
+					position="top"
+					failed={query.isFetchPreviousPageError}
+					onRetry={() => void query.fetchPreviousPage({ cancelRefetch: false })}
+				/>
+			)}
+			{virtualItems.map((virtualItem) => {
+				const item = items[virtualItem.index];
+				const { message, isSenderGroupStart, senderGroupIndex } = item.row;
+				const outgoing = message.direction === MessageDirection.outgoing;
+				const grouped = senderGroupIndex !== undefined;
+				const bodyClassName = cn(
+					grouped && (outgoing ? "ms-14" : "me-14"),
+					grouped && showPhoto && (outgoing ? "me-14" : "ms-14"),
+				);
 
-						let anchor: Array<unknown> = messagesGroupByTimeAndUser; // 把消息插入到哪个位置
-
-						const date = new Date(message.date * 1000);
-						const prevDate = prevMessage
-							? new Date(prevMessage.date * 1000)
-							: undefined;
-
-						const isSameDate = prevDate && isSameDay(date, prevDate);
-						const timeDiff = prevDate
-							? differenceInMinutes(date, prevDate)
-							: undefined;
-
-						if (!isSameDate || (timeDiff && timeDiff > 15)) {
-							anchor.push([]);
-						}
-
-						anchor = anchor[anchor.length - 1] as Array<unknown>;
-
-						const user = message.from;
-						const prevUser = prevMessage?.from;
-						const isSameUser = user && prevUser && user.id === prevUser.id;
-
-						const isMessageGroupable = (message: MessageType) => {
-							if (message.type === MessageTypeEnum.APP) {
-								return ![
-									OpenMessageTypeEnum.PAT,
-									OpenMessageTypeEnum.RINGTONE,
-								].includes(message.message_entity.msg.appmsg.type as number);
-							}
-
-							return ![
-								MessageTypeEnum.SYSTEM,
-								MessageTypeEnum.SYSTEM_EXTENDED,
-							].includes(message.type);
-						};
-
-						const isGroupable = isMessageGroupable(message);
-						const isPrevGroupable =
-							prevMessage && isMessageGroupable(prevMessage);
-
-						if (isSameUser && isPrevGroupable && isGroupable) {
-							if (anchor.length > 0) {
-								anchor = anchor[anchor.length - 1] as Array<unknown>;
-							} else {
-								anchor.push([]);
-								anchor = anchor[anchor.length - 1] as Array<unknown>;
-							}
-						} else if (user && isGroupable) {
-							anchor.push([]);
-							anchor = anchor[anchor.length - 1] as Array<unknown>;
-						}
-
-						anchor.push(message);
-
-						return messagesGroupByTimeAndUser;
-					},
-					[] as (MessageType | MessageType[])[][],
-				)
-				.map((messagesGroupByTime) => {
-					const firstElement = messagesGroupByTime[0];
-					const isMessageGroup = Array.isArray(firstElement);
-					const firstMessage = isMessageGroup ? firstElement[0] : firstElement;
-
+				return (
+					<Fragment key={item.key}>
+						{item.timePaddingTop !== undefined && (
+							<div
+								data-message-kind="time"
+								className="absolute inset-x-4 top-0 text-center text-sm leading-5 text-neutral-600"
+								style={{
+									transform: `translateY(${virtualItem.start + MESSAGE_LIST_ITEM_PADDING - item.leadingSize}px)`,
+									paddingTop: item.timePaddingTop,
+								}}
+							>
+								<time dateTime={new Date(message.date * 1000).toISOString()}>
+									{format(new Date(message.date * 1000), "yyyy/MM/dd HH:mm")}
+								</time>
+							</div>
+						)}
+						{item.showUsername && (
+							<div
+								data-message-kind="sender"
+								aria-hidden="true"
+								className="absolute inset-x-4 top-0"
+								style={{
+									transform: `translateY(${virtualItem.start + MESSAGE_LIST_ITEM_PADDING - MESSAGE_LIST_USERNAME_HEIGHT + 1}px)`,
+								}}
+							>
+								<div className={cn("relative", bodyClassName)}>
+									<User.Username
+										user={message.from}
+										variant="default"
+										className={cn(
+											"absolute top-0 max-w-full truncate text-[13px] leading-[14px] text-neutral-500",
+											outgoing ? "end-0.5" : "start-0.5",
+										)}
+									/>
+								</div>
+							</div>
+						)}
+						<div
+							ref={virtualizer.measureElement}
+							data-index={virtualItem.index}
+							data-message-key={item.key}
+							data-message-kind="message"
+							role="listitem"
+							onFocusCapture={() => retainFocusedItem(item.key)}
+							className="absolute inset-x-4 top-0"
+							style={{
+								transform: `translateY(${virtualItem.start}px)`,
+								paddingTop: MESSAGE_LIST_ITEM_PADDING,
+								paddingBottom: item.trailingSize + MESSAGE_LIST_ITEM_PADDING,
+							}}
+						>
+							<div
+								className={cn(
+									"flex flex-col min-w-0",
+									bodyClassName,
+									grouped
+										? outgoing
+											? "items-end"
+											: "items-start"
+										: "items-stretch",
+									grouped && showPhoto && isSenderGroupStart && "min-h-11",
+								)}
+							>
+								{grouped && (
+									<span className="sr-only">
+										{message.from.remark ??
+											message.from.username ??
+											message.from.id}
+										：
+									</span>
+								)}
+								<div
+									data-sender-group-start={
+										grouped ? isSenderGroupStart : undefined
+									}
+									className={cn(
+										grouped ? "w-fit max-w-full" : "w-full",
+										!isSenderGroupStart &&
+											"[&>.bubble-tail-l]:after:hidden [&>.bubble-tail-r]:after:hidden",
+									)}
+								>
+									<Message
+										message={message}
+										variant="default"
+										data-show-username={item.showUsername}
+									/>
+								</div>
+							</div>
+						</div>
+					</Fragment>
+				);
+			})}
+			{showPhoto &&
+				Array.from(visibleGroups, (groupIndex) => {
+					const group = avatars[groupIndex];
+					const bounds = getMessageAvatarBounds(
+						group,
+						virtualizer.measurementsCache,
+					);
 					return (
 						<div
-							key={`${chat.id}/time:${new Date(firstMessage.date * 1000).getTime()}`}
-							className="space-y-4"
+							key={group.key}
+							data-slot="message-avatar-track"
+							aria-hidden="true"
+							className={cn(
+								"pointer-events-none absolute w-11",
+								group.row.message.direction === MessageDirection.outgoing
+									? "end-4"
+									: "start-4",
+							)}
+							style={bounds}
 						>
-							<div className={"text-center text-sm text-neutral-600"}>
-								<button
-									type="button"
-									// onClick={() => {
-									//   setCalendarMonth(new Date(firstMessage.date * 1000));
-									//   setSelectedDate(new Date(firstMessage.date * 1000));
-									//   setIsOpenCalendar(true)
-									// }}
-								>
-									{format(
-										new Date(firstMessage.date * 1000),
-										"yyyy/MM/dd HH:mm",
-									)}
-								</button>
-							</div>
-
-							{messagesGroupByTime.map((messagesGroupByUser, groupIndex) => {
-								const isMessageGroup = Array.isArray(messagesGroupByUser);
-								const firstMessage = isMessageGroup
-									? messagesGroupByUser[0]
-									: messagesGroupByUser;
-
-								const lastMessage = isMessageGroup
-									? messagesGroupByUser[messagesGroupByUser.length - 1]
-									: messagesGroupByUser;
-
-								return (
-									<React.Fragment
-										key={`${chat.id}/(${groupIndex})${firstMessage.id}-${lastMessage.id}`}
-									>
-										{isMessageGroup ? (
-											<MessageBubbleGroup
-												user={firstMessage.from}
-												messages={messagesGroupByUser}
-											/>
-										) : (
-											<Message
-												message={messagesGroupByUser}
-												variant="default"
-											/>
-										)}
-									</React.Fragment>
-								);
-							})}
+							<User.Photo
+								user={group.row.message.from}
+								variant="default"
+								className="sticky top-20"
+							/>
 						</div>
 					);
 				})}
-		</>
+			{query.hasNextPage && (
+				<PageStatus
+					position="bottom"
+					failed={query.isFetchNextPageError}
+					onRetry={() => void query.fetchNextPage({ cancelRefetch: false })}
+				/>
+			)}
+		</div>
+	);
+}
+
+function PageStatus({
+	position,
+	failed,
+	onRetry,
+}: {
+	position: "top" | "bottom";
+	failed: boolean;
+	onRetry: () => void;
+}) {
+	return (
+		<div
+			className={cn(
+				"absolute inset-x-0 flex justify-center text-neutral-400",
+				position === "top" ? "top-20" : "bottom-4",
+			)}
+		>
+			{failed ? (
+				<button type="button" className="text-sm" onClick={onRetry}>
+					加载失败，重试
+				</button>
+			) : (
+				<span role="status" aria-label="加载聊天记录">
+					<LoaderIcon className="size-5 animate-spin" />
+				</span>
+			)}
+		</div>
 	);
 }

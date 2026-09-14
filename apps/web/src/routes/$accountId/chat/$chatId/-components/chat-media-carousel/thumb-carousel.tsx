@@ -1,32 +1,29 @@
 import { ScrollArea as BaseScrollArea } from "@base-ui/react";
 import { MessageType, MessageTypeEnum } from "@repo/types";
-import { Virtualizer } from "@tanstack/react-virtual";
 import { LoaderIcon } from "@/components/icon";
 import { ImageMessage, VideoMessage } from "@/components/message";
 import scrollAreaClasses from "@/components/ui/scroll-area.module.css";
 import { cn } from "@/lib/utils";
 import { CarouselScrollViewport } from "./carousel-scroll-viewport";
-import { createMessageURI } from "./utils";
+import type { CarouselView } from "./types";
 
 interface ThumbCarouselProps {
-	account: { id: string };
-	virtualizer: Virtualizer<HTMLDivElement, Element>;
-	viewportRef: (element: HTMLDivElement | null) => void;
-	onScroll: (event: React.UIEvent<HTMLDivElement, UIEvent>) => void;
+	view: CarouselView;
 	messages: MessageType[];
 	hasPreviousPage: boolean;
 	hasNextPage: boolean;
 }
 
 export default function ThumbCarousel({
-	account,
-	virtualizer,
-	viewportRef,
-	onScroll,
+	view,
 	messages,
 	hasPreviousPage,
 	hasNextPage,
 }: ThumbCarouselProps) {
+	"use no memo";
+
+	const { virtualizer, viewport } = view;
+
 	// virtualizer enabled=false 时返回空数组，无需额外 gate。
 	const virtualItems = virtualizer.getVirtualItems();
 
@@ -36,10 +33,8 @@ export default function ThumbCarousel({
 			className={cn(scrollAreaClasses.Root, "@container overflow-hidden")}
 		>
 			<CarouselScrollViewport
-				ref={viewportRef}
-				slice="thumb"
+				viewport={viewport}
 				className={scrollAreaClasses.Viewport}
-				onScroll={onScroll}
 			>
 				<BaseScrollArea.Content
 					className={cn(scrollAreaClasses.Content, "h-24 relative")}
@@ -60,9 +55,7 @@ export default function ThumbCarousel({
 						return (
 							<div
 								key={virtualItem.key}
-								ref={virtualizer.measureElement}
-								data-index={virtualItem.index}
-								data-message-uri={createMessageURI({ message, account })}
+								data-message-uri={virtualItem.key}
 								className="absolute inset-y-0 size-24 p-2 snap-normal snap-center"
 								style={{
 									left: 0,

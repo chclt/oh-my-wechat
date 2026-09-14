@@ -1,16 +1,20 @@
 import { Buffer } from "buffer";
 import type { AccountType, UserType } from "@repo/types";
-import type { DataAdapter, DataAdapterResponse } from "@repo/types/adapter";
+import {
+	DataAdapter,
+	DataAdapterResponse,
+	GetMessageSearchIndexStatusRequest,
+	GetMessageSearchIndexStatusResponse,
+} from "@repo/types/adapter";
 import * as Comlink from "comlink";
 import CryptoJS from "crypto-js";
-import { drizzle } from "drizzle-orm/sql-js";
-import initSqlJs from "sql.js";
-import sqliteUrl from "sql.js/dist/sql-wasm.wasm?url";
 import * as ChatController from "./controllers/chat";
+import * as ChatSearchController from "./controllers/chat-search.ts";
 import * as ImageController from "./controllers/file/index.ts";
 import * as MessageController from "./controllers/message";
 import * as MessageAttachController from "./controllers/message-attach.ts";
 import * as MessageImageController from "./controllers/message-image.ts";
+import type * as MessageSearchController from "./controllers/message-search.ts";
 import * as MessageVideoController from "./controllers/message-video.ts";
 import * as MessageVoiceController from "./controllers/message-voice.ts";
 import * as RecordFileController from "./controllers/record-file.ts";
@@ -18,13 +22,22 @@ import * as RecordImageController from "./controllers/record-image.ts";
 import * as RecordVideoController from "./controllers/record-video.ts";
 import * as StatisticController from "./controllers/statistic";
 import * as UserController from "./controllers/user.ts";
-import type { WCDatabaseNames, WCDatabases } from "./types";
+import {
+	createWasmExecutor,
+	type DatabaseExecutor,
+	drizzleFromExecutor,
+} from "./database/executor.ts";
+import { MessageSearchIndex } from "./database/fts/message-search-index.ts";
+import { sessionAbstractTable } from "./database/session.ts";
+import { MessageSearchSession } from "./message-search-session.ts";
+import type { WCDatabases } from "./types";
 import {
 	getFileFromDirectory,
 	getFilesFromManifast,
 	parseLocalInfo,
 	parseUserFromMmsetting,
 } from "./utils";
+import { getSqlite3 } from "./utils/sqlite3.ts";
 globalThis.Buffer = Buffer;
 
 interface AdapterWorkerStore {
@@ -39,6 +52,8 @@ interface AdapterWorkerStore {
 	};
 	accountList: AccountType[] | undefined;
 	account: AccountType | undefined;
+	messageSearchIndex: MessageSearchSession | undefined;
+	accountDatabaseExecutors: DatabaseExecutor[];
 }
 
 export interface AdapterWorkerType extends Record<
@@ -51,7 +66,7 @@ export interface AdapterWorkerType extends Record<
 
 	_loadAccountDatabase: (account: AccountType) => Promise<void>;
 
-	_unloadAccountDatabase: () => void;
+	_unloadAccountDatabase: () => Promise<void>;
 
 	_getStoreItem: <T extends keyof AdapterWorkerStore>(
 		storeKey: T,
@@ -64,6 +79,10 @@ export interface AdapterWorkerType extends Record<
 	}) => Promise<DataAdapterResponse<AccountType>>;
 
 	getChatList: (input?: { userIds?: string[] }) => ChatController.AllOutput;
+
+	searchChats: (
+		controllerInput: ChatSearchController.SearchChatsInput[0],
+	) => ChatSearchController.SearchChatsOutput;
 
 	getAccountContactList: () => UserController.ContactListOutput;
 
@@ -116,6 +135,14 @@ export interface AdapterWorkerType extends Record<
 	getStatistic: (
 		controllerInput: StatisticController.GetInput[0],
 	) => StatisticController.GetOutput;
+
+	searchMessages: (
+		controllerInput: MessageSearchController.SearchMessagesInput[0],
+	) => MessageSearchController.SearchMessagesOutput;
+
+	getMessageSearchIndexStatus: (
+		input: GetMessageSearchIndexStatusRequest,
+	) => GetMessageSearchIndexStatusResponse;
 }
 
 export const _store: Partial<AdapterWorkerStore> = {
@@ -125,10 +152,21 @@ export const _store: Partial<AdapterWorkerStore> = {
 
 	accountList: undefined,
 	account: undefined,
+
+	messageSearchIndex: undefined,
+	accountDatabaseExecutors: [],
 };
+
+let accountLoad: AbortController | undefined;
 
 export const adapterWorker: AdapterWorkerType = {
 	_loadDirectory: async (directory) => {
+		const previousCleanup = adapterWorker._unloadAccountDatabase();
+		const load = new AbortController();
+		accountLoad = load;
+		await previousCleanup;
+		load.signal.throwIfAborted();
+		_store.accountList = undefined;
 		_store.directory = directory;
 		_store.databases = {};
 		_store.wcdbDicts = {};
@@ -137,7 +175,7 @@ export const adapterWorker: AdapterWorkerType = {
 
 		const storeDatabase = adapterWorker._getStoreItem("databases");
 
-		const SQL = await initSqlJs({ locateFile: () => sqliteUrl });
+		const sqlite3 = await getSqlite3();
 
 		const manifestDatabaseFile = await getFileFromDirectory(
 			storeDirectory,
@@ -145,9 +183,10 @@ export const adapterWorker: AdapterWorkerType = {
 		);
 		if (!manifestDatabaseFile) throw new Error("Manifest.db not found");
 		const manifestDatabaseFileBuffer = await manifestDatabaseFile.arrayBuffer();
+		load.signal.throwIfAborted();
 
-		const manifestDatabase = drizzle(
-			new SQL.Database(new Uint8Array(manifestDatabaseFileBuffer)),
+		const manifestDatabase = drizzleFromExecutor(
+			createWasmExecutor(new Uint8Array(manifestDatabaseFileBuffer), sqlite3),
 		);
 
 		storeDatabase.manifest = manifestDatabase;
@@ -180,6 +219,7 @@ export const adapterWorker: AdapterWorkerType = {
 			}
 		}
 
+		load.signal.throwIfAborted();
 		_store.accountList = accounts.sort((a) =>
 			a.id === loginedUserId ? -1 : 1,
 		);
@@ -193,70 +233,88 @@ export const adapterWorker: AdapterWorkerType = {
 			throw Error("IosBackupAdapter: Manifest.db is not loaded");
 		}
 
-		const accountIdMd5 = CryptoJS.MD5(account.id).toString();
-
-		const SQL = await initSqlJs({ locateFile: () => sqliteUrl });
-
-		let databaseFileBuffer: ArrayBuffer;
-
-		databaseFileBuffer = await (
-			await getFilesFromManifast(
-				storeDatabase.manifest,
+		const previousCleanup = adapterWorker._unloadAccountDatabase();
+		const load = new AbortController();
+		accountLoad = load;
+		const executors: DatabaseExecutor[] = [];
+		try {
+			await previousCleanup;
+			load.signal.throwIfAborted();
+			const sqlite3 = await getSqlite3();
+			const manifest = storeDatabase.manifest;
+			const accountIdMd5 = CryptoJS.MD5(account.id).toString();
+			const openDatabase = async (file: File) => {
+				const buffer = await file.arrayBuffer();
+				load.signal.throwIfAborted();
+				const executor = createWasmExecutor(new Uint8Array(buffer), sqlite3);
+				executors.push(executor);
+				return drizzleFromExecutor(executor);
+			};
+			const sessionFiles = await getFilesFromManifast(
+				manifest,
 				storeDirectory,
 				`Documents/${accountIdMd5}/session/session.db`,
-			)
-		)[0].file.arrayBuffer();
-		storeDatabase.session = drizzle(
-			new SQL.Database(new Uint8Array(databaseFileBuffer)),
-		);
-
-		databaseFileBuffer = await (
-			await getFilesFromManifast(
-				storeDatabase.manifest,
+			);
+			const session = await openDatabase(sessionFiles[0].file);
+			const contactFiles = await getFilesFromManifast(
+				manifest,
 				storeDirectory,
 				`Documents/${accountIdMd5}/DB/WCDB_Contact.sqlite`,
-			)
-		)[0].file.arrayBuffer();
-
-		storeDatabase.WCDB_Contact = drizzle(
-			new SQL.Database(new Uint8Array(databaseFileBuffer)),
-		);
-
-		for (const fileItem of await getFilesFromManifast(
-			storeDatabase.manifest,
-			storeDirectory,
-			`Documents/${accountIdMd5}/DB/message_%.sqlite`,
-		)) {
-			const databaseFileBuffer = await fileItem.file.arrayBuffer();
-
-			if (storeDatabase.message === undefined) storeDatabase.message = [];
-
-			storeDatabase.message.push(
-				drizzle(new SQL.Database(new Uint8Array(databaseFileBuffer))),
 			);
-		}
+			const WCDB_Contact = await openDatabase(contactFiles[0].file);
+			const message: NonNullable<WCDatabases["message"]> = [];
+			for (const fileItem of await getFilesFromManifast(
+				manifest,
+				storeDirectory,
+				`Documents/${accountIdMd5}/DB/message_%.sqlite`,
+			)) {
+				message.push(await openDatabase(fileItem.file));
+			}
+			load.signal.throwIfAborted();
 
-		_store.account = account;
+			// Publish one complete snapshot; an older load must never replace a newer account.
+			const index = new MessageSearchIndex(sqlite3);
+			const searchSession = new MessageSearchSession(
+				account.id,
+				index,
+				async (signal) => {
+					const sessionRows = await session
+						.select({ userName: sessionAbstractTable.UsrName })
+						.from(sessionAbstractTable)
+						.all();
+					signal.throwIfAborted();
+					await index.build(
+						message,
+						sessionRows.map((row) => row.userName),
+						{
+							signal,
+							debug: false,
+						},
+					);
+				},
+			);
+			_store.databases = { manifest, session, WCDB_Contact, message };
+			_store.account = account;
+			_store.accountDatabaseExecutors = executors;
+			_store.messageSearchIndex = searchSession;
+			void searchSession.preload();
+		} catch (error) {
+			for (const executor of executors) executor.close();
+			throw error;
+		}
 	},
 
 	_unloadAccountDatabase: async () => {
-		const storeDatabases = adapterWorker._getStoreItem("databases");
-
-		for (const databaseName in storeDatabases) {
-			const values = storeDatabases[databaseName as WCDatabaseNames];
-
-			if (values === undefined) {
-				continue;
-			} else if (Array.isArray(values)) {
-				for (const database of values) {
-					// database.close();
-				}
-			} else {
-				// values.close();
-			}
-		}
-
+		accountLoad?.abort();
+		accountLoad = undefined;
+		const searchSession = _store.messageSearchIndex;
+		const executors = _store.accountDatabaseExecutors ?? [];
+		_store.messageSearchIndex = undefined;
+		_store.accountDatabaseExecutors = [];
 		_store.account = undefined;
+		_store.databases = { manifest: _store.databases?.manifest };
+		await searchSession?.dispose();
+		for (const executor of executors) executor.close();
 	},
 
 	_getStoreItem: (storeKey) => {
@@ -291,12 +349,21 @@ export const adapterWorker: AdapterWorkerType = {
 					ids: userIds,
 				},
 				{
+					account: this._getStoreItem("account"),
 					databases: this._getStoreItem("databases"),
 				},
 			);
 		}
 
 		return await ChatController.all({
+			account: this._getStoreItem("account"),
+			databases: this._getStoreItem("databases"),
+		});
+	},
+
+	async searchChats(controllerInput) {
+		return await ChatSearchController.searchChats(controllerInput, {
+			account: this._getStoreItem("account"),
 			databases: this._getStoreItem("databases"),
 		});
 	},
@@ -317,11 +384,15 @@ export const adapterWorker: AdapterWorkerType = {
 		if (userIds) {
 			return await UserController.findAll(
 				{ ids: userIds },
-				{ databases: adapterWorker._getStoreItem("databases") },
+				{
+					account: adapterWorker._getStoreItem("account"),
+					databases: adapterWorker._getStoreItem("databases"),
+				},
 			);
 		}
 
 		return await UserController.all({
+			account: adapterWorker._getStoreItem("account"),
 			databases: adapterWorker._getStoreItem("databases"),
 		});
 	},
@@ -332,6 +403,7 @@ export const adapterWorker: AdapterWorkerType = {
 
 	getMessageList: async (controllerInput) => {
 		return await MessageController.all(controllerInput, {
+			account: adapterWorker._getStoreItem("account"),
 			databases: adapterWorker._getStoreItem("databases"),
 		});
 	},
@@ -415,8 +487,21 @@ export const adapterWorker: AdapterWorkerType = {
 
 	getStatistic: async (controllerInput) => {
 		return await StatisticController.get(controllerInput, {
+			account: adapterWorker._getStoreItem("account"),
 			databases: adapterWorker._getStoreItem("databases"),
 		});
+	},
+
+	searchMessages: async (controllerInput) => {
+		return adapterWorker
+			._getStoreItem("messageSearchIndex")
+			.search(controllerInput);
+	},
+
+	getMessageSearchIndexStatus: async ({ account }) => {
+		return (
+			_store.messageSearchIndex?.getStatus(account.id) ?? { phase: "idle" }
+		);
 	},
 };
 

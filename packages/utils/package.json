@@ -1,0 +1,14 @@
+{
+	"name": "@repo/utils",
+	"version": "0.0.0",
+	"private": true,
+	"license": "MIT",
+	"exports": {
+		".": "./src/index.ts"
+	},
+	"devDependencies": {
+		"@repo/types": "workspace:*",
+		"@repo/typescript-config": "workspace:*",
+		"vite": "catalog:"
+	}
+}

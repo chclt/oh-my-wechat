@@ -1,50 +1,33 @@
 import { ScrollArea as BaseScrollArea } from "@base-ui/react";
-import type { CSSProperties } from "react";
-import { useCarouselScrollViewportContext } from "./carousel-scroll-viewport-context";
+import type { ComponentProps, CSSProperties } from "react";
+import type { CarouselViewportBindings } from "./types";
 
-type CarouselSlice = "detail" | "thumb";
-
-type CarouselScrollViewportProps = React.ComponentProps<
-	typeof BaseScrollArea.Viewport
-> & {
-	slice: CarouselSlice;
+type Props = Omit<ComponentProps<typeof BaseScrollArea.Viewport>, "style"> & {
+	viewport: CarouselViewportBindings;
+	style?: CSSProperties;
 };
 
-type CarouselScrollViewportStyle = NonNullable<
-	CarouselScrollViewportProps["style"]
->;
-type CarouselScrollViewportStyleFunction = Extract<
-	CarouselScrollViewportStyle,
-	(...args: never[]) => unknown
->;
-type CarouselScrollViewportStyleState =
-	Parameters<CarouselScrollViewportStyleFunction>[0];
-
-export function CarouselScrollViewport({
-	slice,
-	style,
-	...rest
-}: CarouselScrollViewportProps) {
-	const lockState = useCarouselScrollViewportContext()[slice];
-
-	const composeStyle = (resolvedStyle?: CSSProperties) =>
-		({
-			"--carousel-padding-start": `${lockState.carouselPaddingStart}px`,
-			"--carousel-padding-end": `${lockState.carouselPaddingEnd}px`,
-			"--carousel-scroll-start": `var(--scroll-area-overflow-x-start)`,
-			scrollSnapType: "x mandatory",
-			...resolvedStyle,
-			...(lockState.isLocked
-				? { overflow: "hidden", scrollSnapType: "none" }
-				: lockState.isSnapDisabled
-					? { scrollSnapType: "none" }
-					: undefined),
-		}) as unknown as CSSProperties;
-
-	const composedStyle =
-		typeof style === "function"
-			? (state: CarouselScrollViewportStyleState) => composeStyle(style(state))
-			: composeStyle(style);
-
-	return <BaseScrollArea.Viewport style={composedStyle} {...rest} />;
+/** Native snap applies to both user gestures and programmatic instant writes. */
+export function CarouselScrollViewport({ viewport, style, ...props }: Props) {
+	const viewportStyle: CSSProperties & Record<`--carousel-${string}`, string> =
+		{
+			...style,
+			"--carousel-padding-start": `${viewport.padding}px`,
+			"--carousel-padding-end": `${viewport.padding}px`,
+			"--carousel-scroll-start": "var(--scroll-area-overflow-x-start)",
+			scrollSnapType:
+				viewport.isReady && viewport.isSnapEnabled ? "x mandatory" : "none",
+			...(!viewport.isReady ? { overflow: "hidden" } : {}),
+		};
+	return (
+		<BaseScrollArea.Viewport
+			{...props}
+			ref={viewport.ref}
+			style={viewportStyle}
+			onScroll={viewport.onScroll}
+			onWheelCapture={viewport.onInteraction}
+			onPointerDownCapture={viewport.onInteraction}
+			onKeyDownCapture={viewport.onInteraction}
+		/>
+	);
 }

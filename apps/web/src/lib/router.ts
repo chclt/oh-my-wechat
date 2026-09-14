@@ -24,10 +24,28 @@ const accountContactModalToAccountRootMask = createRouteMask({
 	},
 });
 
+const chatSearchMasks = (
+	[
+		"/$accountId/chat",
+		"/$accountId/chat/$chatId",
+		"/$accountId/chat/$chatId/info",
+	] as const
+).map((path) =>
+	createRouteMask({
+		routeTree,
+		from: path,
+		to: path,
+		search: {},
+	}),
+);
+
 const router = createRouter({
 	routeTree,
-	history: memoryHistory,
-	routeMasks: [accountContactModalToAccountRootMask],
+	...(import.meta.env.DEV ? {} : { history: memoryHistory }),
+	routeMasks: [
+		accountContactModalToAccountRootMask,
+		...(import.meta.env.DEV ? [] : chatSearchMasks),
+	],
 });
 
 declare module "@tanstack/react-router" {

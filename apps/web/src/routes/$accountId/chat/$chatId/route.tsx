@@ -1,20 +1,21 @@
-import { ScrollArea as ScrollAreaBase } from "@base-ui/react";
-import { useInfiniteQuery, useSuspenseQuery } from "@tanstack/react-query";
-import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
-import React, { Suspense, useEffect, useRef, type UIEventHandler } from "react";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { createFileRoute, useRouterState } from "@tanstack/react-router";
+import { Suspense, useRef } from "react";
 import { ChatUiConfigProvider } from "@/components/chat-ui-config-provider.tsx";
-import { LoaderIcon } from "@/components/icon";
-import { ScrollAreaScrollBar } from "@/components/ui/scroll-area";
-import scrollAreaClasses from "@/components/ui/scroll-area.module.css";
 import { ChatSuspenseQueryOptions } from "@/lib/fetchers/chat";
-import { MessageListInfiniteQueryOptions } from "@/lib/fetchers/message";
 import { UserSuspenseQueryOptions } from "@/lib/fetchers/user";
 import router from "@/lib/router";
-import { cn } from "@/lib/utils";
+import {
+	getMessageTarget,
+	parseMessageTargetSearch,
+} from "../-lib/message-target";
 import { ChatMediaCarousel } from "./-components/chat-media-carousel";
-import MessageList from "./-components/message-list";
+import type { MessageScrollOrigin } from "./-components/message-list-scroll";
+import MessageListView from "./-components/message-list-view";
+import { useMessageListWindow } from "./-components/use-message-list-window";
 
 export const Route = createFileRoute("/$accountId/chat/$chatId")({
+	validateSearch: parseMessageTargetSearch,
 	component: RouteComponent,
 	pendingComponent: () => <RoutePlaceholderComponent message="加载中" />,
 	errorComponent: () => <RoutePlaceholderComponent />,
@@ -50,6 +51,10 @@ function RoutePlaceholderComponent({ message }: { message?: string }) {
 
 function RouteComponent() {
 	const { accountId, chatId } = Route.useParams();
+	const target = getMessageTarget(Route.useSearch());
+	const positionRequestId = useRouterState({
+		select: (state) => state.location.state.messagePositionRequestId,
+	});
 
 	const { data: chat } = useSuspenseQuery(
 		ChatSuspenseQueryOptions(accountId, chatId),
@@ -57,71 +62,13 @@ function RouteComponent() {
 
 	const isChatroom = chat.type === "chatroom";
 
-	const messageListInfiniteQueryResult = useInfiniteQuery(
-		MessageListInfiniteQueryOptions({
-			account: { id: accountId },
-			chat: { id: chat.id },
-			limit: 20,
-		}),
+	const { queryOptions, windowKey } = useMessageListWindow(
+		accountId,
+		chatId,
+		target,
 	);
 
-	const {
-		data = { pages: [], pageParams: [] },
-
-		hasPreviousPage,
-		fetchPreviousPage,
-		isFetchingPreviousPage,
-
-		hasNextPage,
-		fetchNextPage,
-		isFetchingNextPage,
-	} = messageListInfiniteQueryResult;
-
-	const scrollAreaViewportRef = useRef<HTMLDivElement>(null);
-
-	useEffect(() => {
-		if (
-			data.pageParams.length === 1 &&
-			!data.pageParams[0] &&
-			scrollAreaViewportRef.current
-		) {
-			const maxScrollTop =
-				scrollAreaViewportRef.current.scrollHeight -
-				scrollAreaViewportRef.current.clientHeight;
-			scrollAreaViewportRef.current.scrollTop = maxScrollTop;
-		}
-	}, [data.pageParams]);
-
-	const scrollHeightBeforeUpdate = useRef<number | undefined>(undefined);
-
-	const onScroll: UIEventHandler<HTMLDivElement> = (event) => {
-		const target = event.target as HTMLDivElement;
-		if (target.scrollTop === 0) {
-			scrollHeightBeforeUpdate.current = target.scrollHeight;
-			if (hasPreviousPage && !isFetchingPreviousPage) {
-				fetchPreviousPage().finally(() => {
-					// TODO
-					requestAnimationFrame(() => {
-						requestAnimationFrame(() => {
-							if (scrollHeightBeforeUpdate.current) {
-								const heightDiff =
-									target.scrollHeight - scrollHeightBeforeUpdate.current;
-								target.scrollTop = heightDiff;
-								scrollHeightBeforeUpdate.current = undefined;
-							}
-						});
-					});
-				});
-			}
-		} else if (
-			Math.abs(target.scrollTop - target.scrollHeight + target.clientHeight) < 1
-		) {
-			if (hasNextPage && !isFetchingNextPage) {
-				fetchNextPage();
-			}
-		}
-	};
-
+	const scrollOriginRef = useRef<MessageScrollOrigin | null>(null);
 	return (
 		<ChatUiConfigProvider
 			value={{
@@ -131,53 +78,21 @@ function RouteComponent() {
 		>
 			<ChatMediaCarousel.Root account={{ id: accountId }} chat={{ id: chatId }}>
 				<Suspense>
-					<ScrollAreaBase.Root
-						className={cn(
-							scrollAreaClasses.Root,
-							"contain-strict bg-neutral-100",
-							"size-full [&_[data-slot='scroll-area-scrollbar']]:z-50 [&_[data-slot='scroll-area-scrollbar']]:top-16!",
-						)}
-					>
-						<ScrollAreaBase.Viewport
-							className={cn(scrollAreaClasses.Viewport)}
-							ref={scrollAreaViewportRef}
-							onScroll={onScroll}
-						>
-							<div className="z-20 sticky top-0 w-full h-16 px-6 flex items-center bg-white/80 backdrop-blur">
-								<h2 className={"font-medium text-lg"}>{chat.title}</h2>
-								{/* <Link
-                  to="/$accountId/chat/$chatId/info"
-                  params={{
-                    accountId: accountId,
-                    chatId: chatId,
-                  }}
-                >
-                  Chat Info
-                </Link> */}
-							</div>
-							<div className="mx-auto max-w-3xl p-4 flex flex-col gap-6">
-								{hasPreviousPage && (
-									<div className="flex justify-center items-center text-neutral-400">
-										<LoaderIcon className="animate-spin" />
-									</div>
-								)}
-
-								<MessageList
-									messageListInfiniteQueryResult={
-										messageListInfiniteQueryResult
-									}
-								/>
-
-								{hasNextPage && (
-									<div className="flex justify-center items-center text-neutral-400">
-										<LoaderIcon className="animate-spin" />
-									</div>
-								)}
-							</div>
-						</ScrollAreaBase.Viewport>
-						<ScrollAreaScrollBar />
-						<ScrollAreaBase.Corner />
-					</ScrollAreaBase.Root>
+					<div className="relative size-full contain-strict bg-neutral-100">
+						<div className="absolute inset-x-0 top-0 z-20 h-16 px-6 flex items-center bg-white/80 backdrop-blur">
+							<h2 className="min-w-0 truncate font-medium text-lg">
+								{chat.title}
+							</h2>
+						</div>
+						<MessageListView
+							key={JSON.stringify([accountId, chatId])}
+							windowKey={windowKey}
+							queryOptions={queryOptions}
+							target={target}
+							positionRequestId={positionRequestId}
+							scrollOriginRef={scrollOriginRef}
+						/>
+					</div>
 				</Suspense>
 
 				<ChatMediaCarousel.Dialog />

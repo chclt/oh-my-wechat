@@ -45,7 +45,7 @@ async function loadSrc(
 	const db = databases.manifest;
 	if (!db) throw new Error("manifest database is not found");
 
-	const rows = db
+	const rows = await db
 		.select()
 		.from(filesTable)
 		.where(

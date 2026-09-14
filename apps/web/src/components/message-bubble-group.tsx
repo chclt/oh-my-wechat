@@ -62,10 +62,7 @@ export function MessageBubbleGroup({
 						<User.Username
 							variant="default"
 							user={user}
-							className={cn(
-								"mt-px mb-[7px] mx-0.5 text-[13px] leading-[14px] text-neutral-500",
-								"peer",
-							)}
+							className="mt-px mb-[7px] mx-0.5 text-[13px] leading-[14px] text-neutral-500"
 						/>
 					)}
 					<div
@@ -73,7 +70,6 @@ export function MessageBubbleGroup({
 							"flex flex-col gap-2",
 							["items-end", "items-start"][messageDirection],
 							"[&>*:nth-child(n+2).bubble-tail-l]:bubble-tail-none [&>*:nth-child(n+2).bubble-tail-r]:bubble-tail-none",
-							"peer-has-[+div>div:nth-child(1)[data-red-envelope-decoration=true]]:-mt-[8.33333333%]",
 							className,
 						)}
 						{...props}
@@ -83,6 +79,7 @@ export function MessageBubbleGroup({
 								key={`(${index})${message.id}`}
 								message={message}
 								variant="default"
+								data-show-username={showUsername && index === 0}
 							/>
 						))}
 						{children}

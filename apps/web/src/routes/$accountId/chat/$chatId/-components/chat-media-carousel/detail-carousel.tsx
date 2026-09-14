@@ -1,6 +1,5 @@
 import { Button, ScrollArea as BaseScrollArea } from "@base-ui/react";
 import { MessageType, MessageTypeEnum } from "@repo/types";
-import { Virtualizer } from "@tanstack/react-virtual";
 import {
 	ChevronLeftCircleSolid,
 	ChevronRightCircleSolid,
@@ -10,61 +9,31 @@ import { ImageMessage, VideoMessage } from "@/components/message";
 import scrollAreaClasses from "@/components/ui/scroll-area.module.css";
 import { cn } from "@/lib/utils";
 import { CarouselScrollViewport } from "./carousel-scroll-viewport";
-import { createMessageURI } from "./utils";
+import type { CarouselView } from "./types";
 
 interface DetailCarouselProps {
-	account: { id: string };
-	virtualizer: Virtualizer<HTMLDivElement, Element>;
-	viewportRef: (element: HTMLDivElement | null) => void;
-	itemSize: number;
-	onScroll: (event: React.UIEvent<HTMLDivElement, UIEvent>) => void;
+	view: CarouselView;
 	messages: MessageType[];
 	hasPreviousPage: boolean;
 	hasNextPage: boolean;
+	onPrevious: () => void;
+	onNext: () => void;
 }
 
 export default function DetailCarousel({
-	account,
-	virtualizer,
-	viewportRef,
-	itemSize,
-	onScroll,
+	view,
 	messages,
 	hasPreviousPage,
 	hasNextPage,
+	onPrevious,
+	onNext,
 }: DetailCarouselProps) {
+	"use no memo";
+
+	const { virtualizer, viewport } = view;
+
 	// virtualizer enabled=false 时返回空数组，无需额外 gate。
 	const virtualItems = virtualizer.getVirtualItems();
-
-	const getCurrentIndex = () => {
-		if (!virtualizer.scrollElement || !virtualizer.scrollRect) return;
-
-		const centerOffset =
-			virtualizer.scrollElement.scrollLeft + virtualizer.scrollRect.width / 2;
-
-		return virtualizer.getVirtualItemForOffset(centerOffset)?.index;
-	};
-
-	const handleScrollToPreviousIndex = () => {
-		const currentIndex = getCurrentIndex();
-		if (currentIndex === undefined || currentIndex <= 0) return;
-
-		virtualizer.scrollToIndex(currentIndex - 1, {
-			align: "center",
-			behavior: "instant",
-		});
-	};
-
-	const handleScrollToNextIndex = () => {
-		const currentIndex = getCurrentIndex();
-		if (currentIndex === undefined || currentIndex >= messages.length - 1)
-			return;
-
-		virtualizer.scrollToIndex(currentIndex + 1, {
-			align: "center",
-			behavior: "instant",
-		});
-	};
 
 	return (
 		<BaseScrollArea.Root
@@ -72,10 +41,8 @@ export default function DetailCarousel({
 			className={cn(scrollAreaClasses.Root, "relative overflow-hidden")}
 		>
 			<CarouselScrollViewport
-				ref={viewportRef}
-				slice="detail"
+				viewport={viewport}
 				className={cn(scrollAreaClasses.Viewport, "pb-2")}
-				onScroll={onScroll}
 			>
 				<BaseScrollArea.Content
 					className={cn(
@@ -101,7 +68,7 @@ export default function DetailCarousel({
 						return (
 							<div
 								key={virtualItem.key}
-								data-message-uri={createMessageURI({ message, account })}
+								data-message-uri={virtualItem.key}
 								className={cn(
 									"absolute top-0 h-full px-24",
 									"snap-normal snap-center",
@@ -161,13 +128,15 @@ export default function DetailCarousel({
 			</CarouselScrollViewport>
 
 			<Button
-				onClick={handleScrollToPreviousIndex}
+				onClick={onPrevious}
+				aria-label="上一张"
 				className="absolute start-0 inset-y-0 my-auto w-24 h-full cursor-pointer text-white/50 hover:text-white/80"
 			>
 				<ChevronLeftCircleSolid className="size-8 absolute inset-0 m-auto" />
 			</Button>
 			<Button
-				onClick={handleScrollToNextIndex}
+				onClick={onNext}
+				aria-label="下一张"
 				className="absolute end-0 inset-y-0 my-auto w-24 h-full cursor-pointer text-white/50 hover:text-white/80"
 			>
 				<ChevronRightCircleSolid className="size-8 absolute inset-0 m-auto" />

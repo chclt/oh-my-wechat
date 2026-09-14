@@ -1,11 +1,11 @@
 import { BinaryReader } from "@bufbuild/protobuf/wire";
 import type { UserType } from "@repo/types";
 import { and, eq, like } from "drizzle-orm";
-import { SQLJsDatabase } from "drizzle-orm/sql-js";
+import type { SqliteRemoteDatabase } from "drizzle-orm/sqlite-proxy";
 import { filesTable } from "../database/_manifest.ts";
 
 export async function getFilesFromManifast(
-	manifestDatabase: SQLJsDatabase,
+	manifestDatabase: SqliteRemoteDatabase<Record<string, never>>,
 	directory: FileSystemDirectoryHandle | FileList,
 	fileNamePattern: string,
 ): Promise<
@@ -18,7 +18,7 @@ export async function getFilesFromManifast(
 		file: File;
 	}[]
 > {
-	const rows = manifestDatabase
+	const rows = await manifestDatabase
 		.select()
 		.from(filesTable)
 		.where(
