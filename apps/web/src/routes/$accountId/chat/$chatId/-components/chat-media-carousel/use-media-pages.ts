@@ -1,40 +1,20 @@
-import { MessageTypeEnum, type MessageType } from "@repo/types";
-import type {
-	DataAdapterCursorPagination,
-	MessageListCursor,
-} from "@repo/types/adapter";
+import type { MessageType } from "@repo/types";
+import type { DataAdapterCursorPagination } from "@repo/types/adapter";
 import { type InfiniteData, useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { MessageListInfiniteQueryOptions } from "@/lib/fetchers/message";
-
-export interface MediaPagesOptions {
-	account: { id: string };
-	chat: { id: string };
-	initialMessage: MessageType;
-}
+import {
+	MediaListInfiniteQueryOptions,
+	type MediaPagesOptions,
+} from "./utils";
 
 const EMPTY_MESSAGES: MessageType[] = [];
 const selectMessages = (
 	data: InfiniteData<DataAdapterCursorPagination<MessageType[]>>,
 ) => data.pages.flatMap((page) => page.data);
 
-export function useMediaPages({
-	account,
-	chat,
-	initialMessage,
-}: MediaPagesOptions) {
+export function useMediaPages(options: MediaPagesOptions) {
 	const query = useInfiniteQuery({
-		...MessageListInfiniteQueryOptions({
-			account,
-			chat,
-			type: [MessageTypeEnum.IMAGE, MessageTypeEnum.VIDEO],
-			cursor: JSON.stringify({
-				value: initialMessage.date,
-				messageLocalId: initialMessage.local_id,
-				condition: "<>",
-			} satisfies MessageListCursor),
-			limit: 5,
-		}),
+		...MediaListInfiniteQueryOptions(options),
 		select: selectMessages,
 	});
 	return { query, messages: query.data ?? EMPTY_MESSAGES };

@@ -184,9 +184,9 @@ export default function Configurer(
 						</div>
 					</div>
 
-					<RadioGroup
+					<RadioGroup<string>
 						className={"flex flex-wrap gap-2.5"}
-						onValueChange={(value) => setSelectedAccountId(value as string)}
+						onValueChange={setSelectedAccountId}
 					>
 						{accountList.map((account) => (
 							<label

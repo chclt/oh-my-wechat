@@ -1,15 +1,14 @@
-import { useInViewport } from "@mantine/hooks";
 import { ImageInfo } from "@repo/types";
 import { useQuery } from "@tanstack/react-query";
-import { ImgHTMLAttributes } from "react";
+import type { ComponentPropsWithRef } from "react";
 import { useAccount } from "@/components/account-provider.tsx";
 import AutoResolutionFallbackImage from "@/components/auto-resolution-fallback-image.tsx";
 import { MessageImageQueryOptions } from "@/lib/fetchers";
 import type { ImageMessageProps } from "./types.ts";
 
 interface ImageMessagePlainProps extends Omit<
-	ImgHTMLAttributes<HTMLImageElement>,
-	"src" | "srcset" | "sizes"
+	ComponentPropsWithRef<"img">,
+	"src" | "srcSet" | "sizes"
 > {
 	message: ImageMessageProps["message"];
 	sizes: (keyof ImageInfo)[];
@@ -18,11 +17,10 @@ interface ImageMessagePlainProps extends Omit<
 export function ImageMessagePlain({
 	message,
 	sizes,
+	ref,
 	...props
 }: ImageMessagePlainProps) {
 	const { accountId } = useAccount();
-
-	const { ref: imageRef, inViewport } = useInViewport();
 
 	const { data: image } = useQuery({
 		...MessageImageQueryOptions({
@@ -31,10 +29,7 @@ export function ImageMessagePlain({
 			message,
 			sizes: sizes,
 		}),
-		enabled: true || inViewport,
 	});
 
-	return (
-		<AutoResolutionFallbackImage ref={imageRef} image={image} {...props} />
-	);
+	return <AutoResolutionFallbackImage ref={ref} image={image} {...props} />;
 }

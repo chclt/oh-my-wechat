@@ -16,7 +16,7 @@
 			@apply border-destructive ring-destructive/20 dark:ring-destructive/40;
 		}
 
-		&:disabled {
+		&[data-disabled] {
 			@apply opacity-50 cursor-not-allowed;
 		}
 

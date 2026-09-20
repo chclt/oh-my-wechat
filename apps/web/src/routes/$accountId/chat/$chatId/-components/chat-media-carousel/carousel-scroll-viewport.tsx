@@ -1,4 +1,5 @@
 import { ScrollArea as BaseScrollArea } from "@base-ui/react";
+import { useMergedRef } from "@mantine/hooks";
 import type { ComponentProps, CSSProperties } from "react";
 import type { CarouselViewportBindings } from "./types";
 
@@ -8,7 +9,13 @@ type Props = Omit<ComponentProps<typeof BaseScrollArea.Viewport>, "style"> & {
 };
 
 /** Native snap applies to both user gestures and programmatic instant writes. */
-export function CarouselScrollViewport({ viewport, style, ...props }: Props) {
+export function CarouselScrollViewport({
+	viewport,
+	ref,
+	style,
+	...props
+}: Props) {
+	const mergedRef = useMergedRef(viewport.ref, ref);
 	const viewportStyle: CSSProperties & Record<`--carousel-${string}`, string> =
 		{
 			...style,
@@ -22,7 +29,7 @@ export function CarouselScrollViewport({ viewport, style, ...props }: Props) {
 	return (
 		<BaseScrollArea.Viewport
 			{...props}
-			ref={viewport.ref}
+			ref={mergedRef}
 			style={viewportStyle}
 			onScroll={viewport.onScroll}
 			onWheelCapture={viewport.onInteraction}

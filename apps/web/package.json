@@ -11,7 +11,7 @@
 		"preview": "vite preview"
 	},
 	"dependencies": {
-		"@base-ui/react": "^1.0.0",
+		"@base-ui/react": "^1.8.0",
 		"@bufbuild/protobuf": "catalog:",
 		"@mantine/hooks": "^8.2.3",
 		"@radix-ui/react-portal": "^1.1.10",

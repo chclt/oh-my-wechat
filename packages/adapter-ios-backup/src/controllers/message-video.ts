@@ -7,6 +7,7 @@ import CryptoJS from "crypto-js";
 import { WCDatabases } from "../types";
 import { getFilesFromManifast } from "../utils";
 import { createImageUri } from "./file/utils";
+import { readMediaDimensions } from "./media-dimensions";
 
 export type GetInput = [
 	GetMessageVideoRequest,
@@ -17,6 +18,7 @@ export type GetOutput = GetMessageVideoResponse;
 export async function get(...inputs: GetInput): GetOutput {
 	const [{ account, chat, message, include }, { directory, databases }] =
 		inputs;
+	const video = message.message_entity.msg.videomsg;
 
 	const db = databases.manifest;
 	if (!db) throw new Error("manifest database is not found");
@@ -52,7 +54,13 @@ export async function get(...inputs: GetInput): GetOutput {
 			if (!includeMap.cover) continue;
 			result = {
 				...result,
-				cover: { uri: createImageUri(file.relativePath) },
+				cover: {
+					uri: createImageUri(file.relativePath),
+					...readMediaDimensions(
+						video["@_cdnthumbwidth"],
+						video["@_cdnthumbheight"],
+					),
+				},
 			};
 		}
 	}

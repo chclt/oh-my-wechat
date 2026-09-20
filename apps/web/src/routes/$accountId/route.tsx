@@ -133,7 +133,6 @@ function RouteComponent() {
 											data-slot="dialog-close"
 											className={cn(
 												"z-40 absolute top-5 right-5 size-6 rounded-xs cursor-pointer",
-												"data-[state=open]:bg-accent data-[state=open]:text-muted-foreground",
 												"ring-offset-background focus:ring-ring focus:ring-2 focus:ring-offset-2 focus:outline-hidden",
 												"[&_svg]:pointer-events-none [&_svg]:size-full",
 											)}

@@ -1,40 +1,46 @@
-import { MessageType } from "@repo/types";
-import React, { useState } from "react";
-import {
-	ChatMediaCarouselContext,
-	ChatMediaCarouselContextProps,
-} from "./chat-media-carousel-context";
+import { useState } from "react";
+import { ViewTransition } from "@/components/view-transition";
+import ChatMediaCarouselSession from "./chat-media-carousel-session";
+import { MediaCarouselPreviewProvider } from "./media-carousel-preview-provider";
+import type { ChatMediaCarouselRootProps, ViewerState } from "./types";
 
-interface ChatMediaCarouselRootProps {
-	account: { id: string };
-	chat: { id: string };
-
-	children: React.ReactNode;
-}
-
-export default function ChatMediaCarouselRoot({
-	account,
-	chat,
-	children,
-}: ChatMediaCarouselRootProps) {
-	const [initialMessage, setInitialMessage] = useState<MessageType | null>(
-		null,
-	);
-	const openChatMediaCarousel: ChatMediaCarouselContextProps["openChatMediaCarousel"] =
-		setInitialMessage;
-	const closeChatMediaCarousel = () => setInitialMessage(null);
-
+export default function ChatMediaCarouselRoot(
+	props: ChatMediaCarouselRootProps,
+) {
+	const [viewer, setViewer] = useState<ViewerState>({
+		isOpen: false,
+		transitionDisabled: false,
+		targetKey: null,
+		initialMessageAnchor: null,
+		sessionKey: 0,
+		previewData: { src: "" },
+	});
+	const key = viewer.targetKey;
 	return (
-		<ChatMediaCarouselContext
-			value={{
-				account,
-				chat,
-				initialMessage,
-				closeChatMediaCarousel,
-				openChatMediaCarousel,
+		<ViewTransition.Root
+			active={viewer.isOpen}
+			disabled={viewer.transitionDisabled}
+			from={key ? `chat:${key}` : null}
+			to={key ? `viewer:${key}` : null}
+			data={viewer.previewData}
+			onStatusChange={(_status, { transition, reason }) => {
+				if (reason !== "skipped") return;
+				setViewer((current) =>
+					current.isOpen === transition.active &&
+					transition.to ===
+						`${current.isOpen ? "viewer" : "chat"}:${current.targetKey}`
+						? { ...current, transitionDisabled: true }
+						: current,
+				);
 			}}
 		>
-			{children}
-		</ChatMediaCarouselContext>
+			<MediaCarouselPreviewProvider>
+				<ChatMediaCarouselSession
+					{...props}
+					viewer={viewer}
+					setViewer={setViewer}
+				/>
+			</MediaCarouselPreviewProvider>
+		</ViewTransition.Root>
 	);
 }

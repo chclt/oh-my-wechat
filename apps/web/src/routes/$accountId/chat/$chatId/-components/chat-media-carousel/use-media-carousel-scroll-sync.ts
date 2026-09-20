@@ -1,14 +1,12 @@
-import { useLayoutEffect, useState } from "react";
-import { CarouselScrollController } from "./carousel-scroll-controller";
+import {
+	useCallback,
+	useLayoutEffect,
+	useState,
+	useSyncExternalStore,
+} from "react";
+import type { CarouselScrollController } from "./carousel-scroll-controller";
 import type { CarouselKind, CarouselView, CarouselVirtualizer } from "./types";
 import type { CarouselLayout } from "./use-carousel-layout";
-
-export function useCarouselController(initialMessageKey: string) {
-	const [controller] = useState(
-		() => new CarouselScrollController(initialMessageKey),
-	);
-	return controller;
-}
 
 interface Track {
 	layout: CarouselLayout;
@@ -19,6 +17,7 @@ interface Options {
 	controller: CarouselScrollController;
 	keys: readonly string[];
 	isReady: boolean;
+	onCurrentKeyChange: (key: string) => void;
 	detail: Track;
 	thumb: Track;
 }
@@ -28,15 +27,26 @@ export function useMediaCarouselScrollSync({
 	controller,
 	keys,
 	isReady,
+	onCurrentKeyChange,
 	detail,
 	thumb,
 }: Options) {
 	"use no memo";
 
-	const [source, setSource] = useState<CarouselKind>("detail");
+	const source = useSyncExternalStore(
+		controller.subscribeSource,
+		controller.getSource,
+		controller.getSource,
+	);
 	const isThumbFollowing =
 		source === "detail" && detail.virtualizer.isScrolling;
 	const messageKey = controller.messageKey;
+	const [currentKey, setCurrentKey] = useState<string | null>(null);
+	const updateCurrentKey = useCallback(() => {
+		const key = controller.currentKey;
+		setCurrentKey(key);
+		if (key) onCurrentKeyChange(key);
+	}, [controller, onCurrentKeyChange]);
 	const { geometry: detailGeometry } = detail.layout;
 	const { geometry: thumbGeometry } = thumb.layout;
 	useLayoutEffect(() => {
@@ -54,10 +64,12 @@ export function useMediaCarouselScrollSync({
 			detail: viewport(detail),
 			thumb: viewport(thumb),
 		});
+		updateCurrentKey();
 	}, [
 		controller,
 		keys,
 		isReady,
+		updateCurrentKey,
 		detail.layout.element,
 		thumb.layout.element,
 		detailGeometry.itemSize,
@@ -71,7 +83,8 @@ export function useMediaCarouselScrollSync({
 	// Retry the follower after commit without interrupting the source gesture.
 	useLayoutEffect(() => {
 		controller.syncFollower();
-	}, [controller, messageKey, source, isThumbFollowing]);
+		updateCurrentKey();
+	}, [controller, messageKey, source, isThumbFollowing, updateCurrentKey]);
 
 	const bind = (kind: CarouselKind, track: Track): CarouselView => ({
 		virtualizer: track.virtualizer,
@@ -82,19 +95,26 @@ export function useMediaCarouselScrollSync({
 			// Only suspend thumbnail snap while following an active detail scroll.
 			// Virtualizer's idle transition restores snap without a separate timer.
 			isSnapEnabled: kind === "detail" || !isThumbFollowing,
-			onInteraction: () => {
-				controller.takeControl(kind);
-				setSource(kind);
-			},
+			onInteraction: () => controller.takeControl(kind),
 			onScroll: () => {
-				if (isReady) controller.onScroll(kind);
+				if (!isReady) return;
+				controller.onScroll(kind);
+				updateCurrentKey();
 			},
 		},
 	});
 	return {
+		currentKey,
 		detail: bind("detail", detail),
 		thumb: bind("thumb", thumb),
 		previous: () => controller.moveBy(-1),
 		next: () => controller.moveBy(1),
+		select: (messageKey: string) => {
+			// Click-only activation has no preceding pointer/keyboard interaction.
+			controller.takeControl("thumb");
+			controller.select(messageKey);
+			// Keep keyboard focus on the persistent viewport as items virtualize.
+			thumb.layout.element?.focus({ preventScroll: true });
+		},
 	};
 }

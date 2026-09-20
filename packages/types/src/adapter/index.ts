@@ -4,11 +4,14 @@ import {
 	ContactType,
 	FileInfo,
 	ImageInfo,
+	ImageMessageType,
 	MessageType,
 	MessageTypeEnum,
+	MicroVideoMessageType,
 	UserType,
 	VerityMessageType,
 	VideoInfo,
+	VideoMessageType,
 	VoiceInfo,
 	OpenMessageTypeEnum,
 	MessageRecordBaseType,
@@ -99,13 +102,20 @@ export interface SearchChatsRequest {
 
 export type SearchChatsResponse = Promise<DataAdapterPagination<ChatType[]>>;
 
-export interface GetMessageImageRequest {
+export type GetMessageImageRequest = {
 	account: Pick<AccountType, "id">;
 	chat: Pick<ChatType, "id">;
-	message: Pick<MessageType, "local_id">;
 	sizes?: NonNullable<keyof ImageInfo>[];
-	domain?: "image" | "opendata";
-}
+} & (
+	| {
+			domain?: "image";
+			message: Pick<ImageMessageType, "local_id" | "message_entity">;
+	  }
+	| {
+			domain: "opendata";
+			message: Pick<MessageType, "local_id">;
+	  }
+);
 
 export type GetMessageImageResponse = Promise<
 	DataAdapterResponse<ImageInfo | undefined>
@@ -128,7 +138,10 @@ export type ReleaseMessageFileResponse = Promise<DataAdapterResponse<void>>;
 export interface GetMessageVideoRequest {
 	account: Pick<AccountType, "id">;
 	chat: Pick<ChatType, "id">;
-	message: Pick<MessageType, "local_id">;
+	message: Pick<
+		VideoMessageType | MicroVideoMessageType,
+		"local_id" | "message_entity"
+	>;
 	include?: ("video" | "cover")[];
 }
 

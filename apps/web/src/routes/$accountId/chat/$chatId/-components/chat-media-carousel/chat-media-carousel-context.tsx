@@ -1,17 +1,32 @@
-import { MessageType } from "@repo/types";
-import { createContext, useContext } from "react";
+import type { Dialog } from "@base-ui/react";
+import { createContext, type RefObject, useContext } from "react";
+import type { CarouselScrollController } from "./carousel-scroll-controller";
+import type { CarouselMessageAnchor } from "./types";
 
 interface ChatMediaCarouselContextApi {
-	openChatMediaCarousel: (message: MessageType) => void;
+	account: { id: string };
+	openChatMediaCarousel: (messageAnchor: CarouselMessageAnchor) => void;
 }
 
-export interface ChatMediaCarouselContextProps extends ChatMediaCarouselContextApi {
+export const ChatMediaCarouselTriggerContext =
+	createContext<ChatMediaCarouselContextApi | null>(null);
+
+export interface ChatMediaCarouselContextProps {
 	account: { id: string };
 	chat: { id: string };
 
-	initialMessage: MessageType | null;
-	closeChatMediaCarousel: () => void;
+	initialMessageAnchor: CarouselMessageAnchor | null;
+	currentMessageKey: string | null;
+	isOpen: boolean;
+	transitionDisabled: boolean;
+	sessionKey: number;
+	carouselRef: RefObject<CarouselScrollController | null>;
+	onOpenChange: Dialog.Root.Props["onOpenChange"];
+	onCurrentKeyChange: (key: string) => void;
 }
+
+// Only the presented message window registers chat-side animation targets.
+export const ChatMediaCarouselSourceEnabledContext = createContext(true);
 
 export const ChatMediaCarouselContext =
 	createContext<ChatMediaCarouselContextProps | null>(null);

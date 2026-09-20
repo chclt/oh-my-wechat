@@ -1,18 +1,26 @@
-import { useElementSize } from "@mantine/hooks";
-import { useCallback, useState } from "react";
+import { useLayoutEffect, useState } from "react";
 import type { CarouselGeometry, CarouselKind } from "./types";
 
-/** Both tracks use fixed-size cells: full viewport width or square thumbnails. */
+/** Seed virtual estimates from the viewport immediately; observe later resizes. */
 export function useCarouselLayout(kind: CarouselKind) {
-	const [element, setElement] = useState<HTMLDivElement | null>(null);
-	const { ref: sizeRef, width, height } = useElementSize<HTMLDivElement>();
-	const ref = useCallback(
-		(node: HTMLDivElement | null) => {
-			setElement(node);
-			sizeRef.current = node;
-		},
-		[sizeRef],
-	);
+	const [element, ref] = useState<HTMLDivElement | null>(null);
+	const [{ width, height }, setSize] = useState({ width: 0, height: 0 });
+	useLayoutEffect(() => {
+		if (!element) return;
+		const measure = () => {
+			const width = element.clientWidth;
+			const height = element.clientHeight;
+			setSize((previous) =>
+				previous.width === width && previous.height === height
+					? previous
+					: { width, height },
+			);
+		};
+		measure();
+		const observer = new ResizeObserver(measure);
+		observer.observe(element);
+		return () => observer.disconnect();
+	}, [element]);
 	const itemSize = kind === "detail" ? width : height;
 	const geometry: CarouselGeometry = {
 		itemSize,

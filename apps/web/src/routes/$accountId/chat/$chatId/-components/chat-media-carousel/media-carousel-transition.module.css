@@ -1,0 +1,128 @@
+.Target[data-transition-covered] {
+	opacity: 0;
+}
+
+/* Keep the preview from expanding either scroll container's content bounds. */
+.PreviewLayer {
+	position: absolute;
+	inset: 0;
+	overflow: clip;
+	pointer-events: none;
+	z-index: 1;
+}
+
+/* Virtual-list anchoring moves this origin without animating or clipping a slide. */
+.PreviewAnchor {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+}
+
+.Preview {
+	position: absolute;
+	left: 0;
+	top: 0;
+	margin: 0;
+	box-sizing: border-box;
+	translate: var(--vt-x) var(--vt-y);
+	width: var(--vt-base-width);
+	height: var(--vt-base-height);
+	transform-origin: 0 0;
+	scale: var(--vt-scale-x) var(--vt-scale-y);
+	overflow: clip;
+	border-radius: 0;
+	transition:
+		translate 200ms ease,
+		scale 200ms ease,
+		border-radius 200ms ease;
+
+	&[data-status="preparing"] {
+		visibility: hidden;
+	}
+	&[data-starting-style] {
+		transition: none;
+	}
+	/* Only images without a blurred background transition to rounded corners. */
+	&:not(:has(> img[data-blurred-background])) {
+		&[data-active][data-starting-style],
+		&:not([data-active]):not([data-starting-style]) {
+			border-radius: calc(var(--radius) / var(--vt-from-scale-x)) /
+				calc(var(--radius) / var(--vt-from-scale-y));
+		}
+	}
+	& > img {
+		display: block;
+		width: 100%;
+		height: 100%;
+		object-fit: contain;
+	}
+}
+
+/* The retained backdrop follows open state, independently of Popup's lifecycle. */
+.Backdrop {
+	opacity: 1;
+
+	&[data-dialog-fade] {
+		transition: opacity 200ms ease;
+	}
+
+	&[data-starting-style],
+	&[data-closed] {
+		opacity: 0;
+	}
+
+	&[data-closed] {
+		pointer-events: none;
+		&:not([data-dialog-fade]) {
+			transition: none;
+		}
+	}
+}
+
+/* Fade controls independently: Preview must not inherit an ancestor's opacity. */
+.Controls {
+	opacity: 1;
+	transition: opacity 200ms ease;
+
+	@starting-style {
+		opacity: 0;
+	}
+
+	.Popup[data-closed] & {
+		opacity: 0;
+	}
+}
+
+/* Without a Preview, Base UI owns ordinary opening and closing fades. */
+.Popup[data-dialog-fade] {
+	opacity: 1;
+	transition: opacity 200ms ease;
+
+	&[data-starting-style],
+	&[data-closed] {
+		opacity: 0;
+	}
+
+	/* The Popup already fades these controls along with the media. */
+	.Controls {
+		opacity: 1;
+		transition: none;
+	}
+}
+
+/* Preview closes retain hidden layout for reversals; plain fades stay visible. */
+.Popup[data-closed]:not([data-dialog-fade]) .DetailViewport {
+	visibility: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.Preview,
+	.Popup[data-dialog-fade],
+	.Backdrop[data-dialog-fade],
+	.Backdrop,
+	.Controls {
+		transition: none;
+	}
+}

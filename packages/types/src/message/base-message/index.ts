@@ -65,16 +65,16 @@ export interface ImageMessageEntity {
 			"@_cdnbigimgurl": "";
 
 			"@_cdnmidimgurl": string;
-			"@_cdnmidheight": string;
-			"@_cdnmidwidth": string;
+			"@_cdnmidheight"?: string;
+			"@_cdnmidwidth"?: string;
 
-			"@_cdnhdheight": string;
-			"@_cdnhdwidth": string;
+			"@_cdnhdheight"?: string;
+			"@_cdnhdwidth"?: string;
 
 			"@_cdnthumburl": string;
 			"@_cdnthumblength": string;
-			"@_cdnthumbwidth": string;
-			"@_cdnthumbheight": string;
+			"@_cdnthumbwidth"?: string;
+			"@_cdnthumbheight"?: string;
 			"@_cdnthumbaeskey": string;
 		};
 		appinfo: {
@@ -214,8 +214,8 @@ export interface VideoMessageEntity {
 
 			"@_cdnthumburl": string;
 			"@_cdnthumblength": string;
-			"@_cdnthumbwidth": string;
-			"@_cdnthumbheight": string;
+			"@_cdnthumbwidth"?: string;
+			"@_cdnthumbheight"?: string;
 			"@_cdnthumbaeskey": string;
 
 			"@_encryver": string;
@@ -393,8 +393,8 @@ export interface MicroVideoMessageEntity {
 			"@_cdnvideourl": string;
 			"@_cdnthumburl": string;
 			"@_cdnthumblength": string;
-			"@_cdnthumbwidth": string;
-			"@_cdnthumbheight": string;
+			"@_cdnthumbwidth"?: string;
+			"@_cdnthumbheight"?: string;
 			"@_cdnthumbaeskey": string;
 			"@_encryver": string;
 			"@_isplaceholder": string;

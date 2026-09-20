@@ -1,0 +1,132 @@
+@reference "../../../index.css";
+
+@layer components {
+	.root {
+		@apply relative rounded-lg bg-white;
+		--body-ratio: clamp(0.25, var(--image-ratio, 2), 4);
+		/* Grow small images to 128×64, then fit within both maximum dimensions. */
+		min-width: 128px;
+		/* Until the file's pixel width is known, reserve the available display width. */
+		width: min(
+			max(var(--image-width, 16em), calc(64px * var(--body-ratio))),
+			16em,
+			calc(32rem * var(--body-ratio))
+		);
+		max-width: 100%;
+
+		&:focus-visible {
+			--focus-outline-width: 1px;
+			outline-width: var(--focus-outline-width);
+			outline-offset: calc(
+				var(--bubble-tail-width) + var(--focus-outline-width)
+			);
+		}
+
+		/* These images replace the solid-color tail supplied by the shared classes. */
+		&:global(.bubble-tail-l)::after,
+		&:global(.bubble-tail-r)::after {
+			content: none;
+		}
+	}
+
+	.body {
+		@apply relative flex items-center justify-center w-full overflow-hidden rounded-[inherit];
+		min-height: 64px;
+		max-height: 32rem;
+		aspect-ratio: var(--body-ratio);
+	}
+
+	.image {
+		/* Fit the image box to the bubble without adding space inside the image. */
+		@apply relative block flex-none h-auto;
+		/* Width percentages also give the body's height through its aspect ratio. */
+		width: min(
+			100%,
+			calc(clamp(64px, 100% / var(--body-ratio), 32rem) * var(--image-ratio, 2))
+		);
+	}
+
+	.image[data-transition-covered],
+	.image[data-carousel-current] {
+		opacity: 0;
+	}
+
+	.tail {
+		@apply absolute top-0 h-full overflow-hidden;
+		width: var(--bubble-tail-width);
+		mask: var(--bubble-tail-mask) var(--bubble-tail-position)
+			var(--bubble-tail-top) / var(--bubble-tail-width)
+			var(--bubble-tail-height) no-repeat;
+
+		&::before {
+			@apply absolute inset-0 bg-no-repeat;
+			content: "";
+			background-image: var(--tail-image);
+			background-size: auto 100%;
+			background-position: var(--bubble-tail-position) center;
+			transform: scaleX(-1);
+			/* Finish the fade even when a reversed preview ends sooner. */
+			transition: opacity 200ms ease;
+		}
+	}
+
+	.root:global(.bubble-tail-l) .tail {
+		right: 100%;
+	}
+
+	.root:global(.bubble-tail-r) .tail {
+		left: 100%;
+	}
+
+	.background {
+		@apply absolute inset-y-0 bg-inherit;
+		left: calc(-1 * var(--bubble-tail-left));
+		right: calc(-1 * var(--bubble-tail-right));
+		padding-left: var(--bubble-tail-left);
+		padding-right: var(--bubble-tail-right);
+		--corner-size: calc(2 * var(--radius));
+		--corner-mask: radial-gradient(
+			circle closest-side,
+			#000 calc(100% - 0.5px),
+			transparent
+		);
+		/* One rounded body plus its tail clips one continuous background. */
+		mask:
+			var(--bubble-tail-mask) var(--bubble-tail-position)
+				var(--bubble-tail-top) / var(--bubble-tail-width)
+				var(--bubble-tail-height) no-repeat border-box,
+			linear-gradient(#000 0 0) center / calc(100% - var(--corner-size)) 100%
+				no-repeat content-box,
+			linear-gradient(#000 0 0) center / 100% calc(100% - var(--corner-size))
+				no-repeat content-box,
+			var(--corner-mask) left top / var(--corner-size) var(--corner-size)
+				no-repeat content-box,
+			var(--corner-mask) right top / var(--corner-size) var(--corner-size)
+				no-repeat content-box,
+			var(--corner-mask) left bottom / var(--corner-size) var(--corner-size)
+				no-repeat content-box,
+			var(--corner-mask) right bottom / var(--corner-size) var(--corner-size)
+				no-repeat content-box;
+	}
+
+	.root[data-blurred-background] .background::before {
+		@apply absolute -inset-4 bg-size-[100%_100%];
+		content: "";
+		background-image: var(--background-image);
+		filter: blur(8px) saturate(0.5);
+	}
+
+	.root:has(.image[data-carousel-current]) .tail::before,
+	.root:has(.image[data-transition-source][data-transition-covered])
+		.tail::before,
+	.root:has(.image[data-transition-target][data-starting-style]) .tail::before {
+		opacity: 0;
+		transition: none;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.tail::before {
+			transition: none;
+		}
+	}
+}

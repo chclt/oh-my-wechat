@@ -19,6 +19,7 @@ const OFFSET_TOLERANCE = 0.5;
 export class CarouselScrollController {
 	private position: CarouselPosition;
 	private source: CarouselKind = "detail";
+	private sourceListeners = new Set<() => void>();
 	private keys: readonly string[] = [];
 	private indexes = new Map<string, number>();
 	private viewports: Viewports | null = null;
@@ -26,9 +27,35 @@ export class CarouselScrollController {
 	constructor(initialMessageKey: string) {
 		this.position = { messageKey: initialMessageKey, progress: 0 };
 	}
+	getSource = () => this.source;
+	subscribeSource = (listener: () => void) => {
+		this.sourceListeners.add(listener);
+		return () => {
+			this.sourceListeners.delete(listener);
+		};
+	};
 
 	get messageKey() {
 		return this.position.messageKey;
+	}
+
+	/** Read the actual detail position; native snap may differ from the source. */
+	get currentKey() {
+		const position = this.readPosition("detail");
+		return position && position.progress >= -0.5 && position.progress < 0.5
+			? position.messageKey
+			: null;
+	}
+
+	get isDetailSnapped() {
+		const viewport = this.viewports?.detail;
+		if (!viewport) return false;
+		const position = this.readPosition("detail");
+		return (
+			position !== null &&
+			Math.abs(position.progress * viewport.geometry.itemSize) <=
+				OFFSET_TOLERANCE
+		);
 	}
 
 	/** Called after DOM layout has committed, before browser scroll events. */
@@ -41,11 +68,12 @@ export class CarouselScrollController {
 	}
 
 	takeControl(kind: CarouselKind) {
+		if (kind === this.source) return;
 		// Native snap may have accepted a different position from the one written.
 		// Start a new gesture from what this viewport actually displays.
-		if (kind !== this.source)
-			this.position = this.readPosition(kind) ?? this.position;
+		this.position = this.readPosition(kind) ?? this.position;
 		this.source = kind;
+		this.sourceListeners.forEach((listener) => listener());
 	}
 
 	onScroll(kind: CarouselKind) {
@@ -65,7 +93,12 @@ export class CarouselScrollController {
 		if (index === undefined) return;
 		const nextKey = this.keys[index + delta];
 		if (!nextKey) return;
-		this.position = { messageKey: nextKey, progress: 0 };
+		this.select(nextKey);
+	}
+
+	select(messageKey: string) {
+		if (!this.indexes.has(messageKey)) return;
+		this.position = { messageKey, progress: 0 };
 		this.restore("detail");
 		this.restore("thumb");
 	}

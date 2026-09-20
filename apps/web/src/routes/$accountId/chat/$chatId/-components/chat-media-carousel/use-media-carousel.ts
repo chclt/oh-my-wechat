@@ -1,20 +1,20 @@
-import { useMemo } from "react";
+import { type Ref, useImperativeHandle, useMemo, useState } from "react";
+import { CarouselScrollController } from "./carousel-scroll-controller";
 import { useCarouselLayout } from "./use-carousel-layout";
 import { useFixedCarousel } from "./use-fixed-carousel";
+import { useMediaCarouselScrollSync } from "./use-media-carousel-scroll-sync";
 import {
-	useCarouselController,
-	useMediaCarouselScrollSync,
-} from "./use-media-carousel-scroll-sync";
-import {
-	type MediaPagesOptions,
 	useMediaPages,
 	useMediaPageWindow,
 	useMediaPagination,
 } from "./use-media-pages";
-import { createMessageURI } from "./utils";
+import { createMessageURI, type MediaPagesOptions } from "./utils";
 
 /** One mounted dialog session. Coordinates data, layout and position ownership. */
-export function useMediaCarousel(options: MediaPagesOptions) {
+export function useMediaCarousel(
+	options: MediaPagesOptions & { onCurrentKeyChange: (key: string) => void },
+	ref: Ref<CarouselScrollController>,
+) {
 	"use no memo";
 	const pages = useMediaPages(options);
 	const pageWindow = useMediaPageWindow(pages);
@@ -27,14 +27,15 @@ export function useMediaCarousel(options: MediaPagesOptions) {
 		[messages, options.account.id],
 	);
 	const initialKey = createMessageURI({
-		message: options.initialMessage,
+		message: {
+			chat_id: options.chat.id,
+			local_id: options.initialMessageAnchor.local_id,
+		},
 		account: options.account,
 	});
-	const initialIndex = useMemo(
-		() => keys.indexOf(initialKey),
-		[keys, initialKey],
-	);
-	const controller = useCarouselController(initialKey);
+	const initialIndex = keys.indexOf(initialKey);
+	const [controller] = useState(() => new CarouselScrollController(initialKey));
+	useImperativeHandle(ref, () => controller, [controller]);
 	const detailLayout = useCarouselLayout("detail");
 	const thumbLayout = useCarouselLayout("thumb");
 	const isReady =
@@ -60,6 +61,7 @@ export function useMediaCarousel(options: MediaPagesOptions) {
 		controller,
 		keys,
 		isReady,
+		onCurrentKeyChange: options.onCurrentKeyChange,
 		detail: { layout: detailLayout, virtualizer: detailVirtualizer },
 		thumb: { layout: thumbLayout, virtualizer: thumbVirtualizer },
 	});
