@@ -4,20 +4,27 @@ import {
 	GetMessageVideoResponse,
 } from "@repo/types/adapter";
 import CryptoJS from "crypto-js";
-import { WCDatabases } from "../types";
+import type { WCDatabases } from "../types";
 import { getFilesFromManifast } from "../utils";
+import type { BackupEncryption } from "../utils/encryption/encryption.ts";
 import { createImageUri } from "./file/utils";
 import { readMediaDimensions } from "./media-dimensions";
 
 export type GetInput = [
 	GetMessageVideoRequest,
-	{ directory: FileSystemDirectoryHandle | FileList; databases: WCDatabases },
+	{
+		directory: FileSystemDirectoryHandle | FileList;
+		databases: WCDatabases;
+		encryption?: BackupEncryption;
+	},
 ];
 export type GetOutput = GetMessageVideoResponse;
 
 export async function get(...inputs: GetInput): GetOutput {
-	const [{ account, chat, message, include }, { directory, databases }] =
-		inputs;
+	const [
+		{ account, chat, message, include },
+		{ directory, databases, encryption },
+	] = inputs;
 	const video = message.message_entity.msg.videomsg;
 
 	const db = databases.manifest;
@@ -27,6 +34,7 @@ export async function get(...inputs: GetInput): GetOutput {
 		db,
 		directory,
 		`Documents/${CryptoJS.MD5(account.id).toString()}/Video/${CryptoJS.MD5(chat.id).toString()}/${message.local_id}.%`,
+		encryption,
 	);
 
 	if (!files.length) return { data: undefined };

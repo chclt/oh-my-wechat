@@ -6,9 +6,10 @@ import type {
 } from "@repo/types/adapter";
 import { and, eq } from "drizzle-orm";
 import { filesTable } from "../../database/_manifest.ts";
-import { WCDatabases } from "../../types.ts";
+import type { WCDatabases } from "../../types.ts";
 import { MANIFEST_DOMAIN, URI_PREFIX } from "../../utils/constants.ts";
-import { getFileFromDirectory } from "../../utils/index.ts";
+import type { BackupEncryption } from "../../utils/encryption/encryption.ts";
+import { readManifestFile } from "../../utils/index.ts";
 import { convertWxgfToImage } from "../../utils/wxgf/index.ts";
 import { isWxgf } from "../../utils/wxgf/utils.ts";
 
@@ -43,9 +44,11 @@ async function loadSrc(
 	{
 		directory,
 		databases,
+		encryption,
 	}: {
 		directory: FileSystemDirectoryHandle | FileList;
 		databases: WCDatabases;
+		encryption?: BackupEncryption;
 	},
 ): Promise<string> {
 	const relativePath = uri.slice(URI_PREFIX.length);
@@ -70,10 +73,7 @@ async function loadSrc(
 		throw new Error(`[image] file not found for uri: ${uri}`);
 	}
 
-	const file = await getFileFromDirectory(directory, [
-		row.fileID.substring(0, 2),
-		row.fileID,
-	]);
+	const file = await readManifestFile(directory, row, encryption);
 
 	if (!file) {
 		throw new Error(`[image] file handle not found for uri: ${uri}`);
@@ -84,7 +84,11 @@ async function loadSrc(
 
 export type ResolveInput = [
 	ResolveMessageFileRequest,
-	{ directory: FileSystemDirectoryHandle | FileList; databases: WCDatabases },
+	{
+		directory: FileSystemDirectoryHandle | FileList;
+		databases: WCDatabases;
+		encryption?: BackupEncryption;
+	},
 ];
 
 export type ResolveOutput = ResolveMessageFileResponse;
@@ -129,10 +133,7 @@ export async function resolve(...input: ResolveInput): ResolveOutput {
 	return { data: { src } };
 }
 
-export type ReleaseInput = [
-	ReleaseMessageFileRequest,
-	{ directory: FileSystemDirectoryHandle | FileList; databases: WCDatabases },
-];
+export type ReleaseInput = [ReleaseMessageFileRequest];
 
 export type ReleaseOutput = ReleaseMessageFileResponse;
 

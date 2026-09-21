@@ -31,12 +31,18 @@ import AdapterWorker from "./worker.ts?worker";
 
 export default class IosBackupAdapter implements DataAdapter {
 	private _directory: FileSystemDirectoryHandle | FileList | undefined;
+	private _directoryLoaded = false;
 
 	private _workerAdapter: Comlink.Remote<AdapterWorkerType>;
 
-	async _loadDirectory(directoryHandle: FileSystemDirectoryHandle | FileList) {
+	async _loadDirectory(
+		directoryHandle: FileSystemDirectoryHandle | FileList,
+		password?: string,
+	) {
+		this._directoryLoaded = false;
 		this._directory = directoryHandle;
-		await this._workerAdapter._loadDirectory(this._directory);
+		await this._workerAdapter._loadDirectory(this._directory, password);
+		this._directoryLoaded = true;
 	}
 
 	async _loadAccountDatabase(account: UserType) {
@@ -56,7 +62,7 @@ export default class IosBackupAdapter implements DataAdapter {
 			throw new Error("Directory not loaded");
 		}
 
-		await this._workerAdapter._loadDirectory(this._directory);
+		if (!this._directoryLoaded) await this._loadDirectory(this._directory);
 	}
 
 	async getAccountList() {

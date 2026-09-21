@@ -3,11 +3,32 @@ import type { UserType } from "@repo/types";
 import { and, eq, like } from "drizzle-orm";
 import type { SqliteRemoteDatabase } from "drizzle-orm/sqlite-proxy";
 import { filesTable } from "../database/_manifest.ts";
+import type { BackupEncryption } from "./encryption/encryption.ts";
+
+/** Shared by database readers and direct media URL readers. */
+export async function readManifestFile(
+	directory: FileSystemDirectoryHandle | FileList,
+	row: typeof filesTable.$inferSelect,
+	encryption?: BackupEncryption,
+) {
+	const file = await getFileFromDirectory(directory, [
+		row.fileID.substring(0, 2),
+		row.fileID,
+	]);
+	if (!file) return file;
+	if (!encryption) return file;
+	if (!row.file)
+		throw new Error(
+			`Missing encryption metadata for backup file: ${row.relativePath}`,
+		);
+	return encryption.decrypt(file, row.file);
+}
 
 export async function getFilesFromManifast(
 	manifestDatabase: SqliteRemoteDatabase<Record<string, never>>,
 	directory: FileSystemDirectoryHandle | FileList,
 	fileNamePattern: string,
+	encryption?: BackupEncryption,
 ): Promise<
 	{
 		filename: string;
@@ -40,11 +61,7 @@ export async function getFilesFromManifast(
 		const filePathname = row.relativePath!;
 		const fileName = filePathname.split("/").pop() as string;
 		if (manifestFileName.length === 0) continue;
-		const filePrefix = manifestFileName.substring(0, 2);
-		const file = await getFileFromDirectory(directory, [
-			filePrefix,
-			manifestFileName,
-		]);
+		const file = await readManifestFile(directory, row, encryption);
 		if (file)
 			fileList.push({
 				filename: fileName,
@@ -60,7 +77,7 @@ export async function getFileFromDirectory(
 	directory: FileSystemDirectoryHandle | FileList,
 	fileName: string | string[],
 ) {
-	if (directory instanceof FileList) {
+	if (typeof FileList !== "undefined" && directory instanceof FileList) {
 		const shortFileName = Array.isArray(fileName)
 			? fileName.at(-1)
 			: fileName.split("/").pop();
@@ -72,25 +89,40 @@ export async function getFileFromDirectory(
 
 	if (fileName.length === 0) return null;
 
-	if (directory instanceof FileSystemDirectoryHandle) {
+	if (
+		typeof FileSystemDirectoryHandle !== "undefined" &&
+		directory instanceof FileSystemDirectoryHandle
+	) {
 		const fileNameSegment = Array.isArray(fileName)
 			? fileName
 			: fileName.split("/");
 		const fileNameSegmentLength = fileNameSegment.length;
 
 		if (fileNameSegmentLength === 1) {
-			const fileHandle = await directory.getFileHandle(fileNameSegment[0]);
-			return await fileHandle.getFile();
+			try {
+				const fileHandle = await directory.getFileHandle(fileNameSegment[0]);
+				return await fileHandle.getFile();
+			} catch (error) {
+				if (error instanceof DOMException && error.name === "NotFoundError")
+					return null;
+				throw error;
+			}
 		}
 
 		if (fileNameSegmentLength > 1) {
-			const subDirectoryHandle = await directory.getDirectoryHandle(
-				fileNameSegment[0],
-			);
-			return getFileFromDirectory(
-				subDirectoryHandle,
-				fileNameSegment.splice(1),
-			);
+			try {
+				const subDirectoryHandle = await directory.getDirectoryHandle(
+					fileNameSegment[0],
+				);
+				return await getFileFromDirectory(
+					subDirectoryHandle,
+					fileNameSegment.slice(1),
+				);
+			} catch (error) {
+				if (error instanceof DOMException && error.name === "NotFoundError")
+					return null;
+				throw error;
+			}
 		}
 	}
 }

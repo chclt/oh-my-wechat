@@ -1,17 +1,25 @@
 import { FileInfo } from "@repo/types";
 import { DataAdapterResponse, GetRecordFileRequest } from "@repo/types/adapter";
 import CryptoJS from "crypto-js";
-import { WCDatabases } from "../types";
+import type { WCDatabases } from "../types";
 import { getFilesFromManifast } from "../utils";
+import type { BackupEncryption } from "../utils/encryption/encryption.ts";
 
 export type GetInput = [
 	GetRecordFileRequest,
-	{ directory: FileSystemDirectoryHandle | FileList; databases: WCDatabases },
+	{
+		directory: FileSystemDirectoryHandle | FileList;
+		databases: WCDatabases;
+		encryption?: BackupEncryption;
+	},
 ];
 export type GetOutput = Promise<DataAdapterResponse<FileInfo | undefined>>;
 
 export async function get(...inputs: GetInput): GetOutput {
-	const [{ account, chat, message, record }, { directory, databases }] = inputs;
+	const [
+		{ account, chat, message, record },
+		{ directory, databases, encryption },
+	] = inputs;
 
 	const db = databases.manifest;
 	if (!db) throw new Error("manifest database is not found");
@@ -21,6 +29,7 @@ export async function get(...inputs: GetInput): GetOutput {
 		directory,
 		// @ts-expect-error FIXME
 		`Documents/${CryptoJS.MD5(account.id).toString()}/OpenData/${CryptoJS.MD5(chat.id).toString()}/${message.local_id}/${record["@_dataid"]}.${record["datafmt"]}`,
+		encryption,
 	);
 
 	if (files.length === 0) return { data: undefined };

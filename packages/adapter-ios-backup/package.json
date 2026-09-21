@@ -27,6 +27,7 @@
 		"date-fns": "catalog:",
 		"drizzle-orm": "^0.44.4",
 		"fast-xml-parser": "catalog:",
+		"rork-plist": "0.7.0",
 		"silk-wasm": "^3.7.1",
 		"sql.js": "^1.13.0"
 	},

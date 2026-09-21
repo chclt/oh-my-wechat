@@ -252,6 +252,9 @@ importers:
       fast-xml-parser:
         specifier: 'catalog:'
         version: 5.2.5
+      rork-plist:
+        specifier: 0.7.0
+        version: 0.7.0
       silk-wasm:
         specifier: ^3.7.1
         version: 3.7.1
@@ -2446,6 +2449,10 @@ packages:
     resolution: {integrity: sha512-WMmLFI+Boh6xbop+OAGo9cQ3OgX9MIg7xOQjn+pTCwOkk+FNDAeAemXkJ3HzDJrVXleLOFVa1ipuc1AmEx1Dwg==}
     engines: {node: '>=18.0.0', npm: '>=8.0.0'}
     hasBin: true
+
+  rork-plist@0.7.0:
+    resolution: {integrity: sha512-/VdQFvaDY2N2BBp4DB7kBVqIcCLDq/EwoKKycUZQ5XaSQJb5pkqNMVvr+1dwhglJzX+POx2pXrn7po2n/nUkRw==}
+    engines: {node: '>=20'}
 
   safer-buffer@2.1.2:
     resolution: {integrity: sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==}
@@ -4705,6 +4712,8 @@ snapshots:
       '@rollup/rollup-win32-ia32-msvc': 4.46.2
       '@rollup/rollup-win32-x64-msvc': 4.46.2
       fsevents: 2.3.3
+
+  rork-plist@0.7.0: {}
 
   safer-buffer@2.1.2:
     optional: true

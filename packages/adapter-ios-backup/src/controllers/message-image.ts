@@ -4,19 +4,24 @@ import {
 	GetMessageImageResponse,
 } from "@repo/types/adapter";
 import CryptoJS from "crypto-js";
-import { WCDatabases } from "../types";
+import type { WCDatabases } from "../types";
 import { getFilesFromManifast } from "../utils";
+import type { BackupEncryption } from "../utils/encryption/encryption.ts";
 import { createImageUri } from "./file/utils";
 import { readMediaDimensions } from "./media-dimensions";
 
 export type GetInput = [
 	GetMessageImageRequest,
-	{ directory: FileSystemDirectoryHandle | FileList; databases: WCDatabases },
+	{
+		directory: FileSystemDirectoryHandle | FileList;
+		databases: WCDatabases;
+		encryption?: BackupEncryption;
+	},
 ];
 export type GetOutput = GetMessageImageResponse;
 
 export async function get(...inputs: GetInput): GetOutput {
-	const [request, { directory, databases }] = inputs;
+	const [request, { directory, databases, encryption }] = inputs;
 	const { account, chat, message, sizes, domain = "image" } = request;
 	const img =
 		request.domain === "opendata"
@@ -48,6 +53,7 @@ export async function get(...inputs: GetInput): GetOutput {
 				opendata: "OpenData",
 			}[domain]
 		}/${CryptoJS.MD5(chat.id).toString()}/${message.local_id}.%`,
+		encryption,
 	);
 
 	const sizeIncludeMap: Record<keyof ImageInfo, boolean> = {
@@ -62,6 +68,7 @@ export async function get(...inputs: GetInput): GetOutput {
 			db,
 			directory,
 			`Documents/${CryptoJS.MD5(account.id).toString()}/ImgV2/${CryptoJS.MD5(chat.id).toString()}/${message.local_id}.%`,
+			encryption,
 		);
 
 		files.push(...appendFiles);

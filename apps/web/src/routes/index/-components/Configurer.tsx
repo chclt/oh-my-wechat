@@ -1,4 +1,4 @@
-import { RadioGroup } from "@base-ui/react";
+import { Field, RadioGroup } from "@base-ui/react";
 import { useToggle } from "@mantine/hooks";
 import IosBackupAdapter from "@repo/adapter-ios-backup";
 import {
@@ -9,7 +9,7 @@ import type { AccountType } from "@repo/types";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { ChevronRightSmallLine } from "@/components/central-icon.tsx";
 // import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group.tsx";
 import { LoaderIcon } from "@/components/icon.tsx";
@@ -35,65 +35,81 @@ export default function Configurer(
 		return adapterRef.current;
 	}
 
-	const [adapterInited, setAdapterInited] = useState(false);
+	const [step, toggleStep] = useToggle<
+		"SELECT_DIRECTORY" | "ENTER_PASSWORD" | "SELECT_ACCOUNT"
+	>(["SELECT_DIRECTORY", "ENTER_PASSWORD", "SELECT_ACCOUNT"]);
+	const [password, setPassword] = useState("");
 
 	const {
 		mutateAsync: loadDirectory,
+		variables: loadDirectoryVariables,
+		error: loadDirectoryError,
 		isPending: isLoadingDirectory,
 		isSuccess: isLoadDirectorySuccess,
-	} = useMutation(LoadDirectoryMutationOptions(getAdapter()));
+	} = useMutation({
+		...LoadDirectoryMutationOptions(getAdapter()),
+		onSuccess: async () => {
+			const accounts = await queryClient.fetchQuery({
+				...AccountListSuspenseQueryOptions(),
+				staleTime: 0,
+			});
+			switch (accounts.length) {
+				case 0:
+					toggleStep("SELECT_DIRECTORY");
+					break;
+				case 1:
+					handleAccountSelect(accounts[0]);
+					break;
+				default:
+					toggleStep("SELECT_ACCOUNT");
+					break;
+			}
+		},
+		onError: (error) => {
+			if (error.name === "BackupPasswordRequiredError") {
+				toggleStep("ENTER_PASSWORD");
+			}
+		},
+	});
 
 	const {
-		mutateAsync: loadAccountDatabase,
+		mutate: loadAccountDatabase,
+		error: loadAccountDatabaseError,
 		isPending: isLoadingAccountDatabase,
 		isSuccess: isLoadAccountDatabaseSuccess,
 	} = useMutation(LoadAccountDatabaseMutationOptions(getAdapter()));
 
 	const handleDirectorySelect = async (
 		directoryHandle: FileSystemDirectoryHandle | FileList,
+		password?: string,
 	) => {
 		setDataAdapter(getAdapter());
-		loadDirectory(directoryHandle).then(() => {
-			setAdapterInited(true);
-		});
-
-		await queryClient.invalidateQueries({
-			queryKey: AccountListSuspenseQueryOptions().queryKey,
-		});
+		try {
+			await loadDirectory({ directory: directoryHandle, password });
+		} catch {
+			// Mutation errors are displayed in the current step.
+		}
 	};
 
 	const { data: accountList = [] } = useQuery({
 		...AccountListSuspenseQueryOptions(),
-		enabled: adapterInited,
+		enabled: isLoadDirectorySuccess,
 	});
 
-	const handleAccountSelect = async (account: AccountType) => {
-		loadAccountDatabase(account).then(() => {
-			navigate({
-				to: "/$accountId",
-				params: { accountId: account.id },
-			});
+	const handleAccountSelect = (account: AccountType) => {
+		loadAccountDatabase(account, {
+			onSuccess: () => {
+				navigate({
+					to: "/$accountId",
+					params: { accountId: account.id },
+				});
+			},
+			onError: () => {
+				toggleStep("SELECT_ACCOUNT");
+				setSelectedAccountId(account.id);
+			},
 		});
 	};
-
-	const [step, toggleStep] = useToggle<"SELECT_DIRECTORY" | "SELECT_ACCOUNT">([
-		"SELECT_DIRECTORY",
-		"SELECT_ACCOUNT",
-	]);
-
-	useEffect(() => {
-		switch (accountList.length) {
-			case 0:
-				toggleStep("SELECT_DIRECTORY");
-				break;
-			case 1:
-				handleAccountSelect(accountList[0]);
-				break;
-			default:
-				toggleStep("SELECT_ACCOUNT");
-				break;
-		}
-	}, [accountList.length]);
 
 	const [selectedAccountId, setSelectedAccountId] = useState<string>();
 
@@ -103,7 +119,7 @@ export default function Configurer(
 	return (
 		<main {...props}>
 			{step === "SELECT_DIRECTORY" && (
-				<div className="flex justify-center">
+				<div className="grid auto-rows-auto justify-items-center gap-3">
 					{isFSAEnabled && (
 						<Button
 							variant="outline"
@@ -168,7 +184,82 @@ export default function Configurer(
 							</div>
 						</label>
 					)}
+
+					{loadDirectoryError &&
+						loadDirectoryError.name !== "BackupPasswordRequiredError" && (
+							<p role="alert" className="text-sm text-destructive">
+								{loadDirectoryError.message}
+							</p>
+						)}
 				</div>
+			)}
+
+			{step === "ENTER_PASSWORD" && (
+				<form
+					className="justify-self-stretch grid auto-rows-auto gap-4"
+					onSubmit={async (event) => {
+						event.preventDefault();
+						if (
+							loadDirectoryVariables &&
+							!isLoadingDirectory &&
+							!isLoadDirectorySuccess
+						) {
+							await handleDirectorySelect(
+								loadDirectoryVariables.directory,
+								password,
+							);
+						}
+					}}
+				>
+					<Field.Root
+						name="backupPassword"
+						disabled={isLoadingDirectory || isLoadDirectorySuccess}
+						invalid={Boolean(
+							loadDirectoryError &&
+							loadDirectoryError.name !== "BackupPasswordRequiredError",
+						)}
+						className="grid auto-rows-auto gap-1"
+					>
+						<Field.Label className="font-medium">输入备份密码</Field.Label>
+
+						<Field.Control
+							type="password"
+							autoComplete="off"
+							autoFocus
+							value={password}
+							onValueChange={setPassword}
+							className="h-11 rounded-xl border [&:not(:disabled)]:border-foreground bg-background px-3"
+						/>
+
+						<Field.Error
+							match={Boolean(
+								loadDirectoryError &&
+								loadDirectoryError.name !== "BackupPasswordRequiredError",
+							)}
+							className="text-sm text-destructive"
+						>
+							{loadDirectoryError?.name === "BackupPasswordError"
+								? "密码错误，请重试"
+								: loadDirectoryError?.name !== "BackupPasswordRequiredError"
+									? loadDirectoryError?.message
+									: undefined}
+						</Field.Error>
+					</Field.Root>
+
+					<Button
+						type="submit"
+						variant="outline"
+						className="justify-self-end w-fit h-11 ps-4.5 pe-2 inline-grid grid-flow-col auto-cols-max items-center gap-1 text-base rounded-xl [&:not(:disabled)]:border-foreground [&>svg]:size-6"
+						disabled={!password || isLoadingDirectory || isLoadDirectorySuccess}
+					>
+						打开
+						{isLoadingDirectory || isLoadDirectorySuccess ? (
+							<LoaderIcon className="scale-90 opacity-75 animate-spin" />
+						) : (
+							<ChevronRightSmallLine />
+						)}
+					</Button>
+				</form>
 			)}
 
 			{step === "SELECT_ACCOUNT" && (
@@ -186,6 +277,7 @@ export default function Configurer(
 
 					<RadioGroup<string>
 						className={"flex flex-wrap gap-2.5"}
+						value={selectedAccountId ?? ""}
 						onValueChange={setSelectedAccountId}
 					>
 						{accountList.map((account) => (
@@ -222,6 +314,13 @@ export default function Configurer(
 							</label>
 						))}
 					</RadioGroup>
+
+					{loadAccountDatabaseError && (
+						<p role="alert" className="text-sm text-destructive">
+							{loadAccountDatabaseError.message}
+						</p>
+					)}
+
 					<Button
 						variant="outline"
 						className={
@@ -232,13 +331,13 @@ export default function Configurer(
 							isLoadingAccountDatabase ||
 							isLoadAccountDatabaseSuccess
 						}
-						onClick={async () => {
+						onClick={() => {
 							if (selectedAccountId) {
 								const account = accountList.find(
 									(account) => account.id === selectedAccountId,
 								);
 								if (account) {
-									await handleAccountSelect(account);
+									handleAccountSelect(account);
 								}
 							}
 						}}
