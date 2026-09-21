@@ -41,6 +41,7 @@ import { getSqlite3 } from "./utils/sqlite3.ts";
 globalThis.Buffer = Buffer;
 
 interface AdapterWorkerStore {
+	manifestExecutor: DatabaseExecutor | undefined;
 	directory: FileSystemDirectoryHandle | FileList | undefined;
 	databases: WCDatabases;
 	wcdbDicts: {
@@ -63,6 +64,8 @@ export interface AdapterWorkerType extends Record<
 	_loadDirectory: (
 		directory: FileSystemDirectoryHandle | FileList,
 	) => Promise<void>;
+
+	_unloadDirectory: () => Promise<void>;
 
 	_loadAccountDatabase: (account: AccountType) => Promise<void>;
 
@@ -161,68 +164,70 @@ let accountLoad: AbortController | undefined;
 
 export const adapterWorker: AdapterWorkerType = {
 	_loadDirectory: async (directory) => {
-		const previousCleanup = adapterWorker._unloadAccountDatabase();
+		const previousCleanup = adapterWorker._unloadDirectory();
 		const load = new AbortController();
 		accountLoad = load;
 		await previousCleanup;
 		load.signal.throwIfAborted();
+		let executor: DatabaseExecutor | undefined;
+		try {
+			const manifestFile = await getFileFromDirectory(directory, "Manifest.db");
+			if (!manifestFile) throw new Error("Manifest.db not found");
+			const bytes = new Uint8Array(await manifestFile.arrayBuffer());
+			const sqlite3 = await getSqlite3();
+			load.signal.throwIfAborted();
+			executor = createWasmExecutor(bytes, sqlite3);
+			const manifest = drizzleFromExecutor(executor);
+			const localInfo = (
+				await getFilesFromManifast(
+					manifest,
+					directory,
+					"Documents/LocalInfo.data",
+				)
+			)[0];
+			const loginedUserId = parseLocalInfo(
+				new Uint8Array(await localInfo.file.arrayBuffer()),
+			).id;
+			const mmsettingFiles = await getFilesFromManifast(
+				manifest,
+				directory,
+				"Documents/MMappedKV/mmsetting.archive.%",
+			);
+			const accounts: UserType[] = [];
+			for (const row of mmsettingFiles) {
+				load.signal.throwIfAborted();
+				if (/mmsetting\.archive\.[^.]+$/.test(row.filename)) {
+					accounts.push(
+						parseUserFromMmsetting(
+							new Uint8Array(await row.file.arrayBuffer()),
+						),
+					);
+				}
+			}
+			load.signal.throwIfAborted();
+			_store.directory = directory;
+			_store.databases = { manifest };
+			_store.wcdbDicts = {};
+			_store.manifestExecutor = executor;
+			_store.accountList = accounts.sort((a) =>
+				a.id === loginedUserId ? -1 : 1,
+			);
+		} catch (error) {
+			executor?.close();
+			throw error;
+		}
+	},
+
+	_unloadDirectory: async () => {
+		const cleanup = adapterWorker._unloadAccountDatabase();
+		_store.manifestExecutor?.close();
+		_store.manifestExecutor = undefined;
 		_store.accountList = undefined;
-		_store.directory = directory;
+		_store.directory = undefined;
 		_store.databases = {};
 		_store.wcdbDicts = {};
-
-		const storeDirectory = adapterWorker._getStoreItem("directory");
-
-		const storeDatabase = adapterWorker._getStoreItem("databases");
-
-		const sqlite3 = await getSqlite3();
-
-		const manifestDatabaseFile = await getFileFromDirectory(
-			storeDirectory,
-			"Manifest.db",
-		);
-		if (!manifestDatabaseFile) throw new Error("Manifest.db not found");
-		const manifestDatabaseFileBuffer = await manifestDatabaseFile.arrayBuffer();
-		load.signal.throwIfAborted();
-
-		const manifestDatabase = drizzleFromExecutor(
-			createWasmExecutor(new Uint8Array(manifestDatabaseFileBuffer), sqlite3),
-		);
-
-		storeDatabase.manifest = manifestDatabase;
-
-		const localInfoBuffer = (
-			await getFilesFromManifast(
-				manifestDatabase,
-				storeDirectory,
-				"Documents/LocalInfo.data",
-			)
-		)[0].file;
-
-		const loginedUserId = parseLocalInfo(
-			new Uint8Array(await localInfoBuffer.arrayBuffer()),
-		).id;
-
-		const mmsettingFiles = await getFilesFromManifast(
-			manifestDatabase,
-			storeDirectory,
-			"Documents/MMappedKV/mmsetting.archive.%",
-		);
-
-		const accounts: UserType[] = [];
-
-		for (const row of mmsettingFiles) {
-			if (/mmsetting\.archive\.[^.]+$/.test(row.filename)) {
-				accounts.push(
-					parseUserFromMmsetting(new Uint8Array(await row.file.arrayBuffer())),
-				);
-			}
-		}
-
-		load.signal.throwIfAborted();
-		_store.accountList = accounts.sort((a) =>
-			a.id === loginedUserId ? -1 : 1,
-		);
+		ImageController.clearFileRegistry();
+		await cleanup;
 	},
 
 	_loadAccountDatabase: async (account: UserType) => {

@@ -21,6 +21,14 @@ interface RegistryEntry {
 
 const registry = new Map<string, RegistryEntry>();
 
+export function clearFileRegistry() {
+	for (const entry of registry.values()) {
+		entry.count = 0;
+		if (entry.src) URL.revokeObjectURL(entry.src);
+	}
+	registry.clear();
+}
+
 async function createSrcFromFile(file: File): Promise<string> {
 	const header = new Uint8Array(await file.slice(0, 4).arrayBuffer());
 	if (isWxgf(header)) {
@@ -113,9 +121,9 @@ export async function resolve(...input: ResolveInput): ResolveOutput {
 	if (entry.src === undefined) entry.src = src;
 
 	// 加载期间所有使用者都已 release，这里收尾时立即回收。
-	if (entry.count <= 0 && registry.get(uri) === entry) {
+	if (entry.count <= 0 || registry.get(uri) !== entry) {
 		URL.revokeObjectURL(entry.src);
-		registry.delete(uri);
+		if (registry.get(uri) === entry) registry.delete(uri);
 	}
 
 	return { data: { src } };
