@@ -5,7 +5,7 @@ import {
 	ResizablePanel,
 	ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import ChatListMiniRouter from "./-components/chat-list/mini-router";
+import ChatListWouter from "./-components/chat-list/chat-list-wouter";
 import { useContentSearchHotkey } from "./-components/content-search/use-content-search-hotkey";
 import { parseContentSearchParams } from "./-lib/content-search-state";
 
@@ -32,7 +32,7 @@ function RouteComponent() {
 			>
 				<Suspense>
 					<div className={"relative w-full h-full"}>
-						<ChatListMiniRouter />
+						<ChatListWouter />
 					</div>
 				</Suspense>
 			</ResizablePanel>

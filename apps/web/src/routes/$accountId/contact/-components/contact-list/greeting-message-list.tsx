@@ -2,37 +2,32 @@ import { useDisclosure } from "@mantine/hooks";
 import { MessageTypeEnum } from "@repo/types";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronLeftIcon } from "lucide-react";
+import type { AnimationEvent } from "react";
+import { useLocation } from "wouter";
 import Image from "@/components/image.tsx";
-import { useMiniRoute, useMiniRouter } from "@/components/mini-router";
-import {
-	MiniRoutePageContentClassName,
-	MiniRoutePageOverlayClassName,
-} from "@/components/mini-router/utils.ts";
 import { Button } from "@/components/ui/button.tsx";
 import { ScrollArea } from "@/components/ui/scroll-area.tsx";
+import {
+	WouterPageContentClassName,
+	WouterPageOverlayClassName,
+} from "@/components/wouter/page";
 import { GreetingMessageListQueryOptions } from "@/lib/fetchers/message.ts";
 import { cn } from "@/lib/utils.ts";
 import GreetingMessageItem from "@/routes/$accountId/contact/-components/contact-list/greeting-message-item.tsx";
 import { ContactListContctItem } from "@/routes/$accountId/contact/-components/contact-list/use-contact-list.ts";
 
-export interface GreetingMessageListMiniRouteState {
-	name: "greetingMessageList";
-	data: {
-		contactItem: Pick<ContactListContctItem, "photo" | "title">;
-		accountId: string;
-	};
-}
-
-export default function GreetingMessageList() {
-	const { back } = useMiniRouter();
-	const {
-		data: { contactItem, accountId },
-	} = useMiniRoute() as GreetingMessageListMiniRouteState;
-
+export default function GreetingMessageList({
+	accountId,
+	contactItem,
+}: {
+	accountId: string;
+	contactItem: Pick<ContactListContctItem, "photo" | "title">;
+}) {
+	const [, navigate] = useLocation();
 	const [isOpen, { close }] = useDisclosure(true);
-	const handleAnimationEnd = () => {
-		if (!isOpen) {
-			back();
+	const handleAnimationEnd = (event: AnimationEvent<HTMLElement>) => {
+		if (event.target === event.currentTarget && !isOpen) {
+			navigate("/", { replace: true });
 		}
 	};
 
@@ -49,7 +44,7 @@ export default function GreetingMessageList() {
 				aria-hidden={true}
 				className={cn(
 					"absolute inset-0 bg-background",
-					MiniRoutePageOverlayClassName,
+					WouterPageOverlayClassName,
 				)}
 			/>
 			<section
@@ -57,7 +52,7 @@ export default function GreetingMessageList() {
 				data-state={isOpen ? "open" : "closed"}
 				className={cn(
 					"absolute inset-0 bg-background",
-					MiniRoutePageContentClassName,
+					WouterPageContentClassName,
 				)}
 				onAnimationEnd={handleAnimationEnd}
 			>
@@ -69,6 +64,7 @@ export default function GreetingMessageList() {
 				>
 					<header className="sticky z-30 top-0 h-16 px-5 ps-2.5 flex items-center texture border-b border-muted">
 						<Button
+							aria-label="返回通讯录"
 							size="icon"
 							variant="ghost"
 							className="mr-3 opacity-80"

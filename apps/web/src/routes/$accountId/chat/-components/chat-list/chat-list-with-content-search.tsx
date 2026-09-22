@@ -1,37 +1,21 @@
 import { useDebouncedValue } from "@mantine/hooks";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import {
-	MiniOutlet,
-	useMiniRoute,
-	useMiniRouter,
-} from "@/components/mini-router";
-import { MiniRouteFirstPageContentClassName } from "@/components/mini-router/utils";
+import { Suspense } from "react";
+import { Redirect, Route as LocalRoute, useLocation } from "wouter";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { WouterFirstPageContentClassName } from "@/components/wouter/page";
 import { ChatListSuspenseQueryOptions } from "@/lib/fetchers/chat";
 import { cn } from "@/lib/utils.ts";
+import { Route } from "../../route";
 import { ContentSearch } from "../content-search";
+import ChatGroupList from "./chat-group-list";
 import ChatListItem from "./chat-item";
 import useChatList from "./use-chat-list";
 
-export interface ChatListMiniRouteState {
-	name: "root";
-	data: {
-		accountId: string;
-	};
-}
-
 export default function ChatListWithContentSearch() {
-	const {
-		data: { accountId },
-	} = useMiniRoute() as ChatListMiniRouteState;
-
-	const { states: miniRouterStates } = useMiniRouter();
-	const thisMiniRouteState = useMiniRoute();
-	const thisMiniRoutePosition = miniRouterStates.findIndex((state) =>
-		Object.is(state, thisMiniRouteState),
-	);
-	const isThisMiniRouteOnTop =
-		thisMiniRoutePosition === miniRouterStates.length - 1;
+	const { accountId } = Route.useParams();
+	const [location] = useLocation();
+	const isRootActive = location === "/";
 
 	const { data } = useSuspenseQuery(ChatListSuspenseQueryOptions(accountId));
 
@@ -41,7 +25,7 @@ export default function ChatListWithContentSearch() {
 			<ChatListContent
 				accountId={accountId}
 				chatList={chatList}
-				isThisMiniRouteOnTop={isThisMiniRouteOnTop}
+				isRootActive={isRootActive}
 			/>
 		</ContentSearch.Provider>
 	);
@@ -50,11 +34,11 @@ export default function ChatListWithContentSearch() {
 function ChatListContent({
 	accountId,
 	chatList,
-	isThisMiniRouteOnTop,
+	isRootActive,
 }: {
 	accountId: string;
 	chatList: ReturnType<typeof useChatList>;
-	isThisMiniRouteOnTop: boolean;
+	isRootActive: boolean;
 }) {
 	const { isSearchEnabled, searchQuery } = ContentSearch.useContentSearch();
 	const [debouncedSearchQuery] = useDebouncedValue(searchQuery, 300);
@@ -62,15 +46,13 @@ function ChatListContent({
 
 	return (
 		<div className={cn("absolute inset-0")}>
-			<div
-				className={cn("absolute inset-0", MiniRouteFirstPageContentClassName)}
-			>
+			<div className={cn("absolute inset-0", WouterFirstPageContentClassName)}>
 				<div
 					className="absolute inset-0 overflow-hidden"
-					aria-hidden={!isThisMiniRouteOnTop}
-					inert={!isThisMiniRouteOnTop}
+					aria-hidden={!isRootActive}
+					inert={!isRootActive}
 					style={{
-						pointerEvents: isThisMiniRouteOnTop ? "auto" : "none",
+						pointerEvents: isRootActive ? "auto" : "none",
 					}}
 				>
 					<ContentSearch.Input className="texture border-b border-bd" />
@@ -82,11 +64,10 @@ function ChatListContent({
 								? "-translate-x-[min(100%,20rem)] opacity-0"
 								: "translate-x-0 opacity-100",
 						)}
-						aria-hidden={isSearchEnabled || !isThisMiniRouteOnTop}
-						inert={isSearchEnabled || !isThisMiniRouteOnTop}
+						aria-hidden={isSearchEnabled || !isRootActive}
+						inert={isSearchEnabled || !isRootActive}
 						style={{
-							pointerEvents:
-								isSearchEnabled || !isThisMiniRouteOnTop ? "none" : "auto",
+							pointerEvents: isSearchEnabled || !isRootActive ? "none" : "auto",
 						}}
 					>
 						<ScrollArea
@@ -113,11 +94,10 @@ function ChatListContent({
 								? "translate-x-0 opacity-100"
 								: "translate-x-[min(100%,20rem)] opacity-0",
 						)}
-						aria-hidden={!isSearchEnabled || !isThisMiniRouteOnTop}
-						inert={!isSearchEnabled || !isThisMiniRouteOnTop}
+						aria-hidden={!isSearchEnabled || !isRootActive}
+						inert={!isSearchEnabled || !isRootActive}
 						style={{
-							pointerEvents:
-								isSearchEnabled && isThisMiniRouteOnTop ? "auto" : "none",
+							pointerEvents: isSearchEnabled && isRootActive ? "auto" : "none",
 						}}
 					>
 						<ScrollArea
@@ -136,7 +116,21 @@ function ChatListContent({
 				</div>
 			</div>
 
-			<MiniOutlet />
+			{/* Keep the root list mounted to preserve its scroll and search state. */}
+			<LocalRoute path="/groups/:groupId">
+				{({ groupId }) => {
+					const group = chatList.find(
+						(item) => item.type === "chatGroup" && item.id === groupId,
+					);
+					return group?.type === "chatGroup" ? (
+						<Suspense key={group.id}>
+							<ChatGroupList chatListItem={group} />
+						</Suspense>
+					) : (
+						<Redirect to="/" replace />
+					);
+				}}
+			</LocalRoute>
 		</div>
 	);
 }

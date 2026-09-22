@@ -15,7 +15,7 @@ import { ChatIconFill, ContactIconFill } from "@/components/icon";
 import dialogClasses from "@/components/ui/dialog.module.css";
 import { cn } from "@/lib/utils";
 import { AccountSearchModalOptions } from "./-types";
-import ContactListMiniRouter from "./contact/-components/contact-list/contact-list-mini-router";
+import ContactListWouter from "./contact/-components/contact-list/contact-list-wouter";
 
 interface AccountSearchProps {
 	modal: AccountSearchModalOptions;
@@ -126,7 +126,7 @@ function RouteComponent() {
 										</VisuallyHidden>
 
 										<div className="relative w-full h-full overflow-hidden">
-											<ContactListMiniRouter />
+											<ContactListWouter />
 										</div>
 
 										<Dialog.Close

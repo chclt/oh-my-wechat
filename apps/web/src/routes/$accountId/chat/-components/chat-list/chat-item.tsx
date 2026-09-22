@@ -2,14 +2,13 @@ import { useInViewport } from "@mantine/hooks";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import type React from "react";
+import { useLocation } from "wouter";
 import { ChatUiConfigProvider } from "@/components/chat-ui-config-provider.tsx";
 import Message from "@/components/message/message.tsx";
-import { useMiniRouter } from "@/components/mini-router";
 import { Avatar } from "@/components/ui/avatar.tsx";
 import { LastMessageQueryOptions } from "@/lib/fetchers/message";
 import { cn, formatDateTime } from "@/lib/utils.ts";
 import { Route } from "../../route";
-import { ChatGroupListMiniRouteState } from "./chat-group-list";
 import { ChatListChatGroupItem, ChatListChatItem } from "./use-chat-list";
 
 interface ChatItemProps extends React.HTMLAttributes<HTMLLIElement> {
@@ -23,8 +22,7 @@ export default function ChatListItem({
 }: ChatItemProps) {
 	const { accountId } = Route.useParams();
 
-	const { states: miniRouterStates, pushState: pushMiniRouterState } =
-		useMiniRouter();
+	const [, navigate] = useLocation();
 
 	const { ref: itemRef, inViewport } = useInViewport();
 
@@ -35,17 +33,6 @@ export default function ChatListItem({
 		}),
 		enabled: inViewport,
 	});
-
-	const handleOpenChatGroup = (
-		chatListChatGroupItem: ChatListChatGroupItem,
-	) => {
-		pushMiniRouterState({
-			name: "chatGroupList",
-			data: {
-				chatListItem: chatListChatGroupItem,
-			},
-		} satisfies ChatGroupListMiniRouteState);
-	};
 
 	return (
 		<li ref={itemRef} {...props}>
@@ -64,7 +51,7 @@ export default function ChatListItem({
 					if (chatListItem.type === "chatGroup") {
 						event.preventDefault();
 						event.stopPropagation();
-						handleOpenChatGroup(chatListItem);
+						navigate(`/groups/${encodeURIComponent(chatListItem.id)}`);
 					}
 				}}
 			>

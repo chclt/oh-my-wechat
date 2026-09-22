@@ -1,8 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import React from "react";
-import { useMiniRouter } from "@/components/mini-router";
+import { useLocation } from "wouter";
 import { Avatar } from "@/components/ui/avatar.tsx";
-import { ContactGroupListMiniRouteState } from "./contact-group-list";
 import {
 	ContactListContctGroupItem,
 	ContactListContctItem,
@@ -26,20 +25,7 @@ export default function ContactItem({
 
 	onClick,
 }: ContactItemProps) {
-	const { states: miniRouterStates, pushState: pushMiniRouterState } =
-		useMiniRouter();
-
-	const handleOpenContactGroup = (
-		contactListContactGroupItem: ContactListContctGroupItem,
-	) => {
-		pushMiniRouterState({
-			name: "contactGroupList",
-			data: {
-				accountId,
-				contctGroup: contactListContactGroupItem,
-			},
-		} satisfies ContactGroupListMiniRouteState);
-	};
+	const [, navigate] = useLocation();
 
 	return (
 		<li
@@ -63,7 +49,7 @@ export default function ContactItem({
 							if (contactItem.type === "contactGroup") {
 								event.preventDefault();
 								event.stopPropagation();
-								handleOpenContactGroup(contactItem);
+								navigate(`/groups/${encodeURIComponent(contactItem.id)}`);
 							}
 						}
 					}}
