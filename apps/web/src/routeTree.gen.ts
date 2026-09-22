@@ -10,7 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AccountIdRouteRouteImport } from './routes/$accountId/route'
-import { Route as IndexRouteRouteImport } from './routes/index/route'
+import { Route as IndexIndexRouteImport } from './routes/_index/index'
 import { Route as AccountIdIndexRouteImport } from './routes/$accountId/index'
 import { Route as AccountIdChatRouteRouteImport } from './routes/$accountId/chat/route'
 import { Route as AccountIdContactIndexRouteImport } from './routes/$accountId/contact/index'
@@ -23,9 +23,9 @@ const AccountIdRouteRoute = AccountIdRouteRouteImport.update({
   path: '/$accountId',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRouteRoute = IndexRouteRouteImport.update({
-  id: '/',
-  path: '',
+const IndexIndexRoute = IndexIndexRouteImport.update({
+  id: '/_index/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AccountIdIndexRoute = AccountIdIndexRouteImport.update({
@@ -64,6 +64,7 @@ export interface FileRoutesByFullPath {
   '/$accountId': typeof AccountIdRouteRouteWithChildren
   '/$accountId/chat': typeof AccountIdChatRouteRouteWithChildren
   '/$accountId/': typeof AccountIdIndexRoute
+  '/': typeof IndexIndexRoute
   '/$accountId/chat/$chatId': typeof AccountIdChatChatIdRouteRouteWithChildren
   '/$accountId/chat/': typeof AccountIdChatIndexRoute
   '/$accountId/contact': typeof AccountIdContactIndexRoute
@@ -71,6 +72,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/$accountId': typeof AccountIdIndexRoute
+  '/': typeof IndexIndexRoute
   '/$accountId/chat/$chatId': typeof AccountIdChatChatIdRouteRouteWithChildren
   '/$accountId/chat': typeof AccountIdChatIndexRoute
   '/$accountId/contact': typeof AccountIdContactIndexRoute
@@ -78,10 +80,10 @@ export interface FileRoutesByTo {
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRouteRoute
   '/$accountId': typeof AccountIdRouteRouteWithChildren
   '/$accountId/chat': typeof AccountIdChatRouteRouteWithChildren
   '/$accountId/': typeof AccountIdIndexRoute
+  '/_index/': typeof IndexIndexRoute
   '/$accountId/chat/$chatId': typeof AccountIdChatChatIdRouteRouteWithChildren
   '/$accountId/chat/': typeof AccountIdChatIndexRoute
   '/$accountId/contact/': typeof AccountIdContactIndexRoute
@@ -93,6 +95,7 @@ export interface FileRouteTypes {
     | '/$accountId'
     | '/$accountId/chat'
     | '/$accountId/'
+    | '/'
     | '/$accountId/chat/$chatId'
     | '/$accountId/chat/'
     | '/$accountId/contact'
@@ -100,16 +103,17 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/$accountId'
+    | '/'
     | '/$accountId/chat/$chatId'
     | '/$accountId/chat'
     | '/$accountId/contact'
     | '/$accountId/chat/$chatId/info'
   id:
     | '__root__'
-    | '/'
     | '/$accountId'
     | '/$accountId/chat'
     | '/$accountId/'
+    | '/_index/'
     | '/$accountId/chat/$chatId'
     | '/$accountId/chat/'
     | '/$accountId/contact/'
@@ -117,8 +121,8 @@ export interface FileRouteTypes {
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRouteRoute: typeof IndexRouteRoute
   AccountIdRouteRoute: typeof AccountIdRouteRouteWithChildren
+  IndexIndexRoute: typeof IndexIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -130,11 +134,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AccountIdRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: ''
-      fullPath: ''
-      preLoaderRoute: typeof IndexRouteRouteImport
+    '/_index/': {
+      id: '/_index/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/$accountId/': {
@@ -226,8 +230,8 @@ const AccountIdRouteRouteWithChildren = AccountIdRouteRoute._addFileChildren(
 )
 
 const rootRouteChildren: RootRouteChildren = {
-  IndexRouteRoute: IndexRouteRoute,
   AccountIdRouteRoute: AccountIdRouteRouteWithChildren,
+  IndexIndexRoute: IndexIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

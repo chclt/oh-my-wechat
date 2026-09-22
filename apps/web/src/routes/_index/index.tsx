@@ -11,7 +11,7 @@ import Link from "@/components/link.tsx";
 import Configurer from "./-components/Configurer";
 import ConfigurerErrorFallback from "./-components/ConfigurerErrorFallback";
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/_index/")({
 	component: RouteComponent,
 });
 
