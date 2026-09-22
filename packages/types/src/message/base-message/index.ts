@@ -76,6 +76,22 @@ export interface ImageMessageEntity {
 			"@_cdnthumbwidth"?: string;
 			"@_cdnthumbheight"?: string;
 			"@_cdnthumbaeskey": string;
+
+			/** its exact purpose is not yet confirmed. */
+			"@_tpurl"?: string;
+			"@_tplength"?: string;
+			"@_tpwidth"?: string;
+			"@_tpheight"?: string;
+			"@_tpauthkey"?: string;
+
+			"@_tphdurl"?: string;
+			"@_tphdlength"?: string;
+
+			"@_tpthumburl"?: string;
+			"@_tpthumblength"?: string;
+			"@_tpthumbwidth"?: string;
+			"@_tpthumbheight"?: string;
+			"@_tpthumbaeskey"?: string;
 		};
 		appinfo: {
 			appid: "";

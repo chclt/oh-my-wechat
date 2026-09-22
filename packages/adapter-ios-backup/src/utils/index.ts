@@ -24,6 +24,25 @@ export async function readManifestFile(
 	return encryption.decrypt(file, row.file);
 }
 
+/** Look up candidate files without opening or decrypting their contents. */
+export async function getFileRecordsFromManifest(
+	manifestDatabase: SqliteRemoteDatabase<Record<string, never>>,
+	fileNamePattern: string,
+) {
+	return manifestDatabase
+		.select()
+		.from(filesTable)
+		.where(
+			and(
+				eq(filesTable.domain, "AppDomain-com.tencent.xin"),
+				like(filesTable.relativePath, fileNamePattern),
+				eq(filesTable.flags, 1),
+			),
+		)
+		.orderBy(filesTable.relativePath)
+		.all();
+}
+
 export async function getFilesFromManifast(
 	manifestDatabase: SqliteRemoteDatabase<Record<string, never>>,
 	directory: FileSystemDirectoryHandle | FileList,
@@ -39,21 +58,10 @@ export async function getFilesFromManifast(
 		file: File;
 	}[]
 > {
-	const rows = await manifestDatabase
-		.select()
-		.from(filesTable)
-		.where(
-			and(
-				eq(filesTable.domain, "AppDomain-com.tencent.xin"),
-				like(filesTable.relativePath, fileNamePattern),
-				eq(filesTable.flags, 1),
-			),
-		)
-		.orderBy(filesTable.relativePath)
-		.all();
-
-	if (rows.length === 0) return [];
-
+	const rows = await getFileRecordsFromManifest(
+		manifestDatabase,
+		fileNamePattern,
+	);
 	const fileList = [];
 
 	for (const row of rows) {

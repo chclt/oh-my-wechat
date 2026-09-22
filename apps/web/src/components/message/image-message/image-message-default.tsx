@@ -1,20 +1,25 @@
 import { useRender } from "@base-ui/react/use-render";
 import { useInViewport, useResizeObserver } from "@mantine/hooks";
-import { MessageDirection, type ImageMessageType } from "@repo/types";
+import { MessageDirection } from "@repo/types";
 import { useQuery } from "@tanstack/react-query";
-import {
-	type CSSProperties,
-	type ImgHTMLAttributes,
-	type Ref,
-	useState,
-} from "react";
+import type { CSSProperties, Ref } from "react";
 import { useAccount } from "@/components/account-provider.tsx";
-import { useResolveMessageFile } from "@/hooks/use-resolve-message-file.ts";
+import {
+	useAutoResolutionImage,
+	type ImageResolution,
+} from "@/hooks/use-auto-resolution-image";
 import { MessageImageQueryOptions } from "@/lib/fetchers";
+import { ResolvedImageQueryOptions } from "@/lib/fetchers/resolved-image";
 import { cn } from "@/lib/utils.ts";
 import { ImageMessageCarouselTarget } from "./image-message-carousel-target";
 import classes from "./image-message.module.css";
 import type { ImageMessageProps } from "./types.ts";
+
+const resolutionOrder: readonly ImageResolution[] = [
+	"regular",
+	"hd",
+	"thumbnail",
+];
 
 export interface ImageMessageDefaultProps extends ImageMessageProps {
 	renderRoot?: useRender.RenderProp;
@@ -31,51 +36,40 @@ export function ImageMessageDefault({
 }: ImageMessageDefaultProps) {
 	const { accountId } = useAccount();
 	const { ref: imageRef, inViewport } = useInViewport();
-	const { data: image } = useQuery({
-		...MessageImageQueryOptions({
+	const { data: image } = useQuery(
+		MessageImageQueryOptions({
 			account: { id: accountId },
 			chat: { id: message.chat_id },
 			message,
 		}),
-		enabled: inViewport,
-	});
-	const thumbnailOnly = Boolean(
-		image?.thumbnail && !image.hd && !image.regular,
 	);
-	const metadataDimensions = getMessageDimensions(message, thumbnailOnly);
-	const [loadedImage, setLoadedImage] = useState<{
-		src: string;
-		width: number;
-		height: number;
-	}>();
-	// Metadata may describe a cropped thumbnail rather than the displayed file.
-	const aspectRatio = loadedImage
-		? loadedImage.width / loadedImage.height
-		: metadataDimensions?.aspectRatio;
-	const imageWidth = loadedImage?.width ?? metadataDimensions?.width;
+	const { target, targetImage, ratioDimensions, displayedImage, isError } =
+		useAutoResolutionImage(image, { resolutionOrder, enabled: inViewport });
+	// The decoded file replaces the selected version's metadata.
+	const dimensions = targetImage ?? target;
+	const aspectRatio =
+		ratioDimensions?.width && ratioDimensions.height
+			? ratioDimensions.width / ratioDimensions.height
+			: undefined;
+	const imageWidth = dimensions?.width;
+	const displayedRatio = displayedImage
+		? displayedImage.width / displayedImage.height
+		: aspectRatio;
 	const [bodyRef, bodySize] = useResizeObserver<HTMLDivElement>();
 	// Ignore subpixel rounding when comparing the bubble with the fitted image.
 	const hasBlurredBackground =
-		aspectRatio !== undefined &&
+		displayedRatio !== undefined &&
 		Math.min(
-			Math.abs(bodySize.width - bodySize.height * aspectRatio),
-			Math.abs(bodySize.height - bodySize.width / aspectRatio),
+			Math.abs(bodySize.width - bodySize.height * displayedRatio),
+			Math.abs(bodySize.height - bodySize.width / displayedRatio),
 		) > 1;
-	const imageProps: ImgHTMLAttributes<HTMLImageElement> = {
-		className: classes.image,
-		// Decorations reuse the foreground's resolved resource and resolution fallback.
-		onLoad: ({ currentTarget }) =>
-			setLoadedImage({
-				src: currentTarget.currentSrc,
-				width: currentTarget.naturalWidth,
-				height: currentTarget.naturalHeight,
-			}),
-	};
 
-	const thumbnailSrc = useResolveMessageFile(
-		hasBlurredBackground ? image?.thumbnail?.uri : undefined,
-	);
-	const backgroundSrc = thumbnailSrc ?? loadedImage?.src;
+	const { data: thumbnailImage } = useQuery({
+		...ResolvedImageQueryOptions(image?.thumbnail?.uri),
+		enabled: inViewport && hasBlurredBackground,
+	});
+	// Decorations reuse the foreground's resolved resource and resolution fallback.
+	const backgroundSrc = thumbnailImage?.src ?? displayedImage?.src;
 
 	return useRender({
 		render: renderRoot,
@@ -112,16 +106,23 @@ export function ImageMessageDefault({
 						<ImageMessageCarouselTarget
 							ref={imageRef}
 							message={message}
-							image={image}
-							{...imageProps}
+							className={classes.image}
+							src={displayedImage?.src}
+							width={displayedImage?.width}
+							height={displayedImage?.height}
+							data-state={isError ? "error" : undefined}
+							// A cached preview keeps its own ratio without changing the target layout.
+							style={{ "--image-ratio": displayedRatio } as CSSProperties}
 						/>
 					</div>
-					{!hasBlurredBackground && loadedImage && (
+					{!hasBlurredBackground && displayedImage && (
 						<div
 							className={classes.tail}
 							aria-hidden="true"
 							style={
-								{ "--tail-image": `url("${loadedImage.src}")` } as CSSProperties
+								{
+									"--tail-image": `url("${displayedImage.src}")`,
+								} as CSSProperties
 							}
 						/>
 					)}
@@ -129,23 +130,4 @@ export function ImageMessageDefault({
 			),
 		},
 	});
-}
-
-function getMessageDimensions(
-	message: ImageMessageType,
-	thumbnailOnly: boolean,
-) {
-	const img = message.message_entity.msg.img;
-	for (const size of ["cdnhd", "cdnmid", "cdnthumb"] as const) {
-		if (thumbnailOnly && size !== "cdnthumb") continue;
-		const width = Number(img[`@_${size}width`]);
-		const height = Number(img[`@_${size}height`]);
-		if (width > 0 && height > 0) {
-			return {
-				aspectRatio: width / height,
-				// A thumbnail can estimate a larger file's ratio, but not its pixel width.
-				width: size !== "cdnthumb" || thumbnailOnly ? width : undefined,
-			};
-		}
-	}
 }

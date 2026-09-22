@@ -20,6 +20,7 @@ export function ImageMessageCarouselTrigger({
 			carousel
 				? {
 						type: "button",
+						className: "block",
 						"aria-label": "查看图片",
 						"aria-haspopup": "dialog",
 						onClick: () => {

@@ -1,6 +1,6 @@
-import type { ImageInfo, ImageMessageType } from "@repo/types";
+import type { ImageMessageType } from "@repo/types";
 import { useContext, type Ref, type ImgHTMLAttributes } from "react";
-import AutoResolutionFallbackImage from "@/components/auto-resolution-fallback-image.tsx";
+import Image from "@/components/image.tsx";
 import { ViewTransition } from "@/components/view-transition";
 import {
 	ChatMediaCarouselContext,
@@ -14,12 +14,10 @@ import {
 
 export function ImageMessageCarouselTarget({
 	message,
-	image,
 	ref,
 	...props
 }: {
 	message: ImageMessageType;
-	image?: ImageInfo | null;
 	ref?: Ref<HTMLImageElement>;
 } & ImgHTMLAttributes<HTMLImageElement>) {
 	const carousel = useContext(ChatMediaCarouselContext);
@@ -27,9 +25,7 @@ export function ImageMessageCarouselTarget({
 	const messageKey = carousel
 		? createMessageURI({ account: carousel.account, message })
 		: null;
-	const element = (
-		<AutoResolutionFallbackImage ref={ref} image={image} {...props} />
-	);
+	const element = <Image ref={ref} {...props} />;
 	return carousel && sourceEnabled ? (
 		<ViewTransition.Target
 			targetKey={`chat:${messageKey}`}

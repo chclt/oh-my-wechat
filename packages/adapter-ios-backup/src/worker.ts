@@ -477,8 +477,6 @@ export const adapterWorker: AdapterWorkerType = {
 
 	getMessageImage: async (controllerInput) => {
 		return await MessageImageController.get(controllerInput, {
-			directory: adapterWorker._getStoreItem("directory"),
-			encryption: _store.encryption,
 			databases: adapterWorker._getStoreItem("databases"),
 		});
 	},
