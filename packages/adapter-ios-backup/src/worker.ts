@@ -495,8 +495,6 @@ export const adapterWorker: AdapterWorkerType = {
 
 	getMessageVideo: async (controllerInput) => {
 		return await MessageVideoController.get(controllerInput, {
-			directory: adapterWorker._getStoreItem("directory"),
-			encryption: _store.encryption,
 			databases: adapterWorker._getStoreItem("databases"),
 		});
 	},
@@ -519,16 +517,12 @@ export const adapterWorker: AdapterWorkerType = {
 
 	getRecordImage: async (controllerInput) => {
 		return await RecordImageController.get(controllerInput, {
-			directory: adapterWorker._getStoreItem("directory"),
-			encryption: _store.encryption,
 			databases: adapterWorker._getStoreItem("databases"),
 		});
 	},
 
 	getRecordVideo: async (controllerInput) => {
 		return await RecordVideoController.get(controllerInput, {
-			directory: adapterWorker._getStoreItem("directory"),
-			encryption: _store.encryption,
 			databases: adapterWorker._getStoreItem("databases"),
 		});
 	},

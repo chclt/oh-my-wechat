@@ -53,8 +53,11 @@ The existing directory mutation accepts `{ directory, password? }` as variables.
 without a password and shows the password form only after a
 `BackupPasswordRequiredError`, then retries the same directory. Error names cross
 the worker boundary. Class keys remain non-extractable Web Crypto keys in the worker.
-File controllers receive the encryption session explicitly alongside the directory
-and databases; there is no module-level database-to-keybag registry.
+Image and video queries, including forwarded-record media, read only Manifest
+records to return URIs. URI resolution reads and decrypts the requested file;
+missing physical files are reported at that point. Controllers that read file
+contents receive the encryption session explicitly alongside the directory and
+databases; there is no module-level database-to-keybag registry.
 Media URL release only uses the URI and the file registry. Shared adapter error
 names live in `src/errors.ts`; WeChat account discovery remains in the worker.
 Switching/unloading a backup disposes the keybag, closes the manifest database,
