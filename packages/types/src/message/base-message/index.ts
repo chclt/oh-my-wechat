@@ -1,5 +1,7 @@
 import { ChatType, UserType } from "../common.ts";
 
+export { StickerMessageDescriptionSchema } from "./sticker-message-description_pb.ts";
+
 export enum MessageDirection {
 	outgoing = 0,
 	incoming = 1,
@@ -288,8 +290,8 @@ export interface StickerMessageEntity {
 			"@_externurl": string;
 			"@_externmd5": string;
 
-			"@_width": string;
-			"@_height": string;
+			"@_width"?: string;
+			"@_height"?: string;
 
 			"@_tpurl": string;
 			"@_tpauthkey": string;
@@ -298,7 +300,7 @@ export interface StickerMessageEntity {
 			"@_lensid": string;
 			"@_emojiattr": string;
 			"@_linkid": string;
-			"@_desc": string; // base64 编码后的 protobuf 数据，包含表情描述等等
+			"@_desc"?: string; // base64 编码后的 StickerMessageDescription protobuf 数据
 		};
 
 		gameext: {
