@@ -1,6 +1,6 @@
 import { Button, ScrollArea as BaseScrollArea } from "@base-ui/react";
 import { MessageType, MessageTypeEnum } from "@repo/types";
-import { Virtualizer } from "@tanstack/react-virtual";
+import type { Ref } from "react";
 import {
 	ChevronLeftCircleSolid,
 	ChevronRightCircleSolid,
@@ -8,86 +8,85 @@ import {
 } from "@/components/icon";
 import { ImageMessage, VideoMessage } from "@/components/message";
 import scrollAreaClasses from "@/components/ui/scroll-area.module.css";
+import { ViewTransition } from "@/components/view-transition";
 import { cn } from "@/lib/utils";
 import { CarouselScrollViewport } from "./carousel-scroll-viewport";
-import { createMessageURI } from "./utils";
+import { DetailCarouselItem } from "./detail-carousel-item";
+import DetailCarouselPreview from "./detail-carousel-preview";
+import transitionClasses from "./media-carousel-transition.module.css";
+import type { CarouselView } from "./types";
+import { isImageReady } from "./utils";
 
 interface DetailCarouselProps {
-	account: { id: string };
-	virtualizer: Virtualizer<HTMLDivElement, Element>;
-	viewportRef: (element: HTMLDivElement | null) => void;
-	itemSize: number;
-	onScroll: (event: React.UIEvent<HTMLDivElement, UIEvent>) => void;
+	activeKey: string | null;
+	ref?: Ref<HTMLDivElement>;
+	view: CarouselView;
 	messages: MessageType[];
 	hasPreviousPage: boolean;
 	hasNextPage: boolean;
+	onPrevious: () => void;
+	onNext: () => void;
 }
 
 export default function DetailCarousel({
-	account,
-	virtualizer,
-	viewportRef,
-	itemSize,
-	onScroll,
+	activeKey,
+	ref,
+	view,
 	messages,
 	hasPreviousPage,
 	hasNextPage,
+	onPrevious,
+	onNext,
 }: DetailCarouselProps) {
+	"use no memo";
+
+	const { virtualizer, viewport } = view;
+
 	// virtualizer enabled=false 时返回空数组，无需额外 gate。
 	const virtualItems = virtualizer.getVirtualItems();
-
-	const getCurrentIndex = () => {
-		if (!virtualizer.scrollElement || !virtualizer.scrollRect) return;
-
-		const centerOffset =
-			virtualizer.scrollElement.scrollLeft + virtualizer.scrollRect.width / 2;
-
-		return virtualizer.getVirtualItemForOffset(centerOffset)?.index;
-	};
-
-	const handleScrollToPreviousIndex = () => {
-		const currentIndex = getCurrentIndex();
-		if (currentIndex === undefined || currentIndex <= 0) return;
-
-		virtualizer.scrollToIndex(currentIndex - 1, {
-			align: "center",
-			behavior: "instant",
-		});
-	};
-
-	const handleScrollToNextIndex = () => {
-		const currentIndex = getCurrentIndex();
-		if (currentIndex === undefined || currentIndex >= messages.length - 1)
-			return;
-
-		virtualizer.scrollToIndex(currentIndex + 1, {
-			align: "center",
-			behavior: "instant",
-		});
-	};
 
 	return (
 		<BaseScrollArea.Root
 			data-slot="scroll-area"
-			className={cn(scrollAreaClasses.Root, "relative overflow-hidden")}
+			className={cn(
+				scrollAreaClasses.Root,
+				"relative size-full overflow-hidden",
+			)}
 		>
 			<CarouselScrollViewport
-				ref={viewportRef}
-				slice="detail"
-				className={cn(scrollAreaClasses.Viewport, "pb-2")}
-				onScroll={onScroll}
+				ref={ref}
+				viewport={viewport}
+				tabIndex={0}
+				role="group"
+				aria-label="媒体浏览区域"
+				onKeyDown={(event) => {
+					// Controls inside a media item keep their own arrow-key behavior.
+					if (event.target !== event.currentTarget) return;
+					if (event.key === "ArrowLeft") {
+						event.preventDefault();
+						onPrevious();
+					} else if (event.key === "ArrowRight") {
+						event.preventDefault();
+						onNext();
+					}
+				}}
+				className={cn(
+					scrollAreaClasses.Viewport,
+					transitionClasses.DetailViewport,
+					"@container",
+				)}
 			>
 				<BaseScrollArea.Content
 					className={cn(
 						scrollAreaClasses.Content,
-						"h-full relative",
+						"h-full min-w-full relative overflow-clip",
 						"[&_.carouselWrapper]:-translate-x-[calc((var(--carousel-scroll-start)-var(--carousel-start))/var(--carousel-size)*3rem)]",
 						"[&_.carouselContent]:-translate-x-[calc((var(--carousel-scroll-start)-var(--carousel-start))/var(--carousel-size)*-3rem)]",
 					)}
 					style={{ width: virtualizer.getTotalSize() }}
 				>
 					<div
-						className="absolute inset-y-0 start-0 h-full"
+						className="absolute top-0 bottom-(--media-bottom-inset) start-0"
 						style={{ width: "var(--carousel-padding-start)" }}
 					>
 						{hasPreviousPage && (
@@ -99,11 +98,13 @@ export default function DetailCarousel({
 						const message = messages[virtualItem.index];
 						if (!message) return null;
 						return (
-							<div
+							<DetailCarouselItem
 								key={virtualItem.key}
-								data-message-uri={createMessageURI({ message, account })}
+								isActive={virtualItem.key === activeKey}
+								focusTarget={virtualizer.scrollElement}
+								data-message-uri={virtualItem.key}
 								className={cn(
-									"absolute top-0 h-full px-24",
+									"absolute top-0 h-full px-(--media-inline-inset) pb-(--media-bottom-inset)",
 									"snap-normal snap-center",
 								)}
 								style={{
@@ -124,13 +125,22 @@ export default function DetailCarousel({
 									)}
 								>
 									{message.type === MessageTypeEnum.IMAGE ? (
-										<ImageMessage.Plain
-											message={message}
-											sizes={["hd", "regular", "thumbnail"]}
-											className={cn(
-												"carouselContent",
-												"absolute inset-0 m-auto max-w-full max-h-full",
-											)}
+										<ViewTransition.Target
+											targetKey={`viewer:${virtualItem.key}`}
+											isReady={isImageReady}
+											className={transitionClasses.Target}
+											render={
+												<ImageMessage.Plain
+													message={message}
+													sizes={["hd", "regular", "thumbnail"]}
+													className={cn(
+														"carouselContent",
+														// Let both axes follow the intrinsic ratio when either
+														// maximum constrains the image, matching the estimate.
+														"absolute inset-0 m-auto w-auto h-auto max-w-full max-h-full",
+													)}
+												/>
+											}
 										/>
 									) : message.type === MessageTypeEnum.VIDEO ? (
 										<VideoMessage.Plain
@@ -143,12 +153,12 @@ export default function DetailCarousel({
 										/>
 									) : null}
 								</div>
-							</div>
+							</DetailCarouselItem>
 						);
 					})}
 
 					<div
-						className="absolute inset-y-0 end-0 h-full"
+						className="absolute top-0 bottom-(--media-bottom-inset) end-0"
 						style={{
 							width: "var(--carousel-padding-end)",
 						}}
@@ -157,18 +167,27 @@ export default function DetailCarousel({
 							<LoaderIcon className="absolute inset-0 m-auto text-white opacity-75 animate-spin" />
 						)}
 					</div>
+					<DetailCarouselPreview items={virtualizer.measurementsCache} />
 				</BaseScrollArea.Content>
 			</CarouselScrollViewport>
 
 			<Button
-				onClick={handleScrollToPreviousIndex}
-				className="absolute start-0 inset-y-0 my-auto w-24 h-full cursor-pointer text-white/50 hover:text-white/80"
+				onClick={onPrevious}
+				aria-label="上一张"
+				className={cn(
+					transitionClasses.Controls,
+					"absolute start-0 top-0 bottom-(--media-thumb-size) w-(--media-inline-inset) cursor-pointer text-white/50 hover:text-white/80",
+				)}
 			>
 				<ChevronLeftCircleSolid className="size-8 absolute inset-0 m-auto" />
 			</Button>
 			<Button
-				onClick={handleScrollToNextIndex}
-				className="absolute end-0 inset-y-0 my-auto w-24 h-full cursor-pointer text-white/50 hover:text-white/80"
+				onClick={onNext}
+				aria-label="下一张"
+				className={cn(
+					transitionClasses.Controls,
+					"absolute end-0 top-0 bottom-(--media-thumb-size) w-(--media-inline-inset) cursor-pointer text-white/50 hover:text-white/80",
+				)}
 			>
 				<ChevronRightCircleSolid className="size-8 absolute inset-0 m-auto" />
 			</Button>

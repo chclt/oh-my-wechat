@@ -1,0 +1,43 @@
+@reference "../../../index.css";
+
+@layer components {
+	.root {
+		@apply relative w-fit max-w-[20em] min-w-32 min-h-32 rounded-lg;
+
+		&:global(.bubble-tail-l)::after,
+		&:global(.bubble-tail-r)::after {
+			content: none;
+		}
+	}
+
+	.body {
+		@apply relative overflow-hidden rounded-[inherit];
+	}
+
+	.video {
+		@apply block max-w-full min-w-32 min-h-32 object-contain bg-white;
+	}
+
+	.tail {
+		@apply absolute top-0 h-full overflow-hidden pointer-events-none;
+		left: calc(-1 * var(--bubble-tail-left));
+		right: calc(-1 * var(--bubble-tail-right));
+		mask: var(--bubble-tail-mask) var(--bubble-tail-position)
+			var(--bubble-tail-top) / var(--bubble-tail-width)
+			var(--bubble-tail-height) no-repeat;
+	}
+
+	.decoration {
+		@apply absolute top-0 h-full bg-center bg-contain bg-no-repeat;
+		width: calc(100% - var(--bubble-tail-width));
+		transform: scaleX(-1);
+	}
+
+	.root:global(.bubble-tail-l) .decoration {
+		right: calc(100% - var(--bubble-tail-width));
+	}
+
+	.root:global(.bubble-tail-r) .decoration {
+		left: calc(100% - var(--bubble-tail-width));
+	}
+}

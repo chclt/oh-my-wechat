@@ -1,5 +1,7 @@
 import { ChatType, UserType } from "../common.ts";
 
+export { StickerMessageDescriptionSchema } from "./sticker-message-description_pb.ts";
+
 export enum MessageDirection {
 	outgoing = 0,
 	incoming = 1,
@@ -65,17 +67,33 @@ export interface ImageMessageEntity {
 			"@_cdnbigimgurl": "";
 
 			"@_cdnmidimgurl": string;
-			"@_cdnmidheight": string;
-			"@_cdnmidwidth": string;
+			"@_cdnmidheight"?: string;
+			"@_cdnmidwidth"?: string;
 
-			"@_cdnhdheight": string;
-			"@_cdnhdwidth": string;
+			"@_cdnhdheight"?: string;
+			"@_cdnhdwidth"?: string;
 
 			"@_cdnthumburl": string;
 			"@_cdnthumblength": string;
-			"@_cdnthumbwidth": string;
-			"@_cdnthumbheight": string;
+			"@_cdnthumbwidth"?: string;
+			"@_cdnthumbheight"?: string;
 			"@_cdnthumbaeskey": string;
+
+			/** its exact purpose is not yet confirmed. */
+			"@_tpurl"?: string;
+			"@_tplength"?: string;
+			"@_tpwidth"?: string;
+			"@_tpheight"?: string;
+			"@_tpauthkey"?: string;
+
+			"@_tphdurl"?: string;
+			"@_tphdlength"?: string;
+
+			"@_tpthumburl"?: string;
+			"@_tpthumblength"?: string;
+			"@_tpthumbwidth"?: string;
+			"@_tpthumbheight"?: string;
+			"@_tpthumbaeskey"?: string;
 		};
 		appinfo: {
 			appid: "";
@@ -214,8 +232,8 @@ export interface VideoMessageEntity {
 
 			"@_cdnthumburl": string;
 			"@_cdnthumblength": string;
-			"@_cdnthumbwidth": string;
-			"@_cdnthumbheight": string;
+			"@_cdnthumbwidth"?: string;
+			"@_cdnthumbheight"?: string;
 			"@_cdnthumbaeskey": string;
 
 			"@_encryver": string;
@@ -272,8 +290,8 @@ export interface StickerMessageEntity {
 			"@_externurl": string;
 			"@_externmd5": string;
 
-			"@_width": string;
-			"@_height": string;
+			"@_width"?: string;
+			"@_height"?: string;
 
 			"@_tpurl": string;
 			"@_tpauthkey": string;
@@ -282,7 +300,7 @@ export interface StickerMessageEntity {
 			"@_lensid": string;
 			"@_emojiattr": string;
 			"@_linkid": string;
-			"@_desc": string; // base64 编码后的 protobuf 数据，包含表情描述等等
+			"@_desc"?: string; // base64 编码后的 StickerMessageDescription protobuf 数据
 		};
 
 		gameext: {
@@ -393,8 +411,8 @@ export interface MicroVideoMessageEntity {
 			"@_cdnvideourl": string;
 			"@_cdnthumburl": string;
 			"@_cdnthumblength": string;
-			"@_cdnthumbwidth": string;
-			"@_cdnthumbheight": string;
+			"@_cdnthumbwidth"?: string;
+			"@_cdnthumbheight"?: string;
 			"@_cdnthumbaeskey": string;
 			"@_encryver": string;
 			"@_isplaceholder": string;

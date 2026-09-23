@@ -3,6 +3,7 @@ import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import {
 	createFileRoute,
 	Link,
+	Navigate,
 	Outlet,
 	useCanGoBack,
 	useNavigate,
@@ -14,7 +15,7 @@ import { ChatIconFill, ContactIconFill } from "@/components/icon";
 import dialogClasses from "@/components/ui/dialog.module.css";
 import { cn } from "@/lib/utils";
 import { AccountSearchModalOptions } from "./-types";
-import ContactListMiniRouter from "./contact/-components/contact-list/contact-list-mini-router";
+import ContactListWouter from "./contact/-components/contact-list/contact-list-wouter";
 
 interface AccountSearchProps {
 	modal: AccountSearchModalOptions;
@@ -32,6 +33,11 @@ export const Route = createFileRoute("/$accountId")({
 
 		return validatedSearch;
 	},
+
+	errorComponent: ({ error }) =>
+		error.message === "Data adapter not set" ? (
+			<Navigate to="/" replace />
+		) : null,
 });
 
 function RouteComponent() {
@@ -45,9 +51,10 @@ function RouteComponent() {
 	const handleNavigateToContact = () => {
 		navigate({
 			to: ".",
-			search: {
+			search: (search) => ({
+				...search,
 				modal: AccountSearchModalOptions.CONTACT,
-			},
+			}),
 			mask: {
 				to: "/$accountId/contact",
 				params: { accountId },
@@ -119,14 +126,13 @@ function RouteComponent() {
 										</VisuallyHidden>
 
 										<div className="relative w-full h-full overflow-hidden">
-											<ContactListMiniRouter />
+											<ContactListWouter />
 										</div>
 
 										<Dialog.Close
 											data-slot="dialog-close"
 											className={cn(
 												"z-40 absolute top-5 right-5 size-6 rounded-xs cursor-pointer",
-												"data-[state=open]:bg-accent data-[state=open]:text-muted-foreground",
 												"ring-offset-background focus:ring-ring focus:ring-2 focus:ring-offset-2 focus:outline-hidden",
 												"[&_svg]:pointer-events-none [&_svg]:size-full",
 											)}

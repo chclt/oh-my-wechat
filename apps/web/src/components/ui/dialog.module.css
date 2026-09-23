@@ -3,7 +3,7 @@
 @layer components {
 	.Backdrop {
 		@apply fixed inset-0 bg-black/50;
-		@apply transition-opacity duration-200 ease-[cubic-bezier(0.45,1.005,0,1.005)];
+		@apply transition-opacity duration-200 ease-[cubic-bezier(0.45,1.005,0,1.005)] motion-reduce:transition-none;
 
 		/* iOS 26+: Ensure the backdrop covers the entire visible viewport. */
 		@supports (-webkit-touch-callout: none) {

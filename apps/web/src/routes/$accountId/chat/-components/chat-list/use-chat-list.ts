@@ -1,21 +1,7 @@
 import photoServiceAccount from "/images/avatar/brandservicesessionholder.png";
 import photoCollapsedChats from "/images/avatar/collapsed_chats.png";
 import { ChatType } from "@repo/types";
-import specialBrandIdRaw from "@/assets/specialBrandUserNames.csv?raw";
-const specialBrandIds = specialBrandIdRaw.split("\n").map((i) => i.trim());
-
-const IgnoredChatIds = [
-	// "chatroom_session_box", // 折叠的聊天
-	"brandsessionholder", // 订阅号消息
-	"brandservicesessionholder", // 服务号消息
-
-	"notification_messages", // 服务消息
-	"brandsessionholder_weapp", // 小程序客服消息
-	"opencustomerservicemsg", // 小程序客服消息
-
-	"newsapp", // 腾讯新闻
-	"masssendapp", // 群发助手
-];
+import { isChatVisible } from "@repo/utils";
 
 export type ChatListChatItem = {
 	type: "chat";
@@ -58,17 +44,7 @@ export default function useChatList(
 	const data: UseChatListReturnValue = chatData
 		.sort((i) => (i.is_pinned ? -1 : 0))
 		.filter((chat) => {
-			if (
-				!(
-					chat.id.endsWith("@openim") || // TODO
-					specialBrandIds.includes(chat.id) ||
-					IgnoredChatIds.includes(chat.id) ||
-					// 折叠的聊天
-					chat.is_collapsed ||
-					// 公众号消息
-					chat.id.startsWith("gh_")
-				)
-			) {
+			if (isChatVisible(chat)) {
 				if (chat.id === "chatroom_session_box") {
 					// 折叠的聊天组
 					collapsedGroupIndex = filteredChatIndex;

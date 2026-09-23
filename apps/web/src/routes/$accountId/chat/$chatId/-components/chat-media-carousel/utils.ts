@@ -1,40 +1,59 @@
-import { MessageType } from "@repo/types";
+import { MessageTypeEnum, type MessageType } from "@repo/types";
+import type { MessageListCursor } from "@repo/types/adapter";
+import { MessageListInfiniteQueryOptions } from "@/lib/fetchers/message";
+import type { MediaPreviewData } from "./media-carousel-preview-context";
+import type { CarouselMessageAnchor } from "./types";
+
+export interface MediaPagesOptions {
+	account: { id: string };
+	chat: { id: string };
+	initialMessageAnchor: CarouselMessageAnchor;
+}
+
+export function MediaListInfiniteQueryOptions({
+	account,
+	chat,
+	initialMessageAnchor,
+}: MediaPagesOptions) {
+	return MessageListInfiniteQueryOptions({
+		account,
+		chat,
+		type: [MessageTypeEnum.IMAGE, MessageTypeEnum.VIDEO],
+		cursor: JSON.stringify({
+			value: initialMessageAnchor.date,
+			messageLocalId: initialMessageAnchor.local_id,
+			condition: "<>",
+		} satisfies MessageListCursor),
+		limit: 5,
+	});
+}
+
+export function readMediaPreview(
+	image: HTMLElement | null,
+	messageImage: HTMLElement | null = image,
+): MediaPreviewData | null {
+	if (!(image instanceof HTMLImageElement) || !isImageReady(image)) return null;
+	const src = image.currentSrc || image.src;
+	return {
+		src,
+		width: image.naturalWidth,
+		height: image.naturalHeight,
+		hasBlurredBackground: !!messageImage?.closest("[data-blurred-background]"),
+	};
+}
+
+/** Image targets render an img; reserved layout alone does not make it visible content. */
+export function isImageReady(element: HTMLElement) {
+	const image = element as HTMLImageElement;
+	return image.complete && image.naturalWidth > 0;
+}
 
 export function createMessageURI({
 	message,
 	account,
 }: {
-	message: MessageType;
+	message: Pick<MessageType, "chat_id" | "local_id">;
 	account: { id: string };
 }) {
 	return `omw:account:${account.id}:chat:${message.chat_id}:message:${message.local_id}`;
-}
-
-/**
- * 在已知 itemSize、paddingStart、scrollViewportSize 的等宽虚拟列表里，
- * 计算把指定 index 居中所需要写入容器的 scrollLeft（或 scrollTop）。
- *
- * 公式：
- *   scrollOffset = paddingStart + index * itemSize
- *                  - (scrollViewportSize - itemSize) / 2
- *
- * 该函数与 virtualizer 内部状态完全解耦，所以可以在 virtualizer
- * 还没绑定 scrollElement、还没真正测量任何 item 之前调用。
- *
- * 注意：仅在所有 item 等宽时准确。可变尺寸场景需要换用 virtualizer 自身的
- * 测量结果 / getOffsetForIndex。
- */
-export function calculateCenteredScrollOffsetForIndex({
-	index,
-	itemSize,
-	paddingStart,
-	scrollViewportSize,
-}: {
-	index: number;
-	itemSize: number;
-	paddingStart: number;
-	scrollViewportSize: number;
-}): number {
-	const itemStart = paddingStart + index * itemSize;
-	return itemStart - (scrollViewportSize - itemSize) / 2;
 }

@@ -16,6 +16,7 @@ import {
 	MessageTypeEnum,
 	type MicroVideoMessageEntity,
 	type MicroVideoMessageType,
+	type OMWErrorMessageType,
 	type OpenMessageEntity,
 	type OpenMessageType,
 	OpenMessageTypeEnum,
@@ -45,6 +46,7 @@ import type {
 	GetGreetingMessageListRequest,
 	GetGreetingMessageListResponse,
 	GetMessageListRequest,
+	MessageListCursor,
 } from "@repo/types/adapter";
 import CryptoJS from "crypto-js";
 import {
@@ -60,8 +62,8 @@ import {
 	lte,
 	or,
 	sql,
+	type SQL,
 } from "drizzle-orm";
-import { unionAll } from "drizzle-orm/sqlite-core";
 import { XMLParser } from "fast-xml-parser";
 import {
 	chatTableSelect,
@@ -71,12 +73,11 @@ import {
 	helloTableSelect,
 	HelloTableSelectInfer,
 } from "../database/message.ts";
-import type { ControllerPaginatorCursor, WCDatabases } from "../types.ts";
+import type { WCDatabases } from "../types.ts";
 import WCDB, {
 	WCDBDatabaseSeriesName,
 	WCDBTableSeriesName,
 } from "../utils/wcdb.ts";
-import { adapterWorker } from "../worker.ts";
 import * as ChatController from "./chat.ts";
 import * as UserController from "./user.ts";
 
@@ -94,10 +95,12 @@ export function fallbackUnsupportedMessageQueryRows<
 async function parseMessageDatabaseChatTableRows(
 	rows: ChatTableSelectInfer[],
 	{
+		account,
 		chat,
 		databases,
 		parseReplyMessage = true,
 	}: {
+		account: UserType;
 		chat: ChatType;
 		databases: WCDatabases;
 		parseReplyMessage?: boolean;
@@ -129,7 +132,7 @@ async function parseMessageDatabaseChatTableRows(
 
 				if (raw_message_row.Des === MessageDirection.outgoing) {
 					rawMessageContent = raw_message_row.Message;
-					senderId = adapterWorker._getStoreItem("account").id;
+					senderId = account.id;
 				} else if (
 					raw_message_row.Type === MessageTypeEnum.SYSTEM ||
 					raw_message_row.Message.startsWith("<") ||
@@ -169,12 +172,15 @@ async function parseMessageDatabaseChatTableRows(
 			if (chat && chat.type === "private") {
 				return raw_message_row.Des === MessageDirection.incoming
 					? chat.id
-					: adapterWorker._getStoreItem("account").id;
+					: account.id;
 			}
 		})
 		.filter((i) => i !== undefined);
 	const usersArray = (
-		await UserController.findAll({ ids: messageSenderIds }, { databases })
+		await UserController.findAll(
+			{ ids: messageSenderIds },
+			{ account, databases },
+		)
 	).data as UserType[];
 	const usersTable: Record<string, UserType> = {};
 	usersArray.map((user) => {
@@ -196,8 +202,7 @@ async function parseMessageDatabaseChatTableRows(
 			direction:
 				// 有些消息比如通话记录的发消息的人，但是记录消息方向不是想要的，可能因为这算系统消息
 				(messageSenderIds[index]
-					? messageSenderIds[index] ===
-						adapterWorker._getStoreItem("account").id
+					? messageSenderIds[index] === account.id
 						? MessageDirection.outgoing
 						: MessageDirection.incoming
 					: undefined) ?? raw_message_row.Des,
@@ -221,7 +226,12 @@ async function parseMessageDatabaseChatTableRows(
 		const xmlParser = new XMLParser({
 			ignoreAttributes: false,
 			tagValueProcessor: (_, tagValue, jPath) => {
-				if (jPath === "msg.appmsg.title" || jPath === "msg.appmsg.des") {
+				if (
+					jPath === "msg.appmsg.title" ||
+					jPath === "msg.appmsg.des" ||
+					jPath === "msg.appmsg.refermsg.svrid" ||
+					jPath === "msg.appmsg.refermsg.content"
+				) {
 					return undefined; // 不解析
 				}
 				return tagValue; // 走默认的解析
@@ -308,8 +318,18 @@ async function parseMessageDatabaseChatTableRows(
 			}
 
 			case MessageTypeEnum.APP: {
-				const messageEntity: OpenMessageEntity<{ type: number }> =
-					xmlParser.parse(raw_message_row.Message);
+				// 部分消息不知为何会损坏，只留下一行字符串，不包含任何可以被 XML 解析的数据。
+				const messageEntity = xmlParser.parse(raw_message_row.Message) as
+					| OpenMessageEntity<{ type: number }>
+					| string;
+
+				if (typeof messageEntity !== "object" || !messageEntity?.msg?.appmsg) {
+					return {
+						...message,
+						type: MessageTypeEnum.OMW_ERROR,
+						message_entity: raw_message_row.Message,
+					} as OMWErrorMessageType;
+				}
 
 				try {
 					if (messageEntity.msg.appmsg.type === OpenMessageTypeEnum.REFER) {
@@ -413,7 +433,7 @@ async function parseMessageDatabaseChatTableRows(
 					chat,
 					messageIds: replyMessageIds,
 				},
-				{ databases },
+				{ account, databases },
 			)
 		).data;
 
@@ -436,9 +456,21 @@ async function parseMessageDatabaseChatTableRows(
 	return messages as MessageType[];
 }
 
+function encodeCursor(
+	row: ChatTableSelectInfer,
+	condition: MessageListCursor["condition"],
+): string {
+	return JSON.stringify({
+		condition,
+		value: row.CreateTime,
+		messageLocalId: row.MesLocalID,
+	} satisfies MessageListCursor);
+}
+
 export type AllInput = [
 	GetMessageListRequest,
 	{
+		account: UserType;
 		databases: WCDatabases;
 	},
 ];
@@ -446,420 +478,156 @@ export type AllInput = [
 export type AllOutput = Promise<DataAdapterCursorPagination<MessageType[]>>;
 
 export async function all(...inputs: AllInput): AllOutput {
-	const [{ account, chat, type, type_app, cursor, limit = 50 }, { databases }] =
-		inputs;
-
-	const cursorObject: Partial<ControllerPaginatorCursor> = {};
-
-	if (cursor) {
-		try {
-			const parsedCursorObject = JSON.parse(cursor);
-			if (parsedCursorObject.value) {
-				cursorObject.value = parsedCursorObject.value;
-			}
-			if (parsedCursorObject.condition) {
-				cursorObject.condition = parsedCursorObject.condition;
-			}
-		} catch (error) {
-			//
+	const [request, context] = inputs;
+	const databases = context.databases.message!;
+	const { cursor, limit } = request;
+	const pageCursor =
+		cursor === undefined
+			? undefined
+			: (JSON.parse(cursor) as MessageListCursor);
+	const tableName = `Chat_${CryptoJS.MD5(request.chat.id).toString()}`;
+	const table = getChatTable(tableName);
+	let source: (typeof databases)[number] | undefined;
+	// Each chat table belongs to one message database.
+	for (const database of databases) {
+		const tables = await database
+			.select({ name: sql<string>`name` })
+			.from(sql`sqlite_master`)
+			.where(and(eq(sql`type`, "table"), eq(sql`name`, tableName)))
+			.limit(1);
+		if (tables.length) {
+			source = database;
+			break;
 		}
 	}
-
-	const { value: cursor_value, condition: cursor_condition } = cursorObject;
-
-	const query_limit = limit + 1;
-
-	const dbs = databases.message;
-	if (!dbs) throw new Error("message databases are not found");
-
-	const tableName = `Chat_${CryptoJS.MD5(chat.id).toString()}`;
-
-	const chatTable = getChatTable(tableName);
-
-	// cursor condition
-	// 不能直接把操作符放在模板字符串里面。比如 sql`${chatTable.CreateTime} ${cursor_condition} ${cursor_value}` 会报错
-	let cursorQueryWhereSegmentCondition: any = undefined;
-	if (cursor_value && cursor_condition) {
-		switch (cursor_condition) {
-			case "<":
-				cursorQueryWhereSegmentCondition = lt(
-					chatTable.CreateTime,
-					cursor_value,
-				);
-				break;
-			case "<=":
-				cursorQueryWhereSegmentCondition = lte(
-					chatTable.CreateTime,
-					cursor_value,
-				);
-				break;
-			case ">":
-				cursorQueryWhereSegmentCondition = gt(
-					chatTable.CreateTime,
-					cursor_value,
-				);
-				break;
-			case ">=":
-				cursorQueryWhereSegmentCondition = gte(
-					chatTable.CreateTime,
-					cursor_value,
-				);
-				break;
-			default:
-				break;
-		}
+	if (!source) {
+		if (pageCursor?.messageLocalId !== undefined)
+			throw new Error("Message target not found");
+		return { data: [], meta: {} };
 	}
-
-	// type condition
-	const typeQueryWhereSegmentCondition = type
-		? inArray(chatTable.Type, Array.isArray(type) ? type : [type])
-		: undefined;
-
-	// type_app condition
-	const typeAppQueryWhereSegmentCondition = type_app
-		? or(
-				...(Array.isArray(type_app) ? type_app : [type_app]).map((i) =>
-					like(chatTable.Message, `%<type>${i}</type>%`),
-				),
-			)
-		: undefined;
-
-	// WHERE conditions
-	const baseQueryWhereSegmentConditions = [
-		cursorQueryWhereSegmentCondition,
-		typeQueryWhereSegmentCondition,
-		typeAppQueryWhereSegmentCondition,
-	].filter((i) => i);
-
-	// WHERE
-	const queryWhereSegment = baseQueryWhereSegmentConditions.length
-		? and(...baseQueryWhereSegmentConditions)
-		: undefined;
-
-	let _chatTableIndex = undefined; // 当前聊天所在的数据库次序
-
-	const rows = (
-		await Promise.allSettled(
-			dbs.map(async (database, index) => {
-				try {
-					if (cursor_condition && cursor_value) {
-						if (cursor_condition === "<" || cursor_condition === "<=") {
-							const bastQuery = database
-								.select(chatTableSelect(chatTable))
-								.from(chatTable)
-								.where(queryWhereSegment)
-								.orderBy(desc(chatTable.CreateTime))
-								.limit(query_limit)
-								.as("baseQuery");
-
-							const query = database
-								.select()
-								.from(bastQuery)
-								.orderBy(asc(bastQuery.CreateTime));
-
-							const rows = query.all();
-
-							return fallbackUnsupportedMessageQueryRows(
-								await WCDB.postProcess(rows, {
-									databaseSeries: WCDBDatabaseSeriesName.Message,
-									tableSeries: WCDBTableSeriesName.Chat,
-								}),
-							);
-						} else if (cursor_condition === ">=" || cursor_condition === ">") {
-							const query = database
-								.select(chatTableSelect(chatTable))
-								.from(chatTable)
-								.where(queryWhereSegment)
-								.orderBy(asc(chatTable.CreateTime))
-								.limit(query_limit);
-
-							const rows = query.all();
-
-							return fallbackUnsupportedMessageQueryRows(
-								await WCDB.postProcess(rows, {
-									databaseSeries: WCDBDatabaseSeriesName.Message,
-									tableSeries: WCDBTableSeriesName.Chat,
-								}),
-							);
-						} else if (cursor_condition === "<>") {
-							const baseLeftQueryWhereSegmentConditions = [
-								sql`${chatTable.CreateTime} < ${cursor_value}`,
-								typeQueryWhereSegmentCondition,
-								typeAppQueryWhereSegmentCondition,
-							].filter((i) => i);
-
-							const baseLeftQueryWhereSegment =
-								baseLeftQueryWhereSegmentConditions.length
-									? and(...baseLeftQueryWhereSegmentConditions)
-									: undefined;
-
-							const baseRightQueryWhereSegmentConditions = [
-								sql`${chatTable.CreateTime} >= ${cursor_value}`,
-								typeQueryWhereSegmentCondition,
-								typeAppQueryWhereSegmentCondition,
-							].filter((i) => i);
-
-							const baseRightQueryWhereSegment =
-								baseRightQueryWhereSegmentConditions.length
-									? and(...baseRightQueryWhereSegmentConditions)
-									: undefined;
-
-							const baseLeftSubquery = database
-								.select(chatTableSelect(chatTable))
-								.from(chatTable)
-								.where(baseLeftQueryWhereSegment)
-								.orderBy(desc(chatTable.CreateTime))
-								.limit(query_limit)
-								.as("baseLeftQuery");
-
-							const baseRightSubquery = database
-								.select(chatTableSelect(chatTable))
-								.from(chatTable)
-								.where(baseRightQueryWhereSegment)
-								.orderBy(asc(chatTable.CreateTime))
-								.limit(query_limit)
-								.as("baseRightQuery");
-
-							const baseQuery = unionAll(
-								database.select().from(baseLeftSubquery),
-								database.select().from(baseRightSubquery),
-							).as("baseQuery");
-
-							const query = database
-								.select()
-								.from(baseQuery)
-								.orderBy(asc(baseQuery.CreateTime));
-
-							const rows = query.all() as unknown as ChatTableSelectInfer[];
-
-							return fallbackUnsupportedMessageQueryRows(
-								await WCDB.postProcess(rows, {
-									databaseSeries: WCDBDatabaseSeriesName.Message,
-									tableSeries: WCDBTableSeriesName.Chat,
-								}),
-							);
-						}
-					} else {
-						// 没有游标的时候查询最新的数据但是按时间正序排列
-						// 游标在第一行
-
-						const baseQuery = database
-							.select(chatTableSelect(chatTable))
-							.from(chatTable)
-							.where(queryWhereSegment)
-							.orderBy(desc(chatTable.CreateTime))
-							.limit(query_limit)
-							.as("baseQuery");
-
-						const query = database
-							.select()
-							.from(baseQuery)
-							.orderBy(asc(baseQuery.CreateTime));
-
-						const rows = query.all();
-
-						return fallbackUnsupportedMessageQueryRows(
-							await WCDB.postProcess(rows, {
-								databaseSeries: WCDBDatabaseSeriesName.Message,
-								tableSeries: WCDBTableSeriesName.Chat,
-							}),
-						);
-					}
-				} catch (e) {
-					if (e instanceof Error && e.message.startsWith("no such table")) {
-						//
-					} else {
-						console.error(e);
-					}
-					return [];
-				}
-			}),
-		)
-	).flatMap((promiseResult, index) => {
+	const database = source;
+	const filters = [
+		request.type !== undefined
+			? inArray(
+					table.Type,
+					Array.isArray(request.type) ? request.type : [request.type],
+				)
+			: undefined,
+		request.type_app !== undefined
+			? or(
+					...(Array.isArray(request.type_app)
+						? request.type_app
+						: [request.type_app]
+					).map((type) => like(table.Message, `%<type>${type}</type>%`)),
+				)
+			: undefined,
+	];
+	let anchor: { value: number; messageLocalId?: string } | undefined;
+	if (pageCursor) {
 		if (
-			promiseResult.status === "fulfilled" &&
-			promiseResult.value &&
-			promiseResult.value.length > 0
+			pageCursor.messageLocalId !== undefined &&
+			(pageCursor.value === undefined || pageCursor.condition === "<>")
 		) {
-			_chatTableIndex = index;
-			return promiseResult.value;
+			const [row] = await database
+				.select({ createTime: table.CreateTime })
+				.from(table)
+				.where(
+					and(
+						...filters,
+						eq(table.MesLocalID, sql`${pageCursor.messageLocalId}`),
+					),
+				)
+				.limit(1);
+			if (!row) throw new Error("Message target not found");
+			anchor = {
+				value: row.createTime,
+				messageLocalId: pageCursor.messageLocalId,
+			};
+		} else if (pageCursor.value !== undefined) {
+			anchor = {
+				value: pageCursor.value,
+				messageLocalId: pageCursor.messageLocalId,
+			};
 		}
-		return [];
-	});
-
-	if (!rows || rows.length === 0)
-		return {
-			data: [],
-			meta: {},
-		};
-
-	// 根据请求游标，和查出来的数据，构建前后的游标
-	const cursors: Partial<{
-		current: ControllerPaginatorCursor;
-		previous: ControllerPaginatorCursor;
-		next: ControllerPaginatorCursor;
-	}> = {};
-	if (cursor_value === undefined && cursor_condition === undefined) {
-		if (rows.length === query_limit) {
-			// 有前一页，[0] 是前一页的最后一条
-			cursors.current = {
-				value: rows[1].CreateTime,
-				condition: ">=",
-			};
-
-			cursors.previous = {
-				value: rows[0].CreateTime,
-				condition: "<=",
-				_hasPreviousPage: true,
-			};
-
-			rows.shift(); // 移除第一条数据
-
-			// //  因为是静态数据，后面不会有新数据了，所以其实不会有下一页
-			// cursors.next = {
-			//   value: raw_message_rows.at(-1).CreateTime,
-			//   condition: ">",
-			//   _hasNextPage: false,
-			// };
-		} else {
-			cursors.current = {
-				value: rows[0].CreateTime,
-				condition: ">=",
-			};
-
-			// cursors.previous = {
-			//   value: raw_message_rows[0].CreateTime,
-			//   condition: "<",
-			//   _hasPreviousPage: false,
-			// };
-
-			//  因为是静态数据，后面不会有新数据了，所以其实不会有下一页
-			// cursors.next = {
-			//   value: raw_message_rows.at(-1).CreateTime,
-			//   condition: ">",
-			//   _hasNextPage: false,
-			// };
-		}
-	} else if (cursor_value && cursor_condition) {
-		cursors.current = {
-			value: cursor_value,
-			condition: cursor_condition,
-		};
-
-		if (cursor_condition === "<" || cursor_condition === "<=") {
-			if (rows.length === query_limit) {
-				cursors.previous = {
-					value: rows[0].CreateTime,
-					condition: "<=",
-					_hasPreviousPage: true,
-				};
-
-				rows.shift(); // 移除第一条数据
-			} else {
-				// 其实已经没有前一页了
-				// cursors.previous = {
-				//   value: raw_message_rows[0].CreateTime,
-				//   condition: "<",
-				//   _hasPreviousPage: false,
-				// };
-			}
-
-			cursors.next = {
-				value: rows.at(-1)!.CreateTime,
-				condition: ">",
-				_hasNextPage: "unknown",
-			};
-		} else if (cursor_condition === ">" || cursor_condition === ">=") {
-			if (rows.length === query_limit) {
-				cursors.next = {
-					value: rows.at(-1)!.CreateTime,
-					condition: ">=",
-					hasNextPage: true,
-				};
-			} else {
-				// 其实已经没有下一页了
-				// cursors.next = {
-				//   value: raw_message_rows.at(-1).CreateTime,
-				//   condition: ">",
-				//   _hasNextPage: false,
-				// };
-			}
-
-			cursors.previous = {
-				value: rows[0].CreateTime,
-				condition: "<",
-				_hasPreviousPage: "unknown",
-			};
-		} else if (cursor_condition === "<>") {
-			if (
-				rows.filter((row) => row.CreateTime < cursor_value).length ===
-				query_limit
-			) {
-				cursors.previous = {
-					value: rows[0].CreateTime,
-					condition: "<=",
-					_hasPreviousPage: true,
-				};
-
-				rows.shift(); // 移除第一条数据
-			} else {
-				// 其实已经没有前一页了
-				// cursors.previous = {
-				//   value: raw_message_rows[0].CreateTime,
-				//   condition: "<",
-				//   _hasPreviousPage: false,
-				// };
-			}
-
-			if (
-				rows.filter((row) => row.CreateTime >= cursor_value).length ===
-				query_limit
-			) {
-				cursors.next = {
-					value: rows.at(-1)!.CreateTime,
-					condition: ">=",
-					_hasNextPage: true,
-				};
-
-				rows.pop(); // 移除最后一条数据
-			} else {
-				// 其实已经没有下一页了
-				// cursors.next = {
-				//   value: raw_message_rows.at(-1).CreateTime,
-				//   condition: ">",
-				//   _hasNextPage: false,
-				// };
-			}
-		}
-	} else {
-		console.error("cursor_value and cursor_condition are not set correctly");
 	}
 
-	const chats = await ChatController.find({ ids: [chat.id] }, { databases });
-	const chatDetail = chats.data[0];
+	async function read(
+		condition: Exclude<MessageListCursor["condition"], "<>">,
+	) {
+		const isBefore = condition === "<" || condition === "<=";
+		const order = isBefore ? desc : asc;
+		const compare = { "<": lt, "<=": lte, ">": gt, ">=": gte }[condition];
+		let boundary: SQL | undefined;
+		if (anchor) {
+			boundary =
+				anchor.messageLocalId === undefined
+					? compare(table.CreateTime, anchor.value)
+					: or(
+							(isBefore ? lt : gt)(table.CreateTime, anchor.value),
+							and(
+								eq(table.CreateTime, anchor.value),
+								compare(table.MesLocalID, sql`${anchor.messageLocalId}`),
+							),
+						);
+		}
+		// 多读一条只用于判断当前方向是否还有数据，不计入返回页。
+		const rows = await database
+			.select(chatTableSelect(table))
+			.from(table)
+			.where(and(...filters, boundary))
+			.orderBy(order(table.CreateTime), order(table.MesLocalID))
+			.limit(limit + 1);
+		const data = rows.slice(0, limit);
+		if (isBefore) data.reverse();
+		return { data, hasMore: rows.length > limit };
+	}
 
-	return {
-		data: await parseMessageDatabaseChatTableRows(rows, {
-			chat: chatDetail,
-			databases,
-		}),
-		meta: {
-			...(cursors.current ? { cursor: JSON.stringify(cursors.current) } : {}),
-			...(cursors.previous
-				? { previous_cursor: JSON.stringify(cursors.previous) }
-				: {}),
-			...(cursors.next ? { next_cursor: JSON.stringify(cursors.next) } : {}),
-		},
-		...(import.meta.env.DEV
-			? {
-					__dev: {
-						database: _chatTableIndex
-							? `message_${_chatTableIndex + 1}.sqlite`
-							: undefined,
-						table: tableName,
-					},
-				}
+	let data: ChatTableSelectInfer[];
+	let hasPrevious: boolean;
+	let hasNext: boolean;
+	// 没有游标时查询最新的数据，但返回时仍按时间正序排列。
+	const condition = pageCursor?.condition ?? "<";
+	if (condition === "<>") {
+		// 两侧各取最多 limit 条并分别判断是否还有更多，目标只包含在后一侧。
+		const before = await read("<");
+		const after = await read(">=");
+		data = [...before.data, ...after.data];
+		hasPrevious = before.hasMore;
+		hasNext = after.hasMore;
+	} else {
+		const page = await read(condition);
+		const isBefore = condition === "<" || condition === "<=";
+		data = page.data;
+		// 单向查询尚未确认反方向是否有数据，先保留其游标；查空后停止。
+		// 无游标的首页是例外：备份是静态数据，最新一页不会有下一页。
+		hasPrevious = isBefore ? page.hasMore : true;
+		hasNext = isBefore ? pageCursor !== undefined : page.hasMore;
+	}
+	// 首次查询以返回页的第一条为包含边界，可用当前游标重新读取这一页。
+	const currentCursor =
+		cursor ?? (data.length ? encodeCursor(data[0], ">=") : undefined);
+	// 翻页以已返回的首尾消息为排除边界，避免重复返回边界消息。
+	const meta: DataAdapterCursorPagination<MessageType[]>["meta"] = {
+		...(currentCursor !== undefined ? { cursor: currentCursor } : {}),
+		...(data.length && hasPrevious
+			? { previous_cursor: encodeCursor(data[0], "<") }
 			: {}),
+		...(data.length && hasNext
+			? { next_cursor: encodeCursor(data[data.length - 1], ">") }
+			: {}),
+	};
+	if (!data.length) return { data: [], meta };
+	const rows = fallbackUnsupportedMessageQueryRows(
+		await WCDB.postProcess(data, {
+			databaseSeries: WCDBDatabaseSeriesName.Message,
+			tableSeries: WCDBTableSeriesName.Chat,
+		}),
+	);
+	const chats = await ChatController.find({ ids: [request.chat.id] }, context);
+	const chat = chats.data[0];
+	return {
+		data: await parseMessageDatabaseChatTableRows(rows, { ...context, chat }),
+		meta,
 	};
 }
 
@@ -870,6 +638,7 @@ export type findInput = [
 		parseReplyMessage?: boolean;
 	},
 	{
+		account: UserType;
 		databases: WCDatabases;
 	},
 ];
@@ -877,8 +646,10 @@ export type findInput = [
 export type findOutput = Promise<DataAdapterResponse<MessageType[]>>;
 
 export async function find(...inputs: findInput): findOutput {
-	const [{ chat, messageIds, parseReplyMessage = true }, { databases }] =
-		inputs;
+	const [
+		{ chat, messageIds, parseReplyMessage = true },
+		{ account, databases },
+	] = inputs;
 
 	const dbs = databases.message;
 	if (!dbs) throw new Error("message databases are not found");
@@ -897,7 +668,7 @@ export async function find(...inputs: findInput): findOutput {
 						// @ts-ignore CAST 语句已经将 MesSvrID 转换为字符串
 						.where(inArray(chatTable.MesSvrID, messageIds));
 
-					const rows = query.all();
+					const rows = await query.all();
 
 					return fallbackUnsupportedMessageQueryRows(
 						await WCDB.postProcess(rows, {
@@ -928,6 +699,7 @@ export async function find(...inputs: findInput): findOutput {
 
 	return {
 		data: await parseMessageDatabaseChatTableRows(rows, {
+			account,
 			chat,
 			databases,
 			parseReplyMessage,
@@ -952,29 +724,31 @@ export async function allVerify(...inputs: allVerifyInput): allVerifyOutput {
 		throw new Error("message databases are not found");
 	}
 
-	const rows = dbs
-		.map((database) => {
-			try {
-				const databaseTables = database
-					.select({
-						name: sql<string>`name`,
-					})
-					.from(sql`sqlite_master`)
-					.where(and(eq(sql`type`, "table"), like(sql`name`, "Hello_%")))
-					.all();
+	const rows = (
+		await Promise.all(
+			dbs.map(async (database) => {
+				try {
+					const databaseTables = await database
+						.select({
+							name: sql<string>`name`,
+						})
+						.from(sql`sqlite_master`)
+						.where(and(eq(sql`type`, "table"), like(sql`name`, "Hello_%")))
+						.all();
 
-				const helloTable = getHelloTable(databaseTables[0].name);
+					const helloTable = getHelloTable(databaseTables[0].name);
 
-				return database
-					.select(helloTableSelect(helloTable))
-					.from(helloTable)
-					.orderBy(desc(helloTable.CreateTime))
-					.all();
-			} catch (error) {
-				return [];
-			}
-		})
-		.filter((row) => row.length > 0)[0];
+					return await database
+						.select(helloTableSelect(helloTable))
+						.from(helloTable)
+						.orderBy(desc(helloTable.CreateTime))
+						.all();
+				} catch (error) {
+					return [];
+				}
+			}),
+		)
+	).filter((row) => row.length > 0)[0];
 
 	return {
 		data: transformHelloTableRowToMessage(rows),

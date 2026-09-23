@@ -11,11 +11,10 @@ import {
 	openIMContactTableSelectInfer,
 } from "../database/contact";
 import type { WCDatabases } from "../types";
-import { adapterWorker } from "../worker";
 
 async function parseContactDatabaseFriendTableRows(
 	rows: friendTableSelectInfer | openIMContactTableSelectInfer,
-	{ databases }: { databases: WCDatabases },
+	{ account, databases }: { account: UserType; databases: WCDatabases },
 ): Promise<(UserType | ChatroomType)[]> {
 	const allMemberIds: string[] = [];
 
@@ -111,16 +110,13 @@ async function parseContactDatabaseFriendTableRows(
 			{
 				ids: Array.from(new Set(allMemberIds)),
 			},
-			{ databases },
+			{ account, databases },
 		)
 	).data as UserType[];
 
 	// 加入当前登录的微信账号数据 TODO:其实感觉应该有别的方法判断自己在不在这个群里
-	if (
-		adapterWorker._getStoreItem("account") &&
-		allMemberIds.indexOf(adapterWorker._getStoreItem("account").id) > -1
-	) {
-		allMembers.push(adapterWorker._getStoreItem("account"));
+	if (allMemberIds.indexOf(account.id) > -1) {
+		allMembers.push(account);
 	}
 
 	const allMembersTable: { [key: string]: UserType } = {};
@@ -146,20 +142,20 @@ async function parseContactDatabaseFriendTableRows(
 	return result;
 }
 
-export type AllInput = [{ databases: WCDatabases }];
+export type AllInput = [{ account: UserType; databases: WCDatabases }];
 export type AllOutput = Promise<
 	DataAdapterResponse<(UserType | ChatroomType)[]>
 >;
 
 export async function all(...inputs: AllInput): AllOutput {
-	const [{ databases }] = inputs;
+	const [{ account, databases }] = inputs;
 
 	const db = databases.WCDB_Contact;
 	if (!db) {
 		throw new Error("WCDB_Contact database is not found");
 	}
 
-	const rows = unionAll(
+	const rows = await unionAll(
 		db
 			.select(friendTableSelect)
 			.from(friendTable)
@@ -181,17 +177,23 @@ export async function all(...inputs: AllInput): AllOutput {
 	).all();
 
 	return {
-		data: await parseContactDatabaseFriendTableRows(rows, { databases }),
+		data: await parseContactDatabaseFriendTableRows(rows, {
+			account,
+			databases,
+		}),
 	};
 }
 
-export type FindAllInput = [{ ids: string[] }, { databases: WCDatabases }];
+export type FindAllInput = [
+	{ ids: string[] },
+	{ account: UserType; databases: WCDatabases },
+];
 export type FinfAllOutput = Promise<
 	DataAdapterResponse<(UserType | ChatroomType)[]>
 >;
 
 export async function findAll(...inputs: FindAllInput): FinfAllOutput {
-	const [{ ids }, { databases }] = inputs;
+	const [{ ids }, { account, databases }] = inputs;
 
 	const db = databases.WCDB_Contact;
 	if (!db) {
@@ -202,7 +204,7 @@ export async function findAll(...inputs: FindAllInput): FinfAllOutput {
 
 	// 现在用 IN 查询，但是可能会出现 SQL 语句过长的问题，暂时不知道限制是多少
 
-	const rows = unionAll(
+	const rows = await unionAll(
 		db
 			.select(friendTableSelect)
 			.from(friendTable)
@@ -215,10 +217,11 @@ export async function findAll(...inputs: FindAllInput): FinfAllOutput {
 
 	return {
 		data: [
-			...(ids.indexOf(adapterWorker._getStoreItem("account").id) > -1
-				? [adapterWorker._getStoreItem("account") as UserType]
-				: []),
-			...(await parseContactDatabaseFriendTableRows(rows, { databases })),
+			...(ids.indexOf(account.id) > -1 ? [account] : []),
+			...(await parseContactDatabaseFriendTableRows(rows, {
+				account,
+				databases,
+			})),
 		],
 	};
 }
@@ -240,7 +243,7 @@ export async function contactList(
 		throw new Error("WCDB_Contact database is not found");
 	}
 
-	const rows = unionAll(
+	const rows = await unionAll(
 		db
 			.select(friendTableSelect)
 			.from(friendTable)

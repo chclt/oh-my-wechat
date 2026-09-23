@@ -1,14 +1,14 @@
 import { useDisclosure } from "@mantine/hooks";
 import { ChevronLeftIcon } from "lucide-react";
-import { useId, useState } from "react";
-import { useMiniRoute, useMiniRouter } from "@/components/mini-router";
-import {
-	MiniRoutePageContentClassName,
-	MiniRoutePageOverlayClassName,
-} from "@/components/mini-router/utils";
+import { type AnimationEvent, useId, useState } from "react";
+import { useLocation } from "wouter";
 import { Avatar } from "@/components/ui/avatar.tsx";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+	WouterPageContentClassName,
+	WouterPageOverlayClassName,
+} from "@/components/wouter/page";
 import { cn } from "@/lib/utils";
 import ContactAlphabetList, {
 	AlphabetNavigator,
@@ -16,24 +16,18 @@ import ContactAlphabetList, {
 import useContactAlphabetList from "./use-contact-alphabet-list";
 import { ContactListContctGroupItem } from "./use-contact-list";
 
-export interface ContactGroupListMiniRouteState {
-	name: "contactGroupList";
-	data: {
-		contctGroup: ContactListContctGroupItem;
-		accountId: string;
-	};
-}
-
-export default function ContactGroupList() {
-	const { back } = useMiniRouter();
-	const {
-		data: { contctGroup, accountId },
-	} = useMiniRoute() as ContactGroupListMiniRouteState;
-
+export default function ContactGroupList({
+	accountId,
+	contactGroup,
+}: {
+	accountId: string;
+	contactGroup: ContactListContctGroupItem;
+}) {
+	const [, navigate] = useLocation();
 	const [isOpen, { close }] = useDisclosure(true);
-	const handleAnimationEnd = () => {
-		if (!isOpen) {
-			back();
+	const handleAnimationEnd = (event: AnimationEvent<HTMLElement>) => {
+		if (event.target === event.currentTarget && !isOpen) {
+			navigate("/", { replace: true });
 		}
 	};
 
@@ -41,7 +35,7 @@ export default function ContactGroupList() {
 
 	const reactId = useId();
 
-	const contactAlphabetList = useContactAlphabetList(contctGroup.value);
+	const contactAlphabetList = useContactAlphabetList(contactGroup.value);
 
 	return (
 		<>
@@ -51,7 +45,7 @@ export default function ContactGroupList() {
 				aria-hidden={true}
 				className={cn(
 					"absolute inset-0 bg-background",
-					MiniRoutePageOverlayClassName,
+					WouterPageOverlayClassName,
 				)}
 			/>
 			<section
@@ -59,7 +53,7 @@ export default function ContactGroupList() {
 				data-state={isOpen ? "open" : "closed"}
 				className={cn(
 					"absolute inset-0 bg-background",
-					MiniRoutePageContentClassName,
+					WouterPageContentClassName,
 				)}
 				onAnimationEnd={handleAnimationEnd}
 			>
@@ -74,8 +68,9 @@ export default function ContactGroupList() {
 						"[&_[data-slot='scroll-area-scrollbar']]:z-30 [&_[data-slot='scroll-area-scrollbar']]:top-16!",
 					)}
 				>
-					<header className="sticky z-30 top-0 h-16 px-5 ps-2.5 flex items-center bg-background/80 border-b border-muted backdrop-blur-xl">
+					<header className="sticky z-30 top-0 h-16 px-5 ps-2.5 flex items-center texture border-b border-muted">
 						<Button
+							aria-label="返回通讯录"
 							size="icon"
 							variant="ghost"
 							className="mr-3 opacity-80"
@@ -86,10 +81,10 @@ export default function ContactGroupList() {
 							<ChevronLeftIcon />
 						</Button>
 
-						<Avatar src={contctGroup.photo} className="shrink-0" />
+						<Avatar src={contactGroup.photo} className="shrink-0" />
 
 						<div className="ms-3 font-semibold">
-							<span className="font-medium">{contctGroup.title}</span>
+							<span className="font-medium">{contactGroup.title}</span>
 						</div>
 					</header>
 

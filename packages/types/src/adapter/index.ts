@@ -4,11 +4,14 @@ import {
 	ContactType,
 	FileInfo,
 	ImageInfo,
+	ImageMessageType,
 	MessageType,
 	MessageTypeEnum,
+	MicroVideoMessageType,
 	UserType,
 	VerityMessageType,
 	VideoInfo,
+	VideoMessageType,
 	VoiceInfo,
 	OpenMessageTypeEnum,
 	MessageRecordBaseType,
@@ -49,6 +52,13 @@ export type GetAccountContactListResponse = Promise<
 	DataAdapterResponse<ContactType[]>
 >;
 
+export type MessageListCursor = {
+	condition: "<" | "<=" | ">" | ">=" | "<>";
+} & (
+	| { value: number; messageLocalId?: string }
+	| { value?: undefined; messageLocalId: string }
+);
+
 export interface GetMessageListRequest {
 	account: Pick<AccountType, "id">;
 	chat: Pick<ChatType, "id">;
@@ -83,13 +93,29 @@ export interface GetChatListRequest {
 
 export type GetChatListResponse = Promise<DataAdapterResponse<ChatType[]>>;
 
-export interface GetMessageImageRequest {
+export interface SearchChatsRequest {
+	account: Pick<AccountType, "id">;
+	query: string;
+	offset: number;
+	limit: number;
+}
+
+export type SearchChatsResponse = Promise<DataAdapterPagination<ChatType[]>>;
+
+export type GetMessageImageRequest = {
 	account: Pick<AccountType, "id">;
 	chat: Pick<ChatType, "id">;
-	message: Pick<MessageType, "local_id">;
 	sizes?: NonNullable<keyof ImageInfo>[];
-	domain?: "image" | "opendata";
-}
+} & (
+	| {
+			domain?: "image";
+			message: Pick<ImageMessageType, "local_id" | "message_entity">;
+	  }
+	| {
+			domain: "opendata";
+			message: Pick<MessageType, "local_id">;
+	  }
+);
 
 export type GetMessageImageResponse = Promise<
 	DataAdapterResponse<ImageInfo | undefined>
@@ -112,7 +138,10 @@ export type ReleaseMessageFileResponse = Promise<DataAdapterResponse<void>>;
 export interface GetMessageVideoRequest {
 	account: Pick<AccountType, "id">;
 	chat: Pick<ChatType, "id">;
-	message: Pick<MessageType, "local_id">;
+	message: Pick<
+		VideoMessageType | MicroVideoMessageType,
+		"local_id" | "message_entity"
+	>;
 	include?: ("video" | "cover")[];
 }
 
@@ -180,6 +209,49 @@ export interface GetStatisticRequest {
 
 export type GetStatisticResponse = Promise<DataAdapterResponse<ChatStatistics>>;
 
+export interface SearchMessagesRequest {
+	account: Pick<AccountType, "id">;
+	chat?: Pick<ChatType, "id">;
+	/** Case-insensitive literal substring; trims query edges but preserves internal whitespace. */
+	searchText?: string;
+	user?: Pick<UserType, "id">;
+	startTime?: string;
+	endTime?: string;
+	offset: number;
+	limit: number;
+}
+
+export interface MessageSearchMatch {
+	/** First match in messagePlainText, using UTF-16 offsets: [start, end). */
+	start: number;
+	end: number;
+}
+
+export type SearchMessagesResponse = Promise<
+	DataAdapterPagination<
+		{
+			chatId: string;
+			userId?: string;
+			messageLocalId: string;
+			createTime: number;
+			messagePlainText: string;
+			match: MessageSearchMatch;
+			relevance: number;
+		}[]
+	>
+>;
+
+export interface GetMessageSearchIndexStatusRequest {
+	account: Pick<AccountType, "id">;
+}
+
+export type GetMessageSearchIndexStatusResponse = Promise<
+	| { phase: "idle" }
+	| { phase: "building"; indexedMessageCount: number }
+	| { phase: "ready"; indexedMessageCount: number }
+	| { phase: "failed"; errorMessage: string }
+>;
+
 export interface DataAdapter {
 	init: () => void;
 
@@ -198,6 +270,8 @@ export interface DataAdapter {
 	getChat: (requestData: GetChatRequest) => GetChatResponse;
 
 	getChatList: (requestData: GetChatListRequest) => GetChatListResponse;
+
+	searchChats: (requestData: SearchChatsRequest) => SearchChatsResponse;
 
 	getMessageList: (
 		requestData: GetMessageListRequest,
@@ -243,11 +317,29 @@ export interface DataAdapter {
 	getRecordFile: (requestData: GetRecordFileRequest) => GetRecordFileResponse;
 
 	getStatistic: (requestData: GetStatisticRequest) => GetStatisticResponse;
+
+	searchMessages: (
+		requestData: SearchMessagesRequest,
+	) => SearchMessagesResponse;
+
+	getMessageSearchIndexStatus: (
+		requestData: GetMessageSearchIndexStatusRequest,
+	) => GetMessageSearchIndexStatusResponse;
 }
 
 export interface DataAdapterResponse<DataType> {
 	data: DataType;
 	meta?: Record<string, any>;
+}
+
+export interface DataAdapterPagination<
+	DataType,
+> extends DataAdapterResponse<DataType> {
+	meta: {
+		total: number;
+		offset: number;
+		limit: number;
+	};
 }
 
 export interface DataAdapterCursorPagination<

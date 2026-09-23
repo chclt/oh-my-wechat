@@ -4,26 +4,28 @@ import {
 	GetMessageVideoResponse,
 } from "@repo/types/adapter";
 import CryptoJS from "crypto-js";
-import { WCDatabases } from "../types";
-import { getFilesFromManifast } from "../utils";
+import type { WCDatabases } from "../types";
+import { getFileRecordsFromManifest } from "../utils";
 import { createImageUri } from "./file/utils";
+import { readMediaDimensions } from "./media-dimensions";
 
 export type GetInput = [
 	GetMessageVideoRequest,
-	{ directory: FileSystemDirectoryHandle | FileList; databases: WCDatabases },
+	{
+		databases: WCDatabases;
+	},
 ];
 export type GetOutput = GetMessageVideoResponse;
 
 export async function get(...inputs: GetInput): GetOutput {
-	const [{ account, chat, message, include }, { directory, databases }] =
-		inputs;
+	const [{ account, chat, message, include }, { databases }] = inputs;
+	const video = message.message_entity.msg.videomsg;
 
 	const db = databases.manifest;
 	if (!db) throw new Error("manifest database is not found");
 
-	const files = await getFilesFromManifast(
+	const files = await getFileRecordsFromManifest(
 		db,
-		directory,
 		`Documents/${CryptoJS.MD5(account.id).toString()}/Video/${CryptoJS.MD5(chat.id).toString()}/${message.local_id}.%`,
 	);
 
@@ -40,19 +42,26 @@ export async function get(...inputs: GetInput): GetOutput {
 	let result: VideoInfo = { uri: "" };
 
 	for (const file of files) {
-		if (file.filename.endsWith(".mp4")) {
+		const relativePath = file.relativePath!;
+		if (relativePath.endsWith(".mp4")) {
 			if (!includeMap.video) continue;
 			result = {
 				...result,
-				uri: createImageUri(file.relativePath),
+				uri: createImageUri(relativePath),
 			};
 		}
 
-		if (file.filename.endsWith(".video_thum")) {
+		if (relativePath.endsWith(".video_thum")) {
 			if (!includeMap.cover) continue;
 			result = {
 				...result,
-				cover: { uri: createImageUri(file.relativePath) },
+				cover: {
+					uri: createImageUri(relativePath),
+					...readMediaDimensions(
+						video["@_cdnthumbwidth"],
+						video["@_cdnthumbheight"],
+					),
+				},
 			};
 		}
 	}

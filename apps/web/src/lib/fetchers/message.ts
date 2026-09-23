@@ -24,6 +24,7 @@ export function MessageListInfiniteQueryOptions(
 	string | undefined
 > {
 	return {
+		// The initial cursor identifies the query; pagination only changes pageParam.
 		queryKey: [
 			`account: ${requestData.account.id}`,
 			`chat: ${requestData.chat.id}`,

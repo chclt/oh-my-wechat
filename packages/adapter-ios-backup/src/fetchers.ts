@@ -7,13 +7,14 @@ export function LoadDirectoryMutationOptions(
 ): MutationOptions<
 	unknown,
 	DefaultError,
-	FileSystemDirectoryHandle | FileList,
+	{ directory: FileSystemDirectoryHandle | FileList; password?: string },
 	unknown
 > {
 	return {
 		mutationKey: ["iOSBackupAdapter", "loadDirectory"],
-		mutationFn: (directoryHandle) =>
-			adapterInstance._loadDirectory(directoryHandle),
+		retry: false,
+		mutationFn: ({ directory, password }) =>
+			adapterInstance._loadDirectory(directory, password),
 	};
 }
 

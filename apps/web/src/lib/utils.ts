@@ -23,3 +23,25 @@ export function decodeUnicodeReferences(encodedHTMLComponent: string) {
 export function formatDateTime(date: Date) {
 	return date.toLocaleString("zh-CN", {});
 }
+
+export function parseOptionalString(value: unknown): string | undefined {
+	if (typeof value !== "string") {
+		return undefined;
+	}
+
+	const trimmedValue = value.trim();
+	return trimmedValue.length > 0 ? trimmedValue : undefined;
+}
+
+export function parseOptionalBoolean(value: unknown): boolean | undefined {
+	if (typeof value === "boolean") {
+		return value;
+	}
+	if (value === "true") {
+		return true;
+	}
+	if (value === "false") {
+		return false;
+	}
+	return undefined;
+}

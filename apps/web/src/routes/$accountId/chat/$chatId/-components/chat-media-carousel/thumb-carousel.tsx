@@ -1,48 +1,56 @@
 import { ScrollArea as BaseScrollArea } from "@base-ui/react";
 import { MessageType, MessageTypeEnum } from "@repo/types";
-import { Virtualizer } from "@tanstack/react-virtual";
 import { LoaderIcon } from "@/components/icon";
 import { ImageMessage, VideoMessage } from "@/components/message";
 import scrollAreaClasses from "@/components/ui/scroll-area.module.css";
 import { cn } from "@/lib/utils";
 import { CarouselScrollViewport } from "./carousel-scroll-viewport";
-import { createMessageURI } from "./utils";
+import transitionClasses from "./media-carousel-transition.module.css";
+import type { CarouselView } from "./types";
 
 interface ThumbCarouselProps {
-	account: { id: string };
-	virtualizer: Virtualizer<HTMLDivElement, Element>;
-	viewportRef: (element: HTMLDivElement | null) => void;
-	onScroll: (event: React.UIEvent<HTMLDivElement, UIEvent>) => void;
+	view: CarouselView;
 	messages: MessageType[];
 	hasPreviousPage: boolean;
 	hasNextPage: boolean;
+	onSelect: (messageKey: string) => void;
 }
 
 export default function ThumbCarousel({
-	account,
-	virtualizer,
-	viewportRef,
-	onScroll,
+	view,
 	messages,
 	hasPreviousPage,
 	hasNextPage,
+	onSelect,
 }: ThumbCarouselProps) {
+	"use no memo";
+
+	const { virtualizer, viewport } = view;
+
 	// virtualizer enabled=false 时返回空数组，无需额外 gate。
 	const virtualItems = virtualizer.getVirtualItems();
 
 	return (
 		<BaseScrollArea.Root
 			data-slot="scroll-area"
-			className={cn(scrollAreaClasses.Root, "@container overflow-hidden")}
+			className={cn(
+				scrollAreaClasses.Root,
+				transitionClasses.Controls,
+				"size-full @container overflow-hidden",
+			)}
 		>
 			<CarouselScrollViewport
-				ref={viewportRef}
-				slice="thumb"
+				viewport={viewport}
+				tabIndex={0}
+				role="group"
+				aria-label="缩略图导航"
 				className={scrollAreaClasses.Viewport}
-				onScroll={onScroll}
 			>
 				<BaseScrollArea.Content
-					className={cn(scrollAreaClasses.Content, "h-24 relative")}
+					className={cn(
+						scrollAreaClasses.Content,
+						"h-(--media-thumb-size) relative",
+					)}
 					style={{ width: virtualizer.getTotalSize() }}
 				>
 					<div
@@ -58,12 +66,14 @@ export default function ThumbCarousel({
 						const message = messages[virtualItem.index];
 						if (!message) return null;
 						return (
-							<div
+							<button
+								type="button"
+								tabIndex={-1}
 								key={virtualItem.key}
-								ref={virtualizer.measureElement}
-								data-index={virtualItem.index}
-								data-message-uri={createMessageURI({ message, account })}
-								className="absolute inset-y-0 size-24 p-2 snap-normal snap-center"
+								data-message-uri={virtualItem.key}
+								onClick={() => onSelect(String(virtualItem.key))}
+								aria-label={`查看${message.type === MessageTypeEnum.VIDEO ? "视频" : "图片"}，${new Date(message.date * 1000).toLocaleString()}`}
+								className="absolute inset-y-0 size-(--media-thumb-size) p-2 snap-normal snap-center cursor-pointer rounded focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-white"
 								style={{
 									left: 0,
 									transform: `translateX(${virtualItem.start}px)`,
@@ -73,17 +83,19 @@ export default function ThumbCarousel({
 									<ImageMessage.Plain
 										message={message}
 										sizes={["thumbnail", "regular"]}
+										alt=""
 										className="size-full object-cover rounded"
 									/>
 								) : message.type === MessageTypeEnum.VIDEO ? (
 									<VideoMessage.PlainCover
 										message={message}
+										alt=""
 										className="size-full object-cover rounded"
 									/>
 								) : (
-									<div className="size-24" />
+									<div className="size-(--media-thumb-size)" />
 								)}
-							</div>
+							</button>
 						);
 					})}
 

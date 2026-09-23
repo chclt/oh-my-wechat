@@ -1,45 +1,27 @@
 import imageGreetingMessages from "/images/avatar/greeting_messages.png";
 import imageGroupChats from "/images/avatar/group_chats.png";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { Suspense, useState } from "react";
+import { Redirect, Route as LocalRoute, useLocation } from "wouter";
 import { ContactIconFill } from "@/components/icon";
-import {
-	MiniOutlet,
-	useMiniRoute,
-	useMiniRouter,
-} from "@/components/mini-router";
-import { MiniRouteFirstPageContentClassName } from "@/components/mini-router/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { WouterFirstPageContentClassName } from "@/components/wouter/page";
 import { AccountContactListSuspenseQueryOptions } from "@/lib/fetchers/contact";
 import { cn } from "@/lib/utils";
-import { GreetingMessageListMiniRouteState } from "@/routes/$accountId/contact/-components/contact-list/greeting-message-list.tsx";
+import { Route } from "../../../route";
 import ContactAlphabetList, {
 	AlphabetNavigator,
 } from "./contact-alphabet-list";
+import ContactGroupList from "./contact-group-list";
 import ContactItem from "./contact-item";
+import GreetingMessageList from "./greeting-message-list";
 import useContactAlphabetList from "./use-contact-alphabet-list";
 import useContactList, { ContactListContctGroupItem } from "./use-contact-list";
 
-export interface ContactListMiniRouteState {
-	name: "root";
-	data: {
-		accountId: string;
-	};
-}
-
 export default function ContactList() {
-	const {
-		data: { accountId },
-	} = useMiniRoute() as ContactListMiniRouteState;
-
-	const { states: miniRouterStates, pushState: pushMiniRouterStates } =
-		useMiniRouter();
-	const thisMiniRouteState = useMiniRoute();
-	const thisMiniRoutePosition = miniRouterStates.findIndex((state) =>
-		Object.is(state, thisMiniRouteState),
-	);
-	const isThisMiniRouteOnTop =
-		thisMiniRoutePosition === miniRouterStates.length - 1;
+	const { accountId } = Route.useParams();
+	const [location, navigate] = useLocation();
+	const isRootActive = location === "/";
 
 	const { data: contactList } = useSuspenseQuery(
 		AccountContactListSuspenseQueryOptions({
@@ -59,10 +41,11 @@ export default function ContactList() {
 		<div className="absolute inset-0">
 			<section
 				data-alphabet="root"
-				className={cn("absolute inset-0", MiniRouteFirstPageContentClassName)}
-				aria-hidden={!isThisMiniRouteOnTop}
+				className={cn("absolute inset-0", WouterFirstPageContentClassName)}
+				aria-hidden={!isRootActive}
+				inert={!isRootActive}
 				style={{
-					pointerEvents: isThisMiniRouteOnTop ? "auto" : "none",
+					pointerEvents: isRootActive ? "auto" : "none",
 				}}
 			>
 				<ScrollArea
@@ -76,7 +59,7 @@ export default function ContactList() {
 						"[&_[data-slot='scroll-area-scrollbar']]:z-30 [&_[data-slot='scroll-area-scrollbar']]:top-16!",
 					)}
 				>
-					<header className="sticky z-30 top-0 h-16 px-5 flex items-center bg-background/80 border-b border-muted backdrop-blur-xl">
+					<header className="sticky z-30 top-0 h-16 px-5 flex items-center texture border-b border-muted">
 						<div className="size-11 flex items-center justify-center text-[#FF970A] bg-background clothoid-corner-[18.18%] shrink-0">
 							<ContactIconFill className="size-8" />
 						</div>
@@ -95,16 +78,7 @@ export default function ContactList() {
 							onClick={(event) => {
 								event.preventDefault();
 								event.stopPropagation();
-								pushMiniRouterStates({
-									name: "greetingMessageList",
-									data: {
-										accountId,
-										contactItem: {
-											title: "新的朋友",
-											photo: imageGreetingMessages,
-										},
-									},
-								} satisfies GreetingMessageListMiniRouteState);
+								navigate("/greetings");
 							}}
 						/>
 					)}
@@ -135,7 +109,43 @@ export default function ContactList() {
 				)}
 			</section>
 
-			<MiniOutlet />
+			{/* Keep the contact list mounted while a local page is open. */}
+			<LocalRoute path="/groups/:groupId">
+				{({ groupId }) => {
+					return groupId === "group_chats" ? (
+						<Suspense key={groupId}>
+							<ContactGroupList
+								accountId={accountId}
+								contactGroup={
+									{
+										type: "contactGroup",
+										id: "group_chats",
+										title: "群聊",
+										photo: imageGroupChats,
+										value: contactListWithGroup.groupChat,
+									} satisfies ContactListContctGroupItem
+								}
+							/>
+						</Suspense>
+					) : (
+						<Redirect to="/" replace />
+					);
+				}}
+			</LocalRoute>
+
+			{import.meta.env.DEV && (
+				<LocalRoute path="/greetings">
+					<Suspense>
+						<GreetingMessageList
+							accountId={accountId}
+							contactItem={{
+								title: "新的朋友",
+								photo: imageGreetingMessages,
+							}}
+						/>
+					</Suspense>
+				</LocalRoute>
+			)}
 		</div>
 	);
 }

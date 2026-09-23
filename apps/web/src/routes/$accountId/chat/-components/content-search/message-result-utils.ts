@@ -1,0 +1,15 @@
+import type { ChatType, UserType } from "@repo/types";
+
+export function getChatUsers(chat: ChatType | undefined): UserType[] {
+	if (!chat) {
+		return [];
+	}
+	if (chat.type === "private") {
+		return [chat.user];
+	}
+	return chat.members;
+}
+
+export function getUserDisplayName(user: UserType): string {
+	return user.remark ?? user.username ?? user.id;
+}

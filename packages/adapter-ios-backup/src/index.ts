@@ -15,11 +15,15 @@ import {
 	GetRecordFileRequest,
 	GetRecordImageRequest,
 	GetRecordVideoRequest,
+	GetMessageSearchIndexStatusRequest,
+	GetMessageSearchIndexStatusResponse,
 	GetStatisticRequest,
 	GetUserListRequest,
 	GetUserRequest,
 	ReleaseMessageFileRequest,
 	ResolveMessageFileRequest,
+	SearchChatsRequest,
+	SearchMessagesRequest,
 } from "@repo/types/adapter";
 import * as Comlink from "comlink";
 import type { AdapterWorkerType } from "./worker.ts";
@@ -27,12 +31,18 @@ import AdapterWorker from "./worker.ts?worker";
 
 export default class IosBackupAdapter implements DataAdapter {
 	private _directory: FileSystemDirectoryHandle | FileList | undefined;
+	private _directoryLoaded = false;
 
 	private _workerAdapter: Comlink.Remote<AdapterWorkerType>;
 
-	async _loadDirectory(directoryHandle: FileSystemDirectoryHandle | FileList) {
+	async _loadDirectory(
+		directoryHandle: FileSystemDirectoryHandle | FileList,
+		password?: string,
+	) {
+		this._directoryLoaded = false;
 		this._directory = directoryHandle;
-		await this._workerAdapter._loadDirectory(this._directory);
+		await this._workerAdapter._loadDirectory(this._directory, password);
+		this._directoryLoaded = true;
 	}
 
 	async _loadAccountDatabase(account: UserType) {
@@ -52,7 +62,7 @@ export default class IosBackupAdapter implements DataAdapter {
 			throw new Error("Directory not loaded");
 		}
 
-		await this._workerAdapter._loadDirectory(this._directory);
+		if (!this._directoryLoaded) await this._loadDirectory(this._directory);
 	}
 
 	async getAccountList() {
@@ -104,6 +114,13 @@ export default class IosBackupAdapter implements DataAdapter {
 		return withCommonWrapper(
 			() => this._workerAdapter.getChatList(input),
 			"getChatList",
+		);
+	}
+
+	async searchChats(input: SearchChatsRequest) {
+		return withCommonWrapper(
+			() => this._workerAdapter.searchChats(input),
+			"searchChats",
 		);
 	}
 
@@ -202,6 +219,22 @@ export default class IosBackupAdapter implements DataAdapter {
 		return withCommonWrapper(
 			() => this._workerAdapter.getStatistic(input),
 			"getStatistic",
+		);
+	}
+
+	async searchMessages(input: SearchMessagesRequest) {
+		return withCommonWrapper(
+			() => this._workerAdapter.searchMessages(input),
+			"searchMessages",
+		);
+	}
+
+	async getMessageSearchIndexStatus(
+		input: GetMessageSearchIndexStatusRequest,
+	): GetMessageSearchIndexStatusResponse {
+		return withCommonWrapper<Awaited<GetMessageSearchIndexStatusResponse>>(
+			() => this._workerAdapter.getMessageSearchIndexStatus(input),
+			"getMessageSearchIndexStatus",
 		);
 	}
 }

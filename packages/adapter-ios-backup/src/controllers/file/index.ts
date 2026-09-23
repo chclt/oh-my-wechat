@@ -6,9 +6,10 @@ import type {
 } from "@repo/types/adapter";
 import { and, eq } from "drizzle-orm";
 import { filesTable } from "../../database/_manifest.ts";
-import { WCDatabases } from "../../types.ts";
+import type { WCDatabases } from "../../types.ts";
 import { MANIFEST_DOMAIN, URI_PREFIX } from "../../utils/constants.ts";
-import { getFileFromDirectory } from "../../utils/index.ts";
+import type { BackupEncryption } from "../../utils/encryption/encryption.ts";
+import { readManifestFile } from "../../utils/index.ts";
 import { convertWxgfToImage } from "../../utils/wxgf/index.ts";
 import { isWxgf } from "../../utils/wxgf/utils.ts";
 
@@ -20,6 +21,14 @@ interface RegistryEntry {
 }
 
 const registry = new Map<string, RegistryEntry>();
+
+export function clearFileRegistry() {
+	for (const entry of registry.values()) {
+		entry.count = 0;
+		if (entry.src) URL.revokeObjectURL(entry.src);
+	}
+	registry.clear();
+}
 
 async function createSrcFromFile(file: File): Promise<string> {
 	const header = new Uint8Array(await file.slice(0, 4).arrayBuffer());
@@ -35,9 +44,11 @@ async function loadSrc(
 	{
 		directory,
 		databases,
+		encryption,
 	}: {
 		directory: FileSystemDirectoryHandle | FileList;
 		databases: WCDatabases;
+		encryption?: BackupEncryption;
 	},
 ): Promise<string> {
 	const relativePath = uri.slice(URI_PREFIX.length);
@@ -45,7 +56,7 @@ async function loadSrc(
 	const db = databases.manifest;
 	if (!db) throw new Error("manifest database is not found");
 
-	const rows = db
+	const rows = await db
 		.select()
 		.from(filesTable)
 		.where(
@@ -62,10 +73,7 @@ async function loadSrc(
 		throw new Error(`[image] file not found for uri: ${uri}`);
 	}
 
-	const file = await getFileFromDirectory(directory, [
-		row.fileID.substring(0, 2),
-		row.fileID,
-	]);
+	const file = await readManifestFile(directory, row, encryption);
 
 	if (!file) {
 		throw new Error(`[image] file handle not found for uri: ${uri}`);
@@ -76,7 +84,11 @@ async function loadSrc(
 
 export type ResolveInput = [
 	ResolveMessageFileRequest,
-	{ directory: FileSystemDirectoryHandle | FileList; databases: WCDatabases },
+	{
+		directory: FileSystemDirectoryHandle | FileList;
+		databases: WCDatabases;
+		encryption?: BackupEncryption;
+	},
 ];
 
 export type ResolveOutput = ResolveMessageFileResponse;
@@ -113,18 +125,15 @@ export async function resolve(...input: ResolveInput): ResolveOutput {
 	if (entry.src === undefined) entry.src = src;
 
 	// 加载期间所有使用者都已 release，这里收尾时立即回收。
-	if (entry.count <= 0 && registry.get(uri) === entry) {
+	if (entry.count <= 0 || registry.get(uri) !== entry) {
 		URL.revokeObjectURL(entry.src);
-		registry.delete(uri);
+		if (registry.get(uri) === entry) registry.delete(uri);
 	}
 
 	return { data: { src } };
 }
 
-export type ReleaseInput = [
-	ReleaseMessageFileRequest,
-	{ directory: FileSystemDirectoryHandle | FileList; databases: WCDatabases },
-];
+export type ReleaseInput = [ReleaseMessageFileRequest];
 
 export type ReleaseOutput = ReleaseMessageFileResponse;
 

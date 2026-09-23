@@ -5,27 +5,34 @@ import {
 	ResizablePanel,
 	ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import ChatListMiniRouter from "./-components/chat-list/chat-list-mini-router";
+import ChatListWouter from "./-components/chat-list/chat-list-wouter";
+import { useContentSearchHotkey } from "./-components/content-search/use-content-search-hotkey";
+import { parseContentSearchParams } from "./-lib/content-search-state";
 
 export const Route = createFileRoute("/$accountId/chat")({
+	validateSearch: parseContentSearchParams,
 	component: RouteComponent,
 });
 
 function RouteComponent() {
+	const { search: isSearchMode } = Route.useSearch();
+	useContentSearchHotkey();
+
 	return (
 		<ResizablePanelGroup
-			direction="horizontal"
+			orientation="horizontal"
 			className="min-h-screen max-h-screen items-stretch"
 		>
 			<ResizablePanel
-				defaultSize={25}
-				minSize={10}
-				maxSize={80}
+				defaultSize="25%"
+				minSize={isSearchMode ? 240 : 68}
+				maxSize={480}
+				groupResizeBehavior="preserve-pixel-size"
 				className="flex"
 			>
 				<Suspense>
 					<div className={"relative w-full h-full"}>
-						<ChatListMiniRouter />
+						<ChatListWouter />
 					</div>
 				</Suspense>
 			</ResizablePanel>

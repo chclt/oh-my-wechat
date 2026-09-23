@@ -16,7 +16,7 @@ export default function NoteDocumentDialogContent({
 				className={cn(
 					dialogClasses.Backdrop,
 					"backdrop-blur-[2px]",
-					"transition-[backdrop-filter,opacity]",
+					"transition-[backdrop-filter,opacity] motion-reduce:transition-none",
 					"ease-[var(--ease-out-fast)] duration-[600ms]",
 					"data-[starting-style]:backdrop-blur-0",
 					"data-[ending-style]:ease-[cubic-bezier(0.375,0.015,0.545,0.455)] data-[ending-style]:duration-[200ms]",
