@@ -16,6 +16,7 @@ import {
 	MessageTypeEnum,
 	type MicroVideoMessageEntity,
 	type MicroVideoMessageType,
+	type OMWErrorMessageType,
 	type OpenMessageEntity,
 	type OpenMessageType,
 	OpenMessageTypeEnum,
@@ -225,7 +226,12 @@ async function parseMessageDatabaseChatTableRows(
 		const xmlParser = new XMLParser({
 			ignoreAttributes: false,
 			tagValueProcessor: (_, tagValue, jPath) => {
-				if (jPath === "msg.appmsg.title" || jPath === "msg.appmsg.des") {
+				if (
+					jPath === "msg.appmsg.title" ||
+					jPath === "msg.appmsg.des" ||
+					jPath === "msg.appmsg.refermsg.svrid" ||
+					jPath === "msg.appmsg.refermsg.content"
+				) {
 					return undefined; // 不解析
 				}
 				return tagValue; // 走默认的解析
@@ -312,8 +318,18 @@ async function parseMessageDatabaseChatTableRows(
 			}
 
 			case MessageTypeEnum.APP: {
-				const messageEntity: OpenMessageEntity<{ type: number }> =
-					xmlParser.parse(raw_message_row.Message);
+				// 部分消息不知为何会损坏，只留下一行字符串，不包含任何可以被 XML 解析的数据。
+				const messageEntity = xmlParser.parse(raw_message_row.Message) as
+					| OpenMessageEntity<{ type: number }>
+					| string;
+
+				if (typeof messageEntity !== "object" || !messageEntity?.msg?.appmsg) {
+					return {
+						...message,
+						type: MessageTypeEnum.OMW_ERROR,
+						message_entity: raw_message_row.Message,
+					} as OMWErrorMessageType;
+				}
 
 				try {
 					if (messageEntity.msg.appmsg.type === OpenMessageTypeEnum.REFER) {
