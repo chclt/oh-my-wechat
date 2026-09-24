@@ -124,5 +124,5 @@ export default function ForwardMessageRecord({
 			</div>
 		);
 
-	return <p className="inline">[转发] {record.datatitle}</p>;
+	return <span className="inline">[转发] {record.datatitle}</span>;
 }

@@ -50,5 +50,5 @@ export default function LiveMessageRecord({
 				</div>
 			</div>
 		);
-	return <p>[直播] {record.datatitle}</p>;
+	return <span>[直播] {record.datatitle}</span>;
 }

@@ -7,7 +7,7 @@ export function ReferMessageReferenced({
 	...props
 }: ReferMessageProps) {
 	return (
-		<p>
+		<span {...props}>
 			<User user={message.from} variant="inline" />
 			<span>: </span>
 			<span>
@@ -16,6 +16,6 @@ export function ReferMessageReferenced({
 					inline
 				/>{" "}
 			</span>
-		</p>
+		</span>
 	);
 }

@@ -79,12 +79,12 @@ function ImageMessageRecordInline({
 	});
 
 	return (
-		<p className="inline">
+		<span className="inline">
 			<AutoResolutionFallbackImage
 				ref={imageRef}
 				image={image}
 				className="inline mx-[0.2em] align-top max-w-16 max-h-16 rounded overflow-hidden"
 			/>
-		</p>
+		</span>
 	);
 }

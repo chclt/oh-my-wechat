@@ -5,7 +5,11 @@ import type { ReferMessageProps } from "./types";
 export function ReferMessageAbstract({ message, ...props }: ReferMessageProps) {
 	return (
 		<MessageInlineWrapper message={message} {...props}>
-			<TextPrettier text={message.message_entity.msg.appmsg.title} inline />
+			<TextPrettier
+				text={message.message_entity.msg.appmsg.title}
+				inline
+				formatLink={false}
+			/>
 		</MessageInlineWrapper>
 	);
 }

@@ -31,8 +31,8 @@ export default function LocationMessageRecord({
 		);
 
 	return (
-		<p className={"inline"} {...props}>
+		<span className={"inline"} {...props}>
 			[位置] {record.locitem.poiname} {record.locitem.label}
-		</p>
+		</span>
 	);
 }

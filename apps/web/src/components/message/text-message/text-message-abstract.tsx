@@ -1,5 +1,4 @@
 import type React from "react";
-import MessageInlineWrapper from "@/components/message-inline-wrapper";
 import TextPrettier from "@/components/text-prettier.tsx";
 import type { TextMessageProps } from "./types.ts";
 
@@ -8,8 +7,8 @@ export function TextMessageAbstract({
 	...props
 }: Omit<TextMessageProps, "variant">) {
 	return (
-		<MessageInlineWrapper message={message} {...props}>
+		<span {...props}>
 			<TextPrettier text={message.message_entity} inline formatLink={false} />
-		</MessageInlineWrapper>
+		</span>
 	);
 }

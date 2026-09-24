@@ -36,5 +36,5 @@ export default function ChannelMessageRecord({
 			</Card>
 		);
 
-	return <p>[视频号名片] {record.datatitle}</p>;
+	return <span>[视频号名片] {record.datatitle}</span>;
 }

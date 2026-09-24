@@ -57,5 +57,5 @@ export default function ChannelVideoMessageRecord({
 			</div>
 		);
 
-	return <p>[视频] {record.datatitle}</p>;
+	return <span>[视频] {record.datatitle}</span>;
 }

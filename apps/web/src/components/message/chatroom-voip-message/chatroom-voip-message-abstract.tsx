@@ -5,8 +5,8 @@ export function ChatroomVoipMessageAbstract({
 	...props
 }: ChatroomVoipMessageProps) {
 	return (
-		<div className={"mx-auto text-sm text-neutral-600"} {...props}>
-			<p>{message.message_entity.msgContent}</p>
-		</div>
+		<span className={"mx-auto text-sm text-neutral-600"} {...props}>
+			{message.message_entity.msgContent}
+		</span>
 	);
 }

@@ -11,11 +11,11 @@ export function PatMessageAbstract({ message, ...props }: PatMessageProps) {
 		ChatSuspenseQueryOptions(accountId, message.chat_id),
 	);
 
-	const records = useContentParser(message, chat);
+	const records = useContentParser(message, chat, false);
 
 	const lastRecord = records.at(-1);
 
 	if (!lastRecord) return null;
 
-	return <p>{...lastRecord}</p>;
+	return <span {...props}>{...lastRecord}</span>;
 }

@@ -26,7 +26,7 @@ export function ImageMessageReferenced({
 	});
 
 	return (
-		<div {...props}>
+		<span {...props}>
 			{message.from && (
 				<>
 					<User user={message.from} variant="inline" />
@@ -38,6 +38,6 @@ export function ImageMessageReferenced({
 				image={image}
 				className="inline mx-[0.2em] align-top max-w-16 max-h-16 rounded overflow-hidden"
 			/>
-		</div>
+		</span>
 	);
 }

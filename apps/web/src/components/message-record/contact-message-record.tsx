@@ -28,7 +28,9 @@ export default function ContactMessageRecord({
 	const dataEntity = xmlParser.parse(record.datadesc);
 
 	if (dataEntity.msg["@_certflag"] === "0") {
-		return <p>[名片] {dataEntity.msg["@_nickname"]}</p>;
+		if (variant === "default")
+			return <p>[名片] {dataEntity.msg["@_nickname"]}</p>;
+		return <span>[名片] {dataEntity.msg["@_nickname"]}</span>;
 	}
 
 	if (variant === "default")
@@ -53,5 +55,7 @@ export default function ContactMessageRecord({
 			</Card>
 		);
 
-	return <p className="inline">[公众号名片] {dataEntity.msg["@_nickname"]}</p>;
+	return (
+		<span className="inline">[公众号名片] {dataEntity.msg["@_nickname"]}</span>
+	);
 }

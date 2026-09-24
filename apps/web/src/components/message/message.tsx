@@ -27,6 +27,7 @@ import {
 	VoipMessage,
 	WeComContactMessage,
 } from "@/components/message";
+import MessageInlineWrapper from "@/components/message-inline-wrapper";
 import dialogClasses from "@/components/ui/dialog.module.css";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { AccountSuspenseQueryOptions } from "@/lib/fetchers/account.ts";
@@ -53,19 +54,21 @@ export default function Message({
 	if (message.direction === MessageDirection.outgoing && account)
 		message.from = account;
 
+	const Fallback = variant === "default" ? "div" : "span";
 	return (
 		<ErrorBoundary
 			onError={(e) => {
 				console.error(e);
 			}}
 			fallback={
-				<div
+				<Fallback
+					{...props}
 					onDoubleClick={() => {
 						if (import.meta.env.DEV) console.log(message);
 					}}
 				>
 					解析失败的消息
-				</div>
+				</Fallback>
 			}
 		>
 			<Suspense>
@@ -180,6 +183,12 @@ function MessageComponent({ message, variant, ...props }: MessageProp) {
 			);
 
 		case MessageTypeEnum.OMW_ERROR:
+			if (variant !== "default")
+				return (
+					<MessageInlineWrapper message={message} {...props}>
+						[解析失败的消息]
+					</MessageInlineWrapper>
+				);
 			return (
 				<Card className={"max-w-[20em]"} {...props}>
 					<CardContent className="p-3">
@@ -197,9 +206,19 @@ function MessageComponent({ message, variant, ...props }: MessageProp) {
 			);
 
 		default:
+			if (variant !== "default")
+				return (
+					<MessageInlineWrapper message={message} {...props}>
+						[未知消息类型：{(message as MessageType).type}]
+					</MessageInlineWrapper>
+				);
 			return (
 				<Dialog.Root>
-					<Dialog.Trigger className="text-start">
+					<Dialog.Trigger
+						render={<div />}
+						nativeButton={false}
+						className="text-start"
+					>
 						<Card className={"max-w-[20em]"} {...props}>
 							<CardContent className="p-3">
 								<div

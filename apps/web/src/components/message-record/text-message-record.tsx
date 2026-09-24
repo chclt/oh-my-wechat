@@ -45,8 +45,8 @@ export default function TextMessageRecord({
 		);
 
 	return (
-		<p className="inline">
+		<span className="inline">
 			<TextPrettier text={record.datadesc} inline />
-		</p>
+		</span>
 	);
 }

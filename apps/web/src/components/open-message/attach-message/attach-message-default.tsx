@@ -55,6 +55,7 @@ export function AttachMessageDefault({
 
 	return (
 		<button
+			type="button"
 			className={cn(
 				"file-type-icon_trigger", // TODO: refactor
 				"text-start",
@@ -65,10 +66,10 @@ export function AttachMessageDefault({
 				handleDownloadAttachment();
 			}}
 		>
-			<div>
-				<h4 className="break-words font-medium">
+			<span>
+				<span className="block break-words font-medium">
 					{decodeUnicodeReferences(message.message_entity.msg.appmsg.title)}
-				</h4>
+				</span>
 				<small className={"text-neutral-500"}>
 					<FileSizeFormatter
 						bytes={
@@ -94,7 +95,7 @@ export function AttachMessageDefault({
 						)
 					)}
 				</small>
-			</div>
+			</span>
 
 			{/*<img src={filetype_any} alt={"文件"} />*/}
 			<FileTypeIcon className="shrink-0" />

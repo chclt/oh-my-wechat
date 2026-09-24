@@ -55,7 +55,7 @@ export function ImageMessageDefault({
 	const displayedRatio = displayedImage
 		? displayedImage.width / displayedImage.height
 		: aspectRatio;
-	const [bodyRef, bodySize] = useResizeObserver<HTMLDivElement>();
+	const [bodyRef, bodySize] = useResizeObserver<HTMLSpanElement>();
 	// Ignore subpixel rounding when comparing the bubble with the fitted image.
 	const hasBlurredBackground =
 		displayedRatio !== undefined &&
@@ -91,7 +91,7 @@ export function ImageMessageDefault({
 			} as CSSProperties,
 			children: (
 				<>
-					<div
+					<span
 						className={classes.background}
 						aria-hidden="true"
 						style={
@@ -102,7 +102,7 @@ export function ImageMessageDefault({
 							} as CSSProperties
 						}
 					/>
-					<div ref={bodyRef} className={classes.body}>
+					<span ref={bodyRef} className={classes.body}>
 						<ImageMessageCarouselTarget
 							ref={imageRef}
 							message={message}
@@ -114,9 +114,9 @@ export function ImageMessageDefault({
 							// A cached preview keeps its own ratio without changing the target layout.
 							style={{ "--image-ratio": displayedRatio } as CSSProperties}
 						/>
-					</div>
+					</span>
 					{!hasBlurredBackground && displayedImage && (
-						<div
+						<span
 							className={classes.tail}
 							aria-hidden="true"
 							style={

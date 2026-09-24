@@ -58,12 +58,13 @@ export default function MessageRecord({
 	variant = "default",
 	...props
 }: RecordProps) {
+	const Fallback = variant === "default" ? "div" : "span";
 	return (
 		<ErrorBoundary
 			onError={(error) => {
 				console.error(error, record);
 			}}
-			fallback={<div>Error</div>}
+			fallback={<Fallback>Error</Fallback>}
 		>
 			<MessageRecordComponent
 				message={message}
@@ -227,7 +228,11 @@ function MessageRecordComponent({
 			if (variant === "default") {
 				return (
 					<Dialog.Root>
-						<Dialog.Trigger className="text-start">
+						<Dialog.Trigger
+							render={<div />}
+							nativeButton={false}
+							className="text-start"
+						>
 							<Card className={"max-w-[20em]"} {...props}>
 								<CardContent className="p-3">
 									<div

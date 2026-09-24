@@ -100,6 +100,8 @@ export function NoteMessageDefault({ message, ...props }: NoteMessageProps) {
 			}}
 		>
 			<Dialog.Trigger
+				render={<div />}
+				nativeButton={false}
 				className={cn(
 					"appearance-none text-start cursor-pointer",
 					"relative max-w-[20em] flex flex-col rounded-lg bg-white",

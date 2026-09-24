@@ -1,7 +1,7 @@
-import Message from "@/components/message/message.tsx";
 import { textMessageVariants } from "@/components/message/text-message/libs.ts";
 import TextPrettier from "@/components/text-prettier.tsx";
 import { cn } from "@/lib/utils.ts";
+import ReferencedMessage from "./referenced-message";
 import type { ReferMessageProps } from "./types";
 
 export function ReferMessageDefault({ message, ...props }: ReferMessageProps) {
@@ -27,7 +27,7 @@ export function ReferMessageDefault({ message, ...props }: ReferMessageProps) {
 				)}
 			>
 				{message.reply_to_message ? (
-					<Message variant="referenced" message={message.reply_to_message} />
+					<ReferencedMessage message={message.reply_to_message} />
 				) : (
 					//  TODO 当引用了一个不存在的消息（比如加入群之前的消息），content 是一个 xml
 					<TextPrettier

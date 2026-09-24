@@ -5,8 +5,8 @@ export function ScanResultMessageAbstract({
 	...props
 }: ScanResultMessageProps) {
 	return (
-		<div {...props}>
-			<p>扫码结果通知 {message.message_entity.msg.appmsg.title})</p>
-		</div>
+		<span {...props}>
+			扫码结果通知 {message.message_entity.msg.appmsg.title})
+		</span>
 	);
 }

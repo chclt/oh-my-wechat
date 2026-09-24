@@ -65,8 +65,8 @@ export default function TingMessageRecord({
 		);
 
 	return (
-		<p className={"inline"} {...props}>
+		<span className={"inline"} {...props}>
 			{record.musicShareItem ? "[音乐]" : "[音频]"} {record.datatitle}
-		</p>
+		</span>
 	);
 }

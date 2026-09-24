@@ -116,5 +116,5 @@ function MiniAppMessageRecordInline({
 	record,
 	...props
 }: Omit<MiniAppRecordProps, "variant">) {
-	return <p className="inline">[小程序] {record.datatitle}</p>;
+	return <span className="inline">[小程序] {record.datatitle}</span>;
 }
