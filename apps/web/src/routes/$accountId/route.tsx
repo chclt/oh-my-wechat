@@ -3,8 +3,8 @@ import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import {
 	createFileRoute,
 	Link,
-	Navigate,
 	Outlet,
+	redirect,
 	useCanGoBack,
 	useNavigate,
 	useRouter,
@@ -13,6 +13,7 @@ import { AccountProvider } from "@/components/account-provider.tsx";
 import { CentralCrossLargeFilledOffStroke2Radius2 } from "@/components/central-icon";
 import { ChatIconFill, ContactIconFill } from "@/components/icon";
 import dialogClasses from "@/components/ui/dialog.module.css";
+import { hasDataAdapter } from "@/lib/data-adapter";
 import { cn } from "@/lib/utils";
 import { AccountSearchModalOptions } from "./-types";
 import ContactListWouter from "./contact/-components/contact-list/contact-list-wouter";
@@ -22,6 +23,11 @@ interface AccountSearchProps {
 }
 
 export const Route = createFileRoute("/$accountId")({
+	beforeLoad: () => {
+		if (!hasDataAdapter()) {
+			throw redirect({ to: "/", replace: true });
+		}
+	},
 	component: RouteComponent,
 
 	validateSearch: (search) => {
@@ -33,11 +39,6 @@ export const Route = createFileRoute("/$accountId")({
 
 		return validatedSearch;
 	},
-
-	errorComponent: ({ error }) =>
-		error.message === "Data adapter not set" ? (
-			<Navigate to="/" replace />
-		) : null,
 });
 
 function RouteComponent() {
