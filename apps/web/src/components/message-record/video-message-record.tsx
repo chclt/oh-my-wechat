@@ -18,5 +18,5 @@ export default function VideoMessageRecord({
 			<VideoMessageRecordDefault message={message} record={record} {...props} />
 		);
 	}
-	return <p className="inline">视频</p>;
+	return <span className="inline">视频</span>;
 }

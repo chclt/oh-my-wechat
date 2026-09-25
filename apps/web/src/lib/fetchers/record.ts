@@ -1,5 +1,6 @@
 import {
 	GetRecordFileRequest,
+	GetRecordAudioRequest,
 	GetRecordImageRequest,
 	GetRecordVideoRequest,
 } from "@repo/types/adapter";
@@ -49,6 +50,22 @@ export function RecordFileQueryOptions(requestData: GetRecordFileRequest) {
 		queryFn: () =>
 			getDataAdapter()
 				.getRecordFile(requestData)
+				.then((res) => res.data ?? null),
+	};
+}
+
+export function RecordAudioQueryOptions(requestData: GetRecordAudioRequest) {
+	return {
+		queryKey: [
+			`account: ${requestData.account.id}`,
+			`chat: ${requestData.chat.id}`,
+			`message: ${requestData.message.local_id}`,
+			`record: ${requestData.record["@_dataid"]}`,
+			"record-audio",
+		],
+		queryFn: () =>
+			getDataAdapter()
+				.getRecordAudio(requestData)
 				.then((res) => res.data ?? null),
 	};
 }

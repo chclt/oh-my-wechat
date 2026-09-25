@@ -22,7 +22,7 @@ export function ImageMessageAbstract({ message, ...props }: ImageMessageProps) {
 		enabled: inViewport,
 	});
 
-	const thumbnailSrc = useResolveMessageFile(image?.thumbnail?.uri);
+	const { src: thumbnailSrc } = useResolveMessageFile(image?.thumbnail?.uri);
 
 	return (
 		<MessageInlineWrapper message={message} {...props}>

@@ -13,6 +13,13 @@ export function ImageMessageReferenced({
 }: ImageMessageProps) {
 	const { accountId } = useAccount();
 
+	const width = message.message_entity.msg.img["@_cdnthumbwidth"];
+	const height = message.message_entity.msg.img["@_cdnthumbheight"];
+	const thumbnailDimensions =
+		width && height && width !== "0" && height !== "0"
+			? { width, height }
+			: undefined;
+
 	const { ref: imageRef, inViewport } = useInViewport();
 
 	const { data: image } = useQuery({
@@ -26,7 +33,7 @@ export function ImageMessageReferenced({
 	});
 
 	return (
-		<div {...props}>
+		<span {...props}>
 			{message.from && (
 				<>
 					<User user={message.from} variant="inline" />
@@ -36,8 +43,9 @@ export function ImageMessageReferenced({
 			<AutoResolutionFallbackImage
 				ref={imageRef}
 				image={image}
+				{...thumbnailDimensions}
 				className="inline mx-[0.2em] align-top max-w-16 max-h-16 rounded overflow-hidden"
 			/>
-		</div>
+		</span>
 	);
 }

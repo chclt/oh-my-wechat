@@ -22,5 +22,5 @@ export default function AttachMessageRecord({
 			</div>
 		);
 
-	return <p className="inline">{record.datatitle}</p>;
+	return <span className="inline">{record.datatitle}</span>;
 }

@@ -72,7 +72,11 @@ function ChatListContent({
 					>
 						<ScrollArea
 							className="size-full"
-							classNames={{ content: "pt-16", scrollBar: "top-16! z-10" }}
+							classNames={{
+								// ScrollArea.Content 默认有 min-width: fit-content 的样式，本场景下未发现明显作用
+								content: "pt-16 min-w-0!",
+								scrollBar: "top-16! z-10",
+							}}
 						>
 							<ul>
 								{chatList.map((chatListItem) => (

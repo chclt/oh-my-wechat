@@ -1,9 +1,10 @@
 import type { MessageType } from "@repo/types";
 import type React from "react";
 import { useChatUiConfig } from "@/components/chat-ui-config-provider.tsx";
+import { cn } from "@/lib/utils";
 import User from "./user";
 
-interface MessageInlineWrapperProps extends React.HTMLAttributes<HTMLParagraphElement> {
+interface MessageInlineWrapperProps extends React.HTMLAttributes<HTMLSpanElement> {
 	message: MessageType;
 }
 
@@ -15,14 +16,15 @@ export default function MessageInlineWrapper({
 	...props
 }: MessageInlineWrapperProps) {
 	const { showUsername, showPhoto } = useChatUiConfig();
+	const displayUsername = showUsername && !!message.from;
 
 	return (
-		<p className={className} {...props}>
-			{showUsername && (
+		<span className={cn("block min-w-0 max-w-full", className)} {...props}>
+			{displayUsername && (
 				<User user={message.from} variant={"inline"} showPhoto={showPhoto} />
 			)}
-			{showUsername && ": "}
+			{displayUsername && ": "}
 			{children}
-		</p>
+		</span>
 	);
 }

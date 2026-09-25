@@ -34,8 +34,8 @@ export function VideoMessageRecordDefault({
 		enabled: inViewport,
 	});
 
-	const videoSrc = useResolveMessageFile(video?.uri);
-	const coverSrc = useResolveMessageFile(video?.cover?.uri);
+	const { src: videoSrc } = useResolveMessageFile(video?.uri);
+	const { src: coverSrc } = useResolveMessageFile(video?.cover?.uri);
 
 	return (
 		<div ref={ref} className={cn(videoMessageClassName, className)} {...props}>

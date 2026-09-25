@@ -60,7 +60,7 @@ export function RedEnvelopeMessageDefault({
 												.receiverc2cshowsourceurl
 								}
 								alt={"红包封面"}
-								className={"aspect-[720/264] rounded-2xl "}
+								className={"w-full aspect-[720/264] rounded-2xl "}
 							/>
 							{hasCoverDecoration && (
 								<img

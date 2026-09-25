@@ -5,8 +5,8 @@ export function RingtoneMessageAbstract({
 	...props
 }: RingtoneMessageProps) {
 	return (
-		<div {...props}>
-			<p>朋友使用的铃声 {message.message_entity.msg.appmsg.title})</p>
-		</div>
+		<span {...props}>
+			朋友使用的铃声 {message.message_entity.msg.appmsg.title})
+		</span>
 	);
 }

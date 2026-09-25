@@ -9,6 +9,13 @@ import type { GameMessageProps } from "./types";
 export function GameMessageDefault({ message, ...props }: GameMessageProps) {
 	const { accountId } = useAccount();
 
+	const { cdnthumbwidth, cdnthumbheight } =
+		message.message_entity.msg.appmsg.appattach;
+	const thumbnailDimensions =
+		cdnthumbwidth > 0 && cdnthumbheight > 0
+			? { width: cdnthumbwidth, height: cdnthumbheight }
+			: undefined;
+
 	const { ref: imageRef, inViewport } = useInViewport();
 
 	const { data: image } = useQuery({
@@ -35,6 +42,7 @@ export function GameMessageDefault({ message, ...props }: GameMessageProps) {
 						<AutoResolutionFallbackImage
 							ref={imageRef}
 							image={image}
+							{...thumbnailDimensions}
 							className={"float-end ms-2 h-12 w-auto rounded"}
 						/>
 					)}

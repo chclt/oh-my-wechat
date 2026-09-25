@@ -36,7 +36,7 @@ const LinkCard = ({
 					className={cn("mt-1 text-pretty line-clamp-5 text-muted-foreground")}
 				>
 					{preview && (
-						<Slot className={"float-end ms-2 h-12 w-auto rounded"}>
+						<Slot className={"float-end ms-1.5 h-11 w-auto rounded"}>
 							{preview}
 						</Slot>
 					)}
@@ -46,7 +46,7 @@ const LinkCard = ({
 			</CardContent>
 
 			<CardFooter>
-				{from && from.length > 0 ? from : "\u200B"}
+				<span>{from && from.length > 0 ? from : "\u200B"}</span>
 
 				<CardIndicator>{icon ? icon : <ArrowShareRightSolid />}</CardIndicator>
 			</CardFooter>

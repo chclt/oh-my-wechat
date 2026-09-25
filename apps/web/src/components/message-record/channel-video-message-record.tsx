@@ -25,6 +25,9 @@ export default function ChannelVideoMessageRecord({
 			>
 				<Image
 					src={record.finderFeed.mediaList.media.thumbUrl}
+					width={record.finderFeed.mediaList.media.width}
+					height={record.finderFeed.mediaList.media.height}
+					className="w-full h-auto"
 					alt={record.datatitle}
 				/>
 				<div className="absolute right-0 left-0 bottom-0 p-2 flex items-center text-sm text-white">
@@ -57,5 +60,5 @@ export default function ChannelVideoMessageRecord({
 			</div>
 		);
 
-	return <p>[视频] {record.datatitle}</p>;
+	return <span>[视频] {record.datatitle}</span>;
 }

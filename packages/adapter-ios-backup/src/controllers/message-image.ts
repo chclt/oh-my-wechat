@@ -6,7 +6,7 @@ import {
 import CryptoJS from "crypto-js";
 import type { WCDatabases } from "../types";
 import { getFileRecordsFromManifest } from "../utils";
-import { createImageUri } from "./file/utils";
+import { createMessageFileUri } from "./file/utils";
 import { readMediaDimensions } from "./media-dimensions";
 
 export type GetInput = [
@@ -74,32 +74,32 @@ export async function get(...inputs: GetInput): GetOutput {
 		if (relativePath.endsWith(".pic_hd")) {
 			if (!sizeIncludeMap.hd) continue;
 			result.hd = {
-				uri: createImageUri(relativePath),
+				uri: createMessageFileUri(relativePath),
 				...dimensions?.hd,
 			};
 		} else if (relativePath.endsWith(".pic")) {
 			if (!sizeIncludeMap.regular) continue;
 			result.regular = {
-				uri: createImageUri(relativePath),
+				uri: createMessageFileUri(relativePath),
 				...dimensions?.regular,
 			};
 		} else if (relativePath.endsWith(".pic_thum")) {
 			if (!sizeIncludeMap.thumbnail) continue;
 			result.thumbnail = {
-				uri: createImageUri(relativePath),
+				uri: createMessageFileUri(relativePath),
 				...dimensions?.thumbnail,
 			};
 		} else if (relativePath.endsWith(".pic_thum.tmp")) {
 			if (!sizeIncludeMap.thumbnail) continue;
 			if (result.thumbnail) continue; // .pic_thum 优先级更高
 			result.thumbnail = {
-				uri: createImageUri(relativePath),
+				uri: createMessageFileUri(relativePath),
 				...dimensions?.thumbnail,
 			};
 		} else if (relativePath.endsWith(".pic.mp4")) {
 			if (!sizeIncludeMap.video) continue;
 			result.video = {
-				uri: createImageUri(relativePath),
+				uri: createMessageFileUri(relativePath),
 			};
 		}
 	}

@@ -11,6 +11,13 @@ import type { UrlMessageProps } from "./types";
 export function UrlMessageDefault({ message, ...props }: UrlMessageProps) {
 	const { accountId } = useAccount();
 
+	const { cdnthumbwidth, cdnthumbheight } =
+		message.message_entity.msg.appmsg.appattach;
+	const thumbnailDimensions =
+		cdnthumbwidth > 0 && cdnthumbheight > 0
+			? { width: cdnthumbwidth, height: cdnthumbheight }
+			: undefined;
+
 	const { ref: imageRef, inViewport } = useInViewport();
 
 	const { data: image } = useQuery({
@@ -32,10 +39,19 @@ export function UrlMessageDefault({ message, ...props }: UrlMessageProps) {
 
 	const preview =
 		(message.message_entity.msg.appmsg.thumburl ? (
-			<Image src={message.message_entity.msg.appmsg.thumburl} alt={heading} />
+			<Image
+				src={message.message_entity.msg.appmsg.thumburl}
+				alt={heading}
+				{...thumbnailDimensions}
+			/>
 		) : undefined) ??
 		(message.message_entity.msg.appmsg.appattach.cdnthumbmd5 ? (
-			<AutoResolutionFallbackImage ref={imageRef} image={image} alt={heading} />
+			<AutoResolutionFallbackImage
+				ref={imageRef}
+				image={image}
+				alt={heading}
+				{...thumbnailDimensions}
+			/>
 		) : undefined);
 
 	return (

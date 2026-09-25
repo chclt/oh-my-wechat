@@ -35,7 +35,7 @@ function ContactMessagePersonalAccountDefault({
 				<Image
 					src={message.message_entity.msg["@_bigheadimgurl"]}
 					alt=""
-					className={"shrink-0 w-full rounded-lg"}
+					className={"shrink-0 w-full aspect-square rounded-lg"}
 				/>
 			) : (
 				<div

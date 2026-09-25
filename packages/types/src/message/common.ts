@@ -89,8 +89,7 @@ export interface VideoInfo {
 }
 
 export interface VoiceInfo {
-	src?: string;
-	raw_aud_src: string;
+	uri?: string;
 	transcription?: string;
 	file_size?: number;
 }

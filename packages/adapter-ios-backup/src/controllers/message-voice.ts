@@ -5,9 +5,9 @@ import {
 } from "@repo/types/adapter";
 import CryptoJS from "crypto-js";
 import type { WCDatabases } from "../types";
-import { getFilesFromManifast } from "../utils";
+import { getFileRecordsFromManifest, readManifestFile } from "../utils";
 import type { BackupEncryption } from "../utils/encryption/encryption.ts";
-import { convertSilk } from "../utils/silk";
+import { createMessageFileUri } from "./file/utils";
 
 export type GetInput = [
 	GetMessageVoiceRequest,
@@ -28,32 +28,29 @@ export async function get(...inputs: GetInput): GetOutput {
 	const db = databases.manifest;
 	if (!db) throw new Error("manifest database is not found");
 
-	const files = await getFilesFromManifast(
+	const files = await getFileRecordsFromManifest(
 		db,
-		directory,
 		`Documents/${CryptoJS.MD5(account.id).toString()}/Audio/${CryptoJS.MD5(chat.id).toString()}/${message.local_id}.%`,
-		encryption,
 	);
 
 	if (files.length === 0) return { data: undefined };
 
-	let result: VoiceInfo = {
-		raw_aud_src: "",
-	};
+	let result: VoiceInfo = {};
 
 	for (const file of files) {
-		if (file.filename.endsWith(".aud")) {
+		const relativePath = file.relativePath!;
+		if (relativePath.endsWith(".aud")) {
 			result = {
 				...result,
-				raw_aud_src: URL.createObjectURL(file.file),
-				src: await convertSilk(await file.file.arrayBuffer()),
+				uri: createMessageFileUri(relativePath),
 			};
 		}
 
-		if (file.filename.endsWith(".txt")) {
+		if (relativePath.endsWith(".txt")) {
+			const text = await readManifestFile(directory, file, encryption);
 			result = {
 				...result,
-				transcription: await file.file.text(),
+				transcription: await text?.text(),
 			};
 		}
 	}

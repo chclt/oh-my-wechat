@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import {
 	ReleaseMessageFileMutationOptions,
 	ResolveMessageFileMutationOptions,
@@ -11,38 +11,36 @@ import {
  * 挂载或 uri 变更时向适配器请求解析，卸载或切换 uri 前请求释放，
  * 由适配器内部引用计数决定何时真正回收底层资源。
  */
-export function useResolveMessageFile(uri?: string): string | undefined {
-	const { mutateAsync: resolveMessageFile } = useMutation(
-		ResolveMessageFileMutationOptions(),
-	);
+export function useResolveMessageFile(uri?: string) {
+	const {
+		mutateAsync: resolveMessageFile,
+		data,
+		variables,
+		error,
+		isPending,
+		isIdle,
+	} = useMutation(ResolveMessageFileMutationOptions());
 	const { mutateAsync: releaseMessageFile } = useMutation(
 		ReleaseMessageFileMutationOptions(),
 	);
 
-	const [resolvedSrc, setResolvedSrc] = useState<string>();
-
 	useEffect(() => {
-		setResolvedSrc(undefined);
 		if (!uri) return;
+		const referenceId = crypto.randomUUID();
 
-		let isActive = true;
-
-		resolveMessageFile({ uri })
-			.then((res) => {
-				if (isActive) setResolvedSrc(res.data.src);
-			})
-			.catch((error) => {
-				console.error(
-					`[useResolveMessageFile] Failed to resolve ${uri}:`,
-					error,
-				);
-			});
+		resolveMessageFile({ uri, referenceId }).catch((error) => {
+			console.error(`[useResolveMessageFile] Failed to resolve ${uri}:`, error);
+		});
 
 		return () => {
-			isActive = false;
-			releaseMessageFile({ uri }).catch(() => {});
+			releaseMessageFile({ referenceId }).catch(() => {});
 		};
 	}, [uri]);
 
-	return resolvedSrc;
+	const isCurrent = variables?.uri === uri;
+	return {
+		src: isCurrent ? data?.data.src : undefined,
+		error: isCurrent ? error : null,
+		isPending: Boolean(uri) && (!isCurrent || isPending || isIdle),
+	};
 }

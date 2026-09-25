@@ -10,6 +10,13 @@ import type { MusicMessageProps } from "./types";
 export function MusicMessageDefault({ message, ...props }: MusicMessageProps) {
 	const { accountId } = useAccount();
 
+	const { cdnthumbwidth, cdnthumbheight } =
+		message.message_entity.msg.appmsg.appattach;
+	const thumbnailDimensions =
+		cdnthumbwidth > 0 && cdnthumbheight > 0
+			? { width: cdnthumbwidth, height: cdnthumbheight }
+			: undefined;
+
 	const { ref: imageRef, inViewport } = useInViewport();
 
 	const { data: image } = useQuery({
@@ -48,6 +55,7 @@ export function MusicMessageDefault({ message, ...props }: MusicMessageProps) {
 						<AutoResolutionFallbackImage
 							ref={imageRef}
 							image={image}
+							{...thumbnailDimensions}
 							className={"relative rounded-full"}
 						/>
 					</div>

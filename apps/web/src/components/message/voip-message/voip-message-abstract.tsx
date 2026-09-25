@@ -2,7 +2,7 @@ import type { VoipMessageProps } from "./types.ts";
 
 export function VoipMessageAbstract({ message, ...props }: VoipMessageProps) {
 	return (
-		<p>
+		<span {...props}>
 			{message.message_entity.voipmsg && (
 				<span>
 					[语音通话]{" "}
@@ -14,6 +14,6 @@ export function VoipMessageAbstract({ message, ...props }: VoipMessageProps) {
 			)}
 
 			{message.message_entity.voipinvitemsg && <span>通话邀请</span>}
-		</p>
+		</span>
 	);
 }

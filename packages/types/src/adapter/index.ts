@@ -1,5 +1,6 @@
 import {
 	AccountType,
+	AudioNoteRecordType,
 	ChatType,
 	ContactType,
 	FileInfo,
@@ -123,6 +124,8 @@ export type GetMessageImageResponse = Promise<
 
 export interface ResolveMessageFileRequest {
 	uri: string;
+	/** Unique per acquisition; use the same ID when releasing it. */
+	referenceId: string;
 }
 
 export type ResolveMessageFileResponse = Promise<
@@ -130,7 +133,7 @@ export type ResolveMessageFileResponse = Promise<
 >;
 
 export interface ReleaseMessageFileRequest {
-	uri: string;
+	referenceId: string;
 }
 
 export type ReleaseMessageFileResponse = Promise<DataAdapterResponse<void>>;
@@ -188,6 +191,17 @@ export interface GetRecordVideoRequest {
 }
 
 export type GetRecordVideoResponse = Promise<DataAdapterResponse<VideoInfo>>;
+
+export interface GetRecordAudioRequest {
+	account: Pick<AccountType, "id">;
+	chat: Pick<ChatType, "id">;
+	message: Pick<MessageType, "local_id">;
+	record: Pick<AudioNoteRecordType, "@_dataid" | "datafmt">;
+}
+
+export type GetRecordAudioResponse = Promise<
+	DataAdapterResponse<VoiceInfo | undefined>
+>;
 
 export interface GetRecordFileRequest {
 	account: Pick<AccountType, "id">;
@@ -315,6 +329,10 @@ export interface DataAdapter {
 	) => GetRecordVideoResponse;
 
 	getRecordFile: (requestData: GetRecordFileRequest) => GetRecordFileResponse;
+
+	getRecordAudio: (
+		requestData: GetRecordAudioRequest,
+	) => GetRecordAudioResponse;
 
 	getStatistic: (requestData: GetStatisticRequest) => GetStatisticResponse;
 

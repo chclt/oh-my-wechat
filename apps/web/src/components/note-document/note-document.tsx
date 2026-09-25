@@ -33,14 +33,14 @@ export default function NoteDocument({
 				replace: (domNode) => {
 					if (domNode instanceof Element && domNode.name === "wn-todo") {
 						return (
-							<div className="ms-2">
+							<span className="block ms-2">
 								<input
 									type="checkbox"
 									checked={domNode.attribs.checked === "1"}
 									className="me-3 relative bottom-[-0.12em]"
 								/>
 								<span>{domToReact(domNode.children as DOMNode[])}</span>
-							</div>
+							</span>
 						);
 					} else if (domNode instanceof Element && domNode.name === "object") {
 						// Object 上标记的 data-type 不是 Record 的类型， dataitem 里面的才是正确的，原因未知

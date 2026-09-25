@@ -33,8 +33,8 @@ export function VideoMessageDefault({
 		...queryOptions,
 		enabled: inViewport,
 	});
-	const videoSrc = useResolveMessageFile(video?.uri);
-	const coverSrc = useResolveMessageFile(video?.cover?.uri);
+	const { src: videoSrc } = useResolveMessageFile(video?.uri);
+	const { src: coverSrc } = useResolveMessageFile(video?.cover?.uri);
 	const { data: firstFrame } = useQuery({
 		queryKey: [...queryOptions.queryKey, "first-frame"],
 		queryFn: ({ signal }) => getVideoPoster(videoSrc!, signal),

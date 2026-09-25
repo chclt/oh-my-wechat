@@ -6,7 +6,7 @@ import {
 import CryptoJS from "crypto-js";
 import type { WCDatabases } from "../types";
 import { getFileRecordsFromManifest } from "../utils";
-import { createImageUri } from "./file/utils";
+import { createMessageFileUri } from "./file/utils";
 
 export type GetInput = [
 	GetRecordVideoRequest,
@@ -34,14 +34,14 @@ export async function get(...inputs: GetInput): GetOutput {
 		if (relativePath.endsWith(".mp4")) {
 			result = {
 				...result,
-				uri: createImageUri(relativePath),
+				uri: createMessageFileUri(relativePath),
 			};
 		}
 
 		if (relativePath.endsWith(".record_thumb")) {
 			result = {
 				...result,
-				cover: { uri: createImageUri(relativePath) },
+				cover: { uri: createMessageFileUri(relativePath) },
 			};
 		}
 	}

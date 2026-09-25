@@ -36,6 +36,7 @@ import {
 } from "@repo/types";
 import { CircleQuestionmarkSolid } from "@/components/icon.tsx";
 import { LinkCard } from "@/components/link-card.tsx";
+import MessageInlineWrapper from "@/components/message-inline-wrapper";
 import dialogClasses from "@/components/ui/dialog.module.css";
 import { ScrollArea } from "@/components/ui/scroll-area.tsx";
 import { cn } from "@/lib/utils.ts";
@@ -88,11 +89,8 @@ export function OpenMessageAuto({
 	if (!message.message_entity.msg?.appmsg) {
 		// throw new Error("Invalid app message");
 		console.error(message);
-		return (
-			<div className="" {...props}>
-				无法解析失败：49
-			</div>
-		);
+		const Container = variant === "default" ? "div" : "span";
+		return <Container {...props}>消息解析失败：49</Container>;
 	}
 
 	switch (message.message_entity.msg.appmsg.type) {
@@ -433,9 +431,19 @@ export function OpenMessageAuto({
 			);
 
 		default:
+			if (variant !== "default")
+				return (
+					<MessageInlineWrapper message={message} {...props}>
+						[未知应用消息：{message.message_entity.msg.appmsg.type}]
+					</MessageInlineWrapper>
+				);
 			return (
 				<Dialog.Root>
-					<Dialog.Trigger className="text-start">
+					<Dialog.Trigger
+						render={<div />}
+						nativeButton={false}
+						className="text-start"
+					>
 						<LinkCard
 							abstract="暂未支持的消息类型，点击查看原始数据"
 							from={`49:${message.message_entity.msg.appmsg.type}`}

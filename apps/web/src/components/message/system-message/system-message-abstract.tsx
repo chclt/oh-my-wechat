@@ -5,5 +5,5 @@ export function SystemMessageAbstract({
 	message,
 	...props
 }: SystemMessageProps) {
-	return <p>{parseContent(message)}</p>;
+	return <span {...props}>{parseContent(message)}</span>;
 }

@@ -1,6 +1,9 @@
 import type { DataAdapter } from "@repo/types/adapter";
+import queryClient from "./query-client";
 
 let dataAdapter: DataAdapter | undefined;
+
+const hasDataAdapter = () => dataAdapter !== undefined;
 
 const getDataAdapter = () => {
 	if (!dataAdapter) {
@@ -10,7 +13,10 @@ const getDataAdapter = () => {
 };
 
 const setDataAdapter = (newAdapter: DataAdapter) => {
+	if (dataAdapter === newAdapter) return;
+
+	queryClient.removeQueries();
 	dataAdapter = newAdapter;
 };
 
-export { getDataAdapter, setDataAdapter };
+export { getDataAdapter, hasDataAdapter, setDataAdapter };

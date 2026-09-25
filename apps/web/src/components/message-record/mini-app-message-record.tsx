@@ -88,7 +88,7 @@ function MiniAppMessageRecordDefault({
 			<AutoResolutionFallbackImage
 				ref={imageRef}
 				image={image}
-				className={"w-full"}
+				className={"w-full h-auto aspect-[5/4] object-cover"}
 			/>
 
 			<div className="absolute right-2 bottom-2 w-4 h-4 p-0.5 [&_svg]:size-full rounded-full text-white backdrop-blur backdrop-invert-[0.2]">
@@ -116,5 +116,5 @@ function MiniAppMessageRecordInline({
 	record,
 	...props
 }: Omit<MiniAppRecordProps, "variant">) {
-	return <p className="inline">[小程序] {record.datatitle}</p>;
+	return <span className="inline">[小程序] {record.datatitle}</span>;
 }

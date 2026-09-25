@@ -32,9 +32,9 @@ export default function NoteMessageRecord({
 		return <NoteRecordDefault message={message} record={record} {...props} />;
 
 	return (
-		<p className="inline" {...props}>
+		<span className="inline" {...props}>
 			[笔记] {record.datadesc}
-		</p>
+		</span>
 	);
 }
 
@@ -106,6 +106,8 @@ function NoteRecordDefault({
 			}}
 		>
 			<Dialog.Trigger
+				render={<div />}
+				nativeButton={false}
 				className={cn(
 					"appearance-none text-start cursor-pointer",
 					"relative max-w-[20em] flex flex-col rounded-lg bg-white",

@@ -45,12 +45,14 @@ export default function ChatGroupList({
 				onAnimationEnd={handleAnimationEnd}
 			>
 				<ScrollArea
+					// ScrollArea.Content 默认有 min-width: fit-content 的样式，本场景下未发现明显作用
+					classNames={{ content: "min-w-0!" }}
 					className={cn(
 						"size-full",
 						"[&_[data-slot='scroll-area-scrollbar']]:z-30 [&_[data-slot='scroll-area-scrollbar']]:top-16!",
 					)}
 				>
-					<header className="sticky z-30 top-0 h-16 px-3 flex items-center texture border-b border-muted">
+					<header className="sticky z-30 top-0 h-16 px-3 grid grid-cols-[auto_auto_minmax(0,1fr)] items-center texture border-b border-muted">
 						<Button
 							aria-label="返回聊天列表"
 							size="icon"
@@ -65,7 +67,7 @@ export default function ChatGroupList({
 
 						<Avatar
 							src={chatListItem.photo}
-							className="shrink-0 w-12 h-12 clothoid-corner-2"
+							className="w-12 h-12 clothoid-corner-2"
 						/>
 
 						<div className="ms-3 font-semibold">

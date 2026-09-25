@@ -1,5 +1,5 @@
 import { URI_PREFIX } from "../../utils/constants";
 
-export function createImageUri(relativePath: string) {
+export function createMessageFileUri(relativePath: string) {
 	return `${URI_PREFIX}${relativePath}`;
 }

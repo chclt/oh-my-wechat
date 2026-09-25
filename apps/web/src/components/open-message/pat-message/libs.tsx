@@ -10,6 +10,7 @@ import { UserListQueryOptions } from "@/lib/fetchers/user.ts";
 export function useContentParser(
 	message: OpenMessageType<PatOpenMessageEntity>,
 	chat: ChatType,
+	formatLink = true,
 ) {
 	const { accountId } = useAccount();
 
@@ -63,7 +64,9 @@ export function useContentParser(
 			if (new RegExp(`^\\\${${record.pattedUser}@textstatusicon}$`).test(s))
 				return null; // statusicon
 
-			return <TextPrettier key={index} text={s} inline />;
+			return (
+				<TextPrettier key={index} text={s} inline formatLink={formatLink} />
+			);
 		});
 
 		return segments;

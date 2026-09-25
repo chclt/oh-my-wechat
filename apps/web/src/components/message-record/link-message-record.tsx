@@ -33,5 +33,5 @@ export default function LinkMessageRecord({
 			/>
 		);
 
-	return <p className="inline">[链接] {record.datatitle}</p>;
+	return <span className="inline">[链接] {record.datatitle}</span>;
 }

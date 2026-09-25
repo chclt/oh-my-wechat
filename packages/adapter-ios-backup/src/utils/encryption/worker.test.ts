@@ -3,7 +3,7 @@ import { adapterWorker } from "../../worker";
 import fixture from "./test/fixture.json";
 
 vi.mock("comlink", () => ({ expose: vi.fn() }));
-vi.mock("../ffmpeg", () => ({ loadFFmpeg: vi.fn() }));
+vi.mock("../ffmpeg", () => ({ loadFFmpeg: vi.fn().mockResolvedValue({}) }));
 vi.mock("../silk", () => ({ convertSilk: vi.fn() }));
 
 class TestFileList extends Array<File> {}

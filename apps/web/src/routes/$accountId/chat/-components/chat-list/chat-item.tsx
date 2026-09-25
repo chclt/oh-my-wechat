@@ -2,13 +2,13 @@ import { useInViewport } from "@mantine/hooks";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import type React from "react";
+import { Suspense } from "react";
 import { useLocation } from "wouter";
-import { ChatUiConfigProvider } from "@/components/chat-ui-config-provider.tsx";
-import Message from "@/components/message/message.tsx";
 import { Avatar } from "@/components/ui/avatar.tsx";
 import { LastMessageQueryOptions } from "@/lib/fetchers/message";
 import { cn, formatDateTime } from "@/lib/utils.ts";
 import { Route } from "../../route";
+import ChatListMessageSummary from "./chat-list-message-summary";
 import { ChatListChatGroupItem, ChatListChatItem } from "./use-chat-list";
 
 interface ChatItemProps extends React.HTMLAttributes<HTMLLIElement> {
@@ -40,7 +40,7 @@ export default function ChatListItem({
 				to="/$accountId/chat/$chatId"
 				params={{ accountId, chatId: chatListItem.id }}
 				className={cn(
-					"box-content p-2.5 h-11 flex items-center gap-4 hover:bg-black/5 [&.active]:bg-black/5",
+					"box-content p-2.5 h-11 grid grid-cols-[auto_minmax(0,1fr)] content-center items-center gap-4 hover:bg-black/5 [&.active]:bg-black/5",
 					className,
 				)}
 				style={{
@@ -59,21 +59,19 @@ export default function ChatListItem({
 					<Avatar
 						src={chatListItem.photo}
 						className={cn(
-							"shrink-0 w-12 h-12 clothoid-corner-2 bg-[#DDDFE0]",
+							"w-12 h-12 clothoid-corner-2 bg-[#DDDFE0]",
 							chatListItem.chat.type === "chatroom"
 								? "relative after:absolute after:inset-0 after:rounded-[inherit] after:border-2 after:border-[#DDDFE0]"
 								: "",
 						)}
 					/>
 				) : (
-					<div
-						className={"shrink-0 w-12 h-12 clothoid-corner-2 bg-[#DDDFE0]"}
-					/>
+					<div className={"w-12 h-12 clothoid-corner-2 bg-[#DDDFE0]"} />
 				)}
 
-				<div className="grow flex flex-col items-stretch">
-					<div className="flex gap-2">
-						<h4 className={"grow font-medium break-all line-clamp-1"}>
+				<div className="min-w-0">
+					<div className="grid grid-flow-col grid-cols-[minmax(0,1fr)] auto-cols-auto gap-2">
+						<h4 className={"min-w-0 font-medium line-clamp-1"}>
 							{chatListItem.title}
 							{/* {(chat.type === "private"
                                 ? chat.user.is_openim
@@ -93,20 +91,20 @@ export default function ChatListItem({
 							</small>
 						)}
 					</div>
-					<div
-						className={"min-h-[1.5em] text-sm line-clamp-1 text-neutral-600"}
+					<p
+						className={
+							"min-w-0 min-h-[1.5em] text-sm line-clamp-1 text-neutral-600 [&>*]:inline"
+						}
 					>
 						{last_message && (
-							<ChatUiConfigProvider
-								value={{
-									showUsername: chatListItem.chat.type === "chatroom",
-									showPhoto: false,
-								}}
-							>
-								<Message variant="abstract" message={last_message} />
-							</ChatUiConfigProvider>
+							<Suspense fallback={null}>
+								<ChatListMessageSummary
+									message={last_message}
+									showUsername={chatListItem.chat.type === "chatroom"}
+								/>
+							</Suspense>
 						)}
-					</div>
+					</p>
 				</div>
 			</Link>
 		</li>

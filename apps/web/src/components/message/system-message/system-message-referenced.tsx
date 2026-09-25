@@ -7,8 +7,8 @@ export function SystemMessageReferenced({
 	...props
 }: SystemMessageProps) {
 	return (
-		<div className={"inline"} {...props}>
+		<span className={"inline"} {...props}>
 			{parseContent(message)}
-		</div>
+		</span>
 	);
 }

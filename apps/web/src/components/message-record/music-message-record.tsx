@@ -12,11 +12,13 @@ interface MusicRecordProps extends React.HTMLAttributes<HTMLDivElement> {
 export default function MusicMessageRecord({
 	message,
 	record,
+	variant = "default",
 	...props
 }: MusicRecordProps) {
+	const Container = variant === "default" ? "div" : "span";
 	return (
-		<div {...props}>
+		<Container {...props}>
 			<Link href={record.streamweburl}>[音乐] {record.datatitle}</Link>
-		</div>
+		</Container>
 	);
 }
