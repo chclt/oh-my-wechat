@@ -11,6 +11,13 @@ import type { TingMessageProps } from "./types";
 export function TingMessageDefault({ message, ...props }: TingMessageProps) {
 	const { accountId } = useAccount();
 
+	const { cdnthumbwidth, cdnthumbheight } =
+		message.message_entity.msg.appmsg.appattach;
+	const thumbnailDimensions =
+		cdnthumbwidth > 0 && cdnthumbheight > 0
+			? { width: cdnthumbwidth, height: cdnthumbheight }
+			: undefined;
+
 	const { ref: imageRef, inViewport } = useInViewport();
 
 	const { data: image } = useQuery({
@@ -53,11 +60,13 @@ export function TingMessageDefault({ message, ...props }: TingMessageProps) {
 						<AutoResolutionFallbackImage
 							ref={imageRef}
 							image={image}
+							{...thumbnailDimensions}
 							className={"h-full w-auto rounded-lg"}
 						/>
 					) : message.message_entity.msg.appmsg.songalbumurl ? (
 						<Image
 							src={message.message_entity.msg.appmsg.songalbumurl}
+							{...thumbnailDimensions}
 							className={"h-full w-auto rounded-lg"}
 						/>
 					) : null}

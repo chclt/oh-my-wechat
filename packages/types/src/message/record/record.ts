@@ -15,4 +15,5 @@ export enum RecordTypeEnum {
 	CHANNEL = 26,
 	MUSIC = 29,
 	TING = 32,
+	STICKER = 37,
 }

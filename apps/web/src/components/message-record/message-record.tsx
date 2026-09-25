@@ -15,6 +15,7 @@ import {
 	MusicMessageRecordType,
 	NoteMessageRecordType,
 	RecordTypeEnum,
+	type StickerMessageRecordType,
 	TextMessageRecordType,
 	TingMessageRecordType,
 	VideoMessageRecordType,
@@ -38,6 +39,7 @@ import LocationMessageRecord from "./location-message-record.tsx";
 import MiniAppMessageRecord from "./mini-app-message-record.tsx";
 import MusicMessageRecord from "./music-message-record.tsx";
 import NoteMessageRecord from "./note-message-record.tsx";
+import StickerMessageRecord from "./sticker-message-record.tsx";
 import TextMessageRecord from "./text-message-record.tsx";
 import TingMessageRecord from "./ting-message-record.tsx";
 import VideoMessageRecord from "./video-message-record.tsx";
@@ -102,6 +104,14 @@ function MessageRecordComponent({
 				<ImageMessageRecord
 					message={message}
 					record={record as unknown as ImageMessageRecordType}
+					variant={variant}
+					{...props}
+				/>
+			);
+		case RecordTypeEnum.STICKER:
+			return (
+				<StickerMessageRecord
+					record={record as StickerMessageRecordType}
 					variant={variant}
 					{...props}
 				/>

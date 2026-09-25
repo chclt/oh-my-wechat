@@ -9,6 +9,9 @@ export function LiveMessageDefault({ message, ...props }: LiveMessageProps) {
 		>
 			<Image
 				src={message.message_entity.msg.appmsg.finderLive.media.coverUrl}
+				width={message.message_entity.msg.appmsg.finderLive.media.width}
+				height={message.message_entity.msg.appmsg.finderLive.media.height}
+				className="w-full h-auto"
 				alt=""
 			/>
 			<div className="absolute right-0 left-0 bottom-0 p-2 flex items-center text-sm text-white">

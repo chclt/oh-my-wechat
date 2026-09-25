@@ -19,9 +19,26 @@ export interface ImageMessageRecordType extends MessageRecordBaseType {
 
 	thumbsize: number;
 	thumbfullmd5: string;
+	thumbwidth?: number;
+	thumbheight?: number;
 
 	datasize: number;
 	fullmd5: string;
+}
+
+/** 转发的消息记录中的表情 */
+export interface StickerMessageRecordType extends MessageRecordBaseType {
+	"@_datatype": RecordTypeEnum.STICKER;
+	emojiitem: {
+		cdnurlstring: string;
+		uiemoticonwidth?: number;
+		uiemoticonheight?: number;
+		uiemoticontype: number;
+		md5: string;
+		externurl?: string;
+		externmd5?: string;
+		encrypturlstring?: string;
+	};
 }
 
 /** 转发的消息记录中的视频消息 */

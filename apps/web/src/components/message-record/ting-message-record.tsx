@@ -23,7 +23,8 @@ export default function TingMessageRecord({
 			<Link href={record.streamweburl}>
 				<div
 					className={cn(
-						"relative max-w-[20em] h-24 rounded-2xl overflow-hidden bg-white",
+						// clip-path 是为了修复 overflow-hidden 不生效，原因未知
+						"relative max-w-[20em] h-24 rounded-2xl overflow-hidden [clip-path:border-box] bg-white",
 						className,
 					)}
 					{...props}

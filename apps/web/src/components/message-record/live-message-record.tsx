@@ -21,7 +21,13 @@ export default function LiveMessageRecord({
 				className="relative w-48 min-h-16 rounded-lg overflow-hidden bg-neutral-400"
 				{...props}
 			>
-				<Image src={record.finderLive.media.coverUrl} alt="" />
+				<Image
+					src={record.finderLive.media.coverUrl}
+					width={record.finderLive.media.width}
+					height={record.finderLive.media.height}
+					className="w-full h-auto"
+					alt=""
+				/>
 				<div className="absolute right-0 left-0 bottom-0 p-2 flex items-center text-sm text-white">
 					<Image
 						src={record.finderLive.headUrl}

@@ -66,6 +66,9 @@ function ImageMessageRecordInline({
 }: Omit<ImageRecordProps, "variant">) {
 	const { accountId } = Route.useParams();
 
+	const { thumbwidth: width, thumbheight: height } = record;
+	const thumbnailDimensions = width && height ? { width, height } : undefined;
+
 	const { ref: imageRef, inViewport } = useInViewport();
 
 	const { data: image } = useQuery({
@@ -83,6 +86,7 @@ function ImageMessageRecordInline({
 			<AutoResolutionFallbackImage
 				ref={imageRef}
 				image={image}
+				{...thumbnailDimensions}
 				className="inline mx-[0.2em] align-top max-w-16 max-h-16 rounded overflow-hidden"
 			/>
 		</span>

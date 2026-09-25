@@ -31,14 +31,20 @@ export default function ImageNoteRecord({
 		}),
 	);
 
-	const imageSrc = useResolveMessageFile(
-		image.regular?.uri ?? image.thumbnail?.uri,
-	);
+	const selectedImage = image.regular ?? image.thumbnail;
+	const imageSrc = useResolveMessageFile(selectedImage?.uri);
 
 	return (
 		<>
 			{Object.keys(image).length ? (
-				<Image src={imageSrc} alt="image" className={className} {...props} />
+				<Image
+					src={imageSrc}
+					width={selectedImage?.width}
+					height={selectedImage?.height}
+					alt="image"
+					className={className}
+					{...props}
+				/>
 			) : (
 				"图片"
 			)}
