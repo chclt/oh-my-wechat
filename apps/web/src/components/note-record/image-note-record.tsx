@@ -32,7 +32,7 @@ export default function ImageNoteRecord({
 	);
 
 	const selectedImage = image.regular ?? image.thumbnail;
-	const imageSrc = useResolveMessageFile(selectedImage?.uri);
+	const { src: imageSrc } = useResolveMessageFile(selectedImage?.uri);
 
 	return (
 		<>

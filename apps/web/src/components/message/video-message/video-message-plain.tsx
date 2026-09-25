@@ -29,8 +29,8 @@ export function VideoMessagePlain({
 		}),
 	});
 
-	const videoSrc = useResolveMessageFile(video?.uri);
-	const coverSrc = useResolveMessageFile(video?.cover?.uri);
+	const { src: videoSrc } = useResolveMessageFile(video?.uri);
+	const { src: coverSrc } = useResolveMessageFile(video?.cover?.uri);
 
 	return (
 		<video

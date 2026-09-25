@@ -31,7 +31,7 @@ export function VideoMessagePlainCover({
 		}),
 	});
 
-	const coverSrc = useResolveMessageFile(video?.cover?.uri);
+	const { src: coverSrc } = useResolveMessageFile(video?.cover?.uri);
 
 	return (
 		<Image

@@ -6,7 +6,7 @@ import {
 import CryptoJS from "crypto-js";
 import type { WCDatabases } from "../types";
 import { getFileRecordsFromManifest } from "../utils";
-import { createImageUri } from "./file/utils";
+import { createMessageFileUri } from "./file/utils";
 
 export type GetInput = [
 	GetRecordImageRequest,
@@ -32,9 +32,9 @@ export async function get(...inputs: GetInput): GetOutput {
 	for (const file of files) {
 		const relativePath = file.relativePath!;
 		if (relativePath.endsWith(".record_dat")) {
-			result.regular = { uri: createImageUri(relativePath) };
+			result.regular = { uri: createMessageFileUri(relativePath) };
 		} else if (relativePath.endsWith(".record_thumb")) {
-			result.regular = { uri: createImageUri(relativePath) };
+			result.regular = { uri: createMessageFileUri(relativePath) };
 		}
 	}
 

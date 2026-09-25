@@ -10,13 +10,14 @@ import * as Comlink from "comlink";
 import CryptoJS from "crypto-js";
 import * as ChatController from "./controllers/chat";
 import * as ChatSearchController from "./controllers/chat-search.ts";
-import * as ImageController from "./controllers/file/index.ts";
+import * as FileController from "./controllers/file/index.ts";
 import * as MessageController from "./controllers/message";
 import * as MessageAttachController from "./controllers/message-attach.ts";
 import * as MessageImageController from "./controllers/message-image.ts";
 import type * as MessageSearchController from "./controllers/message-search.ts";
 import * as MessageVideoController from "./controllers/message-video.ts";
 import * as MessageVoiceController from "./controllers/message-voice.ts";
+import * as RecordAudioController from "./controllers/record-audio.ts";
 import * as RecordFileController from "./controllers/record-file.ts";
 import * as RecordImageController from "./controllers/record-image.ts";
 import * as RecordVideoController from "./controllers/record-video.ts";
@@ -108,11 +109,11 @@ export interface AdapterWorkerType extends Record<
 	) => MessageImageController.GetOutput;
 
 	resolveMessageFile: (
-		controllerInput: ImageController.ResolveInput[0],
+		controllerInput: FileController.ResolveInput[0],
 	) => Promise<DataAdapterResponse<{ src: string }>>;
 
 	releaseMessageFile: (
-		controllerInput: ImageController.ReleaseInput[0],
+		controllerInput: FileController.ReleaseInput[0],
 	) => Promise<DataAdapterResponse<void>>;
 
 	getMessageVideo: (
@@ -138,6 +139,10 @@ export interface AdapterWorkerType extends Record<
 	getRecordFile: (
 		controllerInput: RecordFileController.GetInput[0],
 	) => RecordFileController.GetOutput;
+
+	getRecordAudio: (
+		controllerInput: RecordAudioController.GetInput[0],
+	) => RecordAudioController.GetOutput;
 
 	getStatistic: (
 		controllerInput: StatisticController.GetInput[0],
@@ -270,7 +275,7 @@ export const adapterWorker: AdapterWorkerType = {
 		_store.directory = undefined;
 		_store.databases = {};
 		_store.wcdbDicts = {};
-		ImageController.clearFileRegistry();
+		FileController.clearFileRegistry();
 		await cleanup;
 	},
 
@@ -482,7 +487,7 @@ export const adapterWorker: AdapterWorkerType = {
 	},
 
 	resolveMessageFile: async (controllerInput) => {
-		return await ImageController.resolve(controllerInput, {
+		return await FileController.resolve(controllerInput, {
 			directory: adapterWorker._getStoreItem("directory"),
 			encryption: _store.encryption,
 			databases: adapterWorker._getStoreItem("databases"),
@@ -490,7 +495,7 @@ export const adapterWorker: AdapterWorkerType = {
 	},
 
 	releaseMessageFile: async (controllerInput) => {
-		return await ImageController.release(controllerInput);
+		return await FileController.release(controllerInput);
 	},
 
 	getMessageVideo: async (controllerInput) => {
@@ -531,6 +536,12 @@ export const adapterWorker: AdapterWorkerType = {
 		return await RecordFileController.get(controllerInput, {
 			directory: adapterWorker._getStoreItem("directory"),
 			encryption: _store.encryption,
+			databases: adapterWorker._getStoreItem("databases"),
+		});
+	},
+
+	getRecordAudio: async (controllerInput) => {
+		return await RecordAudioController.get(controllerInput, {
 			databases: adapterWorker._getStoreItem("databases"),
 		});
 	},

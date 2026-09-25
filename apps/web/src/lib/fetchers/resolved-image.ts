@@ -9,11 +9,12 @@ export function ResolvedImageQueryOptions(uri?: string) {
 		queryFn: uri
 			? async ({ client, queryKey, signal }) => {
 					const adapter = getDataAdapter();
+					const referenceId = crypto.randomUUID();
 					const {
 						data: { src },
-					} = await adapter.resolveMessageFile({ uri });
+					} = await adapter.resolveMessageFile({ uri, referenceId });
 					const release = () => {
-						void adapter.releaseMessageFile({ uri }).catch(() => {});
+						void adapter.releaseMessageFile({ referenceId }).catch(() => {});
 					};
 					const image = new Image();
 					try {

@@ -13,6 +13,7 @@ import {
 	GetMessageVideoRequest,
 	GetMessageVoiceRequest,
 	GetRecordFileRequest,
+	GetRecordAudioRequest,
 	GetRecordImageRequest,
 	GetRecordVideoRequest,
 	GetMessageSearchIndexStatusRequest,
@@ -212,6 +213,13 @@ export default class IosBackupAdapter implements DataAdapter {
 		return withCommonWrapper(
 			() => this._workerAdapter.getRecordFile(input),
 			"getRecordFile",
+		);
+	}
+
+	async getRecordAudio(input: GetRecordAudioRequest) {
+		return withCommonWrapper(
+			() => this._workerAdapter.getRecordAudio(input),
+			"getRecordAudio",
 		);
 	}
 

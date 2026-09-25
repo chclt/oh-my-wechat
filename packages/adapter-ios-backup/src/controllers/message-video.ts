@@ -6,7 +6,7 @@ import {
 import CryptoJS from "crypto-js";
 import type { WCDatabases } from "../types";
 import { getFileRecordsFromManifest } from "../utils";
-import { createImageUri } from "./file/utils";
+import { createMessageFileUri } from "./file/utils";
 import { readMediaDimensions } from "./media-dimensions";
 
 export type GetInput = [
@@ -47,7 +47,7 @@ export async function get(...inputs: GetInput): GetOutput {
 			if (!includeMap.video) continue;
 			result = {
 				...result,
-				uri: createImageUri(relativePath),
+				uri: createMessageFileUri(relativePath),
 			};
 		}
 
@@ -56,7 +56,7 @@ export async function get(...inputs: GetInput): GetOutput {
 			result = {
 				...result,
 				cover: {
-					uri: createImageUri(relativePath),
+					uri: createMessageFileUri(relativePath),
 					...readMediaDimensions(
 						video["@_cdnthumbwidth"],
 						video["@_cdnthumbheight"],
