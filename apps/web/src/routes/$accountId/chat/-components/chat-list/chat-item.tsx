@@ -2,6 +2,7 @@ import { useInViewport } from "@mantine/hooks";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import type React from "react";
+import { Suspense } from "react";
 import { useLocation } from "wouter";
 import { Avatar } from "@/components/ui/avatar.tsx";
 import { LastMessageQueryOptions } from "@/lib/fetchers/message";
@@ -96,10 +97,12 @@ export default function ChatListItem({
 						}
 					>
 						{last_message && (
-							<ChatListMessageSummary
-								message={last_message}
-								showUsername={chatListItem.chat.type === "chatroom"}
-							/>
+							<Suspense fallback={null}>
+								<ChatListMessageSummary
+									message={last_message}
+									showUsername={chatListItem.chat.type === "chatroom"}
+								/>
+							</Suspense>
 						)}
 					</p>
 				</div>
