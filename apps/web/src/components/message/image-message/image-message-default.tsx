@@ -1,8 +1,15 @@
 import { useRender } from "@base-ui/react/use-render";
-import { useInViewport, useResizeObserver } from "@mantine/hooks";
+import { useInViewport } from "@mantine/hooks";
 import { MessageDirection } from "@repo/types";
 import { useQuery } from "@tanstack/react-query";
-import type { CSSProperties, Ref } from "react";
+import {
+	type CSSProperties,
+	type Ref,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+} from "react";
 import { useAccount } from "@/components/account-provider.tsx";
 import {
 	useAutoResolutionImage,
@@ -55,14 +62,31 @@ export function ImageMessageDefault({
 	const displayedRatio = displayedImage
 		? displayedImage.width / displayedImage.height
 		: aspectRatio;
-	const [bodyRef, bodySize] = useResizeObserver<HTMLSpanElement>();
-	// Ignore subpixel rounding when comparing the bubble with the fitted image.
-	const hasBlurredBackground =
-		displayedRatio !== undefined &&
-		Math.min(
-			Math.abs(bodySize.width - bodySize.height * displayedRatio),
-			Math.abs(bodySize.height - bodySize.width / displayedRatio),
-		) > 1;
+	const bodyRef = useRef<HTMLSpanElement>(null);
+	const layout = useMemo(
+		() => ({ aspectRatio, imageWidth, displayedRatio }),
+		[aspectRatio, imageWidth, displayedRatio],
+	);
+	const [blurredLayout, setBlurredLayout] = useState<typeof layout>();
+	useEffect(() => {
+		if (layout.displayedRatio === undefined) return;
+		const ratio = layout.displayedRatio;
+		const body = bodyRef.current!;
+		const observer = new ResizeObserver(([entry]) => {
+			const { width, height } = entry.contentRect;
+			// Ignore subpixel rounding when comparing the bubble with the fitted image.
+			const hasGap =
+				Math.min(
+					Math.abs(width - height * ratio),
+					Math.abs(height - width / ratio),
+				) > 1;
+			setBlurredLayout(hasGap ? layout : undefined);
+		});
+		observer.observe(body);
+		return () => observer.disconnect();
+	}, [layout]);
+	// A previous layout must not trigger a thumbnail request for new dimensions.
+	const hasBlurredBackground = blurredLayout === layout;
 
 	const { data: thumbnailImage } = useQuery({
 		...ResolvedImageQueryOptions(image?.thumbnail?.uri),
