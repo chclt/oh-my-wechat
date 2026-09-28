@@ -4,12 +4,13 @@ import {
 	GetGreetingMessageListRequest,
 	GetMessageListRequest,
 } from "@repo/types/adapter";
-import type {
-	DefaultError,
-	InfiniteData,
-	QueryKey,
-	UndefinedInitialDataInfiniteOptions,
-	UseQueryOptions,
+import {
+	queryOptions,
+	type DefaultError,
+	type InfiniteData,
+	type QueryKey,
+	type UndefinedInitialDataInfiniteOptions,
+	type UseQueryOptions,
 } from "@tanstack/react-query";
 import { omit } from "es-toolkit";
 import { getDataAdapter } from "../data-adapter.ts";
@@ -60,12 +61,12 @@ export function LastMessageQueryOptions(
 
 export function GreetingMessageListQueryOptions(
 	requestData: GetGreetingMessageListRequest,
-): UseQueryOptions<VerityMessageType[]> {
-	return {
+) {
+	return queryOptions({
 		queryKey: [`account: ${requestData.account.id}`, "greetingMessageList"],
 		queryFn: () =>
 			getDataAdapter()
 				.getGreetingMessageList(requestData)
 				.then((res) => res.data),
-	};
+	});
 }

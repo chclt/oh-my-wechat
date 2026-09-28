@@ -709,6 +709,7 @@ export async function find(...inputs: findInput): findOutput {
 export type allVerifyInput = [
 	GetGreetingMessageListRequest,
 	{
+		account: UserType;
 		databases: WCDatabases;
 	},
 ];
@@ -716,41 +717,49 @@ export type allVerifyInput = [
 export type allVerifyOutput = GetGreetingMessageListResponse;
 
 export async function allVerify(...inputs: allVerifyInput): allVerifyOutput {
-	const [{ account }, { databases }] = inputs;
+	const [, { account, databases }] = inputs;
 
 	const dbs = databases.message;
 	if (!dbs) {
 		throw new Error("message databases are not found");
 	}
 
-	const rows = (
-		await Promise.all(
-			dbs.map(async (database) => {
-				try {
+	const rows =
+		(
+			await Promise.all(
+				dbs.map(async (database) => {
 					const databaseTables = await database
-						.select({
-							name: sql<string>`name`,
-						})
+						.select({ name: sql<string>`name` })
 						.from(sql`sqlite_master`)
 						.where(and(eq(sql`type`, "table"), like(sql`name`, "Hello_%")))
 						.all();
+					if (databaseTables.length === 0) return [];
 
 					const helloTable = getHelloTable(databaseTables[0].name);
-
 					return await database
 						.select(helloTableSelect(helloTable))
 						.from(helloTable)
 						.orderBy(desc(helloTable.CreateTime))
 						.all();
-				} catch (error) {
-					return [];
-				}
-			}),
-		)
-	).filter((row) => row.length > 0)[0];
+				}),
+			)
+		).find((rows) => rows.length > 0) ?? [];
 
+	const messages = transformHelloTableRowToMessage(rows);
+	const { data: contacts } = await UserController.resolveIdentities(
+		{
+			identities: messages.map(({ message_entity: { msg } }) => ({
+				username: msg["@_fromusername"],
+				encodedUsername: msg["@_encryptusername"],
+			})),
+		},
+		{ account, databases },
+	);
 	return {
-		data: transformHelloTableRowToMessage(rows),
+		data: messages.map((message, index) => ({
+			...message,
+			contact: contacts[index],
+		})),
 	};
 }
 
@@ -760,7 +769,10 @@ function transformHelloTableRowToMessage(
 	const result: VerityMessageType[] = [];
 
 	raws.forEach((helloTableRow) => {
-		if (helloTableRow.Type === MessageTypeEnum.VERITY) {
+		if (
+			helloTableRow.Type === MessageTypeEnum.VERITY ||
+			helloTableRow.Type === MessageTypeEnum.VERITY_2
+		) {
 			const xmlParser = new XMLParser({ ignoreAttributes: false });
 			const messageEntity: VerityMessageEntity = xmlParser.parse(
 				helloTableRow.Message,
@@ -770,7 +782,7 @@ function transformHelloTableRowToMessage(
 				local_id: helloTableRow.MesLocalID,
 				date: helloTableRow.CreateTime,
 				direction: helloTableRow.Des,
-				type: MessageTypeEnum.VERITY,
+				type: helloTableRow.Type,
 				message_entity: messageEntity,
 				raw_message: helloTableRow.Message,
 				...(import.meta.env.DEV

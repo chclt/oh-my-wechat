@@ -477,6 +477,7 @@ export const adapterWorker: AdapterWorkerType = {
 
 	getGreetingMessageList: async (controllerInput) => {
 		return await MessageController.allVerify(controllerInput, {
+			account: adapterWorker._getStoreItem("account"),
 			databases: adapterWorker._getStoreItem("databases"),
 		});
 	},

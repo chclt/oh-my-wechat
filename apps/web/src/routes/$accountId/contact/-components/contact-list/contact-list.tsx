@@ -68,20 +68,18 @@ export default function ContactList() {
 						</div>
 					</header>
 
-					{import.meta.env.DEV && (
-						<ContactItem
-							accountId={accountId}
-							contactItem={{
-								title: "新的朋友",
-								photo: imageGreetingMessages,
-							}}
-							onClick={(event) => {
-								event.preventDefault();
-								event.stopPropagation();
-								navigate("/greetings");
-							}}
-						/>
-					)}
+					<ContactItem
+						accountId={accountId}
+						contactItem={{
+							title: "新的朋友",
+							photo: imageGreetingMessages,
+						}}
+						onClick={(event) => {
+							event.preventDefault();
+							event.stopPropagation();
+							navigate("/greetings");
+						}}
+					/>
 
 					<ContactItem
 						accountId={accountId}
@@ -133,19 +131,17 @@ export default function ContactList() {
 				}}
 			</LocalRoute>
 
-			{import.meta.env.DEV && (
-				<LocalRoute path="/greetings">
-					<Suspense>
-						<GreetingMessageList
-							accountId={accountId}
-							contactItem={{
-								title: "新的朋友",
-								photo: imageGreetingMessages,
-							}}
-						/>
-					</Suspense>
-				</LocalRoute>
-			)}
+			<LocalRoute path="/greetings">
+				<Suspense>
+					<GreetingMessageList
+						accountId={accountId}
+						contactItem={{
+							title: "新的朋友",
+							photo: imageGreetingMessages,
+						}}
+					/>
+				</Suspense>
+			</LocalRoute>
 		</div>
 	);
 }

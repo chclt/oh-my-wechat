@@ -20,7 +20,7 @@ import {
 
 export const friendTable = sqliteTable("Friend", {
 	username: text().notNull(),
-	// encodeUserName: text(),
+	encodeUserName: text(),
 	type: integer().notNull(),
 	// typeExt: integer(),
 	// imgStatus: integer(),
@@ -88,7 +88,7 @@ export type friendTableSelectInfer = {
 
 export const openIMContactTable = sqliteTable("OpenIMContact", {
 	username: text().notNull(),
-	// encodeUserName: text(),
+	encodeUserName: text(),
 	type: integer().notNull(),
 	// typeExt: integer(),
 	// imgStatus: integer(),

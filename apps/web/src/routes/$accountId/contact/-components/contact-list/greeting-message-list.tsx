@@ -15,6 +15,7 @@ import { GreetingMessageListQueryOptions } from "@/lib/fetchers/message.ts";
 import { cn } from "@/lib/utils.ts";
 import GreetingMessageItem from "@/routes/$accountId/contact/-components/contact-list/greeting-message-item.tsx";
 import { ContactListContctItem } from "@/routes/$accountId/contact/-components/contact-list/use-contact-list.ts";
+import GreetingMessageListError from "./greeting-message-list-error";
 
 export default function GreetingMessageList({
 	accountId,
@@ -31,7 +32,7 @@ export default function GreetingMessageList({
 		}
 	};
 
-	const { data: greetingMessageList, isLoading } = useQuery(
+	const { data: greetingMessageList, error } = useQuery(
 		GreetingMessageListQueryOptions({
 			account: { id: accountId },
 		}),
@@ -86,27 +87,34 @@ export default function GreetingMessageList({
 						</div>
 					</header>
 
-					<ul>
-						{greetingMessageList?.map((message) => {
-							if (message.type === MessageTypeEnum.VERITY) {
-								return (
-									<GreetingMessageItem
-										key={`${message.id}|${message.local_id}`}
-										message={message}
-										className={cn(
-											"relative border-b border-transparent",
-											"after:absolute after:left-[4.75rem] after:right-0 after:bottom-0 after:border-b after:border-muted",
-										)}
-									/>
-								);
-							} else {
-								console.error(
-									"Unsupported message type in greeting messages:",
-									message,
-								);
-							}
-						})}
-					</ul>
+					{error ? (
+						<GreetingMessageListError error={error} />
+					) : (
+						<ul>
+							{greetingMessageList?.map((message) => {
+								if (
+									message.type === MessageTypeEnum.VERITY ||
+									message.type === MessageTypeEnum.VERITY_2
+								) {
+									return (
+										<GreetingMessageItem
+											key={`${message.id}|${message.local_id}`}
+											message={message}
+											className={cn(
+												"relative border-b border-transparent",
+												"after:absolute after:left-[4.75rem] after:right-0 after:bottom-0 after:border-b after:border-muted",
+											)}
+										/>
+									);
+								} else {
+									console.error(
+										"Unsupported message type in greeting messages:",
+										message,
+									);
+								}
+							})}
+						</ul>
+					)}
 				</ScrollArea>
 			</section>
 		</>

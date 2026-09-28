@@ -226,6 +226,76 @@ export async function findAll(...inputs: FindAllInput): FinfAllOutput {
 	};
 }
 
+export type ResolveIdentitiesInput = [
+	{ identities: { username: string; encodedUsername: string }[] },
+	{ account: UserType; databases: WCDatabases },
+];
+export type ResolveIdentitiesOutput = Promise<
+	DataAdapterResponse<(UserType | undefined)[]>
+>;
+
+/** Resolve each identity in input order, preferring real usernames over encoded IDs. */
+export async function resolveIdentities(
+	...inputs: ResolveIdentitiesInput
+): ResolveIdentitiesOutput {
+	const [{ identities }, { account, databases }] = inputs;
+	if (identities.length === 0) return { data: [] };
+
+	const db = databases.WCDB_Contact;
+	if (!db) throw new Error("WCDB_Contact database is not found");
+
+	const ids = Array.from(
+		new Set(
+			identities
+				.flatMap(({ username, encodedUsername }) => [username, encodedUsername])
+				.filter(Boolean),
+		),
+	);
+	const encodedContacts = await unionAll(
+		db
+			.select({
+				username: friendTable.username,
+				encodeUserName: friendTable.encodeUserName,
+			})
+			.from(friendTable)
+			.where(inArray(friendTable.encodeUserName, ids)),
+		db
+			.select({
+				username: openIMContactTable.username,
+				encodeUserName: openIMContactTable.encodeUserName,
+			})
+			.from(openIMContactTable)
+			.where(inArray(openIMContactTable.encodeUserName, ids)),
+	).all();
+	const { data: users } = await findAll(
+		{
+			ids: Array.from(
+				new Set([...ids, ...encodedContacts.map(({ username }) => username)]),
+			),
+		},
+		{ account, databases },
+	);
+	const contacts = new Map(
+		users
+			.filter((user): user is UserType => "username" in user)
+			.map((user) => [user.id, user]),
+	);
+	const encodedUsers = new Map(
+		encodedContacts.map(({ username, encodeUserName }) => [
+			encodeUserName,
+			contacts.get(username),
+		]),
+	);
+	return {
+		data: identities.map(
+			({ username, encodedUsername }) =>
+				contacts.get(username) ??
+				encodedUsers.get(username) ??
+				encodedUsers.get(encodedUsername),
+		),
+	};
+}
+
 /**
  * TODO: 上面的都可以重构了。。
  */
