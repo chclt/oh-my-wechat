@@ -74,6 +74,10 @@ import {
 	HelloTableSelectInfer,
 } from "../database/message.ts";
 import type { WCDatabases } from "../types.ts";
+import {
+	createUnknownMessageSender,
+	splitGroupMessageContent,
+} from "../utils/message.ts";
 import WCDB, {
 	WCDBDatabaseSeriesName,
 	WCDBTableSeriesName,
@@ -157,11 +161,11 @@ async function parseMessageDatabaseChatTableRows(
 						}
 					}
 				} else {
-					const separatorPosition = raw_message_row.Message.indexOf(":\n");
-					senderId = raw_message_row.Message.slice(0, separatorPosition);
-					rawMessageContent = raw_message_row.Message.slice(
-						separatorPosition + 2,
+					const messageContent = splitGroupMessageContent(
+						raw_message_row.Message,
 					);
+					senderId = messageContent.senderId;
+					rawMessageContent = messageContent.content;
 				}
 
 				raw_message_row.Message = rawMessageContent;
@@ -209,12 +213,7 @@ async function parseMessageDatabaseChatTableRows(
 			from:
 				usersTable[messageSenderIds[index]] ??
 				(messageSenderIds[index].length > 0
-					? {
-							id: messageSenderIds[index],
-							user_id: messageSenderIds[index],
-							username: messageSenderIds[index],
-							// 好像一些群聊成员不会出现在数据库中
-						}
+					? createUnknownMessageSender(messageSenderIds[index])
 					: undefined), // 有一些系统消息没有 from
 			chat_id: chat.id,
 

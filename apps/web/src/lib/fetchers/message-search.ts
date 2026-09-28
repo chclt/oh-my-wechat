@@ -8,8 +8,6 @@ import {
 	type UseQueryOptions,
 } from "@tanstack/react-query";
 import { getDataAdapter } from "../data-adapter.ts";
-import { ChatListQueryOptions } from "./chat.ts";
-import { UserListQueryOptions } from "./user.ts";
 
 export function MessageSearchInfiniteQueryOptions(
 	requestData: Omit<SearchMessagesRequest, "offset">,
@@ -42,29 +40,6 @@ export function MessageSearchInfiniteQueryOptions(
 		},
 		enabled: searchText.length > 0,
 	});
-}
-
-/** Keep enrichment scoped to each result page, reusing the existing batch caches. */
-export function MessageSearchDetailsQueryOptions(
-	accountId: string,
-	messages: Awaited<SearchMessagesResponse>["data"],
-) {
-	const chatIds = [
-		...new Set(messages.map((message) => message.chatId).filter(Boolean)),
-	].sort();
-	const userIds = [
-		...new Set(
-			messages
-				.map((message) => message.userId)
-				.filter((id): id is string => Boolean(id)),
-		),
-	].sort();
-	const chats = ChatListQueryOptions(accountId, chatIds);
-	const users = UserListQueryOptions(accountId, userIds);
-	return [
-		{ ...chats, queryFn: chatIds.length ? chats.queryFn : async () => [] },
-		{ ...users, queryFn: userIds.length ? users.queryFn : async () => [] },
-	] as const;
 }
 
 export function SearchIndexStatusQueryOptions(

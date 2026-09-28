@@ -1,6 +1,9 @@
 import type { SearchMessagesRequest } from "@repo/types/adapter";
 import { QueryClient, type QueryFunctionContext } from "@tanstack/query-core";
-import { searchMessages } from "./controllers/message-search.ts";
+import {
+	searchMessages,
+	type SearchMessagesInput,
+} from "./controllers/message-search.ts";
 import type {
 	MessageSearchIndex,
 	MessageSearchIndexStatus,
@@ -54,11 +57,17 @@ export class MessageSearchSession {
 		return this.client.prefetchQuery(this.queryOptions);
 	}
 
-	async search(request: SearchMessagesRequest) {
+	async search(
+		request: SearchMessagesRequest,
+		context: Omit<SearchMessagesInput[1], "messageSearchIndex">,
+	) {
 		this.assertActive(request.account.id);
 		const index = await this.client.ensureQueryData(this.queryOptions);
 		this.assertActive(request.account.id);
-		const result = await searchMessages(request, { messageSearchIndex: index });
+		const result = await searchMessages(request, {
+			...context,
+			messageSearchIndex: index,
+		});
 		this.assertActive(request.account.id);
 		return result;
 	}

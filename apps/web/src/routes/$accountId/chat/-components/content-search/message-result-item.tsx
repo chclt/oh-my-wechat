@@ -1,40 +1,44 @@
-import type { ChatType, UserType } from "@repo/types";
 import { SearchMessagesResponse } from "@repo/types/adapter";
 import { Link, useMatch } from "@tanstack/react-router";
+import clsx from "clsx";
 import { format } from "date-fns";
-import { memo } from "react";
+import type { HTMLAttributes, ReactNode } from "react";
 import { Avatar } from "@/components/ui/avatar";
+import User from "@/components/user";
 import { requestMessagePosition } from "../../-lib/message-target";
 import { MessageResultPreview } from "./message-result-preview.tsx";
-import { getUserDisplayName } from "./message-result-utils";
 
 interface MessageResultItemProps {
 	accountId: string;
 	messageResult: Awaited<SearchMessagesResponse>["data"][number];
-	chat: ChatType | undefined;
-	senderUser: UserType | undefined;
+	extraSectionProps?: HTMLAttributes<HTMLDivElement>;
+	extraSection?: ReactNode;
 }
 
-export const MessageResultItem = memo(function MessageResultItem({
+export function MessageResultItem({
 	accountId,
 	messageResult,
-	chat,
-	senderUser,
+	extraSectionProps: {
+		className: extraSectionClassName,
+		...extraSectionProps
+	} = {},
+	extraSection,
 }: MessageResultItemProps) {
-	const isChatroom = chat?.type === "chatroom";
+	const { chat, from } = messageResult;
+	const isChatroom = chat.type === "chatroom";
+	const chatTitle = chat.title;
 	const isCurrentChat = useMatch({
 		from: "/$accountId/chat/$chatId",
 		shouldThrow: false,
 		select: (match) =>
-			match.params.accountId === accountId &&
-			match.params.chatId === messageResult.chatId,
+			match.params.accountId === accountId && match.params.chatId === chat.id,
 	});
 
 	return (
-		<li>
+		<li className="relative hover:bg-muted">
 			<Link
 				to="/$accountId/chat/$chatId"
-				params={{ accountId, chatId: messageResult.chatId }}
+				params={{ accountId, chatId: chat.id }}
 				replace={isCurrentChat ?? false}
 				resetScroll={false}
 				state={requestMessagePosition}
@@ -42,24 +46,26 @@ export const MessageResultItem = memo(function MessageResultItem({
 					...search,
 					messageLocalId: messageResult.messageLocalId,
 				})}
-				className="flex gap-2.5 hover:bg-muted"
-			>
-				<div className="shrink-0 py-2.5 ps-2.5">
+				aria-label={`${chatTitle}：${messageResult.messagePlainText}`}
+				className="absolute inset-0"
+			/>
+			<div className="relative pointer-events-none grid grid-cols-[auto_minmax(0,1fr)] items-start gap-2.5">
+				<div className="py-2.5 ps-2.5">
 					<Avatar
-						src={chat?.photo}
+						src={chat.photo}
 						className={[
 							"w-12 h-12 clothoid-corner-2 bg-[#DDDFE0]",
-							chat?.type === "chatroom"
+							isChatroom
 								? "relative after:absolute after:inset-0 after:rounded-[inherit] after:border-2 after:border-[#DDDFE0]"
 								: "",
 						].join(" ")}
 					/>
 				</div>
 
-				<div className="min-w-0 flex-grow py-2.5 pe-5 border-b border-muted">
+				<div className="min-w-0 py-2.5 pe-5 border-b border-muted">
 					<div className="flex items-start gap-2">
 						<div className="min-w-0 flex-1 truncate font-medium">
-							{chat?.title || messageResult.chatId || "未知聊天"}
+							{chatTitle}
 						</div>
 						<time className="shrink-0 text-xs text-neutral-400">
 							{format(
@@ -68,54 +74,31 @@ export const MessageResultItem = memo(function MessageResultItem({
 							)}
 						</time>
 					</div>
-					<div className="mt-1 min-w-0 text-sm text-neutral-600">
-						{isChatroom && senderUser && (
-							<span className="me-1 inline-flex max-w-full align-top">
-								<Avatar
-									src={senderUser.photo?.thumb}
-									variant="inline"
-									className="me-1"
-								/>
-								<span className="truncate">
-									{getUserDisplayName(senderUser)}：
-								</span>
-							</span>
+					<div className="mt-1 min-w-0 line-clamp-2 break-all text-sm text-neutral-600">
+						{isChatroom && (
+							<>
+								<User user={from} variant="inline" />
+								{": "}
+							</>
 						)}
 						<MessageResultPreview
 							text={messageResult.messagePlainText}
 							match={messageResult.match}
 						/>
 					</div>
+					{extraSection && (
+						<div
+							className={clsx(
+								"pointer-events-auto w-fit",
+								extraSectionClassName,
+							)}
+							{...extraSectionProps}
+						>
+							{extraSection}
+						</div>
+					)}
 				</div>
-			</Link>
+			</div>
 		</li>
 	);
-}, areMessageResultItemPropsEqual);
-
-function areMessageResultItemPropsEqual(
-	prevProps: MessageResultItemProps,
-	nextProps: MessageResultItemProps,
-) {
-	const prevResult = prevProps.messageResult;
-	const nextResult = nextProps.messageResult;
-
-	return (
-		prevProps.accountId === nextProps.accountId &&
-		prevResult.chatId === nextResult.chatId &&
-		prevResult.messageLocalId === nextResult.messageLocalId &&
-		prevResult.createTime === nextResult.createTime &&
-		prevResult.messagePlainText === nextResult.messagePlainText &&
-		prevResult.match.start === nextResult.match.start &&
-		prevResult.match.end === nextResult.match.end &&
-		prevProps.chat?.title === nextProps.chat?.title &&
-		prevProps.chat?.photo === nextProps.chat?.photo &&
-		prevProps.chat?.type === nextProps.chat?.type &&
-		prevProps.senderUser?.photo?.thumb === nextProps.senderUser?.photo?.thumb &&
-		getOptionalUserDisplayName(prevProps.senderUser) ===
-			getOptionalUserDisplayName(nextProps.senderUser)
-	);
-}
-
-function getOptionalUserDisplayName(user: UserType | undefined) {
-	return user ? getUserDisplayName(user) : undefined;
 }

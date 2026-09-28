@@ -2,7 +2,6 @@ import { Button } from "@base-ui/react";
 import { useInViewport } from "@mantine/hooks";
 import type { SearchMessagesRequest } from "@repo/types/adapter";
 import { hashKey, useInfiniteQuery } from "@tanstack/react-query";
-import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { LoaderIcon } from "@/components/icon";
 import { MessageSearchInfiniteQueryOptions } from "@/lib/fetchers/message-search.ts";
@@ -39,12 +38,10 @@ export function MessageSearchResults({
 							key={`${searchKey}:${page.meta.offset}`}
 							fallback={null}
 						>
-							<Suspense>
-								<MessageResultPage
-									accountId={request.account.id}
-									data={page.data}
-								/>
-							</Suspense>
+							<MessageResultPage
+								accountId={request.account.id}
+								data={page.data}
+							/>
 						</ErrorBoundary>
 					))}
 				</ul>

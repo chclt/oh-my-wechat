@@ -18,7 +18,7 @@ export function MessageResultPreview({
 		.join("");
 
 	return (
-		<span className="line-clamp-2 break-all">
+		<span>
 			{match.start > before.length && "…"}
 			{before}
 			<mark className="bg-transparent text-orange-500">
