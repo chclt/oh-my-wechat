@@ -25,7 +25,8 @@ export type MessageRecordReferenceType = {
 /** 转发的消息记录中的文本消息 */
 export interface TextMessageRecordType extends MessageRecordBaseType {
 	"@_datatype": RecordTypeEnum.TEXT;
-	datadesc: string;
+	// 部分转发文本记录的原始 XML 不含正文。
+	datadesc?: string;
 	refermsgitem?: MessageRecordReferenceType;
 }
 
@@ -87,7 +88,7 @@ export interface LinkMessageRecordType extends MessageRecordBaseType {
 	datatitle: string;
 	datasize: number;
 	link: string;
-	weburlitem: {
+	weburlitem?: {
 		thumburl?: string;
 		title: string;
 		desc: string;

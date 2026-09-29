@@ -22,13 +22,13 @@ export default function LinkMessageRecord({
 			<LinkCard
 				href={record.link}
 				heading={record.datatitle}
-				abstract={record.weburlitem.desc}
+				abstract={record.weburlitem?.desc}
 				preview={
-					record.weburlitem.thumburl ? (
+					record.weburlitem?.thumburl ? (
 						<Image src={record.weburlitem.thumburl} alt={record.datatitle} />
 					) : undefined
 				}
-				from={record.weburlitem.appmsgshareitem?.srcdisplayname}
+				from={record.weburlitem?.appmsgshareitem?.srcdisplayname}
 				{...props}
 			/>
 		);
