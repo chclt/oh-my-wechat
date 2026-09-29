@@ -229,6 +229,7 @@ async function parseMessageDatabaseChatTableRows(
 					jPath === "msg.appmsg.title" ||
 					jPath === "msg.appmsg.des" ||
 					jPath === "msg.appmsg.refermsg.svrid" ||
+					jPath === "msg.appmsg.refermsg.displayname" ||
 					jPath === "msg.appmsg.refermsg.content"
 				) {
 					return undefined; // 不解析

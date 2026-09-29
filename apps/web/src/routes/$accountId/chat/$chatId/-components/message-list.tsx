@@ -4,14 +4,17 @@ import type {
 	InfiniteData,
 	UseInfiniteQueryResult,
 } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { format } from "date-fns";
 import { Fragment, useMemo, useRef, useState, type RefObject } from "react";
+import { useAccount } from "@/components/account-provider";
 import { useChatUiConfig } from "@/components/chat-ui-config-provider";
 import Message from "@/components/message/message";
 import User from "@/components/user";
 import { cn } from "@/lib/utils";
 import {
 	getMessageTargetKey,
+	requestMessagePosition,
 	type MessageListTarget,
 } from "../../-lib/message-target";
 import { ChatMediaCarouselSourceEnabledContext } from "./chat-media-carousel/chat-media-carousel-context";
@@ -63,6 +66,7 @@ export default function MessageList({
 	onPrepared,
 }: MessageListProps) {
 	"use no memo";
+	const { accountId } = useAccount();
 	const { showUsername, showPhoto } = useChatUiConfig();
 	const layout = useMemo(
 		() =>
@@ -183,6 +187,7 @@ export default function MessageList({
 				{virtualItems.map((virtualItem) => {
 					const item = items[virtualItem.index];
 					const { message, isSenderGroupStart, senderGroupIndex } = item.row;
+					const referencedMessage = message.reply_to_message;
 					const outgoing = message.direction === MessageDirection.outgoing;
 					const grouped = senderGroupIndex !== undefined;
 					const bodyClassName = cn(
@@ -275,6 +280,26 @@ export default function MessageList({
 											<Message
 												message={message}
 												variant="default"
+												referMessageProps={{
+													renderReference: referencedMessage ? (
+														<Link
+															to="/$accountId/chat/$chatId"
+															params={{
+																accountId,
+																chatId: referencedMessage.chat_id,
+															}}
+															search={(search) => ({
+																...search,
+																messageLocalId: referencedMessage.local_id,
+															})}
+															state={requestMessagePosition}
+															replace
+															resetScroll={false}
+															title="定位到引用的消息"
+															className="cursor-pointer transition-colors hover:bg-black/5 hover:text-neutral-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-500"
+														/>
+													) : undefined,
+												}}
 												data-show-username={item.showUsername}
 											/>
 										</ChatMediaCarouselSourceEnabledContext>

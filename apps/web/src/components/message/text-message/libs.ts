@@ -5,7 +5,7 @@ export const textMessageVariants = cva(
 	[
 		"py-2.5 px-3 w-fit max-w-[20em] min-h-11 rounded-lg",
 		"leading-normal break-words text-pretty",
-		"[&>p]:min-h-[1.5em] [&_a]:text-blue-500 [&_a]:underline",
+		"[&>p]:min-h-[1.5em]",
 	],
 	{
 		variants: {

@@ -37,6 +37,7 @@ import {
 import { CircleQuestionmarkSolid } from "@/components/icon.tsx";
 import { LinkCard } from "@/components/link-card.tsx";
 import MessageInlineWrapper from "@/components/message-inline-wrapper";
+import type { ReferMessageDefaultProps } from "@/components/open-message/refer-message/refer-message-default";
 import dialogClasses from "@/components/ui/dialog.module.css";
 import { ScrollArea } from "@/components/ui/scroll-area.tsx";
 import { cn } from "@/lib/utils.ts";
@@ -79,11 +80,13 @@ interface OpenMessageProps {
 		type: number;
 	}>;
 	variant: "default" | "referenced" | "abstract";
+	referMessageProps?: Pick<ReferMessageDefaultProps, "renderReference">;
 }
 
 export function OpenMessageAuto({
 	message,
 	variant,
+	referMessageProps,
 	...props
 }: OpenMessageProps) {
 	if (!message.message_entity.msg?.appmsg) {
@@ -260,6 +263,7 @@ export function OpenMessageAuto({
 						message as unknown as OpenMessageType<ReferOpenMessageEntity>
 					}
 					variant={variant}
+					{...referMessageProps}
 					{...props}
 				/>
 			);

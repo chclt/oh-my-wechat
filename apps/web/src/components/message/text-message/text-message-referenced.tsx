@@ -8,7 +8,7 @@ export function TextMessageReferenced({
 }: Omit<TextMessageProps, "variant">) {
 	return (
 		<span className={"inline"} {...props}>
-			<TextPrettier text={message.message_entity} inline />
+			<TextPrettier text={message.message_entity} inline formatLink={false} />
 		</span>
 	);
 }
