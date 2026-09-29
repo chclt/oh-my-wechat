@@ -1,3 +1,4 @@
+import type { MessageTypeEnum } from "../base-message";
 import { RecordTypeEnum } from "./record.ts";
 
 export interface MessageRecordBaseType {
@@ -5,10 +6,27 @@ export interface MessageRecordBaseType {
 	"@_dataid": string;
 }
 
+export type MessageRecordReferenceType = {
+	svrid: string;
+	displayname: string;
+	content: string;
+} & (
+	| {
+			type: MessageTypeEnum.SYSTEM;
+			// 被撤回的引用只保留 content，没有 referdesc。
+			referdesc?: string;
+	  }
+	| {
+			type: Exclude<MessageTypeEnum, MessageTypeEnum.SYSTEM>;
+			referdesc: string;
+	  }
+);
+
 /** 转发的消息记录中的文本消息 */
 export interface TextMessageRecordType extends MessageRecordBaseType {
 	"@_datatype": RecordTypeEnum.TEXT;
 	datadesc: string;
+	refermsgitem?: MessageRecordReferenceType;
 }
 
 /** 转发的消息记录中的图片消息 */
