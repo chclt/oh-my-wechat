@@ -16,5 +16,11 @@
 		],
 		"newlinesBetween": false,
 	},
-	"ignorePatterns": ["routeTree.gen.ts", "*_pb.ts"],
+	"ignorePatterns": [
+		"routeTree.gen.ts",
+		"*_pb.ts",
+		"target/**",
+		"apps/desktop/target/**",
+		"apps/desktop/src-tauri/gen/**",
+	],
 }

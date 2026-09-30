@@ -1,0 +1,35 @@
+{
+	"$schema": "https://schema.tauri.app/config/2",
+	"productName": "Oh My WeChat",
+	"version": "0.0.0",
+	"identifier": "com.ohmywechat.desktop",
+	"build": {
+		"beforeDevCommand": "pnpm --filter web dev --mode tauri --port 1420 --strictPort",
+		"devUrl": "http://localhost:1420",
+		"beforeBuildCommand": "pnpm --filter web build --mode tauri",
+		"frontendDist": "../../web/dist"
+	},
+	"app": {
+		"windows": [
+			{
+				"label": "main",
+				"title": "Oh My WeChat",
+				"width": 1200,
+				"height": 800,
+				"minWidth": 800,
+				"minHeight": 600
+			}
+		]
+	},
+	"bundle": {
+		"active": true,
+		"targets": "all",
+		"icon": [
+			"icons/32x32.png",
+			"icons/128x128.png",
+			"icons/128x128@2x.png",
+			"icons/icon.icns",
+			"icons/icon.ico"
+		]
+	}
+}

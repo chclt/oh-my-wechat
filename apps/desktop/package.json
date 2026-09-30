@@ -1,0 +1,16 @@
+{
+	"name": "desktop",
+	"version": "0.0.0",
+	"private": true,
+	"scripts": {
+		"typecheck": "cargo check --workspace --all-targets --locked --manifest-path src-tauri/Cargo.toml",
+		"format": "cargo fmt --all --manifest-path src-tauri/Cargo.toml",
+		"lint": "cargo clippy --workspace --all-targets --locked --manifest-path src-tauri/Cargo.toml -- -D warnings",
+		"dev": "tauri dev",
+		"build": "tauri build",
+		"test": "cargo test --workspace --locked --manifest-path src-tauri/Cargo.toml"
+	},
+	"devDependencies": {
+		"@tauri-apps/cli": "^2.0.0"
+	}
+}

@@ -1,0 +1,10 @@
+[package]
+name = "rust-ios-backup"
+version = "0.0.0"
+description = "iOS backup backend and Tauri commands for Oh My WeChat"
+edition = "2021"
+publish = false
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+tauri = { version = "2", default-features = false }
