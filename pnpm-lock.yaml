@@ -304,10 +304,16 @@ importers:
 
   packages/adapter-ios-backup-tauri:
     dependencies:
+      '@tanstack/react-query':
+        specifier: ^5.0.0
+        version: 5.84.1(react@19.1.1)
       '@tauri-apps/api':
         specifier: ^2.0.0
         version: 2.12.0
     devDependencies:
+      '@repo/types':
+        specifier: workspace:*
+        version: link:../types
       '@repo/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config

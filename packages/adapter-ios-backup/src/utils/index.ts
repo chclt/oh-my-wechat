@@ -1,5 +1,5 @@
 import { BinaryReader } from "@bufbuild/protobuf/wire";
-import type { UserType } from "@repo/types";
+import type { AccountType } from "@repo/types";
 import { and, eq, like } from "drizzle-orm";
 import type { SqliteRemoteDatabase } from "drizzle-orm/sqlite-proxy";
 import { filesTable } from "../database/_manifest.ts";
@@ -149,8 +149,11 @@ export async function getFileFromITunesFileList(
 	});
 }
 
-export function parseUserFromMmsetting(buffer: Uint8Array): UserType {
-	const dataKeys: Record<string, keyof UserType> = {
+export function parseUserFromMmsetting(buffer: Uint8Array): AccountType {
+	const dataKeys: Record<
+		string,
+		"photo" | "background" | "id" | "user_id" | "username" | "bio" | "phone"
+	> = {
 		headimgurl: "photo",
 		headhdimgurl: "photo",
 		"63": "background",
@@ -162,7 +165,7 @@ export function parseUserFromMmsetting(buffer: Uint8Array): UserType {
 	};
 
 	let position = 8; // Skip the first 8 bytes
-	const result: Partial<UserType> = {};
+	const result: Partial<AccountType> = {};
 
 	while (position < buffer.length && Object.keys(dataKeys).length > 0) {
 		let keyLength = 0;
@@ -193,15 +196,17 @@ export function parseUserFromMmsetting(buffer: Uint8Array): UserType {
 
 		position += valueLength;
 
-		if (dataKeys[key]) {
-			if (key === "headimgurl") {
+		const field = dataKeys[key];
+		if (field) {
+			if (field !== "photo") {
+				result[field] = new TextDecoder("utf-8").decode(value.slice(1));
+			} else if (key === "headimgurl") {
 				if (!result.photo)
 					result.photo = {
 						thumb: new TextDecoder("utf-8").decode(value.slice(2)),
 					};
 				else
 					result.photo.thumb = new TextDecoder("utf-8").decode(value.slice(2));
-				delete dataKeys["headimgurl"];
 			} else if (key === "headhdimgurl") {
 				if (!result.photo)
 					result.photo = {
@@ -210,16 +215,14 @@ export function parseUserFromMmsetting(buffer: Uint8Array): UserType {
 					};
 				else
 					result.photo.origin = new TextDecoder("utf-8").decode(value.slice(2));
-				delete dataKeys["headhdimgurl"];
-			} else {
-				// @ts-ignore
-				result[dataKeys[key]] = new TextDecoder("utf-8").decode(value.slice(1));
-				delete dataKeys[key];
 			}
+			delete dataKeys[key];
 		}
 	}
 
-	return result as UserType;
+	// mmsetting 可能缺少 user_id、username，且此解析器不产生 is_openim。
+	// 导入阶段暂用断言沿用公共账号类型。
+	return result as AccountType;
 }
 
 export function parseLocalInfo(localInfoBuffer: Uint8Array): { id: string } {

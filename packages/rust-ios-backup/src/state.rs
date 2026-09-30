@@ -1,0 +1,109 @@
+use crate::{
+    account::database::AccountDatabases,
+    account::{Account, AccountList},
+    backup::LoadedBackup,
+    errors::BackupError,
+};
+use std::sync::{Arc, Mutex, MutexGuard};
+
+#[derive(Default)]
+struct Session {
+    backup: Option<Arc<LoadedBackup>>,
+    generation: u64,
+    loaded: Option<AccountDatabases>,
+}
+
+#[derive(Clone, Default)]
+pub struct BackupState {
+    session: Arc<Mutex<Session>>,
+}
+
+impl BackupState {
+    fn lock(&self) -> Result<MutexGuard<'_, Session>, BackupError> {
+        self.session
+            .lock()
+            .map_err(|error| BackupError::context("备份状态不可用", error))
+    }
+
+    pub(crate) fn begin_directory_load(&self) -> Result<u64, BackupError> {
+        let mut session = self.lock()?;
+        session.generation += 1;
+        session.loaded = None;
+        session.backup = None;
+        Ok(session.generation)
+    }
+
+    pub(crate) fn finish_directory_load(
+        &self,
+        generation: u64,
+        backup: LoadedBackup,
+    ) -> Result<(), BackupError> {
+        let mut session = self.lock()?;
+        if session.generation != generation {
+            return Err(cancelled());
+        }
+        session.backup = Some(Arc::new(backup));
+        Ok(())
+    }
+
+    pub(crate) fn account_list(&self) -> Result<AccountList, BackupError> {
+        let session = self.lock()?;
+        let backup = session
+            .backup
+            .as_ref()
+            .ok_or_else(|| BackupError::new("Error", "Directory not loaded"))?;
+        Ok(AccountList {
+            data: backup.accounts.clone(),
+        })
+    }
+
+    pub(crate) fn account(&self, account_id: &str) -> Result<Account, BackupError> {
+        self.account_list()?
+            .data
+            .into_iter()
+            .find(|account| account.id.as_deref() == Some(account_id))
+            .ok_or_else(|| BackupError::new("Error", "Account not found"))
+    }
+
+    pub(crate) fn begin_account_load(&self) -> Result<(Arc<LoadedBackup>, u64), BackupError> {
+        let mut session = self.lock()?;
+        let backup = session
+            .backup
+            .clone()
+            .ok_or_else(|| BackupError::new("Error", "Directory not loaded"))?;
+        session.generation += 1;
+        session.loaded = None;
+        Ok((backup, session.generation))
+    }
+
+    pub(crate) fn check_current(&self, generation: u64) -> Result<(), BackupError> {
+        if self.lock()?.generation != generation {
+            return Err(cancelled());
+        }
+        Ok(())
+    }
+
+    pub(crate) fn finish_account_load(
+        &self,
+        generation: u64,
+        databases: AccountDatabases,
+    ) -> Result<(), BackupError> {
+        let mut session = self.lock()?;
+        if session.generation != generation {
+            return Err(cancelled());
+        }
+        session.loaded = Some(databases);
+        Ok(())
+    }
+
+    pub(crate) fn unload_account(&self) -> Result<(), BackupError> {
+        let mut session = self.lock()?;
+        session.generation += 1;
+        session.loaded = None;
+        Ok(())
+    }
+}
+
+fn cancelled() -> BackupError {
+    BackupError::new("AbortError", "Account loading was cancelled")
+}

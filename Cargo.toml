@@ -2,6 +2,30 @@
 members = ["apps/desktop/src-tauri", "packages/rust-ios-backup"]
 resolver = "2"
 
+# Tauri's generic invoke handler also instantiates crypto code in the desktop
+# crate. Optimizing only the backend leaves the actual IPC path unoptimized.
+[profile.dev.package.oh-my-wechat-desktop]
+opt-level = 3
+
+# Encrypted backups perform millions of PBKDF2 iterations, including in dev.
+[profile.dev.package.rust-ios-backup]
+opt-level = 3
+
+[profile.dev.package.sha2]
+opt-level = 3
+
+[profile.dev.package.pbkdf2]
+opt-level = 3
+
+[profile.dev.package.hmac]
+opt-level = 3
+
+[profile.dev.package.sha1]
+opt-level = 3
+
+[profile.dev.package.aes]
+opt-level = 3
+
 [profile.release]
 lto = true
 codegen-units = 1

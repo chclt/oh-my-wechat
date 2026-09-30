@@ -4,7 +4,9 @@
 	"private": true,
 	"type": "module",
 	"exports": {
-		".": "./src/index.ts"
+		".": "./src/index.ts",
+		"./queryOptions": "./src/fetchers.ts",
+		"./utils": "./src/utils.ts"
 	},
 	"scripts": {
 		"typecheck": "tsc --noEmit"
@@ -13,7 +15,11 @@
 		"@tauri-apps/api": "^2.0.0"
 	},
 	"devDependencies": {
+		"@repo/types": "workspace:*",
 		"@repo/typescript-config": "workspace:*",
 		"typescript": "catalog:"
+	},
+	"peerDependencies": {
+		"@tanstack/react-query": "^5.0.0"
 	}
 }
