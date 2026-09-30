@@ -144,6 +144,21 @@ pub(crate) async fn search_chats(
 }
 
 #[tauri::command]
+pub(crate) async fn get_message_list(
+    state: tauri::State<'_, BackupState>,
+    request: crate::message::MessageListRequest,
+) -> Result<crate::message::MessageList, BackupError> {
+    let state = state.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || {
+        state.with_account(&request.account.id, |databases| {
+            crate::message::list(databases, &request)
+        })
+    })
+    .await
+    .map_err(|error| BackupError::context("读取消息列表失败", error))?
+}
+
+#[tauri::command]
 pub(crate) async fn load_account_database(
     state: tauri::State<'_, BackupState>,
     account_id: String,

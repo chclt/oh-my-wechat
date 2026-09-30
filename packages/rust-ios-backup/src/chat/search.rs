@@ -1,5 +1,8 @@
 use super::{list, Chat};
-use crate::{account::database::AccountDatabases, contact, errors::BackupError};
+use crate::{
+    account::database::AccountDatabases, contact, errors::BackupError,
+    utils::is_js_whitespace as is_whitespace,
+};
 use icu_casemap::CaseMapper;
 use icu_locale_core::LanguageIdentifier;
 use icu_normalizer::ComposingNormalizer;
@@ -32,15 +35,6 @@ struct ChatSearchMeta {
     total: usize,
     offset: usize,
     limit: usize,
-}
-
-// ECMAScript trim/\s includes BOM and excludes U+0085, unlike Rust whitespace.
-fn is_whitespace(character: char) -> bool {
-    matches!(character,
-        '\u{0009}'..='\u{000d}' | ' ' | '\u{00a0}' | '\u{1680}' |
-        '\u{2000}'..='\u{200a}' | '\u{2028}' | '\u{2029}' | '\u{202f}' |
-        '\u{205f}' | '\u{3000}' | '\u{feff}'
-    )
 }
 
 fn normalize(value: Option<&str>, language: &LanguageIdentifier) -> String {

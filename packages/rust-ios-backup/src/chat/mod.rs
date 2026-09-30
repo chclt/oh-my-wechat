@@ -17,7 +17,7 @@ pub(crate) struct ChatList {
 #[derive(serde::Serialize)]
 pub(crate) struct Chat {
     #[serde(rename = "type")]
-    kind: &'static str,
+    pub(crate) kind: &'static str,
     id: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     title: Option<String>,

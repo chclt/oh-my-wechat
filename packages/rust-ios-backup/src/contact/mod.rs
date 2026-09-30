@@ -97,6 +97,21 @@ impl From<Account> for Contact {
     }
 }
 
+impl Contact {
+    pub(crate) fn unknown_sender(id: &str) -> Self {
+        Self {
+            account: Account {
+                id: Some(id.to_owned()),
+                user_id: Some(id.to_owned()),
+                username: Some(id.to_owned()),
+                ..Account::default()
+            },
+            is_openim: Some(false),
+            ..Self::default()
+        }
+    }
+}
+
 fn decode<T: Message + Default>(bytes: Vec<u8>, column: &str) -> Result<T, BackupError> {
     T::decode(bytes.as_slice()).map_err(|error| {
         BackupError::context(format!("Cannot decode contact protobuf: {column}"), error)

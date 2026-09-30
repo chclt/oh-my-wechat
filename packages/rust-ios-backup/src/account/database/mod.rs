@@ -13,7 +13,6 @@ pub(crate) struct AccountDatabases {
     pub(crate) account: Account,
     pub(crate) session: Connection,
     pub(crate) contact: Connection,
-    #[allow(dead_code)] // Message queries are the next migration step.
     pub(crate) message: Vec<Connection>,
 }
 

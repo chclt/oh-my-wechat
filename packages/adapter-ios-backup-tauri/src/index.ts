@@ -6,6 +6,8 @@ import type {
 	GetChatRequest,
 	GetChatListRequest,
 	GetChatListResponse,
+	GetMessageListRequest,
+	GetMessageListResponse,
 	GetUserRequest,
 	GetUserListRequest,
 	SearchChatsRequest,
@@ -13,6 +15,7 @@ import type {
 } from "@repo/types/adapter";
 import { invoke } from "./invoke";
 import { restoreChats } from "./restoreChats";
+import { restoreMessages } from "./restoreMessages";
 
 export default class IosBackupTauriAdapter implements DataAdapter {
 	private _directory: string | undefined;
@@ -112,9 +115,10 @@ export default class IosBackupTauriAdapter implements DataAdapter {
 		return { ...response, data: restoreChats(response.data) };
 	}
 
-	getMessageList: DataAdapter["getMessageList"] = async () => {
-		throw new Error("Tauri adapter: getMessageList 尚未实现");
-	};
+	async getMessageList(input: GetMessageListRequest): GetMessageListResponse {
+		const response = await invoke("get_message_list", { request: input });
+		return { ...response, data: restoreMessages(response.data) };
+	}
 
 	getGreetingMessageList: DataAdapter["getGreetingMessageList"] = async () => {
 		throw new Error("Tauri adapter: getGreetingMessageList 尚未实现");

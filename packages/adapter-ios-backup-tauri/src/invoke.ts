@@ -3,6 +3,8 @@ import type {
 	GetAccountListResponse,
 	GetAccountResponse,
 	GetChatListResponse,
+	GetMessageListRequest,
+	GetMessageListResponse,
 	GetUserListResponse,
 	SearchChatsResponse,
 } from "@repo/types/adapter";
@@ -37,6 +39,9 @@ interface Commands {
 		limit: number;
 		language: string;
 	}) => Awaited<SearchChatsResponse>;
+	get_message_list: (args: {
+		request: GetMessageListRequest;
+	}) => Awaited<GetMessageListResponse>;
 }
 
 export async function invoke<Command extends keyof Commands>(
