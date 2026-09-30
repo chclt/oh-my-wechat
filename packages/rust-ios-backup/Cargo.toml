@@ -20,6 +20,11 @@ prost = { version = "0.14", default-features = false, features = [
 ] }
 rusqlite = { version = "0.40", features = ["bundled", "serialize"] }
 md5 = "0.8"
+icu_casemap = "2.3"
+icu_locale_core = { version = "2.3", features = ["serde"] }
+icu_normalizer = { version = "2.3", default-features = false, features = [
+	"compiled_data",
+] }
 serde = { version = "1", features = ["derive"] }
 tauri = { version = "2", default-features = false }
 tauri-plugin-dialog = "2"

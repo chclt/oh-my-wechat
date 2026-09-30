@@ -23,6 +23,7 @@ pub fn invoke_handler<R: Runtime>() -> impl Fn(Invoke<R>) -> bool + Send + Sync 
         commands::get_account_contact_list,
         commands::get_chat_list,
         commands::get_user_list,
+        commands::search_chats,
         commands::load_account_database,
         commands::unload_account_database
     ]

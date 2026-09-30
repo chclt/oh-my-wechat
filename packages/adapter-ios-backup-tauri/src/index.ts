@@ -8,8 +8,11 @@ import type {
 	GetChatListResponse,
 	GetUserRequest,
 	GetUserListRequest,
+	SearchChatsRequest,
+	SearchChatsResponse,
 } from "@repo/types/adapter";
 import { invoke } from "./invoke";
+import { restoreChats } from "./restoreChats";
 
 export default class IosBackupTauriAdapter implements DataAdapter {
 	private _directory: string | undefined;
@@ -58,19 +61,7 @@ export default class IosBackupTauriAdapter implements DataAdapter {
 			userIds: input.userIds,
 		});
 		return {
-			data: response.data.map((chat) => ({
-				...chat,
-				title: chat.title,
-				is_pinned: chat.is_pinned,
-				...(chat.type === "private"
-					? {
-							user: chat.user,
-							// The web adapter can return undefined for missing contacts.
-							// IPC encodes those array slots as null; restore them here.
-							members: chat.members.map((member) => member ?? undefined),
-						}
-					: { chatroom: chat.chatroom }),
-			})),
+			data: restoreChats(response.data),
 		};
 	}
 
@@ -108,9 +99,18 @@ export default class IosBackupTauriAdapter implements DataAdapter {
 		});
 	}
 
-	searchChats: DataAdapter["searchChats"] = async () => {
-		throw new Error("Tauri adapter: searchChats 尚未实现");
-	};
+	async searchChats(input: SearchChatsRequest): SearchChatsResponse {
+		const response = await invoke("search_chats", {
+			accountId: input.account.id,
+			query: input.query,
+			offset: input.offset,
+			limit: input.limit,
+			// Use the same default language as JavaScript's toLocaleLowerCase().
+			language: new Intl.Locale(Intl.DateTimeFormat().resolvedOptions().locale)
+				.language,
+		});
+		return { ...response, data: restoreChats(response.data) };
+	}
 
 	getMessageList: DataAdapter["getMessageList"] = async () => {
 		throw new Error("Tauri adapter: getMessageList 尚未实现");

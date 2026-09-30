@@ -46,21 +46,21 @@ impl ContactRow {
 
 #[derive(serde::Serialize)]
 pub(crate) struct ContactList {
-    data: Vec<ContactListItem>,
+    pub(crate) data: Vec<ContactListItem>,
 }
 
 #[derive(serde::Serialize)]
-struct ContactListItem {
-    id: String,
+pub(crate) struct ContactListItem {
+    pub(crate) id: String,
     username: String,
     #[serde(rename = "usernamePinyin")]
-    username_pinyin: String,
+    pub(crate) username_pinyin: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     remark: Option<String>,
     #[serde(rename = "remarkPinyin", skip_serializing_if = "Option::is_none")]
-    remark_pinyin: Option<String>,
+    pub(crate) remark_pinyin: Option<String>,
     #[serde(rename = "remarkPinyinInits", skip_serializing_if = "Option::is_none")]
-    remark_pinyin_inits: Option<String>,
+    pub(crate) remark_pinyin_inits: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     photo: Option<Photo>,
     is_openim: bool,

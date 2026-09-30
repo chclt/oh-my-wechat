@@ -1,3 +1,6 @@
+mod search;
+pub(crate) use search::{search, ChatSearchResult};
+
 use crate::{
     account::database::AccountDatabases,
     contact::{self, Contact},
@@ -24,7 +27,7 @@ pub(crate) struct Chat {
     #[serde(skip_serializing_if = "Option::is_none")]
     is_pinned: Option<bool>,
     is_collapsed: bool,
-    // JSON represents an undefined array slot as null. The TS invoke wrapper
+    // JSON represents an undefined array slot as null. The TS restoreChats helper
     // restores that slot, preserving the web adapter's missing-contact behavior.
     members: Vec<Option<Contact>>,
     #[serde(skip_serializing_if = "Option::is_none")]

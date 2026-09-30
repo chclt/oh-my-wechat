@@ -125,6 +125,25 @@ pub(crate) async fn get_chat_list(
 }
 
 #[tauri::command]
+pub(crate) async fn search_chats(
+    state: tauri::State<'_, BackupState>,
+    account_id: String,
+    query: String,
+    offset: usize,
+    limit: usize,
+    language: icu_locale_core::LanguageIdentifier,
+) -> Result<crate::chat::ChatSearchResult, BackupError> {
+    let state = state.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || {
+        state.with_account(&account_id, |databases| {
+            crate::chat::search(databases, &query, offset, limit, &language)
+        })
+    })
+    .await
+    .map_err(|error| BackupError::context("搜索聊天失败", error))?
+}
+
+#[tauri::command]
 pub(crate) async fn load_account_database(
     state: tauri::State<'_, BackupState>,
     account_id: String,

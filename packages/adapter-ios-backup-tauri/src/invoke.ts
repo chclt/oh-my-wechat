@@ -4,6 +4,7 @@ import type {
 	GetAccountResponse,
 	GetChatListResponse,
 	GetUserListResponse,
+	SearchChatsResponse,
 } from "@repo/types/adapter";
 import { invoke as tauriInvoke } from "@tauri-apps/api/core";
 
@@ -29,6 +30,13 @@ interface Commands {
 		accountId: string;
 		userIds: string[];
 	}) => Awaited<GetUserListResponse>;
+	search_chats: (args: {
+		accountId: string;
+		query: string;
+		offset: number;
+		limit: number;
+		language: string;
+	}) => Awaited<SearchChatsResponse>;
 }
 
 export async function invoke<Command extends keyof Commands>(
