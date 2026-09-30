@@ -71,6 +71,60 @@ pub(crate) async fn get_account(
 }
 
 #[tauri::command]
+pub(crate) async fn get_account_contact_list(
+    state: tauri::State<'_, BackupState>,
+    account_id: String,
+) -> Result<crate::contact::ContactList, BackupError> {
+    let state = state.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || {
+        state.with_account(&account_id, |databases| {
+            crate::contact::list(&databases.contact)
+        })
+    })
+    .await
+    .map_err(|error| BackupError::context("读取通讯录列表失败", error))?
+}
+
+#[derive(serde::Serialize)]
+pub(crate) struct UserListResponse {
+    data: Vec<crate::contact::Contact>,
+}
+
+#[tauri::command]
+pub(crate) async fn get_user_list(
+    state: tauri::State<'_, BackupState>,
+    account_id: String,
+    user_ids: Vec<String>,
+) -> Result<UserListResponse, BackupError> {
+    let state = state.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || {
+        state.with_account(&account_id, |databases| {
+            Ok(UserListResponse {
+                data: crate::contact::find(&databases.contact, &databases.account, &user_ids)?,
+            })
+        })
+    })
+    .await
+    .map_err(|error| BackupError::context("读取用户列表失败", error))?
+}
+
+#[tauri::command]
+pub(crate) async fn get_chat_list(
+    state: tauri::State<'_, BackupState>,
+    account_id: String,
+    user_ids: Option<Vec<String>>,
+) -> Result<crate::chat::ChatList, BackupError> {
+    let state = state.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || {
+        state.with_account(&account_id, |databases| {
+            crate::chat::list(databases, user_ids.as_deref())
+        })
+    })
+    .await
+    .map_err(|error| BackupError::context("读取聊天列表失败", error))?
+}
+
+#[tauri::command]
 pub(crate) async fn load_account_database(
     state: tauri::State<'_, BackupState>,
     account_id: String,

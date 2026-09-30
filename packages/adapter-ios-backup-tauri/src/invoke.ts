@@ -1,6 +1,9 @@
 import type {
+	GetAccountContactListResponse,
 	GetAccountListResponse,
 	GetAccountResponse,
+	GetChatListResponse,
+	GetUserListResponse,
 } from "@repo/types/adapter";
 import { invoke as tauriInvoke } from "@tauri-apps/api/core";
 
@@ -15,6 +18,17 @@ interface Commands {
 	unload_account_database: () => null;
 	get_account_list: () => Awaited<GetAccountListResponse>;
 	get_account: (args: { accountId: string }) => Awaited<GetAccountResponse>;
+	get_account_contact_list: (args: {
+		accountId: string;
+	}) => Awaited<GetAccountContactListResponse>;
+	get_chat_list: (args: {
+		accountId: string;
+		userIds?: string[];
+	}) => Awaited<GetChatListResponse>;
+	get_user_list: (args: {
+		accountId: string;
+		userIds: string[];
+	}) => Awaited<GetUserListResponse>;
 }
 
 export async function invoke<Command extends keyof Commands>(

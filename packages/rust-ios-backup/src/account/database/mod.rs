@@ -9,11 +9,11 @@ mod tests;
 
 // Owned connections are retained for subsequent query commands and dropped
 // together on unload, failed load, or a superseding load.
-#[allow(dead_code)] // Retain opened databases for the next query migration steps.
 pub(crate) struct AccountDatabases {
     pub(crate) account: Account,
     pub(crate) session: Connection,
     pub(crate) contact: Connection,
+    #[allow(dead_code)] // Message queries are the next migration step.
     pub(crate) message: Vec<Connection>,
 }
 

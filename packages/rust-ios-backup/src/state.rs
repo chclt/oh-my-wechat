@@ -19,6 +19,22 @@ pub struct BackupState {
 }
 
 impl BackupState {
+    pub(crate) fn with_account<T>(
+        &self,
+        account_id: &str,
+        query: impl FnOnce(&AccountDatabases) -> Result<T, BackupError>,
+    ) -> Result<T, BackupError> {
+        let session = self.lock()?;
+        let loaded = session
+            .loaded
+            .as_ref()
+            .filter(|loaded| loaded.account.id.as_deref() == Some(account_id))
+            .ok_or_else(|| {
+                BackupError::new("AccountNotLoadedError", "Account database is not loaded")
+            })?;
+        query(loaded)
+    }
+
     fn lock(&self) -> Result<MutexGuard<'_, Session>, BackupError> {
         self.session
             .lock()

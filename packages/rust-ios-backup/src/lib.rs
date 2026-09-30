@@ -1,6 +1,8 @@
 mod account;
 mod backup;
+mod chat;
 mod commands;
+mod contact;
 mod database;
 mod encryption;
 mod errors;
@@ -18,6 +20,9 @@ pub fn invoke_handler<R: Runtime>() -> impl Fn(Invoke<R>) -> bool + Send + Sync 
         commands::load_backup_directory,
         commands::get_account_list,
         commands::get_account,
+        commands::get_account_contact_list,
+        commands::get_chat_list,
+        commands::get_user_list,
         commands::load_account_database,
         commands::unload_account_database
     ]

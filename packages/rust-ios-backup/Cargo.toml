@@ -14,7 +14,10 @@ sha1 = "0.10"
 sha2 = "0.10"
 zeroize = "1"
 plist = "1"
-prost = { version = "0.14", default-features = false, features = ["std"] }
+prost = { version = "0.14", default-features = false, features = [
+	"std",
+	"derive",
+] }
 rusqlite = { version = "0.40", features = ["bundled", "serialize"] }
 md5 = "0.8"
 serde = { version = "1", features = ["derive"] }

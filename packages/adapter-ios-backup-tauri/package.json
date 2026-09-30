@@ -9,7 +9,8 @@
 		"./utils": "./src/utils.ts"
 	},
 	"scripts": {
-		"typecheck": "tsc --noEmit"
+		"typecheck": "tsc --noEmit",
+		"test": "vitest run"
 	},
 	"dependencies": {
 		"@tauri-apps/api": "^2.0.0"
@@ -17,7 +18,8 @@
 	"devDependencies": {
 		"@repo/types": "workspace:*",
 		"@repo/typescript-config": "workspace:*",
-		"typescript": "catalog:"
+		"typescript": "catalog:",
+		"vitest": "catalog:"
 	},
 	"peerDependencies": {
 		"@tanstack/react-query": "^5.0.0"

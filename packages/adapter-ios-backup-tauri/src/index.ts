@@ -1,26 +1,40 @@
 import type { AccountType } from "@repo/types";
-import type { DataAdapter, GetAccountRequest } from "@repo/types/adapter";
+import type {
+	DataAdapter,
+	GetAccountContactListRequest,
+	GetAccountRequest,
+	GetChatRequest,
+	GetChatListRequest,
+	GetChatListResponse,
+	GetUserRequest,
+	GetUserListRequest,
+} from "@repo/types/adapter";
 import { invoke } from "./invoke";
 
 export default class IosBackupTauriAdapter implements DataAdapter {
 	private _directory: string | undefined;
 	private _directoryLoaded = false;
+	private _accountId: string | undefined;
 
 	async _loadDirectory(directory: string, password?: string): Promise<void> {
 		this._directoryLoaded = false;
 		this._directory = directory;
+		this._accountId = undefined;
 		await invoke("load_backup_directory", { directory, password });
 		this._directoryLoaded = true;
 	}
 
 	async _loadAccountDatabase(account: Pick<AccountType, "id">) {
+		this._accountId = undefined;
 		await invoke("load_account_database", {
 			accountId: account.id,
 		});
+		this._accountId = account.id;
 	}
 
 	async _unloadAccountDatabase() {
 		await invoke("unload_account_database");
+		this._accountId = undefined;
 	}
 
 	async init() {
@@ -38,25 +52,61 @@ export default class IosBackupTauriAdapter implements DataAdapter {
 		});
 	}
 
-	getChatList: DataAdapter["getChatList"] = async () => {
-		throw new Error("Tauri adapter: getChatList 尚未实现");
-	};
+	async getChatList(input: GetChatListRequest): GetChatListResponse {
+		const response = await invoke("get_chat_list", {
+			accountId: this.getAccountId(),
+			userIds: input.userIds,
+		});
+		return {
+			data: response.data.map((chat) => ({
+				...chat,
+				title: chat.title,
+				is_pinned: chat.is_pinned,
+				...(chat.type === "private"
+					? {
+							user: chat.user,
+							// The web adapter can return undefined for missing contacts.
+							// IPC encodes those array slots as null; restore them here.
+							members: chat.members.map((member) => member ?? undefined),
+						}
+					: { chatroom: chat.chatroom }),
+			})),
+		};
+	}
 
-	getChat: DataAdapter["getChat"] = async () => {
-		throw new Error("Tauri adapter: getChat 尚未实现");
-	};
+	async getChat(input: GetChatRequest) {
+		const response = await this.getChatList({
+			userIds: [input.chat.id],
+		});
+		// Match the web adapter: an absent chat remains undefined at runtime.
+		return { data: response.data[0]! };
+	}
 
-	getUser: DataAdapter["getUser"] = async () => {
-		throw new Error("Tauri adapter: getUser 尚未实现");
-	};
+	private getAccountId() {
+		if (!this._accountId) throw new Error("Account database is not loaded");
+		return this._accountId;
+	}
 
-	getUserList: DataAdapter["getUserList"] = async () => {
-		throw new Error("Tauri adapter: getUserList 尚未实现");
-	};
+	async getUser(input: GetUserRequest) {
+		const response = await this.getUserList({
+			userIds: [input.user.id],
+		});
+		// Match the web adapter: an absent user remains undefined at runtime.
+		return { data: response.data[0]! };
+	}
 
-	getAccountContactList: DataAdapter["getAccountContactList"] = async () => {
-		throw new Error("Tauri adapter: getAccountContactList 尚未实现");
-	};
+	async getUserList(input: GetUserListRequest) {
+		return invoke("get_user_list", {
+			accountId: this.getAccountId(),
+			userIds: input.userIds,
+		});
+	}
+
+	getAccountContactList(input: GetAccountContactListRequest) {
+		return invoke("get_account_contact_list", {
+			accountId: input.account.id,
+		});
+	}
 
 	searchChats: DataAdapter["searchChats"] = async () => {
 		throw new Error("Tauri adapter: searchChats 尚未实现");
