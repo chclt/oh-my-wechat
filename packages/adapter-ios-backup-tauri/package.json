@@ -13,7 +13,8 @@
 		"test": "vitest run"
 	},
 	"dependencies": {
-		"@tauri-apps/api": "^2.0.0"
+		"@tauri-apps/api": "^2.0.0",
+		"date-fns": "catalog:"
 	},
 	"devDependencies": {
 		"@repo/types": "workspace:*",

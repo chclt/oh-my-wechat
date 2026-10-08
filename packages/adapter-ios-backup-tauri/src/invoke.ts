@@ -26,12 +26,24 @@ import type {
 	GetMessageListResponse,
 	GetGreetingMessageListResponse,
 	GetUserListResponse,
+	SearchMessagesRequest,
+	SearchMessagesResponse,
+	GetMessageSearchIndexStatusResponse,
 	SearchChatsResponse,
 } from "@repo/types/adapter";
 import { invoke as tauriInvoke } from "@tauri-apps/api/core";
 
 // Keep these signatures aligned with rust-ios-backup/src/commands.rs.
 interface Commands {
+	search_messages: (args: {
+		request: Omit<SearchMessagesRequest, "startTime" | "endTime"> & {
+			startTime?: number;
+			endTime?: number;
+		};
+	}) => Awaited<SearchMessagesResponse>;
+	get_message_search_index_status: (args: {
+		accountId: string;
+	}) => Awaited<GetMessageSearchIndexStatusResponse>;
 	get_greeting_message_list: (args: {
 		accountId: string;
 		includeDev: boolean;

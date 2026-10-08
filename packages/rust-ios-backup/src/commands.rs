@@ -164,6 +164,31 @@ pub(crate) async fn get_message_list(
 }
 
 #[tauri::command]
+pub(crate) async fn search_messages(
+    state: tauri::State<'_, BackupState>,
+    request: crate::message::search::Request,
+) -> Result<crate::message::search::Response, BackupError> {
+    let state = state.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || crate::message::search::search(&state, &request))
+        .await
+        .map_err(|error| BackupError::context("搜索消息失败", error))?
+}
+
+#[tauri::command]
+pub(crate) async fn get_message_search_index_status(
+    state: tauri::State<'_, BackupState>,
+    account_id: String,
+) -> Result<crate::message::search::Status, BackupError> {
+    let state = state.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || match state.search_session(&account_id)? {
+        Some(search) => search.status(),
+        None => Ok(crate::message::search::Status::Idle),
+    })
+    .await
+    .map_err(|error| BackupError::context("读取搜索索引状态失败", error))?
+}
+
+#[tauri::command]
 pub(crate) async fn get_greeting_message_list(
     state: tauri::State<'_, BackupState>,
     account_id: String,

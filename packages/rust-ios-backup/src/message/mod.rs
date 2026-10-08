@@ -1,5 +1,7 @@
+mod content;
 mod greeting;
 mod query;
+pub(crate) mod search;
 mod xml;
 
 pub(crate) use greeting::{list as greetings, GreetingMessageList};
@@ -234,17 +236,9 @@ fn sender(
         }
         return Ok(String::new());
     }
-    if let Some(position) = content.find(":\n") {
-        let sender = content[..position].to_owned();
-        *content = content[position + 2..].to_owned();
-        Ok(sender)
-    } else {
-        // Preserve splitGroupMessageContent's slice(0, -1) / slice(1) behavior.
-        let units = content.encode_utf16().collect::<Vec<_>>();
-        let sender = String::from_utf16_lossy(&units[..units.len().saturating_sub(1)]);
-        *content = String::from_utf16_lossy(&units[units.len().min(1)..]);
-        Ok(sender)
-    }
+    let (sender, body) = content::split_group_content(content);
+    *content = body;
+    Ok(sender)
 }
 
 fn truthy(value: &Value) -> bool {

@@ -14,11 +14,11 @@ pub(crate) struct ChatList {
     pub(crate) data: Vec<Chat>,
 }
 
-#[derive(serde::Serialize)]
+#[derive(Clone, serde::Serialize)]
 pub(crate) struct Chat {
     #[serde(rename = "type")]
     pub(crate) kind: &'static str,
-    id: String,
+    pub(crate) id: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     title: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]

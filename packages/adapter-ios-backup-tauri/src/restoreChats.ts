@@ -1,7 +1,11 @@
 import type { ChatType } from "@repo/types";
 
 export function restoreChats(chats: ChatType[]): ChatType[] {
-	return chats.map((chat) => ({
+	return chats.map(restoreChat);
+}
+
+export function restoreChat(chat: ChatType): ChatType {
+	return {
 		...chat,
 		title: chat.title,
 		is_pinned: chat.is_pinned,
@@ -13,5 +17,5 @@ export function restoreChats(chats: ChatType[]): ChatType[] {
 					members: chat.members.map((member) => member ?? undefined),
 				}
 			: { chatroom: chat.chatroom }),
-	}));
+	};
 }

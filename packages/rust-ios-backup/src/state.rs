@@ -4,6 +4,7 @@ use crate::{
     backup::LoadedBackup,
     errors::BackupError,
     file::Registry,
+    message::search,
 };
 use std::sync::{Arc, Mutex, MutexGuard};
 
@@ -12,6 +13,7 @@ struct Session {
     backup: Option<Arc<LoadedBackup>>,
     generation: u64,
     loaded: Option<AccountDatabases>,
+    search: Option<Arc<search::Session>>,
     files: Arc<Registry>,
 }
 
@@ -55,6 +57,41 @@ impl BackupState {
         query(loaded)
     }
 
+    pub(crate) fn search_session(
+        &self,
+        account_id: &str,
+    ) -> Result<Option<Arc<search::Session>>, BackupError> {
+        let session = self.lock()?;
+        Ok(
+            if session
+                .loaded
+                .as_ref()
+                .is_some_and(|databases| databases.account.id.as_deref() == Some(account_id))
+            {
+                session.search.clone()
+            } else {
+                None
+            },
+        )
+    }
+
+    pub(crate) fn with_search_account<T>(
+        &self,
+        generation: u64,
+        query: impl FnOnce(&AccountDatabases) -> Result<T, BackupError>,
+    ) -> Result<T, BackupError> {
+        let session = self.lock()?;
+        if session.generation != generation {
+            return Err(cancelled());
+        }
+        query(
+            session
+                .loaded
+                .as_ref()
+                .expect("search session has a loaded account"),
+        )
+    }
+
     fn lock(&self) -> Result<MutexGuard<'_, Session>, BackupError> {
         self.session
             .lock()
@@ -66,6 +103,9 @@ impl BackupState {
         session.files.clear();
         session.files = Arc::new(Registry::default());
         session.generation += 1;
+        if let Some(search) = session.search.take() {
+            search.cancel()?;
+        }
         session.loaded = None;
         session.backup = None;
         Ok(session.generation)
@@ -112,6 +152,9 @@ impl BackupState {
         session.files.clear();
         session.files = Arc::new(Registry::default());
         session.generation += 1;
+        if let Some(search) = session.search.take() {
+            search.cancel()?;
+        }
         session.loaded = None;
         Ok((backup, session.generation))
     }
@@ -132,7 +175,16 @@ impl BackupState {
         if session.generation != generation {
             return Err(cancelled());
         }
+        let search = Arc::new(search::Session::new(generation));
         session.loaded = Some(databases);
+        session.search = Some(search.clone());
+        drop(session);
+        let state = self.clone();
+        tauri::async_runtime::spawn_blocking(move || {
+            if let Err(error) = search.build(&state) {
+                eprintln!("Cannot update message search state: {error}");
+            }
+        });
         Ok(())
     }
 
@@ -141,6 +193,9 @@ impl BackupState {
         session.files.clear();
         session.files = Arc::new(Registry::default());
         session.generation += 1;
+        if let Some(search) = session.search.take() {
+            search.cancel()?;
+        }
         session.loaded = None;
         Ok(())
     }

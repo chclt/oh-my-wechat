@@ -31,13 +31,18 @@ import type {
 	GetMessageListResponse,
 	GetUserRequest,
 	GetUserListRequest,
+	SearchMessagesRequest,
+	SearchMessagesResponse,
+	GetMessageSearchIndexStatusRequest,
+	GetMessageSearchIndexStatusResponse,
 	SearchChatsRequest,
 	SearchChatsResponse,
 } from "@repo/types/adapter";
 import { convertFileSrc } from "@tauri-apps/api/core";
+import { getUnixTime, parseISO } from "date-fns";
 import { createFileUrl } from "./file";
 import { invoke } from "./invoke";
-import { restoreChats } from "./restoreChats";
+import { restoreChat, restoreChats } from "./restoreChats";
 import { restoreMessages } from "./restoreMessages";
 
 export default class IosBackupTauriAdapter implements DataAdapter {
@@ -247,12 +252,35 @@ export default class IosBackupTauriAdapter implements DataAdapter {
 		return { data: {} };
 	};
 
-	searchMessages: DataAdapter["searchMessages"] = async () => {
-		throw new Error("Tauri adapter: searchMessages 尚未实现");
-	};
-
-	getMessageSearchIndexStatus: DataAdapter["getMessageSearchIndexStatus"] =
-		async () => {
-			throw new Error("Tauri adapter: getMessageSearchIndexStatus 尚未实现");
+	async searchMessages(input: SearchMessagesRequest): SearchMessagesResponse {
+		const response = await invoke("search_messages", {
+			request: {
+				...input,
+				startTime:
+					input.startTime === undefined
+						? undefined
+						: getUnixTime(parseISO(input.startTime)),
+				endTime:
+					input.endTime === undefined
+						? undefined
+						: getUnixTime(parseISO(input.endTime)),
+			},
+		});
+		return {
+			...response,
+			data: response.data.map((hit) => ({
+				...hit,
+				chat: restoreChat(hit.chat),
+				matchCount: hit.matchCount,
+			})),
 		};
+	}
+
+	getMessageSearchIndexStatus(
+		input: GetMessageSearchIndexStatusRequest,
+	): GetMessageSearchIndexStatusResponse {
+		return invoke("get_message_search_index_status", {
+			accountId: input.account.id,
+		});
+	}
 }
