@@ -1,4 +1,4 @@
-#[derive(Debug, serde::Serialize)]
+#[derive(Clone, Debug, serde::Serialize)]
 pub(crate) struct BackupError {
     name: &'static str,
     message: String,

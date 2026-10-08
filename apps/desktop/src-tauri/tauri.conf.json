@@ -20,7 +20,13 @@
 				"minWidth": 800,
 				"minHeight": 600
 			}
-		]
+		],
+		"security": {
+			"assetProtocol": {
+				"enable": true,
+				"scope": ["$TEMP/oh-my-wechat-media-*/**"]
+			}
+		}
 	},
 	"bundle": {
 		"active": true,

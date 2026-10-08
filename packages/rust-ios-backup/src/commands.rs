@@ -1,5 +1,5 @@
 use crate::{account::AccountList, BackupState};
-use crate::{backup::LoadedBackup, errors::BackupError};
+use crate::{backup::LoadedBackup, errors::BackupError, file::FileSource};
 use std::path::PathBuf;
 use tauri_plugin_dialog::DialogExt;
 
@@ -33,15 +33,20 @@ pub(crate) async fn show_directory_picker<R: tauri::Runtime>(
 }
 
 #[tauri::command]
-pub(crate) async fn load_backup_directory(
+pub(crate) async fn load_backup_directory<R: tauri::Runtime>(
+    app: tauri::AppHandle<R>,
     state: tauri::State<'_, BackupState>,
     directory: PathBuf,
     password: Option<String>,
 ) -> Result<(), BackupError> {
+    use tauri::Manager;
     let generation = state.begin_directory_load()?;
     let state = state.inner().clone();
     tauri::async_runtime::spawn_blocking(move || {
         let backup = LoadedBackup::open(directory, password, || state.check_current(generation))?;
+        app.asset_protocol_scope()
+            .allow_directory(&backup.directory, true)
+            .map_err(|error| BackupError::context("Cannot expose backup files", error))?;
         state.finish_directory_load(generation, backup)
     })
     .await
@@ -181,4 +186,92 @@ pub(crate) fn unload_account_database(
     state: tauri::State<'_, BackupState>,
 ) -> Result<(), BackupError> {
     state.unload_account()
+}
+
+#[tauri::command]
+pub(crate) async fn get_message_image(
+    state: tauri::State<'_, BackupState>,
+    request: crate::media::ImageRequest,
+) -> Result<crate::media::Response<crate::media::ImageInfo>, BackupError> {
+    let (backup, _) = state.files()?;
+    tauri::async_runtime::spawn_blocking(move || crate::media::image(&backup, request))
+        .await
+        .map_err(|error| BackupError::context("读取图片信息失败", error))?
+}
+
+#[tauri::command]
+pub(crate) async fn get_message_video(
+    state: tauri::State<'_, BackupState>,
+    request: crate::media::VideoRequest,
+) -> Result<crate::media::Response<Option<crate::media::VideoInfo>>, BackupError> {
+    let (backup, _) = state.files()?;
+    tauri::async_runtime::spawn_blocking(move || crate::media::video(&backup, request))
+        .await
+        .map_err(|error| BackupError::context("读取视频信息失败", error))?
+}
+
+#[tauri::command]
+pub(crate) async fn get_message_voice(
+    state: tauri::State<'_, BackupState>,
+    request: crate::media::VoiceRequest,
+) -> Result<crate::media::Response<Option<crate::media::VoiceInfo>>, BackupError> {
+    let (backup, _) = state.files()?;
+    tauri::async_runtime::spawn_blocking(move || crate::media::voice(&backup, request))
+        .await
+        .map_err(|error| BackupError::context("读取语音信息失败", error))?
+}
+
+// This command registers the reference before handing work to Tauri's runtime.
+// An async #[tauri::command] would also defer registration past a later release.
+pub(crate) fn resolve_message_file<R: tauri::Runtime>(invoke: tauri::ipc::Invoke<R>) {
+    use tauri::{
+        ipc::{CommandArg, CommandItem, Invoke, InvokeError},
+        Manager,
+    };
+    let Invoke {
+        message,
+        resolver,
+        acl,
+    } = invoke;
+    let pending = (|| {
+        let request = crate::file::ResolveRequest::from_command(CommandItem {
+            plugin: None,
+            name: "resolve_message_file",
+            key: "request",
+            message: &message,
+            acl: &acl,
+        })?;
+        let app = message.webview_ref().app_handle();
+        let (backup, registry) = app.state::<BackupState>().files()?;
+        crate::file::resolve(backup, registry, request.uri, request.reference_id)
+            .map_err(InvokeError::from)
+    })();
+    match pending {
+        Ok(pending) => resolver.respond_async(async move {
+            let file = pending.await?;
+            Ok::<_, InvokeError>(crate::media::Response {
+                data: FileSource {
+                    src: file.path.clone(),
+                },
+            })
+        }),
+        Err(error) => resolver.invoke_error(error),
+    }
+}
+
+#[tauri::command]
+pub(crate) fn release_message_file(
+    state: tauri::State<'_, BackupState>,
+    request: crate::file::ReleaseRequest,
+) -> Result<(), BackupError> {
+    state.release_file(&request.reference_id)
+}
+
+#[tauri::command]
+pub(crate) async fn get_message_attach(
+    state: tauri::State<'_, BackupState>,
+    request: crate::media::AttachRequest,
+) -> Result<crate::media::Response<Option<FileSource>>, BackupError> {
+    let (backup, registry) = state.files()?;
+    crate::media::attach(backup, registry, request).await
 }

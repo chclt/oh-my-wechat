@@ -7,12 +7,24 @@ import type {
 	GetChatListRequest,
 	GetChatListResponse,
 	GetMessageListRequest,
+	GetMessageImageRequest,
+	GetMessageImageResponse,
+	GetMessageVideoRequest,
+	GetMessageVideoResponse,
+	GetMessageVoiceRequest,
+	GetMessageVoiceResponse,
+	GetMessageAttachRequest,
+	GetMessageAttachResponse,
+	ResolveMessageFileRequest,
+	ResolveMessageFileResponse,
+	ReleaseMessageFileRequest,
 	GetMessageListResponse,
 	GetUserRequest,
 	GetUserListRequest,
 	SearchChatsRequest,
 	SearchChatsResponse,
 } from "@repo/types/adapter";
+import { convertFileSrc } from "@tauri-apps/api/core";
 import { invoke } from "./invoke";
 import { restoreChats } from "./restoreChats";
 import { restoreMessages } from "./restoreMessages";
@@ -124,29 +136,82 @@ export default class IosBackupTauriAdapter implements DataAdapter {
 		throw new Error("Tauri adapter: getGreetingMessageList 尚未实现");
 	};
 
-	getMessageImage: DataAdapter["getMessageImage"] = async () => {
-		throw new Error("Tauri adapter: getMessageImage 尚未实现");
-	};
+	async getMessageImage(
+		input: GetMessageImageRequest,
+	): GetMessageImageResponse {
+		const response = await invoke("get_message_image", { request: input });
+		// The web adapter keeps own undefined dimensions when XML dimensions are absent.
+		if (
+			input.domain !== "opendata" &&
+			input.message.message_entity.msg.img &&
+			response.data
+		) {
+			for (const size of ["hd", "regular", "thumbnail"] as const) {
+				const image = response.data[size];
+				if (image)
+					response.data[size] = {
+						...image,
+						width: image.width,
+						height: image.height,
+					};
+			}
+		}
+		return response;
+	}
 
-	resolveMessageFile: DataAdapter["resolveMessageFile"] = async () => {
-		throw new Error("Tauri adapter: resolveMessageFile 尚未实现");
-	};
+	async resolveMessageFile(
+		input: ResolveMessageFileRequest,
+	): ResolveMessageFileResponse {
+		const { data } = await invoke("resolve_message_file", { request: input });
+		return { data: { src: convertFileSrc(data.src) } };
+	}
 
-	releaseMessageFile: DataAdapter["releaseMessageFile"] = async () => {
-		throw new Error("Tauri adapter: releaseMessageFile 尚未实现");
-	};
+	async releaseMessageFile(input: ReleaseMessageFileRequest) {
+		await invoke("release_message_file", { request: input });
+		return { data: undefined };
+	}
 
-	getMessageVideo: DataAdapter["getMessageVideo"] = async () => {
-		throw new Error("Tauri adapter: getMessageVideo 尚未实现");
-	};
+	async getMessageVideo(
+		input: GetMessageVideoRequest,
+	): GetMessageVideoResponse {
+		const { data } = await invoke("get_message_video", { request: input });
+		if (data?.cover)
+			data.cover = {
+				...data.cover,
+				width: data.cover.width,
+				height: data.cover.height,
+			};
+		return { data: data ?? undefined };
+	}
 
-	getMessageVoice: DataAdapter["getMessageVoice"] = async () => {
-		throw new Error("Tauri adapter: getMessageVoice 尚未实现");
-	};
+	async getMessageVoice(
+		input: GetMessageVoiceRequest,
+	): GetMessageVoiceResponse {
+		const { data } = await invoke("get_message_voice", { request: input });
+		if (data && "transcription" in data)
+			data.transcription = data.transcription ?? undefined;
+		return { data: data ?? undefined };
+	}
 
-	getMessageAttach: DataAdapter["getMessageAttach"] = async () => {
-		throw new Error("Tauri adapter: getMessageAttach 尚未实现");
-	};
+	async getMessageAttach(
+		input: GetMessageAttachRequest,
+	): GetMessageAttachResponse {
+		const { data } = await invoke("get_message_attach", { request: input });
+		if (!data) return { data: undefined };
+		// Attachments use the existing <a download> flow and component-owned URL
+		// cleanup. A Blob URL also preserves its filename across WebView platforms.
+		const response = await fetch(convertFileSrc(data.src));
+		if (!response.ok)
+			throw new Error(`Cannot read attachment: ${response.status}`);
+		const blob = await response.blob();
+		return {
+			data: {
+				src: URL.createObjectURL(
+					input.type ? new Blob([blob], { type: input.type }) : blob,
+				),
+			},
+		};
+	}
 
 	getRecordImage: DataAdapter["getRecordImage"] = async () => {
 		throw new Error("Tauri adapter: getRecordImage 尚未实现");

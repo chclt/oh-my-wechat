@@ -1,5 +1,5 @@
-use crate::{encryption::BackupEncryption, errors::BackupError};
-use rusqlite::Connection;
+use crate::{backup::LoadedBackup, encryption::BackupEncryption, errors::BackupError};
+use rusqlite::{Connection, OptionalExtension};
 use std::{
     ffi::OsStr,
     fs,
@@ -14,6 +14,26 @@ pub(crate) struct ManifestFile {
 }
 
 impl ManifestFile {
+    pub(crate) fn from_record(
+        directory: &Path,
+        id: &str,
+        relative_path: String,
+        metadata: Option<Vec<u8>>,
+    ) -> Result<Self, BackupError> {
+        let prefix: String = id.chars().take(2).collect();
+        // Both the file ID and its prefix must stay within the backup directory.
+        if Path::new(id).file_name() != Some(OsStr::new(id)) || id.contains('\\') || prefix == ".."
+        {
+            return Err(BackupError::invalid("Invalid backup file path"));
+        }
+
+        Ok(Self {
+            relative_path,
+            path: directory.join(prefix).join(id),
+            metadata,
+        })
+    }
+
     pub(crate) fn read(
         &self,
         encryption: Option<&BackupEncryption>,
@@ -37,6 +57,27 @@ impl ManifestFile {
             None => Ok(bytes),
         }
     }
+}
+
+pub(crate) fn find_file(
+    backup: &LoadedBackup,
+    relative_path: &str,
+) -> Result<ManifestFile, BackupError> {
+    let manifest = backup
+        .manifest
+        .lock()
+        .map_err(|error| BackupError::context("Manifest database unavailable", error))?;
+    let record: Option<(String, Option<Vec<u8>>)> = manifest.query_row(
+        "SELECT fileID, file FROM Files WHERE domain = 'AppDomain-com.tencent.xin' AND relativePath = ?1 AND flags = 1 LIMIT 1",
+        [relative_path], |row| Ok((row.get(0)?, row.get(1)?)),
+    ).optional().map_err(|error| BackupError::context("Cannot query media file", error))?;
+    let (id, metadata) = record.filter(|(id, _)| !id.is_empty()).ok_or_else(|| {
+        BackupError::new(
+            "Error",
+            format!("[messageFile] file not found for uri: ios-backup:{relative_path}"),
+        )
+    })?;
+    ManifestFile::from_record(&backup.directory, &id, relative_path.to_owned(), metadata)
 }
 
 /// Equivalent to getFilesFromManifast, leaving content reads to the caller so
@@ -65,30 +106,19 @@ pub(crate) fn find_files(
         if id.is_empty() {
             continue;
         }
-        let prefix: String = id.chars().take(2).collect();
-        // Both the file ID and its prefix must stay within the backup directory.
-        if Path::new(&id).file_name() != Some(OsStr::new(&id))
-            || id.contains('\\')
-            || prefix == ".."
-        {
-            return Err(BackupError::invalid("Invalid backup file path"));
-        }
-        let path = directory.join(prefix).join(&id);
-        match fs::metadata(&path) {
-            Ok(file_info) if file_info.is_file() => files.push(ManifestFile {
-                relative_path,
-                path,
-                metadata,
-            }),
+        let file = ManifestFile::from_record(directory, &id, relative_path, metadata)?;
+        match fs::metadata(&file.path) {
+            Ok(file_info) if file_info.is_file() => files.push(file),
             Err(error) if error.kind() == ErrorKind::NotFound => continue,
             Ok(_) => {
                 return Err(BackupError::invalid(format!(
-                    "Backup entry is not a file: {relative_path}"
+                    "Backup entry is not a file: {}",
+                    file.relative_path
                 )))
             }
             Err(error) => {
                 return Err(BackupError::context(
-                    format!("Cannot access {relative_path}"),
+                    format!("Cannot access {}", file.relative_path),
                     error,
                 ))
             }

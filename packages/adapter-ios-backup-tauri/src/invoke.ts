@@ -1,4 +1,15 @@
 import type {
+	GetMessageImageRequest,
+	GetMessageImageResponse,
+	GetMessageVideoRequest,
+	GetMessageVideoResponse,
+	GetMessageVoiceRequest,
+	GetMessageVoiceResponse,
+	GetMessageAttachRequest,
+	GetMessageAttachResponse,
+	ResolveMessageFileRequest,
+	ResolveMessageFileResponse,
+	ReleaseMessageFileRequest,
 	GetAccountContactListResponse,
 	GetAccountListResponse,
 	GetAccountResponse,
@@ -12,6 +23,22 @@ import { invoke as tauriInvoke } from "@tauri-apps/api/core";
 
 // Keep these signatures aligned with rust-ios-backup/src/commands.rs.
 interface Commands {
+	get_message_image: (args: {
+		request: GetMessageImageRequest;
+	}) => Awaited<GetMessageImageResponse>;
+	get_message_video: (args: {
+		request: GetMessageVideoRequest;
+	}) => Awaited<GetMessageVideoResponse>;
+	get_message_voice: (args: {
+		request: GetMessageVoiceRequest;
+	}) => Awaited<GetMessageVoiceResponse>;
+	get_message_attach: (args: {
+		request: GetMessageAttachRequest;
+	}) => Awaited<GetMessageAttachResponse>;
+	resolve_message_file: (args: {
+		request: ResolveMessageFileRequest;
+	}) => Awaited<ResolveMessageFileResponse>;
+	release_message_file: (args: { request: ReleaseMessageFileRequest }) => null;
 	show_directory_picker: () => string | null;
 	load_backup_directory: (args: {
 		directory: string;

@@ -3,6 +3,7 @@ use crate::{
     account::{Account, AccountList},
     backup::LoadedBackup,
     errors::BackupError,
+    file::Registry,
 };
 use std::sync::{Arc, Mutex, MutexGuard};
 
@@ -11,6 +12,7 @@ struct Session {
     backup: Option<Arc<LoadedBackup>>,
     generation: u64,
     loaded: Option<AccountDatabases>,
+    files: Arc<Registry>,
 }
 
 #[derive(Clone, Default)]
@@ -19,6 +21,24 @@ pub struct BackupState {
 }
 
 impl BackupState {
+    pub(crate) fn files(&self) -> Result<(Arc<LoadedBackup>, Arc<Registry>), BackupError> {
+        let session = self.lock()?;
+        let backup = session
+            .backup
+            .clone()
+            .ok_or_else(|| BackupError::new("Error", "Directory not loaded"))?;
+        Ok((backup, session.files.clone()))
+    }
+
+    pub(crate) fn file_registry(&self) -> Result<Arc<Registry>, BackupError> {
+        Ok(self.lock()?.files.clone())
+    }
+
+    pub(crate) fn release_file(&self, reference_id: &str) -> Result<(), BackupError> {
+        self.file_registry()?.release(reference_id);
+        Ok(())
+    }
+
     pub(crate) fn with_account<T>(
         &self,
         account_id: &str,
@@ -43,6 +63,8 @@ impl BackupState {
 
     pub(crate) fn begin_directory_load(&self) -> Result<u64, BackupError> {
         let mut session = self.lock()?;
+        session.files.clear();
+        session.files = Arc::new(Registry::default());
         session.generation += 1;
         session.loaded = None;
         session.backup = None;
@@ -87,6 +109,8 @@ impl BackupState {
             .backup
             .clone()
             .ok_or_else(|| BackupError::new("Error", "Directory not loaded"))?;
+        session.files.clear();
+        session.files = Arc::new(Registry::default());
         session.generation += 1;
         session.loaded = None;
         Ok((backup, session.generation))
@@ -114,6 +138,8 @@ impl BackupState {
 
     pub(crate) fn unload_account(&self) -> Result<(), BackupError> {
         let mut session = self.lock()?;
+        session.files.clear();
+        session.files = Arc::new(Registry::default());
         session.generation += 1;
         session.loaded = None;
         Ok(())

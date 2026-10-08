@@ -10,5 +10,5 @@ tauri-build = { version = "2", features = [] }
 
 [dependencies]
 rust-ios-backup = { path = "../../../packages/rust-ios-backup" }
-tauri = { version = "2", features = [] }
+tauri = { version = "2", features = ["protocol-asset"] }
 tauri-plugin-dialog = "2"
