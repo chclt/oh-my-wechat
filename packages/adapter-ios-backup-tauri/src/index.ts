@@ -7,6 +7,8 @@ import type {
 	GetChatListRequest,
 	GetChatListResponse,
 	GetMessageListRequest,
+	GetGreetingMessageListRequest,
+	GetGreetingMessageListResponse,
 	GetMessageImageRequest,
 	GetMessageImageResponse,
 	GetMessageVideoRequest,
@@ -141,9 +143,18 @@ export default class IosBackupTauriAdapter implements DataAdapter {
 		return { ...response, data: restoreMessages(response.data) };
 	}
 
-	getGreetingMessageList: DataAdapter["getGreetingMessageList"] = async () => {
-		throw new Error("Tauri adapter: getGreetingMessageList 尚未实现");
-	};
+	async getGreetingMessageList(
+		input: GetGreetingMessageListRequest,
+	): GetGreetingMessageListResponse {
+		const { data } = await invoke("get_greeting_message_list", {
+			accountId: input.account.id,
+			includeDev: import.meta.env.DEV,
+		});
+		// The web adapter keeps an own undefined contact when no identity matches.
+		return {
+			data: data.map((message) => ({ ...message, contact: message.contact })),
+		};
+	}
 
 	async getMessageImage(
 		input: GetMessageImageRequest,
@@ -232,7 +243,8 @@ export default class IosBackupTauriAdapter implements DataAdapter {
 	}
 
 	getStatistic: DataAdapter["getStatistic"] = async () => {
-		throw new Error("Tauri adapter: getStatistic 尚未实现");
+		// 网页目前没有使用统计接口，暂时返回空数据。
+		return { data: {} };
 	};
 
 	searchMessages: DataAdapter["searchMessages"] = async () => {

@@ -1,6 +1,8 @@
+mod greeting;
 mod query;
 mod xml;
 
+pub(crate) use greeting::{list as greetings, GreetingMessageList};
 pub(crate) use query::MessageListRequest;
 
 use crate::{

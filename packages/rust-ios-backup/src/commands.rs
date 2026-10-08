@@ -164,6 +164,22 @@ pub(crate) async fn get_message_list(
 }
 
 #[tauri::command]
+pub(crate) async fn get_greeting_message_list(
+    state: tauri::State<'_, BackupState>,
+    account_id: String,
+    include_dev: bool,
+) -> Result<crate::message::GreetingMessageList, BackupError> {
+    let state = state.inner().clone();
+    tauri::async_runtime::spawn_blocking(move || {
+        state.with_account(&account_id, |databases| {
+            crate::message::greetings(databases, include_dev)
+        })
+    })
+    .await
+    .map_err(|error| BackupError::context("读取验证消息失败", error))?
+}
+
+#[tauri::command]
 pub(crate) async fn load_account_database(
     state: tauri::State<'_, BackupState>,
     account_id: String,

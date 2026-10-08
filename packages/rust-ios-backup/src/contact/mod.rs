@@ -1,4 +1,7 @@
+mod identity;
 mod proto;
+
+pub(crate) use identity::{resolve as resolve_identities, Identity};
 
 use crate::{
     account::{Account, Photo},

@@ -29,6 +29,7 @@ pub fn invoke_handler<R: Runtime>() -> impl Fn(Invoke<R>) -> bool + Send + Sync 
         commands::get_user_list,
         commands::search_chats,
         commands::get_message_list,
+        commands::get_greeting_message_list,
         commands::get_message_image,
         commands::get_message_video,
         commands::get_message_voice,

@@ -24,6 +24,7 @@ import type {
 	GetChatListResponse,
 	GetMessageListRequest,
 	GetMessageListResponse,
+	GetGreetingMessageListResponse,
 	GetUserListResponse,
 	SearchChatsResponse,
 } from "@repo/types/adapter";
@@ -31,6 +32,10 @@ import { invoke as tauriInvoke } from "@tauri-apps/api/core";
 
 // Keep these signatures aligned with rust-ios-backup/src/commands.rs.
 interface Commands {
+	get_greeting_message_list: (args: {
+		accountId: string;
+		includeDev: boolean;
+	}) => Awaited<GetGreetingMessageListResponse>;
 	get_record_image: (args: {
 		request: GetRecordImageRequest;
 	}) => Awaited<GetRecordImageResponse>;

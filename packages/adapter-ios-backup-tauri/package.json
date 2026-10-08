@@ -19,6 +19,7 @@
 		"@repo/types": "workspace:*",
 		"@repo/typescript-config": "workspace:*",
 		"typescript": "catalog:",
+		"vite": "catalog:",
 		"vitest": "catalog:"
 	},
 	"peerDependencies": {
