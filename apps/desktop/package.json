@@ -11,6 +11,7 @@
 		"test": "cargo test --workspace --locked --manifest-path src-tauri/Cargo.toml"
 	},
 	"devDependencies": {
+		"@repo/ffmpeg": "workspace:*",
 		"@tauri-apps/cli": "^2.0.0"
 	}
 }

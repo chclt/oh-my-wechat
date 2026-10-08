@@ -7,6 +7,7 @@
 		"beforeDevCommand": "pnpm --filter web dev --mode tauri --port 1420 --strictPort",
 		"devUrl": "http://localhost:1420",
 		"beforeBuildCommand": "pnpm --filter web build --mode tauri",
+		"beforeBundleCommand": "node scripts/prepare-ffmpeg.mjs",
 		"frontendDist": "../../web/dist"
 	},
 	"app": {
@@ -30,6 +31,8 @@
 			"icons/128x128@2x.png",
 			"icons/icon.icns",
 			"icons/icon.ico"
-		]
+		],
+		"externalBin": ["binaries/ffmpeg"],
+		"resources": ["binaries/ffmpeg.LICENSE", "binaries/ffmpeg.build.json"]
 	}
 }

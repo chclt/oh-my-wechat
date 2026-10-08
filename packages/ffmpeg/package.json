@@ -1,0 +1,13 @@
+{
+	"name": "@repo/ffmpeg",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"exports": {
+		"./config": "./ffmpeg.config.mjs",
+		"./package.json": "./package.json"
+	},
+	"scripts": {
+		"build": "node build.mjs"
+	}
+}
