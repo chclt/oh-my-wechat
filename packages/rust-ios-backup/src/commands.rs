@@ -275,3 +275,45 @@ pub(crate) async fn get_message_attach(
     let (backup, registry) = state.files()?;
     crate::media::attach(backup, registry, request).await
 }
+
+#[tauri::command]
+pub(crate) async fn get_record_image(
+    state: tauri::State<'_, BackupState>,
+    request: crate::media::record::RecordRequest,
+) -> Result<crate::media::Response<crate::media::ImageInfo>, BackupError> {
+    let (backup, _) = state.files()?;
+    tauri::async_runtime::spawn_blocking(move || crate::media::record::image(&backup, request))
+        .await
+        .map_err(|error| BackupError::context("读取记录图片失败", error))?
+}
+
+#[tauri::command]
+pub(crate) async fn get_record_video(
+    state: tauri::State<'_, BackupState>,
+    request: crate::media::record::RecordRequest,
+) -> Result<crate::media::Response<crate::media::VideoInfo>, BackupError> {
+    let (backup, _) = state.files()?;
+    tauri::async_runtime::spawn_blocking(move || crate::media::record::video(&backup, request))
+        .await
+        .map_err(|error| BackupError::context("读取记录视频失败", error))?
+}
+
+#[tauri::command]
+pub(crate) async fn get_record_audio(
+    state: tauri::State<'_, BackupState>,
+    request: crate::media::record::RecordFileRequest,
+) -> Result<crate::media::Response<Option<crate::media::VoiceInfo>>, BackupError> {
+    let (backup, _) = state.files()?;
+    tauri::async_runtime::spawn_blocking(move || crate::media::record::audio(&backup, request))
+        .await
+        .map_err(|error| BackupError::context("读取记录音频失败", error))?
+}
+
+#[tauri::command]
+pub(crate) async fn get_record_file(
+    state: tauri::State<'_, BackupState>,
+    request: crate::media::record::RecordFileRequest,
+) -> Result<crate::media::Response<Option<FileSource>>, BackupError> {
+    let (backup, registry) = state.files()?;
+    crate::media::record::file(backup, registry, request).await
+}

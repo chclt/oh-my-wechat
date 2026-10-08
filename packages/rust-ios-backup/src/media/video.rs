@@ -19,9 +19,9 @@ pub(crate) struct VideoRequest {
 
 #[derive(Default, Serialize)]
 pub(crate) struct VideoInfo {
-    uri: String,
+    pub(super) uri: String,
     #[serde(skip_serializing_if = "Option::is_none")]
-    cover: Option<MediaFile>,
+    pub(super) cover: Option<MediaFile>,
 }
 
 pub(crate) fn get(
@@ -32,7 +32,7 @@ pub(crate) fn get(
         backup,
         &request.account.id,
         &request.chat.id,
-        &request.message.local_id,
+        &format!("{}.%", request.message.local_id),
         "Video",
     )?;
     if paths.is_empty() {

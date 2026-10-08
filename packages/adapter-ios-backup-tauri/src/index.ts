@@ -15,6 +15,14 @@ import type {
 	GetMessageVoiceResponse,
 	GetMessageAttachRequest,
 	GetMessageAttachResponse,
+	GetRecordImageRequest,
+	GetRecordImageResponse,
+	GetRecordVideoRequest,
+	GetRecordVideoResponse,
+	GetRecordAudioRequest,
+	GetRecordAudioResponse,
+	GetRecordFileRequest,
+	GetRecordFileResponse,
 	ResolveMessageFileRequest,
 	ResolveMessageFileResponse,
 	ReleaseMessageFileRequest,
@@ -25,6 +33,7 @@ import type {
 	SearchChatsResponse,
 } from "@repo/types/adapter";
 import { convertFileSrc } from "@tauri-apps/api/core";
+import { createFileUrl } from "./file";
 import { invoke } from "./invoke";
 import { restoreChats } from "./restoreChats";
 import { restoreMessages } from "./restoreMessages";
@@ -198,36 +207,29 @@ export default class IosBackupTauriAdapter implements DataAdapter {
 	): GetMessageAttachResponse {
 		const { data } = await invoke("get_message_attach", { request: input });
 		if (!data) return { data: undefined };
-		// Attachments use the existing <a download> flow and component-owned URL
-		// cleanup. A Blob URL also preserves its filename across WebView platforms.
-		const response = await fetch(convertFileSrc(data.src));
-		if (!response.ok)
-			throw new Error(`Cannot read attachment: ${response.status}`);
-		const blob = await response.blob();
 		return {
-			data: {
-				src: URL.createObjectURL(
-					input.type ? new Blob([blob], { type: input.type }) : blob,
-				),
-			},
+			data: { src: await createFileUrl(data.src, input.type) },
 		};
 	}
 
-	getRecordImage: DataAdapter["getRecordImage"] = async () => {
-		throw new Error("Tauri adapter: getRecordImage 尚未实现");
-	};
+	getRecordImage(input: GetRecordImageRequest): GetRecordImageResponse {
+		return invoke("get_record_image", { request: input });
+	}
 
-	getRecordVideo: DataAdapter["getRecordVideo"] = async () => {
-		throw new Error("Tauri adapter: getRecordVideo 尚未实现");
-	};
+	getRecordVideo(input: GetRecordVideoRequest): GetRecordVideoResponse {
+		return invoke("get_record_video", { request: input });
+	}
 
-	getRecordFile: DataAdapter["getRecordFile"] = async () => {
-		throw new Error("Tauri adapter: getRecordFile 尚未实现");
-	};
+	async getRecordFile(input: GetRecordFileRequest): GetRecordFileResponse {
+		const { data } = await invoke("get_record_file", { request: input });
+		if (!data) return { data: undefined };
+		return { data: { src: await createFileUrl(data.src) } };
+	}
 
-	getRecordAudio: DataAdapter["getRecordAudio"] = async () => {
-		throw new Error("Tauri adapter: getRecordAudio 尚未实现");
-	};
+	async getRecordAudio(input: GetRecordAudioRequest): GetRecordAudioResponse {
+		const { data } = await invoke("get_record_audio", { request: input });
+		return { data: data ?? undefined };
+	}
 
 	getStatistic: DataAdapter["getStatistic"] = async () => {
 		throw new Error("Tauri adapter: getStatistic 尚未实现");

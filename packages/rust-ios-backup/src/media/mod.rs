@@ -1,5 +1,6 @@
 mod attach;
 mod image;
+pub(crate) mod record;
 mod video;
 mod voice;
 
@@ -58,11 +59,11 @@ fn files(
     backup: &LoadedBackup,
     account: &str,
     chat: &str,
-    id: &str,
+    filename_pattern: &str,
     directory: &str,
 ) -> Result<Vec<String>, BackupError> {
     let pattern = format!(
-        "Documents/{:x}/{directory}/{:x}/{id}.%",
+        "Documents/{:x}/{directory}/{:x}/{filename_pattern}",
         md5::compute(account),
         md5::compute(chat)
     );

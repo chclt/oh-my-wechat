@@ -33,6 +33,10 @@ pub fn invoke_handler<R: Runtime>() -> impl Fn(Invoke<R>) -> bool + Send + Sync 
         commands::get_message_video,
         commands::get_message_voice,
         commands::get_message_attach,
+        commands::get_record_image,
+        commands::get_record_video,
+        commands::get_record_audio,
+        commands::get_record_file,
         commands::release_message_file,
         commands::load_account_database,
         commands::unload_account_database

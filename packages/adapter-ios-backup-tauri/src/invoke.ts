@@ -7,6 +7,14 @@ import type {
 	GetMessageVoiceResponse,
 	GetMessageAttachRequest,
 	GetMessageAttachResponse,
+	GetRecordImageRequest,
+	GetRecordImageResponse,
+	GetRecordVideoRequest,
+	GetRecordVideoResponse,
+	GetRecordAudioRequest,
+	GetRecordAudioResponse,
+	GetRecordFileRequest,
+	GetRecordFileResponse,
 	ResolveMessageFileRequest,
 	ResolveMessageFileResponse,
 	ReleaseMessageFileRequest,
@@ -23,6 +31,18 @@ import { invoke as tauriInvoke } from "@tauri-apps/api/core";
 
 // Keep these signatures aligned with rust-ios-backup/src/commands.rs.
 interface Commands {
+	get_record_image: (args: {
+		request: GetRecordImageRequest;
+	}) => Awaited<GetRecordImageResponse>;
+	get_record_video: (args: {
+		request: GetRecordVideoRequest;
+	}) => Awaited<GetRecordVideoResponse>;
+	get_record_audio: (args: {
+		request: GetRecordAudioRequest;
+	}) => Awaited<GetRecordAudioResponse>;
+	get_record_file: (args: {
+		request: GetRecordFileRequest;
+	}) => Awaited<GetRecordFileResponse>;
 	get_message_image: (args: {
 		request: GetMessageImageRequest;
 	}) => Awaited<GetMessageImageResponse>;

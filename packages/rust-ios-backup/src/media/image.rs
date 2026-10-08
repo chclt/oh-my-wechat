@@ -34,9 +34,9 @@ pub(crate) struct ImageInfo {
     #[serde(skip_serializing_if = "Option::is_none")]
     hd: Option<MediaFile>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    regular: Option<MediaFile>,
+    pub(super) regular: Option<MediaFile>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    thumbnail: Option<MediaFile>,
+    pub(super) thumbnail: Option<MediaFile>,
     #[serde(skip_serializing_if = "Option::is_none")]
     video: Option<MediaFile>,
 }
@@ -50,7 +50,7 @@ pub(crate) fn get(
             backup,
             &request.account.id,
             &request.chat.id,
-            &request.message.local_id,
+            &format!("{}.%", request.message.local_id),
             directory,
         )
     };

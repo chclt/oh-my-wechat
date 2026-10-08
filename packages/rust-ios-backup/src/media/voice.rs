@@ -14,9 +14,9 @@ pub(crate) struct VoiceRequest {
 #[derive(Default, Serialize)]
 pub(crate) struct VoiceInfo {
     #[serde(skip_serializing_if = "Option::is_none")]
-    uri: Option<String>,
+    pub(super) uri: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    transcription: Option<Option<String>>,
+    pub(super) transcription: Option<Option<String>>,
 }
 
 pub(crate) fn get(
@@ -27,7 +27,7 @@ pub(crate) fn get(
         backup,
         &request.account.id,
         &request.chat.id,
-        &request.message.local_id,
+        &format!("{}.%", request.message.local_id),
         "Audio",
     )?;
     if paths.is_empty() {

@@ -27,7 +27,7 @@ pub(crate) async fn get(
             &lookup_backup,
             &request.account.id,
             &request.chat.id,
-            &request.message.local_id,
+            &format!("{}.%", request.message.local_id),
             "OpenData",
         )? {
             if find_file(&lookup_backup, &path)?.path.is_file() {
