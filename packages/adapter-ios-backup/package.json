@@ -13,10 +13,9 @@
 	},
 	"dependencies": {
 		"@bufbuild/protobuf": "catalog:",
-		"@ffmpeg/core": "^0.12.10",
 		"@ffmpeg/ffmpeg": "^0.12.15",
 		"@ffmpeg/types": "^0.12.4",
-		"@ffmpeg/util": "^0.12.2",
+		"@repo/ffmpeg-wasm": "workspace:*",
 		"@repo/utils": "workspace:*",
 		"@sqlite.org/sqlite-wasm": "3.53.0-build1",
 		"@tanstack/pacer": "^0.14.0",

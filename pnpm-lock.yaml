@@ -210,18 +210,15 @@ importers:
       '@bufbuild/protobuf':
         specifier: 'catalog:'
         version: 2.7.0
-      '@ffmpeg/core':
-        specifier: ^0.12.10
-        version: 0.12.10
       '@ffmpeg/ffmpeg':
         specifier: ^0.12.15
         version: 0.12.15
       '@ffmpeg/types':
         specifier: ^0.12.4
         version: 0.12.4
-      '@ffmpeg/util':
-        specifier: ^0.12.2
-        version: 0.12.2
+      '@repo/ffmpeg-wasm':
+        specifier: workspace:*
+        version: link:../ffmpeg-wasm
       '@repo/utils':
         specifier: workspace:*
         version: link:../utils
@@ -292,6 +289,8 @@ importers:
       vitest:
         specifier: 'catalog:'
         version: 4.0.6(@types/node@24.2.0)(jiti@2.5.1)(less@4.4.2)(lightningcss@1.30.1)(sass@1.94.2)(stylus@0.62.0)(tsx@4.20.6)
+
+  packages/ffmpeg-wasm: {}
 
   packages/types:
     dependencies:
@@ -759,10 +758,6 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@ffmpeg/core@0.12.10':
-    resolution: {integrity: sha512-dzNplnn2Nxle2c2i2rrDhqcB19q9cglCkWnoMTDN9Q9l3PvdjZWd1HfSPjCNWc/p8Q3CT+Es9fWOR0UhAeYQZA==}
-    engines: {node: '>=16.x'}
-
   '@ffmpeg/ffmpeg@0.12.15':
     resolution: {integrity: sha512-1C8Obr4GsN3xw+/1Ww6PFM84wSQAGsdoTuTWPOj2OizsRDLT4CXTaVjPhkw6ARyDus1B9X/L2LiXHqYYsGnRFw==}
     engines: {node: '>=18.x'}
@@ -770,10 +765,6 @@ packages:
   '@ffmpeg/types@0.12.4':
     resolution: {integrity: sha512-k9vJQNBGTxE5AhYDtOYR5rO5fKsspbg51gbcwtbkw2lCdoIILzklulcjJfIDwrtn7XhDeF2M+THwJ2FGrLeV6A==}
     engines: {node: '>=16.x'}
-
-  '@ffmpeg/util@0.12.2':
-    resolution: {integrity: sha512-ouyoW+4JB7WxjeZ2y6KpRvB+dLp7Cp4ro8z0HIVpZVCM7AwFlHa0c4R8Y/a4M3wMqATpYKhC7lSFHQ0T11MEDw==}
-    engines: {node: '>=18.x'}
 
   '@floating-ui/core@1.8.0':
     resolution: {integrity: sha512-0CIZ5itps/8x7BG8dEIhs53BvCUH2PCoogtakwRTut+Arm58sJooJ0AuZhLw2HJYIR5cMLNPBSS728sPho2khQ==}
@@ -3226,15 +3217,11 @@ snapshots:
   '@esbuild/win32-x64@0.25.12':
     optional: true
 
-  '@ffmpeg/core@0.12.10': {}
-
   '@ffmpeg/ffmpeg@0.12.15':
     dependencies:
       '@ffmpeg/types': 0.12.4
 
   '@ffmpeg/types@0.12.4': {}
-
-  '@ffmpeg/util@0.12.2': {}
 
   '@floating-ui/core@1.8.0':
     dependencies:

@@ -1,0 +1,6 @@
+--- a/build/ffmpeg.sh
++++ b/build/ffmpeg.sh
+@@ -34,2 +34,2 @@
+ emconfigure ./configure "${CONF_FLAGS[@]}" $@
+-emmake make -j
++emmake make -j2

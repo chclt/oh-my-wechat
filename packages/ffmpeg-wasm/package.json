@@ -1,0 +1,13 @@
+{
+	"name": "@repo/ffmpeg-wasm",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"exports": {
+		"./core": "./artifacts/ffmpeg-core.js",
+		"./wasm": "./artifacts/ffmpeg-core.wasm"
+	},
+	"scripts": {
+		"build:core": "node scripts/build.mjs"
+	}
+}

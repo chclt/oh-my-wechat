@@ -30,7 +30,6 @@ export default function vitePresets(): Plugin[] {
 				config.optimizeDeps.exclude ??= [];
 				for (const dep of [
 					"@ffmpeg/ffmpeg",
-					"@ffmpeg/util",
 					"silk-wasm",
 					"@sqlite.org/sqlite-wasm",
 				]) {
