@@ -5,6 +5,7 @@ import { ImageMessage, VideoMessage } from "@/components/message";
 import scrollAreaClasses from "@/components/ui/scroll-area.module.css";
 import { cn } from "@/lib/utils";
 import { CarouselScrollViewport } from "./carousel-scroll-viewport";
+import { CarouselSnapPoints } from "./carousel-snap-points";
 import transitionClasses from "./media-carousel-transition.module.css";
 import type { CarouselView } from "./types";
 
@@ -53,6 +54,7 @@ export default function ThumbCarousel({
 					)}
 					style={{ width: virtualizer.getTotalSize() }}
 				>
+					<CarouselSnapPoints items={virtualizer.measurementsCache} />
 					<div
 						className="absolute inset-y-0 left-0 h-full"
 						style={{ width: "var(--carousel-padding-start)" }}
@@ -73,7 +75,7 @@ export default function ThumbCarousel({
 								data-message-uri={virtualItem.key}
 								onClick={() => onSelect(String(virtualItem.key))}
 								aria-label={`查看${message.type === MessageTypeEnum.VIDEO ? "视频" : "图片"}，${new Date(message.date * 1000).toLocaleString()}`}
-								className="absolute inset-y-0 size-(--media-thumb-size) p-2 snap-normal snap-center cursor-pointer rounded focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-white"
+								className="absolute inset-y-0 size-(--media-thumb-size) p-2 cursor-pointer rounded focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-white"
 								style={{
 									left: 0,
 									transform: `translateX(${virtualItem.start}px)`,

@@ -47,7 +47,6 @@ export function useMediaCarousel(
 		layout: detailLayout,
 		initialIndex,
 		enabled: isReady,
-		controller,
 	});
 	const thumbVirtualizer = useFixedCarousel({
 		kind: "thumb",
@@ -55,7 +54,6 @@ export function useMediaCarousel(
 		layout: thumbLayout,
 		initialIndex,
 		enabled: isReady,
-		controller,
 	});
 	const scroll = useMediaCarouselScrollSync({
 		controller,
