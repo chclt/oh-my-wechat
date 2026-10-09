@@ -344,6 +344,7 @@ export const adapterWorker: AdapterWorkerType = {
 					await index.build(
 						message,
 						sessionRows.map((row) => row.userName),
+						account.id,
 						{
 							signal,
 							debug: false,
@@ -476,6 +477,7 @@ export const adapterWorker: AdapterWorkerType = {
 
 	getGreetingMessageList: async (controllerInput) => {
 		return await MessageController.allVerify(controllerInput, {
+			account: adapterWorker._getStoreItem("account"),
 			databases: adapterWorker._getStoreItem("databases"),
 		});
 	},
@@ -556,7 +558,10 @@ export const adapterWorker: AdapterWorkerType = {
 	searchMessages: async (controllerInput) => {
 		return adapterWorker
 			._getStoreItem("messageSearchIndex")
-			.search(controllerInput);
+			.search(controllerInput, {
+				account: adapterWorker._getStoreItem("account"),
+				databases: adapterWorker._getStoreItem("databases"),
+			});
 	},
 
 	getMessageSearchIndexStatus: async ({ account }) => {

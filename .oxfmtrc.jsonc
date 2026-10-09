@@ -16,5 +16,10 @@
 		],
 		"newlinesBetween": false,
 	},
-	"ignorePatterns": ["routeTree.gen.ts", "*_pb.ts"],
+	"ignorePatterns": [
+		"routeTree.gen.ts",
+		"*_pb.ts",
+		"vendor/**",
+		"packages/ffmpeg-wasm/artifacts/**",
+	],
 }

@@ -1,6 +1,6 @@
-import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 import type * as React from "react";
+import { useState } from "react";
 import Image from "@/components/image.tsx";
 import { cn } from "@/lib/utils";
 
@@ -23,21 +23,32 @@ const avatarVariants = cva(
 
 type AvatarProps = React.HTMLAttributes<HTMLElement> &
 	VariantProps<typeof avatarVariants> &
-	Pick<React.ImgHTMLAttributes<HTMLImageElement>, "src"> & {
-		asChild?: boolean;
-	};
+	Pick<React.ImgHTMLAttributes<HTMLImageElement>, "src">;
 
-function Avatar({
-	src,
-	asChild = false,
-	variant,
-	className,
-	...props
-}: AvatarProps) {
-	const Comp = asChild ? Slot : variant === "inline" ? "span" : "div";
+function Avatar({ src, variant, className, ...props }: AvatarProps) {
+	const [invalidSrc, setInvalidSrc] = useState<string>();
+	const Comp = variant === "inline" ? "span" : "div";
 	return (
-		<Comp className={cn(avatarVariants({ variant, className }))} {...props}>
-			<Image src={src} />
+		<Comp
+			className={cn(
+				avatarVariants({ variant, className }),
+				src && src === invalidSrc && "[&_img]:invisible",
+			)}
+			{...props}
+		>
+			<Image
+				key={src}
+				src={src}
+				onLoad={({ currentTarget: image }) => {
+					// 微信的失效头像占位图是一张 120×120 图，这里对比图像宽高来判断图像是否失效。
+					// 当然，这种方法不准确，经过测试，”公众平台安全助手“ 的正常头像也会被此规则误判。
+					setInvalidSrc(
+						image.naturalWidth === 120 && image.naturalHeight === 120
+							? src
+							: undefined,
+					);
+				}}
+			/>
 		</Comp>
 	);
 }

@@ -31,7 +31,7 @@ function CardFooter({ className, ...props }: React.ComponentProps<"div">) {
 	return (
 		<div
 			className={cn(
-				"px-3 py-1.5 min-h-[em] text-sm leading-normal text-muted-foreground border-t",
+				"flow-root px-3 py-1.5 min-h-[em] text-sm leading-normal text-muted-foreground border-t",
 				className,
 			)}
 			{...props}
@@ -43,7 +43,7 @@ function CardIndicator({ className, ...props }: React.ComponentProps<"div">) {
 	return (
 		<div
 			className={cn(
-				"float-end mt-[3px] mb-[4px] ms-1 size-3.5 [&_svg]:size-full text-muted-foreground/55",
+				"float-end mt-[3px] mb-[4px] ms-2 size-3.5 [&_svg]:size-full text-muted-foreground/55",
 				className,
 			)}
 			{...props}

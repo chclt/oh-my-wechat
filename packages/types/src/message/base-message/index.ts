@@ -21,6 +21,7 @@ export enum MessageTypeEnum {
 	VOIP = 50, // 语音/视频通话
 	MICROVIDEO = 62, // 也是视频
 	GROUP_VOIP = 64, // 群语音/视频通话 TODO: 可能是通知
+	VERITY_2 = 65, // 也是验证消息，暂时不知道和 37 有什么区别。遇到的一个例子是来自收到的一个企业微信的好友申请
 	WECOM_CONTACT = 66, // 企业微信名片
 	SYSTEM = 10000, // 系统消息,应该只是文本
 	SYSTEM_EXTENDED = 10002,
@@ -526,7 +527,7 @@ export type SystemExtendedMessageType = BasicMessageType<
 // Special Message Type
 export interface VerityMessageEntity {
 	msg: {
-		"@_fromusername": "wxid";
+		"@_fromusername": string; // eg. wxid_00000000000000
 		"@_fromnickname": "nickname";
 		"@_fullpy": string;
 		"@_shortpy": string;
@@ -567,9 +568,14 @@ export interface VerityMessageEntity {
 }
 
 export type VerityMessageType = Omit<
-	BasicMessageType<MessageTypeEnum.VERITY, VerityMessageEntity>,
+	BasicMessageType<
+		MessageTypeEnum.VERITY | MessageTypeEnum.VERITY_2,
+		VerityMessageEntity
+	>,
 	"from" | "chat_id"
->;
+> & {
+	contact?: UserType;
+};
 
 export type OMWErrorMessageType = BasicMessageType<
 	MessageTypeEnum.OMW_ERROR,

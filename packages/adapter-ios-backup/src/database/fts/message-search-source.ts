@@ -1,7 +1,8 @@
-import { MessageTypeEnum } from "@repo/types";
+import { MessageDirection, MessageTypeEnum } from "@repo/types";
 import CryptoJS from "crypto-js";
 import { and, eq, sql } from "drizzle-orm";
 import type { SqliteRemoteDatabase } from "drizzle-orm/sqlite-proxy";
+import { splitGroupMessageContent } from "../../utils/message.ts";
 import WCDB, {
 	WCDBDatabaseSeriesName,
 	WCDBTableSeriesName,
@@ -11,6 +12,7 @@ import type { MessageSearchPerformance } from "./message-search-performance.ts";
 
 export interface MessageSearchDocument {
 	messageLocalId: string;
+	senderId: string;
 	createTime: number;
 	messagePlainText: string;
 }
@@ -41,12 +43,15 @@ export async function listMessageSearchTables(
 export async function readMessageSearchDocuments(
 	database: SqliteRemoteDatabase<Record<string, never>>,
 	tableName: string,
+	chatId: string,
+	accountId: string,
 	profiler?: MessageSearchPerformance,
 ): Promise<{
 	documents: MessageSearchDocument[];
 	scannedRowCount: number;
 }> {
 	const table = getChatTable(tableName);
+	const isChatroom = chatId.endsWith("@chatroom");
 	profiler?.start("selectRows");
 	const rows = await database
 		.select({
@@ -54,6 +59,7 @@ export async function readMessageSearchDocuments(
 				"MesLocalID",
 			),
 			CreateTime: table.CreateTime,
+			Des: table.Des,
 			Type: table.Type,
 			Message: table.Message,
 		})
@@ -84,10 +90,19 @@ export async function readMessageSearchDocuments(
 			continue;
 		}
 
+		const { senderId, content } =
+			isChatroom && row.Des === MessageDirection.incoming
+				? splitGroupMessageContent(row.Message)
+				: {
+						senderId:
+							row.Des === MessageDirection.outgoing ? accountId : chatId,
+						content: row.Message,
+					};
 		documents.push({
 			messageLocalId: row.MesLocalID,
+			senderId,
 			createTime: row.CreateTime,
-			messagePlainText: row.Message,
+			messagePlainText: content,
 		});
 	}
 

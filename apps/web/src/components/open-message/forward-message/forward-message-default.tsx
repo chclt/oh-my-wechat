@@ -24,7 +24,14 @@ export function ForwardMessageDefault({
 		parseAttributeValue: true,
 		ignoreAttributes: false,
 		tagValueProcessor: (_, tagValue, jPath) => {
-			if (jPath.endsWith("datatitle") || jPath.endsWith("datadesc")) {
+			if (
+				jPath.endsWith("datatitle") ||
+				jPath.endsWith("datadesc") ||
+				jPath.endsWith("refermsgitem.svrid") ||
+				jPath.endsWith("refermsgitem.displayname") ||
+				jPath.endsWith("refermsgitem.content") ||
+				jPath.endsWith("refermsgitem.referdesc")
+			) {
 				return undefined;
 			}
 			return tagValue;

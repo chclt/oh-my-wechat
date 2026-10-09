@@ -10,6 +10,7 @@ import {
 import { cn } from "@/lib/utils";
 import { ArrowShareRightSolid } from "./central-icon";
 import Link from "./link";
+import LinkPreviewPlaceholder from "./link-preview-placeholder";
 
 export interface LinkCardProps extends React.AnchorHTMLAttributes<HTMLDivElement> {
 	heading?: string;
@@ -35,13 +36,14 @@ const LinkCard = ({
 				<div
 					className={cn("mt-1 text-pretty line-clamp-5 text-muted-foreground")}
 				>
-					{preview && (
+					{/* Safari 17.6: floats directly inside the line clamp lose their float layout. Keep them in a normal block container. */}
+					<div className="flow-root">
 						<Slot className={"float-end ms-1.5 h-11 w-auto rounded"}>
-							{preview}
+							{preview || <LinkPreviewPlaceholder />}
 						</Slot>
-					)}
 
-					{abstract}
+						{abstract}
+					</div>
 				</div>
 			</CardContent>
 

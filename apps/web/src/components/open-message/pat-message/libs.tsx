@@ -1,7 +1,6 @@
 import type { ChatType, OpenMessageType } from "@repo/types";
 import { PatOpenMessageEntity } from "@repo/types";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
 import { useAccount } from "@/components/account-provider.tsx";
 import TextPrettier from "@/components/text-prettier.tsx";
 import User from "@/components/user.tsx";
@@ -13,20 +12,23 @@ export function useContentParser(
 	formatLink = true,
 ) {
 	const { accountId } = useAccount();
+	const records = Array.isArray(
+		message.message_entity.msg.appmsg.patMsg.records.record,
+	)
+		? message.message_entity.msg.appmsg.patMsg.records.record
+		: [message.message_entity.msg.appmsg.patMsg.records.record];
 
 	// 在用户退群的情况下，chat信息中可能缺少用户信息，需额外查询
-	const [missingUserIds, setMissingUserIds] = useState<string[]>([]);
+	const missingUserIds = Array.from(
+		new Set(records.flatMap((record) => [record.fromUser, record.pattedUser])),
+	).filter((id) => !chat.members.some((member) => member.id === id));
 
 	const { data: foundMissingUser = [] } = useQuery({
 		...UserListQueryOptions(accountId, missingUserIds),
 		enabled: missingUserIds.length > 0,
 	});
 
-	const records = (
-		Array.isArray(message.message_entity.msg.appmsg.patMsg.records.record)
-			? message.message_entity.msg.appmsg.patMsg.records.record
-			: [message.message_entity.msg.appmsg.patMsg.records.record]
-	).map((record) => {
+	return records.map((record) => {
 		const regex = new RegExp(
 			`((?:\\\${${record.fromUser}(?:@textstatusicon)?})|(?:\\\${${record.pattedUser}(?:@textstatusicon)?}))`,
 			"g",
@@ -40,9 +42,8 @@ export function useContentParser(
 					foundMissingUser.find((user) => user.id === record.fromUser);
 
 				if (user) {
-					return <User user={user} variant={"inline"} />;
+					return <User key={index} user={user} variant={"inline"} />;
 				}
-				setMissingUserIds((prev) => [...prev, record.fromUser]);
 				return record.fromUser;
 			}
 
@@ -55,9 +56,8 @@ export function useContentParser(
 					foundMissingUser.find((user) => user.id === record.pattedUser);
 
 				if (user) {
-					return <User user={user} variant={"inline"} />;
+					return <User key={index} user={user} variant={"inline"} />;
 				}
-				setMissingUserIds((prev) => [...prev, record.pattedUser]);
 				return record.pattedUser;
 			}
 
@@ -71,6 +71,4 @@ export function useContentParser(
 
 		return segments;
 	});
-
-	return records;
 }

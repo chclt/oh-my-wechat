@@ -15,9 +15,8 @@ export const messageSearchMetadataTable = sqliteTable(
 	"messageSearchMetadata",
 	{
 		rowid: integer("rowid").primaryKey(),
-		shardIndex: integer("shardIndex").notNull(),
-		sourceTableName: text("sourceTableName").notNull(),
 		chatId: text("chatId").notNull(),
+		senderId: text("senderId").notNull(),
 		messageLocalId: text("messageLocalId").notNull(),
 		createTime: integer("createTime").notNull(),
 		messagePlainText: text("messagePlainText").notNull(),
@@ -36,9 +35,8 @@ CREATE VIRTUAL TABLE ${getTableName(messageBodyFullTextIndexTable)}
 	USING fts5(tokenizedBody, content='');
 CREATE TABLE ${getTableName(messageSearchMetadataTable)} (
 	rowid INTEGER PRIMARY KEY,
-	shardIndex INTEGER NOT NULL,
-	sourceTableName TEXT NOT NULL,
 	chatId TEXT NOT NULL,
+	senderId TEXT NOT NULL,
 	messageLocalId TEXT NOT NULL,
 	createTime INTEGER NOT NULL,
 	messagePlainText TEXT NOT NULL

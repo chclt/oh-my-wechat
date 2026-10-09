@@ -119,6 +119,10 @@
 }
 
 @layer base {
+	::placeholder {
+		color: inherit;
+	}
+
 	* {
 		@apply border-border outline-ring/50;
 	}

@@ -57,10 +57,11 @@ export class MessageSearchIndex {
 		this.status = { phase: "idle" };
 	}
 
-	/** Unknown chat table names remain indexed with an empty chatId. */
+	/** Only source tables mapped to known chat IDs are indexed. */
 	async build(
 		sourceMessageDatabases: SqliteRemoteDatabase<Record<string, never>>[],
 		chatIdList: string[],
+		accountId: string,
 		options: BuildMessageSearchIndexOptions = {},
 	): Promise<void> {
 		const yieldEveryMessageCount = options.yieldEveryMessageCount ?? 20000;
@@ -79,12 +80,7 @@ export class MessageSearchIndex {
 
 			await store.populate(
 				async (insert) => {
-					for (
-						let shardIndex = 0;
-						shardIndex < sourceMessageDatabases.length;
-						shardIndex++
-					) {
-						const sourceDatabase = sourceMessageDatabases[shardIndex];
+					for (const sourceDatabase of sourceMessageDatabases) {
 						profiler?.start("listTables");
 						const chatTableNames =
 							await listMessageSearchTables(sourceDatabase);
@@ -92,12 +88,17 @@ export class MessageSearchIndex {
 						profiler?.count("tables", chatTableNames.length);
 
 						for (const sourceTableName of chatTableNames) {
-							const chatId = tableNameToChatId.get(sourceTableName) ?? "";
 							signal?.throwIfAborted();
+							const chatId = tableNameToChatId.get(sourceTableName);
+							// 真实数据中存在消息表仍有记录、SessionAbstract 却没有对应会话的情况。
+							// 暂不索引这些表；空 chatId 会合并不同会话，且无法定位到聊天。
+							if (chatId === undefined) continue;
 
 							const sourceBatch = await readMessageSearchDocuments(
 								sourceDatabase,
 								sourceTableName,
+								chatId,
+								accountId,
 								profiler,
 							);
 							signal?.throwIfAborted();
@@ -112,10 +113,7 @@ export class MessageSearchIndex {
 								if (tokenizedBody.length === 0) continue;
 
 								profiler?.start("insert");
-								insert(
-									{ ...document, shardIndex, sourceTableName, chatId },
-									tokenizedBody,
-								);
+								insert({ ...document, chatId }, tokenizedBody);
 								profiler?.end("insert");
 								indexedMessageCount++;
 

@@ -14,6 +14,7 @@ export function ReferMessageReferenced({
 				<TextPrettier
 					text={message.message_entity.msg.appmsg.title}
 					inline
+					formatLink={false}
 				/>{" "}
 			</span>
 		</span>

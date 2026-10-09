@@ -11,6 +11,7 @@ import scrollAreaClasses from "@/components/ui/scroll-area.module.css";
 import { ViewTransition } from "@/components/view-transition";
 import { cn } from "@/lib/utils";
 import { CarouselScrollViewport } from "./carousel-scroll-viewport";
+import { CarouselSnapPoints } from "./carousel-snap-points";
 import { DetailCarouselItem } from "./detail-carousel-item";
 import DetailCarouselPreview from "./detail-carousel-preview";
 import transitionClasses from "./media-carousel-transition.module.css";
@@ -85,6 +86,7 @@ export default function DetailCarousel({
 					)}
 					style={{ width: virtualizer.getTotalSize() }}
 				>
+					<CarouselSnapPoints items={virtualizer.measurementsCache} />
 					<div
 						className="absolute top-0 bottom-(--media-bottom-inset) start-0"
 						style={{ width: "var(--carousel-padding-start)" }}
@@ -103,10 +105,7 @@ export default function DetailCarousel({
 								isActive={virtualItem.key === activeKey}
 								focusTarget={virtualizer.scrollElement}
 								data-message-uri={virtualItem.key}
-								className={cn(
-									"absolute top-0 h-full px-(--media-inline-inset) pb-(--media-bottom-inset)",
-									"snap-normal snap-center",
-								)}
+								className="absolute top-0 h-full px-(--media-inline-inset) pb-(--media-bottom-inset)"
 								style={{
 									left: 0,
 									width: virtualItem.size,

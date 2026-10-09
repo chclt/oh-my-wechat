@@ -2,6 +2,7 @@ import type { Sqlite3Static } from "@sqlite.org/sqlite-wasm";
 import {
 	and,
 	asc,
+	countDistinct,
 	desc,
 	eq,
 	getTableColumns,
@@ -30,6 +31,8 @@ export interface MessageSearchStoreQuery {
 
 export type MessageSearchStoredHit = MessageSearchMetadata & {
 	relevance: number;
+	/** Present for global grouped searches; undefined when chatId is provided. */
+	matchCount?: number;
 };
 type InsertDocument = (
 	document: MessageSearchMetadata,
@@ -41,7 +44,8 @@ const { rowid, ...metadataColumns } = getTableColumns(
 	messageSearchMetadataTable,
 );
 const joinCondition = eq(rowid, messageBodyFullTextIndexTable.rowid);
-const relevance = sql<number>`bm25(${messageBodyFullTextIndexTable})`;
+// FTS5's default rank is bm25; the column also works inside window queries.
+const relevance = sql<number>`${messageBodyFullTextIndexTable}.rank`;
 
 /** Owns the private index database, its native bulk writer and typed search queries. */
 export class MessageSearchStore {
@@ -83,8 +87,8 @@ export class MessageSearchStore {
 				);
 				metadataStatement = this.database.prepare(
 					`INSERT INTO ${getTableName(messageSearchMetadataTable)}
-						(rowid, shardIndex, sourceTableName, chatId, messageLocalId, createTime, messagePlainText)
-						VALUES (?, ?, ?, ?, ?, ?, ?)`,
+						(rowid, chatId, senderId, messageLocalId, createTime, messagePlainText)
+						VALUES (?, ?, ?, ?, ?, ?)`,
 				);
 				const body = bodyStatement;
 				const metadata = metadataStatement;
@@ -96,9 +100,8 @@ export class MessageSearchStore {
 					body.reset();
 					metadata.bind([
 						rowId,
-						document.shardIndex,
-						document.sourceTableName,
 						document.chatId,
+						document.senderId,
 						document.messageLocalId,
 						document.createTime,
 						document.messagePlainText,
@@ -137,6 +140,62 @@ export class MessageSearchStore {
 				? lte(messageSearchMetadataTable.createTime, endTime)
 				: undefined,
 		);
+		if (!chatId) {
+			// Group and page before loading original text, keeping message bodies out of the window query.
+			const rankedHits = this.queryDatabase
+				.select({
+					rowid,
+					createTime: messageSearchMetadataTable.createTime,
+					relevance: relevance.as("relevance"),
+					matchCount: sql<number>`count(*) over (
+						partition by ${messageSearchMetadataTable.chatId}
+					)`.as("matchCount"),
+					position: sql<number>`row_number() over (
+						partition by ${messageSearchMetadataTable.chatId}
+						order by ${relevance}, ${messageSearchMetadataTable.createTime} desc, ${rowid}
+					)`.as("position"),
+				})
+				.from(messageBodyFullTextIndexTable)
+				.innerJoin(messageSearchMetadataTable, joinCondition)
+				.where(condition)
+				.as("rankedMessageHits");
+			const chatPage = this.queryDatabase
+				.select({
+					rowid: rankedHits.rowid,
+					relevance: rankedHits.relevance,
+					matchCount: rankedHits.matchCount,
+				})
+				.from(rankedHits)
+				.where(eq(rankedHits.position, 1))
+				.orderBy(
+					asc(rankedHits.relevance),
+					desc(rankedHits.createTime),
+					asc(rankedHits.rowid),
+				)
+				.limit(limit)
+				.offset(offset)
+				.as("chatPage");
+			const hits = await this.queryDatabase
+				.select({
+					...metadataColumns,
+					relevance: chatPage.relevance,
+					matchCount: chatPage.matchCount,
+				})
+				.from(chatPage)
+				.innerJoin(messageSearchMetadataTable, eq(rowid, chatPage.rowid))
+				.orderBy(
+					asc(chatPage.relevance),
+					desc(messageSearchMetadataTable.createTime),
+					asc(rowid),
+				);
+			const [count] = await this.queryDatabase
+				.select({ total: countDistinct(messageSearchMetadataTable.chatId) })
+				.from(messageBodyFullTextIndexTable)
+				.innerJoin(messageSearchMetadataTable, joinCondition)
+				.where(condition);
+			return { hits, totalCount: count.total };
+		}
+
 		const hits = await this.queryDatabase
 			.select({ ...metadataColumns, relevance })
 			.from(messageBodyFullTextIndexTable)

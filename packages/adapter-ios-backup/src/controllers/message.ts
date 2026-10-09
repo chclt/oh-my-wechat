@@ -74,6 +74,10 @@ import {
 	HelloTableSelectInfer,
 } from "../database/message.ts";
 import type { WCDatabases } from "../types.ts";
+import {
+	createUnknownMessageSender,
+	splitGroupMessageContent,
+} from "../utils/message.ts";
 import WCDB, {
 	WCDBDatabaseSeriesName,
 	WCDBTableSeriesName,
@@ -157,11 +161,11 @@ async function parseMessageDatabaseChatTableRows(
 						}
 					}
 				} else {
-					const separatorPosition = raw_message_row.Message.indexOf(":\n");
-					senderId = raw_message_row.Message.slice(0, separatorPosition);
-					rawMessageContent = raw_message_row.Message.slice(
-						separatorPosition + 2,
+					const messageContent = splitGroupMessageContent(
+						raw_message_row.Message,
 					);
+					senderId = messageContent.senderId;
+					rawMessageContent = messageContent.content;
 				}
 
 				raw_message_row.Message = rawMessageContent;
@@ -209,12 +213,7 @@ async function parseMessageDatabaseChatTableRows(
 			from:
 				usersTable[messageSenderIds[index]] ??
 				(messageSenderIds[index].length > 0
-					? {
-							id: messageSenderIds[index],
-							user_id: messageSenderIds[index],
-							username: messageSenderIds[index],
-							// 好像一些群聊成员不会出现在数据库中
-						}
+					? createUnknownMessageSender(messageSenderIds[index])
 					: undefined), // 有一些系统消息没有 from
 			chat_id: chat.id,
 
@@ -230,6 +229,7 @@ async function parseMessageDatabaseChatTableRows(
 					jPath === "msg.appmsg.title" ||
 					jPath === "msg.appmsg.des" ||
 					jPath === "msg.appmsg.refermsg.svrid" ||
+					jPath === "msg.appmsg.refermsg.displayname" ||
 					jPath === "msg.appmsg.refermsg.content"
 				) {
 					return undefined; // 不解析
@@ -710,6 +710,7 @@ export async function find(...inputs: findInput): findOutput {
 export type allVerifyInput = [
 	GetGreetingMessageListRequest,
 	{
+		account: UserType;
 		databases: WCDatabases;
 	},
 ];
@@ -717,41 +718,49 @@ export type allVerifyInput = [
 export type allVerifyOutput = GetGreetingMessageListResponse;
 
 export async function allVerify(...inputs: allVerifyInput): allVerifyOutput {
-	const [{ account }, { databases }] = inputs;
+	const [, { account, databases }] = inputs;
 
 	const dbs = databases.message;
 	if (!dbs) {
 		throw new Error("message databases are not found");
 	}
 
-	const rows = (
-		await Promise.all(
-			dbs.map(async (database) => {
-				try {
+	const rows =
+		(
+			await Promise.all(
+				dbs.map(async (database) => {
 					const databaseTables = await database
-						.select({
-							name: sql<string>`name`,
-						})
+						.select({ name: sql<string>`name` })
 						.from(sql`sqlite_master`)
 						.where(and(eq(sql`type`, "table"), like(sql`name`, "Hello_%")))
 						.all();
+					if (databaseTables.length === 0) return [];
 
 					const helloTable = getHelloTable(databaseTables[0].name);
-
 					return await database
 						.select(helloTableSelect(helloTable))
 						.from(helloTable)
 						.orderBy(desc(helloTable.CreateTime))
 						.all();
-				} catch (error) {
-					return [];
-				}
-			}),
-		)
-	).filter((row) => row.length > 0)[0];
+				}),
+			)
+		).find((rows) => rows.length > 0) ?? [];
 
+	const messages = transformHelloTableRowToMessage(rows);
+	const { data: contacts } = await UserController.resolveIdentities(
+		{
+			identities: messages.map(({ message_entity: { msg } }) => ({
+				username: msg["@_fromusername"],
+				encodedUsername: msg["@_encryptusername"],
+			})),
+		},
+		{ account, databases },
+	);
 	return {
-		data: transformHelloTableRowToMessage(rows),
+		data: messages.map((message, index) => ({
+			...message,
+			contact: contacts[index],
+		})),
 	};
 }
 
@@ -761,7 +770,10 @@ function transformHelloTableRowToMessage(
 	const result: VerityMessageType[] = [];
 
 	raws.forEach((helloTableRow) => {
-		if (helloTableRow.Type === MessageTypeEnum.VERITY) {
+		if (
+			helloTableRow.Type === MessageTypeEnum.VERITY ||
+			helloTableRow.Type === MessageTypeEnum.VERITY_2
+		) {
 			const xmlParser = new XMLParser({ ignoreAttributes: false });
 			const messageEntity: VerityMessageEntity = xmlParser.parse(
 				helloTableRow.Message,
@@ -771,7 +783,7 @@ function transformHelloTableRowToMessage(
 				local_id: helloTableRow.MesLocalID,
 				date: helloTableRow.CreateTime,
 				direction: helloTableRow.Des,
-				type: MessageTypeEnum.VERITY,
+				type: helloTableRow.Type,
 				message_entity: messageEntity,
 				raw_message: helloTableRow.Message,
 				...(import.meta.env.DEV

@@ -74,7 +74,7 @@ export function ContentSearchInput({
 					onCompositionEnd={searchInput.onCompositionEnd}
 					onChange={searchInput.onChange}
 					placeholder="搜索"
-					className="block size-full min-w-0 px-11 px-4 bg-muted rounded-[9px] outline-none [&::-webkit-search-cancel-button]:hidden"
+					className="block size-full min-w-0 px-11 bg-muted rounded-[9px] outline-none placeholder:text-muted-foreground [&::-webkit-search-cancel-button]:hidden"
 				/>
 
 				{shouldShowCancelButton && (

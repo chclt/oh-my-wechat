@@ -28,6 +28,7 @@ import {
 	WeComContactMessage,
 } from "@/components/message";
 import MessageInlineWrapper from "@/components/message-inline-wrapper";
+import type { ReferMessageDefaultProps } from "@/components/open-message/refer-message/refer-message-default";
 import dialogClasses from "@/components/ui/dialog.module.css";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { AccountSuspenseQueryOptions } from "@/lib/fetchers/account.ts";
@@ -38,11 +39,13 @@ import { Card, CardContent, CardFooter, CardIndicator } from "../ui/card";
 interface MessageProp {
 	message: MessageType;
 	variant: "default" | "referenced" | "abstract";
+	referMessageProps?: Pick<ReferMessageDefaultProps, "renderReference">;
 }
 
 export default function Message({
 	message,
 	variant = "default",
+	referMessageProps,
 	...props
 }: MessageProp & React.HTMLAttributes<HTMLElement>) {
 	const { accountId } = useAccount();
@@ -75,6 +78,7 @@ export default function Message({
 				<MessageComponent
 					message={message}
 					variant={variant}
+					referMessageProps={referMessageProps}
 					onDoubleClick={() => {
 						if (import.meta.env.DEV) console.log(message);
 					}}
@@ -85,7 +89,12 @@ export default function Message({
 	);
 }
 
-function MessageComponent({ message, variant, ...props }: MessageProp) {
+function MessageComponent({
+	message,
+	variant,
+	referMessageProps,
+	...props
+}: MessageProp) {
 	switch (message.type) {
 		case MessageTypeEnum.TEXT:
 			return (
@@ -141,6 +150,7 @@ function MessageComponent({ message, variant, ...props }: MessageProp) {
 				<OpenMessage.Auto
 					message={message as OpenMessageType<{ type: number }>}
 					variant={variant}
+					referMessageProps={referMessageProps}
 					{...props}
 				/>
 			);

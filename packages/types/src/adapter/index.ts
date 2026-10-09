@@ -225,12 +225,14 @@ export type GetStatisticResponse = Promise<DataAdapterResponse<ChatStatistics>>;
 
 export interface SearchMessagesRequest {
 	account: Pick<AccountType, "id">;
+	/** Omit for one best matching message per chat; provide to list matching messages in that chat. */
 	chat?: Pick<ChatType, "id">;
 	/** Case-insensitive literal substring; trims query edges but preserves internal whitespace. */
 	searchText?: string;
 	user?: Pick<UserType, "id">;
 	startTime?: string;
 	endTime?: string;
+	/** Pagination counts chats globally, or messages when chat is provided. */
 	offset: number;
 	limit: number;
 }
@@ -241,16 +243,25 @@ export interface MessageSearchMatch {
 	end: number;
 }
 
+/** meta.total counts matching chats globally, or matching messages within the requested chat. */
 export type SearchMessagesResponse = Promise<
 	DataAdapterPagination<
 		{
-			chatId: string;
-			userId?: string;
+			/** The conversation containing the matching message. */
+			chat: ChatType;
+			/** Sender of the displayed message, including the representative in global search. */
+			from: UserType;
 			messageLocalId: string;
 			createTime: number;
 			messagePlainText: string;
 			match: MessageSearchMatch;
 			relevance: number;
+			/**
+			 * Present when request.chat is omitted (global grouped search): matching messages
+			 * in this chat under the current filters, including the displayed message.
+			 * Undefined when request.chat is provided: each result is an individual message.
+			 */
+			matchCount?: number;
 		}[]
 	>
 >;

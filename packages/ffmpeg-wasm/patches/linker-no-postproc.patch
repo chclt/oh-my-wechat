@@ -1,0 +1,18 @@
+--- a/build/ffmpeg-wasm.sh
++++ b/build/ffmpeg-wasm.sh
+@@ -17,7 +17,6 @@
+   -Llibavfilter
+   -Llibavformat
+   -Llibavutil
+-  -Llibpostproc
+   -Llibswresample
+   -Llibswscale
+   -lavcodec
+@@ -25,7 +24,6 @@
+   -lavfilter
+   -lavformat
+   -lavutil
+-  -lpostproc
+   -lswresample
+   -lswscale
+   -Wno-deprecated-declarations

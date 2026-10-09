@@ -139,5 +139,5 @@
 		"builtin": true
 	},
 	"globals": {},
-	"ignorePatterns": []
+	"ignorePatterns": ["vendor/**", "packages/ffmpeg-wasm/artifacts/**"]
 }
