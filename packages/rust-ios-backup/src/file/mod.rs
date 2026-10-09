@@ -1,4 +1,6 @@
 mod ffmpeg;
+#[cfg(target_os = "linux")]
+mod mp4;
 mod registry;
 mod silk;
 mod speex;
@@ -25,11 +27,37 @@ pub(crate) struct ResolvedFile {
 }
 
 #[derive(serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+pub(crate) struct ResolvedFileSource {
+    pub src: PathBuf,
+    pub mime_type: String,
+}
+
+impl ResolvedFile {
+    pub(crate) fn source(&self) -> Result<ResolvedFileSource, BackupError> {
+        // Use the same MIME detection as Tauri's asset protocol. Backup filenames
+        // can be hashes, and converted audio no longer has its original format.
+        let mut header = Vec::new();
+        fs::File::open(&self.path)
+            .and_then(|file| file.take(8192).read_to_end(&mut header))
+            .map_err(|error| BackupError::context("Cannot read media header", error))?;
+        Ok(ResolvedFileSource {
+            src: self.path.clone(),
+            mime_type: tauri::utils::mime_type::MimeType::parse(
+                &header,
+                &self.path.to_string_lossy(),
+            ),
+        })
+    }
+}
+
+#[derive(serde::Serialize)]
 pub(crate) struct FileSource {
     pub src: PathBuf,
 }
 
-pub(crate) fn resolve(
+pub(crate) fn resolve<R: tauri::Runtime>(
+    app: &tauri::AppHandle<R>,
     backup: Arc<LoadedBackup>,
     registry: Arc<Registry>,
     uri: String,
@@ -42,13 +70,17 @@ pub(crate) fn resolve(
         .strip_prefix("ios-backup:")
         .ok_or_else(|| BackupError::new("Error", format!("[messageFile] unsupported uri: {uri}")))?
         .to_owned();
+    let ffmpeg = ffmpeg::executable(app)?;
     let entry = registry.acquire(&uri, reference_id.clone())?;
     // Register synchronously at IPC dispatch; only file work runs asynchronously.
     Ok(async move {
         let result = entry
             .result
             .get_or_init(|| async {
-                prepare(backup, registry.clone(), path, true, || entry.active()).await
+                prepare(backup, registry.clone(), path, Some(ffmpeg), || {
+                    entry.active()
+                })
+                .await
             })
             .await
             .clone();
@@ -65,7 +97,7 @@ pub(crate) async fn prepare_attachment(
     registry: Arc<Registry>,
     path: String,
 ) -> Result<FileSource, BackupError> {
-    let file = prepare(backup, registry.clone(), path, false, || true).await?;
+    let file = prepare(backup, registry.clone(), path, None, || true).await?;
     let src = file.path.clone();
     registry.retain_attachment(file)?;
     Ok(FileSource { src })
@@ -75,15 +107,17 @@ async fn prepare(
     backup: Arc<LoadedBackup>,
     registry: Arc<Registry>,
     path: String,
-    convert: bool,
+    ffmpeg: Option<PathBuf>,
     active: impl Fn() -> bool + Send + Sync,
 ) -> Result<Arc<ResolvedFile>, BackupError> {
     let lookup_backup = backup.clone();
     let lookup_path = path.clone();
+    let convert = ffmpeg.is_some();
     let (file, transformed) = tauri::async_runtime::spawn_blocking(move || {
         let file = find_file(&lookup_backup, &lookup_path)?;
         let audio = convert && (lookup_path.ends_with(".aud") || lookup_path.ends_with(".speex"));
-        let mut transformed = audio || lookup_backup.encryption.is_some();
+        let video = convert && cfg!(target_os = "linux") && lookup_path.ends_with(".mp4");
+        let mut transformed = audio || video || lookup_backup.encryption.is_some();
         if !transformed && convert {
             let mut header = [0; 4];
             let mut source = fs::File::open(&file.path)
@@ -113,17 +147,24 @@ async fn prepare(
     let result = tauri::async_runtime::spawn_blocking(move || {
         let directory = registry.directory()?;
         let bytes = file.read(backup.encryption.as_ref(), &|| Ok(()))?;
-        let output = if convert && path.ends_with(".aud") {
-            silk::convert(&bytes, directory.path(), &ffmpeg::executable()?)?
-        } else if convert && path.ends_with(".speex") {
-            speex::convert(&bytes, directory.path(), &ffmpeg::executable()?)?
-        } else if convert && wxgf::is_wxgf(&bytes) {
-            wxgf::convert(&bytes, directory.path(), &ffmpeg::executable()?)?
-        } else {
-            let output = directory.path().join(Path::new(&path).file_name().unwrap());
-            fs::write(&output, bytes)
-                .map_err(|error| BackupError::context("Cannot write decrypted media", error))?;
-            output
+        let output = match ffmpeg.as_deref() {
+            #[cfg(target_os = "linux")]
+            Some(ffmpeg) if path.ends_with(".mp4") => mp4::remux(&bytes, directory.path(), ffmpeg)?,
+            Some(ffmpeg) if path.ends_with(".aud") => {
+                silk::convert(&bytes, directory.path(), ffmpeg)?
+            }
+            Some(ffmpeg) if path.ends_with(".speex") => {
+                speex::convert(&bytes, directory.path(), ffmpeg)?
+            }
+            Some(ffmpeg) if wxgf::is_wxgf(&bytes) => {
+                wxgf::convert(&bytes, directory.path(), ffmpeg)?
+            }
+            _ => {
+                let output = directory.path().join(Path::new(&path).file_name().unwrap());
+                fs::write(&output, bytes)
+                    .map_err(|error| BackupError::context("Cannot write decrypted media", error))?;
+                output
+            }
         };
         Ok(Arc::new(ResolvedFile {
             path: output,

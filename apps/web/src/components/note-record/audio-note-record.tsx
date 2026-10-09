@@ -44,7 +44,9 @@ export default function AudioNoteRecord({
 			{audio.isSuccess && !audio.data && (
 				<p className="text-muted-foreground">备份中未找到对应音频</p>
 			)}
-			{audioFile.src && <audio src={audioFile.src} controls />}
+			{audioFile.src && (
+				<audio src={audioFile.src} preload="metadata" controls />
+			)}
 		</div>
 	);
 }

@@ -36,7 +36,7 @@ export function getVideoPoster(
 		video.onerror = () =>
 			fail(new Error("Unable to decode video poster", { cause: video.error }));
 		signal.addEventListener("abort", cancel, { once: true });
-		video.preload = "auto";
+		video.preload = "metadata";
 		video.src = src;
 	});
 }

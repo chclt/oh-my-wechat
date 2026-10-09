@@ -6,7 +6,7 @@
 	"build": {
 		"beforeDevCommand": "pnpm --filter web dev --mode tauri --port 1420 --strictPort",
 		"devUrl": "http://localhost:1420",
-		"beforeBuildCommand": "pnpm --filter web build --mode tauri",
+		"beforeBuildCommand": "pnpm --filter @repo/ffmpeg build && pnpm --filter web build --mode tauri",
 		"beforeBundleCommand": "node scripts/prepare-ffmpeg.mjs",
 		"frontendDist": "../../web/dist"
 	},

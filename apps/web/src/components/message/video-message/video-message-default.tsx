@@ -69,6 +69,7 @@ export function VideoMessageDefault({
 					ref={videoRef}
 					src={videoSrc}
 					poster={posterSrc}
+					preload="metadata"
 					controls
 					style={getVideoMessageSizeStyle(message)}
 					className={classes.video}

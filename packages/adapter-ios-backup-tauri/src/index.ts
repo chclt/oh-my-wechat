@@ -42,6 +42,7 @@ import { convertFileSrc } from "@tauri-apps/api/core";
 import { getUnixTime, parseISO } from "date-fns";
 import { createFileUrl } from "./file";
 import { invoke } from "./invoke";
+import { MediaFiles } from "./media-files";
 import { restoreChat, restoreChats } from "./restoreChats";
 import { restoreMessages } from "./restoreMessages";
 
@@ -49,8 +50,14 @@ export default class IosBackupTauriAdapter implements DataAdapter {
 	private _directory: string | undefined;
 	private _directoryLoaded = false;
 	private _accountId: string | undefined;
+	// Tauri supplies the build target; Linux desktop uses WebKitGTK.
+	private readonly _mediaFiles =
+		import.meta.env.TAURI_ENV_PLATFORM === "linux"
+			? new MediaFiles()
+			: undefined;
 
 	async _loadDirectory(directory: string, password?: string): Promise<void> {
+		if (this._mediaFiles) await this._mediaFiles.clear();
 		this._directoryLoaded = false;
 		this._directory = directory;
 		this._accountId = undefined;
@@ -59,6 +66,7 @@ export default class IosBackupTauriAdapter implements DataAdapter {
 	}
 
 	async _loadAccountDatabase(account: Pick<AccountType, "id">) {
+		if (this._mediaFiles) await this._mediaFiles.clear();
 		this._accountId = undefined;
 		await invoke("load_account_database", {
 			accountId: account.id,
@@ -67,6 +75,7 @@ export default class IosBackupTauriAdapter implements DataAdapter {
 	}
 
 	async _unloadAccountDatabase() {
+		if (this._mediaFiles) await this._mediaFiles.clear();
 		await invoke("unload_account_database");
 		this._accountId = undefined;
 	}
@@ -187,11 +196,17 @@ export default class IosBackupTauriAdapter implements DataAdapter {
 	async resolveMessageFile(
 		input: ResolveMessageFileRequest,
 	): ResolveMessageFileResponse {
+		if (this._mediaFiles)
+			return { data: { src: await this._mediaFiles.resolve(input) } };
 		const { data } = await invoke("resolve_message_file", { request: input });
 		return { data: { src: convertFileSrc(data.src) } };
 	}
 
 	async releaseMessageFile(input: ReleaseMessageFileRequest) {
+		if (this._mediaFiles) {
+			await this._mediaFiles.release(input.referenceId);
+			return { data: undefined };
+		}
 		await invoke("release_message_file", { request: input });
 		return { data: undefined };
 	}

@@ -9,7 +9,8 @@
 		"dev:web": "pnpm --filter web dev",
 		"dev:desktop": "pnpm --filter desktop dev",
 		"build:web": "pnpm --filter web build",
-		"build:desktop": "pnpm --filter desktop build"
+		"build:desktop": "pnpm --filter desktop build",
+		"build:dev": "pnpm --filter desktop build:dev"
 	},
 	"devDependencies": {
 		"oxfmt": "^0.32.0",

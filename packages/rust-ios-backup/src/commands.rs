@@ -284,17 +284,16 @@ pub(crate) fn resolve_message_file<R: tauri::Runtime>(invoke: tauri::ipc::Invoke
         })?;
         let app = message.webview_ref().app_handle();
         let (backup, registry) = app.state::<BackupState>().files()?;
-        crate::file::resolve(backup, registry, request.uri, request.reference_id)
+        crate::file::resolve(app, backup, registry, request.uri, request.reference_id)
             .map_err(InvokeError::from)
     })();
     match pending {
         Ok(pending) => resolver.respond_async(async move {
             let file = pending.await?;
-            Ok::<_, InvokeError>(crate::media::Response {
-                data: FileSource {
-                    src: file.path.clone(),
-                },
-            })
+            let source = tauri::async_runtime::spawn_blocking(move || file.source())
+                .await
+                .map_err(|error| BackupError::context("Cannot inspect resolved media", error))??;
+            Ok::<_, InvokeError>(crate::media::Response { data: source })
         }),
         Err(error) => resolver.invoke_error(error),
     }

@@ -16,7 +16,6 @@ import type {
 	GetRecordFileRequest,
 	GetRecordFileResponse,
 	ResolveMessageFileRequest,
-	ResolveMessageFileResponse,
 	ReleaseMessageFileRequest,
 	GetAccountContactListResponse,
 	GetAccountListResponse,
@@ -72,9 +71,9 @@ interface Commands {
 	get_message_attach: (args: {
 		request: GetMessageAttachRequest;
 	}) => Awaited<GetMessageAttachResponse>;
-	resolve_message_file: (args: {
-		request: ResolveMessageFileRequest;
-	}) => Awaited<ResolveMessageFileResponse>;
+	resolve_message_file: (args: { request: ResolveMessageFileRequest }) => {
+		data: { src: string; mimeType: string };
+	};
 	release_message_file: (args: { request: ReleaseMessageFileRequest }) => null;
 	show_directory_picker: () => string | null;
 	load_backup_directory: (args: {

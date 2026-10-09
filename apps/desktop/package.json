@@ -8,6 +8,7 @@
 		"lint": "cargo clippy --workspace --all-targets --locked --manifest-path src-tauri/Cargo.toml -- -D warnings",
 		"dev": "tauri dev",
 		"build": "tauri build",
+		"build:dev": "tauri build --debug",
 		"test": "cargo test --workspace --locked --manifest-path src-tauri/Cargo.toml"
 	},
 	"devDependencies": {

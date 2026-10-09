@@ -35,7 +35,13 @@ export default function VideoNoteRecord({
 
 	return (
 		<div className={className} {...props}>
-			<video src={videoSrc} poster={coverSrc} controls className="w-full" />
+			<video
+				src={videoSrc}
+				poster={coverSrc}
+				preload="metadata"
+				controls
+				className="w-full"
+			/>
 		</div>
 	);
 }
