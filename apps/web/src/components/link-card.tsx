@@ -36,11 +36,14 @@ const LinkCard = ({
 				<div
 					className={cn("mt-1 text-pretty line-clamp-5 text-muted-foreground")}
 				>
-					<Slot className={"float-end ms-1.5 h-11 w-auto rounded"}>
-						{preview || <LinkPreviewPlaceholder />}
-					</Slot>
+					{/* Safari 17.6: floats directly inside the line clamp lose their float layout. Keep them in a normal block container. */}
+					<div className="flow-root">
+						<Slot className={"float-end ms-1.5 h-11 w-auto rounded"}>
+							{preview || <LinkPreviewPlaceholder />}
+						</Slot>
 
-					{abstract}
+						{abstract}
+					</div>
 				</div>
 			</CardContent>
 

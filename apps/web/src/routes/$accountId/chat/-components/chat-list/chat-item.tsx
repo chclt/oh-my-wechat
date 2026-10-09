@@ -71,15 +71,15 @@ export default function ChatListItem({
 
 				<div className="min-w-0">
 					<div className="grid grid-flow-col grid-cols-[minmax(0,1fr)] auto-cols-auto gap-2">
-						<h4 className={"min-w-0 font-medium line-clamp-1"}>
+						<h4 className={"min-w-0 font-medium truncate"}>
 							{chatListItem.title}
 							{/* {(chat.type === "private"
-                                ? chat.user.is_openim
-                                : chat.chatroom.is_openim) && (
-                                <span className="ms-1 text-sm font-normal text-orange-400">
-                                @企业微信
-                                </span>
-                            )} */}
+								? chat.user.is_openim
+								: chat.chatroom.is_openim) && (
+								<span className="ms-1 text-sm font-normal text-orange-400">
+									@企业微信
+								</span>
+							)} */}
 						</h4>
 						{last_message && (
 							<small className={"ms-2 text-xs text-neutral-400"}>
@@ -93,7 +93,7 @@ export default function ChatListItem({
 					</div>
 					<p
 						className={
-							"min-w-0 min-h-[1.5em] text-sm line-clamp-1 text-neutral-600 [&>*]:inline"
+							"min-w-0 min-h-[1.5em] text-sm truncate text-neutral-600 [&>*]:inline"
 						}
 					>
 						{last_message && (
