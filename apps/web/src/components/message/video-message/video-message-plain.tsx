@@ -37,6 +37,7 @@ export function VideoMessagePlain({
 			ref={videoRef}
 			src={videoSrc}
 			poster={coverSrc}
+			preload="metadata"
 			controls
 			// width={result?.[0]?.width}
 			// height={result?.[0]?.height}

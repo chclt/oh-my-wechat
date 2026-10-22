@@ -40,7 +40,13 @@ export function VideoMessageRecordDefault({
 	return (
 		<div ref={ref} className={cn(videoMessageClassName, className)} {...props}>
 			<div className="relative">
-				<video src={videoSrc} poster={coverSrc} controls className="w-full" />
+				<video
+					src={videoSrc}
+					poster={coverSrc}
+					preload="metadata"
+					controls
+					className="w-full"
+				/>
 			</div>
 		</div>
 	);
