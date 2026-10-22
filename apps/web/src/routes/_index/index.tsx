@@ -26,7 +26,7 @@ function RouteComponent() {
 				<ErrorBoundary fallback={<ConfigurerErrorFallback />}>
 					<Image
 						src={imageLogo}
-						alt={"OhMyWechat.com logo"}
+						alt={"Oh My WeChat logo"}
 						draggable={false}
 						className={"select-none h-12 w-auto"}
 						width={223}
