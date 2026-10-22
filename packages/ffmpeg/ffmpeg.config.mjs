@@ -53,6 +53,14 @@ export function getBuildConfig(target) {
 			];
 			break;
 		}
+		case "aarch64-unknown-linux-gnu":
+		case "x86_64-unknown-linux-gnu":
+			configure = [
+				"--cc=cc",
+				`--arch=${target.split("-")[0]}`,
+				"--target-os=linux",
+			];
+			break;
 		case "x86_64-pc-windows-msvc":
 			// The standalone sidecar can use MinGW while the Tauri app uses MSVC.
 			configure =
@@ -93,7 +101,14 @@ export function getBuildConfig(target) {
 	}
 	return {
 		source,
-		configure: [...configure, ...features],
+		configure: [
+			...configure,
+			...features,
+			// WebKitGTK playback remuxes MP4 without re-encoding.
+			...(target.includes("-linux-")
+				? ["--enable-demuxer=mov", "--enable-muxer=mp4"]
+				: []),
+		],
 		target,
 		...(zlib ? { zlib } : {}),
 	};

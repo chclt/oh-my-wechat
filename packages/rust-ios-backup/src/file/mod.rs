@@ -1,5 +1,7 @@
 mod directory;
 mod ffmpeg;
+#[cfg(target_os = "linux")]
+mod mp4;
 pub(crate) mod protocol;
 mod registry;
 mod silk;
@@ -77,7 +79,7 @@ pub(crate) fn resolve<R: tauri::Runtime>(
     let ffmpeg = if raw {
         None
     } else {
-        Some(ffmpeg::executable()?)
+        Some(ffmpeg::executable(app)?)
     };
     let key = format!("{}:{uri}", if raw { "raw" } else { "converted" });
     let directories = app.state::<directory::Store>().inner().clone();
@@ -116,7 +118,8 @@ async fn prepare(
     let (file, transformed) = tauri::async_runtime::spawn_blocking(move || {
         let file = find_file(&lookup_backup, &lookup_path)?;
         let audio = convert && (lookup_path.ends_with(".aud") || lookup_path.ends_with(".speex"));
-        let mut transformed = audio || lookup_backup.encryption.is_some();
+        let video = convert && cfg!(target_os = "linux") && lookup_path.ends_with(".mp4");
+        let mut transformed = audio || video || lookup_backup.encryption.is_some();
         if !transformed && convert {
             let mut header = [0; 4];
             let mut source = fs::File::open(&file.path)
@@ -147,6 +150,8 @@ async fn prepare(
         let directory = registry.directory(&directories, &path)?;
         let bytes = file.read(backup.encryption.as_ref(), &|| Ok(()))?;
         let output = match ffmpeg.as_deref() {
+            #[cfg(target_os = "linux")]
+            Some(ffmpeg) if path.ends_with(".mp4") => mp4::remux(&bytes, directory.path(), ffmpeg)?,
             Some(ffmpeg) if path.ends_with(".aud") => {
                 silk::convert(&bytes, directory.path(), ffmpeg)?
             }

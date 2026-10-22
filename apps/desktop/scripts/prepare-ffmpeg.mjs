@@ -14,7 +14,10 @@ const directory = fileURLToPath(
 );
 const extension = target.includes("windows") ? ".exe" : "";
 const files = [
-	[`ffmpeg${extension}`, `ffmpeg-${target}${extension}`],
+	[
+		`ffmpeg${extension}`,
+		target.includes("-linux-") ? "ffmpeg" : `ffmpeg-${target}${extension}`,
+	],
 	["LICENSE", "ffmpeg.LICENSE"],
 	["build.json", "ffmpeg.build.json"],
 ];
