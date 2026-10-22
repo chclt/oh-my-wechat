@@ -1,0 +1,29 @@
+{
+	"name": "@repo/adapter-ios-backup-tauri",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"exports": {
+		".": "./src/index.ts",
+		"./queryOptions": "./src/fetchers.ts",
+		"./utils": "./src/utils.ts"
+	},
+	"scripts": {
+		"typecheck": "tsc --noEmit",
+		"test": "vitest run"
+	},
+	"dependencies": {
+		"@tauri-apps/api": "^2.0.0",
+		"date-fns": "catalog:"
+	},
+	"devDependencies": {
+		"@repo/types": "workspace:*",
+		"@repo/typescript-config": "workspace:*",
+		"typescript": "catalog:",
+		"vite": "catalog:",
+		"vitest": "catalog:"
+	},
+	"peerDependencies": {
+		"@tanstack/react-query": "^5.0.0"
+	}
+}

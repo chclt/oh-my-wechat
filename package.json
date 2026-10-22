@@ -2,12 +2,15 @@
 	"name": "oh-my-wechat",
 	"private": true,
 	"scripts": {
-		"typecheck": "turbo run typecheck",
-		"lint": "oxlint --type-aware",
-		"format": "oxfmt",
-		"format:check": "oxfmt --check",
-		"build": "turbo run build",
-		"dev": "turbo run dev"
+		"typecheck": "pnpm -r --parallel --if-present typecheck",
+		"lint": "oxlint --type-aware && pnpm -r --parallel --if-present lint",
+		"format": "oxfmt && pnpm -r --parallel --if-present format",
+		"test": "pnpm -r --parallel --if-present test",
+		"dev:web": "pnpm --filter web dev",
+		"dev:desktop": "pnpm --filter desktop dev",
+		"build:web": "pnpm --filter web build",
+		"build:desktop": "pnpm --filter desktop build",
+		"build:desktop:dev": "pnpm --filter desktop build:dev"
 	},
 	"devDependencies": {
 		"oxfmt": "^0.32.0",

@@ -3,12 +3,17 @@ import {
 	createRouteMask,
 	createRouter,
 } from "@tanstack/react-router";
+import { isTauri } from "@/lib/platform";
 import { AccountSearchModalOptions } from "@/routes/$accountId/-types.ts";
 import { routeTree } from "@/routeTree.gen";
 
-const memoryHistory = createMemoryHistory({
-	initialEntries: ["/"],
-});
+const isBrowserHistoryEnabled = isTauri || import.meta.env.DEV;
+
+const memoryHistory = isBrowserHistoryEnabled
+	? undefined
+	: createMemoryHistory({
+			initialEntries: ["/"],
+		});
 
 const accountContactModalToAccountRootMask = createRouteMask({
 	routeTree,
@@ -41,10 +46,10 @@ const chatSearchMasks = (
 
 const router = createRouter({
 	routeTree,
-	...(import.meta.env.DEV ? {} : { history: memoryHistory }),
+	...(isBrowserHistoryEnabled ? {} : { history: memoryHistory }),
 	routeMasks: [
 		accountContactModalToAccountRootMask,
-		...(import.meta.env.DEV ? [] : chatSearchMasks),
+		...(isBrowserHistoryEnabled ? [] : chatSearchMasks),
 	],
 });
 

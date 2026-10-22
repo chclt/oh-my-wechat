@@ -1,4 +1,5 @@
 import { Field, RadioGroup } from "@base-ui/react";
+import { showDirectoryPicker as showNativeDirectoryPicker } from "@repo/adapter-ios-backup-tauri/utils";
 import type { AccountType } from "@repo/types";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
@@ -24,6 +25,8 @@ export default function Configurer(
 		"SELECT_DIRECTORY" | "ENTER_PASSWORD" | "SELECT_ACCOUNT"
 	>("SELECT_DIRECTORY");
 	const [password, setPassword] = useState("");
+	const [directoryPickerError, setDirectoryPickerError] =
+		useState<Error | null>(null);
 	// 覆盖选择目录、加载备份及页面跳转；成功时保持到首页卸载。
 	const [isOpeningBackup, setIsOpeningBackup] = useState(false);
 
@@ -33,7 +36,7 @@ export default function Configurer(
 		setStep(nextStep);
 	}
 
-	const { loadDirectoryMutation, loadAccountDatabaseMutation } =
+	const { target, loadDirectoryMutation, loadAccountDatabaseMutation } =
 		useBackupAdapter({
 			onDirectoryLoaded: async () => {
 				const accounts = await queryClient.fetchQuery({
@@ -67,6 +70,8 @@ export default function Configurer(
 	const { mutate: loadAccountDatabase, error: loadAccountDatabaseError } =
 		loadAccountDatabaseMutation;
 
+	const directoryError = directoryPickerError ?? loadDirectoryError;
+
 	const { data: accountList = [] } = useQuery({
 		...AccountListSuspenseQueryOptions(),
 		enabled: isLoadDirectorySuccess,
@@ -97,7 +102,7 @@ export default function Configurer(
 		<main {...props}>
 			{step === "SELECT_DIRECTORY" && (
 				<div className="grid auto-rows-auto justify-items-center gap-3">
-					{isFSAEnabled && (
+					{target === "web" && isFSAEnabled && (
 						<OpenBackupButton
 							label="选择 iTunes 备份"
 							loading={isOpeningBackup}
@@ -121,7 +126,7 @@ export default function Configurer(
 						/>
 					)}
 
-					{!isFSAEnabled && (
+					{target === "web" && !isFSAEnabled && (
 						<DirectoryInputButton
 							render={
 								<OpenBackupButton
@@ -142,10 +147,33 @@ export default function Configurer(
 						/>
 					)}
 
-					{loadDirectoryError &&
-						loadDirectoryError.name !== "BackupPasswordRequiredError" && (
+					{target === "tauri" && (
+						<OpenBackupButton
+							label="打开本地备份"
+							loading={isOpeningBackup}
+							onClick={() => {
+								setIsOpeningBackup(true);
+								setDirectoryPickerError(null);
+								showNativeDirectoryPicker()
+									.then((directory) => {
+										if (directory !== null) {
+											loadDirectoryMutation.mutate({ directory });
+										} else {
+											setIsOpeningBackup(false);
+										}
+									})
+									.catch((error: Error) => {
+										setDirectoryPickerError(error);
+										setIsOpeningBackup(false);
+									});
+							}}
+						/>
+					)}
+
+					{directoryError &&
+						directoryError.name !== "BackupPasswordRequiredError" && (
 							<p role="alert" className="text-sm text-destructive">
-								{loadDirectoryError.message}
+								{directoryError.message}
 							</p>
 						)}
 				</div>

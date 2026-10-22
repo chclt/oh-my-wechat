@@ -21,5 +21,8 @@
 		"*_pb.ts",
 		"vendor/**",
 		"packages/ffmpeg-wasm/artifacts/**",
+		"target/**",
+		"apps/desktop/target/**",
+		"apps/desktop/src-tauri/gen/**",
 	],
 }
