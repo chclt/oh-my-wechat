@@ -34,7 +34,7 @@ export async function get(...inputs: GetInput): GetOutput {
 		if (relativePath.endsWith(".record_dat")) {
 			result.regular = { uri: createMessageFileUri(relativePath) };
 		} else if (relativePath.endsWith(".record_thumb")) {
-			result.regular = { uri: createMessageFileUri(relativePath) };
+			result.thumbnail = { uri: createMessageFileUri(relativePath) };
 		}
 	}
 
