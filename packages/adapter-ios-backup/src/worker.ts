@@ -525,7 +525,6 @@ export const adapterWorker: AdapterWorkerType = {
 	getMessageAttach: async (controllerInput) => {
 		return await MessageAttachController.get(controllerInput, {
 			directory: adapterWorker._getStoreItem("directory"),
-			encryption: _store.encryption,
 			databases: adapterWorker._getStoreItem("databases"),
 		});
 	},
@@ -545,7 +544,6 @@ export const adapterWorker: AdapterWorkerType = {
 	getRecordFile: async (controllerInput) => {
 		return await RecordFileController.get(controllerInput, {
 			directory: adapterWorker._getStoreItem("directory"),
-			encryption: _store.encryption,
 			databases: adapterWorker._getStoreItem("databases"),
 		});
 	},

@@ -5,10 +5,11 @@ import {
 	OpenMessageType,
 } from "@repo/types";
 import { useMutation } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
 import FileTypeIcon from "@/components/filetype-icon.tsx";
+import { LoaderIcon } from "@/components/icon";
 import FileSizeFormatter from "@/components/ui/file-size-formatter.tsx";
 import { getDataAdapter } from "@/lib/data-adapter.ts";
+import { downloadMessageFile } from "@/lib/download-message-file";
 import { cn } from "@/lib/utils.ts";
 import { Route } from "@/routes/$accountId/route.tsx";
 
@@ -25,40 +26,33 @@ export default function AttachNoteRecord({
 }: AttachNoteRecordProps) {
 	const { accountId } = Route.useParams();
 
-	const [isAttachmentNotFound, setIsAttachmentNotFound] = useState(false);
-
-	const { mutateAsync: download, data } = useMutation<FileInfo | null>({
+	const {
+		mutate: download,
+		data,
+		isPending,
+		isError,
+		isSuccess,
+	} = useMutation<FileInfo | null>({
 		mutationKey: ["attach", message.chat_id, message.id],
-		mutationFn: () => {
-			return getDataAdapter()
-				.getRecordFile({
-					account: { id: accountId },
-					chat: { id: message.chat_id },
-					message,
-					record: recordEntity,
-				})
-				.then((res) => res.data ?? null);
-		},
-		onSuccess: (data) => {
-			if (!data) {
-				setIsAttachmentNotFound(true);
-				return;
-			}
-			const downlaodLink = document.createElement("a");
-			downlaodLink.href = data.src;
-			downlaodLink.download = recordEntity.datatitle;
-			downlaodLink.click();
-		},
-		onError: () => {
-			setIsAttachmentNotFound(true);
+		mutationFn: async () => {
+			const adapter = getDataAdapter();
+			const { data } = await adapter.getRecordFile({
+				account: { id: accountId },
+				chat: { id: message.chat_id },
+				message,
+				record: recordEntity,
+			});
+			if (data)
+				await downloadMessageFile(adapter, data.uri, recordEntity.datatitle);
+			return data ?? null;
 		},
 	});
 
-	useEffect(() => {
-		return () => {
-			if (data) URL.revokeObjectURL(data.src);
-		};
-	});
+	const failure = isError
+		? "附件读取或解密失败，点击重试"
+		: isSuccess && data === null
+			? "没找到对应文件，点击重试"
+			: undefined;
 
 	return (
 		<div
@@ -68,8 +62,10 @@ export default function AttachNoteRecord({
 				className,
 			)}
 			{...props}
+			aria-busy={isPending}
+			aria-disabled={isPending}
 			onClick={() => {
-				download();
+				if (!isPending) download();
 			}}
 		>
 			<FileTypeIcon className="shrink-0" />
@@ -79,11 +75,16 @@ export default function AttachNoteRecord({
 				<small className={"text-neutral-500"}>
 					<FileSizeFormatter bytes={recordEntity.datasize} />
 				</small>
-				{isAttachmentNotFound && (
-					<p className="inline ml-2 text-destructive-foreground">
-						<small>没找到对应文件</small>
+				{isPending ? (
+					<LoaderIcon
+						aria-label="正在准备附件"
+						className="inline ms-2 size-3 animate-spin"
+					/>
+				) : failure ? (
+					<p role="alert" className="inline ml-2 text-destructive-foreground">
+						<small>{failure}</small>
 					</p>
-				)}
+				) : null}
 			</div>
 		</div>
 	);

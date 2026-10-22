@@ -80,7 +80,7 @@ function NoteRecordDefault({
 		return (
 			<NoteDocument
 				message={message as OpenMessageType<NoteOpenMessageEntity>}
-				docUrl={noteDocumentFile.src}
+				docUri={noteDocumentFile.uri}
 				noteEntity={noteContent}
 			/>
 		);

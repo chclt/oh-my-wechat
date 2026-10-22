@@ -7,27 +7,23 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import parse, { DOMNode, domToReact, Element } from "html-react-parser";
 import NoteRecord from "@/components/note-record/note-record";
+import { NoteDocumentQueryOptions } from "@/lib/fetchers/record";
 import { cn } from "@/lib/utils";
 
 interface NoteDocumentProps extends React.HTMLAttributes<HTMLElement> {
-	docUrl: string;
+	docUri: string;
 	noteEntity: NoteEntity;
 	message: OpenMessageType<NoteOpenMessageEntity>;
 }
 
 export default function NoteDocument({
-	docUrl,
+	docUri,
 	noteEntity,
 	message,
 	className,
 	...props
 }: NoteDocumentProps) {
-	const { data: docContent } = useQuery({
-		queryKey: ["note-message-html", docUrl],
-		queryFn: () => {
-			return fetch(docUrl).then((res) => res.text());
-		},
-	});
+	const { data: docContent } = useQuery(NoteDocumentQueryOptions(docUri));
 
 	const parsedDocContent = docContent
 		? parse(cleanNoteDocumentHtml(docContent), {

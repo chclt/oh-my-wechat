@@ -78,7 +78,7 @@ export function NoteMessageDefault({ message, ...props }: NoteMessageProps) {
 		return (
 			<NoteDocument
 				message={message}
-				docUrl={noteDocumentFile.src}
+				docUri={noteDocumentFile.uri}
 				noteEntity={noteContent}
 			/>
 		);

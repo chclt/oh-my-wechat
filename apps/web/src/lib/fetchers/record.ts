@@ -4,6 +4,7 @@ import {
 	GetRecordImageRequest,
 	GetRecordVideoRequest,
 } from "@repo/types/adapter";
+import { queryOptions } from "@tanstack/react-query";
 import { getDataAdapter } from "../data-adapter";
 
 export function RecordImageQueryOptions(requestData: GetRecordImageRequest) {
@@ -77,4 +78,29 @@ export function RecordAudioQueryOptions(requestData: GetRecordAudioRequest) {
 				.getRecordAudio(requestData)
 				.then((res) => res.data ?? null),
 	};
+}
+
+export function NoteDocumentQueryOptions(docUri: string) {
+	return queryOptions({
+		queryKey: ["note-message-html", docUri],
+		queryFn: async ({ signal }) => {
+			const adapter = getDataAdapter();
+			const referenceId = crypto.randomUUID();
+			try {
+				const {
+					data: { src },
+				} = await adapter.resolveMessageFile({
+					uri: docUri,
+					referenceId,
+					raw: true,
+				});
+				const response = await fetch(src, { signal });
+				if (!response.ok)
+					throw new Error(`Cannot read note: ${response.status}`);
+				return await response.text();
+			} finally {
+				await adapter.releaseMessageFile({ referenceId }).catch(() => {});
+			}
+		},
+	});
 }

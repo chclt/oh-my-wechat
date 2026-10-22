@@ -6,6 +6,7 @@ import {
 import { useMutation } from "@tanstack/react-query";
 import { useRef } from "react";
 import { clearDataAdapter, setDataAdapter } from "@/lib/data-adapter";
+import { createBrowserDownloads } from "./file-downloads";
 
 interface UseBackupAdapterOptions {
 	onDirectoryLoaded: () => Promise<void>;
@@ -24,7 +25,7 @@ export function useBackupAdapter({
 
 	const loadDirectoryMutation = useMutation({
 		...LoadDirectoryMutationOptions(adapter),
-		onMutate: () => setDataAdapter(adapter),
+		onMutate: () => setDataAdapter(adapter, createBrowserDownloads),
 		onSuccess: onDirectoryLoaded,
 		onError: async (error) => {
 			try {

@@ -95,5 +95,5 @@ export interface VoiceInfo {
 }
 
 export interface FileInfo {
-	src: string;
+	uri: string;
 }

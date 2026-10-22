@@ -125,6 +125,8 @@ export type GetMessageImageResponse = Promise<
 
 export interface ResolveMessageFileRequest {
 	uri: string;
+	/** Return original content after decryption, without format conversion. Defaults to false. */
+	raw?: boolean;
 	/** Unique per acquisition; use the same ID when releasing it. */
 	referenceId: string;
 }
@@ -168,7 +170,6 @@ export interface GetMessageAttachRequest {
 	account: Pick<AccountType, "id">;
 	chat: Pick<ChatType, "id">;
 	message: Pick<MessageType, "local_id">;
-	type?: string;
 }
 
 export type GetMessageAttachResponse = Promise<

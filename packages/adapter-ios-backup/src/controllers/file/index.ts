@@ -45,6 +45,7 @@ async function createSrcFromFile(
 
 async function loadSrc(
 	uri: string,
+	raw: boolean,
 	{
 		directory,
 		databases,
@@ -83,7 +84,9 @@ async function loadSrc(
 		throw new Error(`[messageFile] file handle not found for uri: ${uri}`);
 	}
 
-	return createSrcFromFile(file, relativePath);
+	return raw
+		? URL.createObjectURL(file)
+		: createSrcFromFile(file, relativePath);
 }
 
 export type ResolveInput = [
@@ -98,14 +101,16 @@ export type ResolveInput = [
 export type ResolveOutput = ResolveMessageFileResponse;
 
 export async function resolve(...input: ResolveInput): ResolveOutput {
-	const [{ uri, referenceId }, ctx] = input;
+	const [{ uri, referenceId, raw = false }, ctx] = input;
 	if (!uri.startsWith(URI_PREFIX)) {
 		throw new Error(`[messageFile] unsupported uri: ${uri}`);
 	}
 
 	return {
 		data: {
-			src: await registry.acquire(uri, referenceId, () => loadSrc(uri, ctx)),
+			src: await registry.acquire(JSON.stringify([uri, raw]), referenceId, () =>
+				loadSrc(uri, raw, ctx),
+			),
 		},
 	};
 }
