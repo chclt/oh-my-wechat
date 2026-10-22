@@ -10,7 +10,8 @@ const zlibSource = {
 	sha256: "bb329a0a2cd0274d05519d61c667c062e06990d72e125ee2dfa8de64f0119d16",
 };
 
-// Shared by base and plus: PCM/Speex -> WAV, extracted WXGF HEVC -> PNG.
+// Shared by base and plus: PCM/Speex -> WAV, extracted WXGF HEVC -> PNG,
+// and MP4 stream-copy remuxing for WebKitGTK playback.
 const features = [
 	"--disable-everything",
 	"--disable-autodetect",
@@ -27,11 +28,11 @@ const features = [
 	"--disable-debug",
 	"--enable-zlib",
 	"--enable-protocol=file",
-	"--enable-demuxer=pcm_s16le,ogg,hevc",
+	"--enable-demuxer=pcm_s16le,ogg,hevc,mov",
 	"--enable-decoder=pcm_s16le,speex,hevc",
 	"--enable-parser=hevc",
 	"--enable-encoder=pcm_s16le,png",
-	"--enable-muxer=wav,image2",
+	"--enable-muxer=wav,image2,mp4",
 	// scale preserves plus's BT.601/full-range output; aresample converts Speex PCM.
 	"--enable-filter=scale,aresample",
 ];
@@ -101,14 +102,7 @@ export function getBuildConfig(target) {
 	}
 	return {
 		source,
-		configure: [
-			...configure,
-			...features,
-			// WebKitGTK playback remuxes MP4 without re-encoding.
-			...(target.includes("-linux-")
-				? ["--enable-demuxer=mov", "--enable-muxer=mp4"]
-				: []),
-		],
+		configure: [...configure, ...features],
 		target,
 		...(zlib ? { zlib } : {}),
 	};

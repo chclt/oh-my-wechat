@@ -24,7 +24,7 @@ export function VoiceMessageDefault({ message, ...props }: VoiceMessageProps) {
 
 	return (
 		<div className={cn("max-w-[20em]")} {...props}>
-			<audio ref={voiceRef} src={voiceSrc} controls />
+			<audio ref={voiceRef} src={voiceSrc} preload="metadata" controls />
 		</div>
 	);
 }
