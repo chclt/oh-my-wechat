@@ -1,6 +1,7 @@
 import {
 	NoteEntity,
 	NoteOpenMessageEntity,
+	NoteRecordType,
 	OpenMessageType,
 } from "@repo/types";
 import { useQuery } from "@tanstack/react-query";
@@ -44,16 +45,10 @@ export default function NoteDocument({
 						);
 					} else if (domNode instanceof Element && domNode.name === "object") {
 						// Object 上标记的 data-type 不是 Record 的类型， dataitem 里面的才是正确的，原因未知
-						const recordInfo = noteEntity.recordinfo.datalist.dataitem.find(
-							(item) => item["@_htmlid"] === domNode.attribs["id"],
-						);
-
-						if (!recordInfo) {
-							return <>加载失败</>;
-						}
-
 						const recordEntity = noteEntity.recordinfo.datalist.dataitem.find(
-							(item) => item["@_htmlid"] === domNode.attribs["id"],
+							(item): item is NoteRecordType =>
+								item["@_htmlid"] !== "WeNoteHtmlFile" &&
+								item["@_htmlid"] === domNode.attribs["id"],
 						);
 
 						if (!recordEntity) {

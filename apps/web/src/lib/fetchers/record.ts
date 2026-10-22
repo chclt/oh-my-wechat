@@ -38,19 +38,28 @@ export function RecordVideoQueryOptions(requestData: GetRecordVideoRequest) {
 	};
 }
 
-export function RecordFileQueryOptions(requestData: GetRecordFileRequest) {
+export function RecordFileQueryOptions(
+	requestData: Omit<GetRecordFileRequest, "record"> & {
+		record: GetRecordFileRequest["record"] | undefined;
+	},
+) {
+	const { record } = requestData;
 	return {
 		queryKey: [
 			`account: ${requestData.account.id}`,
 			`chat: ${requestData.chat.id}`,
 			`message: ${requestData.message.local_id}`,
-			`record: ${requestData.record["@_dataid"]}`,
+			`record: ${record?.["@_dataid"]}`,
 			"record-file",
 		],
-		queryFn: () =>
-			getDataAdapter()
-				.getRecordFile(requestData)
-				.then((res) => res.data ?? null),
+		queryFn: async () => {
+			if (!record) return null;
+			const { data } = await getDataAdapter().getRecordFile({
+				...requestData,
+				record,
+			});
+			return data ?? null;
+		},
 	};
 }
 

@@ -13,9 +13,16 @@ export interface NoteEntity {
 		};
 		datalist: {
 			"@_count": number;
-			dataitem: NoteRecordType[];
+			dataitem: (NoteRecordType | HtmlNoteRecordType)[];
 		};
 	};
+}
+
+/** 笔记正文文件；通过 htmlid 与正文中的图片、附件等条目区分。 */
+export interface HtmlNoteRecordType {
+	"@_dataid": string;
+	"@_htmlid": "WeNoteHtmlFile";
+	datafmt: string;
 }
 /** 所有类型的笔记条目的公共字段 */
 type NoteRecordBaseType<RecordType extends RecordTypeEnum> = {

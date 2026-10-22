@@ -1,5 +1,6 @@
 import { Dialog } from "@base-ui/react";
-import { MessageRecordBaseType, NoteEntity } from "@repo/types";
+import { NoteEntity } from "@repo/types";
+import type { HtmlNoteRecordType } from "@repo/types";
 import { useQuery } from "@tanstack/react-query";
 import { XMLParser } from "fast-xml-parser";
 import { Suspense, useMemo, useState } from "react";
@@ -41,21 +42,16 @@ export function NoteMessageDefault({ message, ...props }: NoteMessageProps) {
 	) as NoteEntity;
 
 	const noteHtmlFile = noteContent.recordinfo.datalist.dataitem.find(
-		(item) => item["@_htmlid"] === "WeNoteHtmlFile",
+		(item): item is HtmlNoteRecordType => item["@_htmlid"] === "WeNoteHtmlFile",
 	);
 
-	// TODO: 新的获取笔记内容的方法，而不是拿 ObjectURL 再 fetch
 	const NoteDocumentQueryOptions = {
 		enabled: false,
 		...RecordFileQueryOptions({
 			account: { id: accountId },
 			chat: { id: message.chat_id },
 			message,
-			record: noteHtmlFile as unknown as Pick<
-				MessageRecordBaseType,
-				"@_dataid"
-			>, // FIXME
-			// type: "text/html",
+			record: noteHtmlFile,
 		}),
 	};
 	const {

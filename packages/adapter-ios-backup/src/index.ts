@@ -1,4 +1,4 @@
-import type { ChatType, UserType } from "@repo/types";
+import type { AccountType, ChatType, UserType } from "@repo/types";
 import {
 	DataAdapter,
 	DataAdapterResponse,
@@ -46,7 +46,7 @@ export default class IosBackupAdapter implements DataAdapter {
 		this._directoryLoaded = true;
 	}
 
-	async _loadAccountDatabase(account: UserType) {
+	async _loadAccountDatabase(account: AccountType) {
 		await this._workerAdapter._loadAccountDatabase(account);
 	}
 
