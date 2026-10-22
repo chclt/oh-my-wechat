@@ -1,3 +1,7 @@
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+
+#[cfg(windows)]
+mod context_menu;
 mod temp;
 
 use std::{fs, sync::Mutex};
@@ -24,7 +28,7 @@ fn main() {
                 .iter()
                 .find(|window| window.label == "main")
                 .ok_or_else(|| std::io::Error::other("Main window configuration is missing"))?;
-            tauri::WebviewWindowBuilder::from_config(app, config)?
+            let _window = tauri::WebviewWindowBuilder::from_config(app, config)?
                 .on_download(|webview, event| {
                     if let tauri::webview::DownloadEvent::Finished { url, .. } = event {
                         let _ = webview.emit("message-file-download-finished", url.as_str());
@@ -40,6 +44,8 @@ fn main() {
                     }
                 })
                 .build()?;
+            #[cfg(windows)]
+            context_menu::install(&_window)?;
             Ok(())
         })
         .manage(rust_ios_backup::BackupState::default())

@@ -12,8 +12,9 @@ const input = path.join(root, "dist", target);
 const directory = fileURLToPath(
 	new URL("../src-tauri/binaries/", import.meta.url),
 );
+const extension = target.includes("windows") ? ".exe" : "";
 const files = [
-	["ffmpeg", `ffmpeg-${target}`],
+	[`ffmpeg${extension}`, `ffmpeg-${target}${extension}`],
 	["LICENSE", "ffmpeg.LICENSE"],
 	["build.json", "ffmpeg.build.json"],
 ];

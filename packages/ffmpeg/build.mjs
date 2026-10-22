@@ -2,6 +2,7 @@ import { execFileSync, spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import {
 	copyFileSync,
+	cpSync,
 	existsSync,
 	mkdirSync,
 	mkdtempSync,
@@ -19,7 +20,10 @@ const host = execFileSync("rustc", ["--print", "host-tuple"], {
 	encoding: "utf8",
 }).trim();
 const target = process.argv[2] || process.env.TAURI_ENV_TARGET_TRIPLE || host;
-if (target !== host) {
+if (
+	target !== host &&
+	!(process.platform !== "win32" && target === "x86_64-pc-windows-msvc")
+) {
 	throw new Error(
 		`FFmpeg cross-compilation from ${host} to ${target} is not configured.`,
 	);
@@ -29,7 +33,7 @@ const config = getBuildConfig(target);
 const root = fileURLToPath(new URL(".", import.meta.url));
 const dist = path.join(root, "dist");
 const output = path.join(dist, target);
-const binary = "ffmpeg";
+const binary = target.includes("windows") ? "ffmpeg.exe" : "ffmpeg";
 const metadata = path.join(output, "build.json");
 if (
 	[binary, "LICENSE", "build.json"].every((file) =>
@@ -54,6 +58,12 @@ function run(command, args, cwd = root) {
 	if (result.error) throw result.error;
 	if (result.status !== 0)
 		throw new Error(`${command} failed (${result.status})`);
+}
+
+function shellPath(file) {
+	if (process.platform !== "win32") return file;
+	// Windows builds use MSYS2 UCRT64 (x64) or CLANGARM64 (ARM64).
+	return execFileSync("cygpath", ["-u", file], { encoding: "utf8" }).trim();
 }
 
 function verify(file, source) {
@@ -88,7 +98,13 @@ function prepareSource(source) {
 	if (!existsSync(directory)) {
 		const temporary = mkdtempSync(path.join(cache, "extract-"));
 		try {
-			run("tar", ["-xf", archive, "--strip-components=1", "-C", temporary]);
+			run("tar", [
+				"-xf",
+				shellPath(archive),
+				"--strip-components=1",
+				"-C",
+				shellPath(temporary),
+			]);
 			renameSync(temporary, directory);
 		} finally {
 			rmSync(temporary, { recursive: true, force: true });
@@ -105,9 +121,26 @@ const configuration = createHash("sha256")
 	.digest("hex");
 const build = path.join(cache, "build", host, target, configuration);
 mkdirSync(build, { recursive: true });
+if (config.zlib) {
+	const zlibSource = prepareSource(config.zlib.source);
+	const zlibBuild = path.join(build, "zlib");
+	if (!existsSync(zlibBuild))
+		cpSync(zlibSource, zlibBuild, { recursive: true });
+	run(
+		"make",
+		[
+			"-f",
+			"win32/Makefile.gcc",
+			...config.zlib.make,
+			`-j${availableParallelism()}`,
+			"libz.a",
+		],
+		zlibBuild,
+	);
+}
 run(
 	"sh",
-	[path.join(sourceDirectory, "configure"), ...config.configure],
+	[shellPath(path.join(sourceDirectory, "configure")), ...config.configure],
 	build,
 );
 run("make", [`-j${availableParallelism()}`, binary], build);
@@ -120,6 +153,15 @@ try {
 		path.join(sourceDirectory, "COPYING.LGPLv2.1"),
 		path.join(temporary, "LICENSE"),
 	);
+	if (config.zlib) {
+		writeFileSync(
+			path.join(temporary, "LICENSE"),
+			[
+				readFileSync(path.join(temporary, "LICENSE"), "utf8"),
+				readFileSync(path.join(build, "zlib", "LICENSE"), "utf8"),
+			].join("\n"),
+		);
+	}
 	writeFileSync(
 		path.join(temporary, "build.json"),
 		`${JSON.stringify(config, null, 2)}\n`,
