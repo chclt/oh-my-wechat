@@ -2,8 +2,9 @@ import { FileInfo } from "@repo/types";
 import { DataAdapterResponse, GetRecordFileRequest } from "@repo/types/adapter";
 import CryptoJS from "crypto-js";
 import type { WCDatabases } from "../types";
-import { getFilesFromManifast } from "../utils";
+import { getFileFromDirectory, getFileRecordsFromManifest } from "../utils";
 import type { BackupEncryption } from "../utils/encryption/encryption.ts";
+import { createMessageFileUri } from "./file/utils";
 
 export type GetInput = [
 	GetRecordFileRequest,
@@ -16,27 +17,25 @@ export type GetInput = [
 export type GetOutput = Promise<DataAdapterResponse<FileInfo | undefined>>;
 
 export async function get(...inputs: GetInput): GetOutput {
-	const [
-		{ account, chat, message, record },
-		{ directory, databases, encryption },
-	] = inputs;
+	const [{ account, chat, message, record }, { directory, databases }] = inputs;
 
 	const db = databases.manifest;
 	if (!db) throw new Error("manifest database is not found");
 
-	const files = await getFilesFromManifast(
+	const files = await getFileRecordsFromManifest(
 		db,
-		directory,
 		`Documents/${CryptoJS.MD5(account.id).toString()}/OpenData/${CryptoJS.MD5(chat.id).toString()}/${message.local_id}/${record["@_dataid"]}.${record["datafmt"]}`,
-		encryption,
 	);
-
-	if (files.length === 0) return { data: undefined };
-
-	const file = files[0];
-	return {
-		data: {
-			src: URL.createObjectURL(file.file),
-		},
-	};
+	for (const file of files) {
+		if (!file.fileID || !file.relativePath) continue;
+		if (
+			await getFileFromDirectory(directory, [
+				file.fileID.slice(0, 2),
+				file.fileID,
+			])
+		) {
+			return { data: { uri: createMessageFileUri(file.relativePath) } };
+		}
+	}
+	return { data: undefined };
 }

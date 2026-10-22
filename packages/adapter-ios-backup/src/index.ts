@@ -34,28 +34,93 @@ export default class IosBackupAdapter implements DataAdapter {
 	private _directory: FileSystemDirectoryHandle | FileList | undefined;
 	private _directoryLoaded = false;
 
-	private _workerAdapter: Comlink.Remote<AdapterWorkerType>;
+	private _worker: Worker | undefined;
+	private _proxy: Comlink.Remote<AdapterWorkerType> | undefined;
+	private _generation = 0;
+	private _lifetime: AbortController | undefined;
+
+	private async call<T>(
+		fn: (worker: Comlink.Remote<AdapterWorkerType>) => Promise<T>,
+		context: string,
+	): Promise<T> {
+		// Capture the worker and its lifetime together; reopening must not adopt old calls.
+		const proxy = this._proxy;
+		const lifetime = this._lifetime;
+		if (!proxy || !lifetime) throw new Error("Directory not loaded");
+		try {
+			return await withAbort(fn(proxy), lifetime.signal);
+		} catch (error) {
+			if (!lifetime.signal.aborted)
+				console.error(`[IosBackupAdapter Error] ${context}:`, error);
+			throw error;
+		}
+	}
 
 	async _loadDirectory(
 		directoryHandle: FileSystemDirectoryHandle | FileList,
 		password?: string,
 	) {
-		this._directoryLoaded = false;
-		this._directory = directoryHandle;
-		await this._workerAdapter._loadDirectory(this._directory, password);
-		this._directoryLoaded = true;
+		const cleanup = this._unloadDirectory();
+		const generation = this._generation;
+		await cleanup;
+		if (generation !== this._generation)
+			throw new DOMException("Backup loading was cancelled", "AbortError");
+		const worker = new AdapterWorker();
+		const proxy = Comlink.wrap<AdapterWorkerType>(worker);
+		this._worker = worker;
+		this._proxy = proxy;
+		const lifetime = new AbortController();
+		this._lifetime = lifetime;
+		try {
+			await withAbort(
+				proxy._loadDirectory(directoryHandle, password),
+				lifetime.signal,
+			);
+			if (generation !== this._generation)
+				throw new DOMException("Backup loading was cancelled", "AbortError");
+			this._directory = directoryHandle;
+			this._directoryLoaded = true;
+		} catch (error) {
+			if (this._proxy === proxy)
+				await this._unloadDirectory().catch(console.error);
+			throw error;
+		}
 	}
 
 	async _loadAccountDatabase(account: AccountType) {
-		await this._workerAdapter._loadAccountDatabase(account);
+		await this.call(
+			(worker) => worker._loadAccountDatabase(account),
+			"_loadAccountDatabase",
+		);
 	}
 
 	async _unloadAccountDatabase() {
-		await this._workerAdapter._unloadAccountDatabase();
+		if (!this._proxy) return;
+		await this.call(
+			(worker) => worker._unloadAccountDatabase(),
+			"_unloadAccountDatabase",
+		);
 	}
 
-	constructor() {
-		this._workerAdapter = Comlink.wrap(new AdapterWorker());
+	async _unloadDirectory() {
+		++this._generation;
+		this._lifetime?.abort();
+		this._lifetime = undefined;
+		const worker = this._worker;
+		const proxy = this._proxy;
+		this._worker = undefined;
+		this._proxy = undefined;
+		this._directory = undefined;
+		this._directoryLoaded = false;
+		try {
+			await proxy?._unloadDirectory();
+		} finally {
+			try {
+				proxy?.[Comlink.releaseProxy]();
+			} finally {
+				worker?.terminate();
+			}
+		}
 	}
 
 	async init() {
@@ -67,32 +132,24 @@ export default class IosBackupAdapter implements DataAdapter {
 	}
 
 	async getAccountList() {
-		return withCommonWrapper(
-			() => this._workerAdapter.getAccountList(),
-			"getAccountList",
-		);
+		return this.call((worker) => worker.getAccountList(), "getAccountList");
 	}
 
 	async getAccount(input: GetAccountRequest) {
-		return withCommonWrapper(
-			() => this._workerAdapter.getAccount(input),
-			"getAccount",
-		);
+		return this.call((worker) => worker.getAccount(input), "getAccount");
 	}
 
 	async getUserList(input: GetUserListRequest) {
-		return withCommonWrapper(
-			() =>
-				this._workerAdapter.getUserList(input) as Promise<
-					DataAdapterResponse<UserType[]>
-				>,
+		return this.call(
+			(worker) =>
+				worker.getUserList(input) as Promise<DataAdapterResponse<UserType[]>>,
 			"getUserList",
 		);
 	}
 
 	async getUser(input: GetUserRequest) {
-		return withCommonWrapper(async () => {
-			const temp = (await this._workerAdapter.getUserList({
+		return this.call(async (worker) => {
+			const temp = (await worker.getUserList({
 				userIds: [input.user.id],
 			})) as DataAdapterResponse<UserType[]>;
 
@@ -105,29 +162,23 @@ export default class IosBackupAdapter implements DataAdapter {
 	}
 
 	async getAccountContactList(input: GetAccountContactListRequest) {
-		return withCommonWrapper(
-			() => this._workerAdapter.getAccountContactList(),
+		return this.call(
+			(worker) => worker.getAccountContactList(),
 			"getAccountContactList",
 		);
 	}
 
 	async getChatList(input: GetChatListRequest) {
-		return withCommonWrapper(
-			() => this._workerAdapter.getChatList(input),
-			"getChatList",
-		);
+		return this.call((worker) => worker.getChatList(input), "getChatList");
 	}
 
 	async searchChats(input: SearchChatsRequest) {
-		return withCommonWrapper(
-			() => this._workerAdapter.searchChats(input),
-			"searchChats",
-		);
+		return this.call((worker) => worker.searchChats(input), "searchChats");
 	}
 
 	async getChat(input: GetChatRequest) {
-		return withCommonWrapper(async () => {
-			const temp = await this._workerAdapter.getChatList({
+		return this.call(async (worker) => {
+			const temp = await worker.getChatList({
 				userIds: [input.chat.id],
 			});
 
@@ -140,99 +191,94 @@ export default class IosBackupAdapter implements DataAdapter {
 	}
 
 	async getMessageList(input: GetMessageListRequest) {
-		return withCommonWrapper(
-			() => this._workerAdapter.getMessageList(input),
+		return this.call(
+			(worker) => worker.getMessageList(input),
 			"getMessageList",
 		);
 	}
 
 	async getGreetingMessageList(input: GetGreetingMessageListRequest) {
-		return withCommonWrapper(
-			() => this._workerAdapter.getGreetingMessageList(input),
+		return this.call(
+			(worker) => worker.getGreetingMessageList(input),
 			"getGreetingMessageList",
 		);
 	}
 
 	async getMessageImage(input: GetMessageImageRequest) {
-		return withCommonWrapper(
-			() => this._workerAdapter.getMessageImage(input),
+		return this.call(
+			(worker) => worker.getMessageImage(input),
 			"getMessageImage",
 		);
 	}
 
 	async resolveMessageFile(input: ResolveMessageFileRequest) {
-		return withCommonWrapper(
-			() => this._workerAdapter.resolveMessageFile(input),
+		return this.call(
+			(worker) => worker.resolveMessageFile(input),
 			"resolveMessageFile",
 		);
 	}
 
 	async releaseMessageFile(input: ReleaseMessageFileRequest) {
-		return withCommonWrapper(
-			() => this._workerAdapter.releaseMessageFile(input),
+		if (!this._proxy) return { data: undefined };
+		return this.call(
+			(worker) => worker.releaseMessageFile(input),
 			"releaseMessageFile",
 		);
 	}
 
 	async getMessageVideo(input: GetMessageVideoRequest) {
-		return withCommonWrapper(
-			() => this._workerAdapter.getMessageVideo(input),
+		return this.call(
+			(worker) => worker.getMessageVideo(input),
 			"getMessageVideo",
 		);
 	}
 
 	async getMessageVoice(input: GetMessageVoiceRequest) {
-		return withCommonWrapper(
-			() => this._workerAdapter.getMessageVoice(input),
+		return this.call(
+			(worker) => worker.getMessageVoice(input),
 			"getMessageVoice",
 		);
 	}
 
 	async getMessageAttach(input: GetMessageAttachRequest) {
-		return withCommonWrapper(
-			() => this._workerAdapter.getMessageAttach(input),
+		return this.call(
+			(worker) => worker.getMessageAttach(input),
 			"getMessageAttach",
 		);
 	}
 
 	async getRecordImage(input: GetRecordImageRequest) {
-		return withCommonWrapper(
-			() => this._workerAdapter.getRecordImage(input),
+		return this.call(
+			(worker) => worker.getRecordImage(input),
 			"getRecordImage",
 		);
 	}
 
 	async getRecordVideo(input: GetRecordVideoRequest) {
-		return withCommonWrapper(
-			() => this._workerAdapter.getRecordVideo(input),
+		return this.call(
+			(worker) => worker.getRecordVideo(input),
 			"getRecordVideo",
 		);
 	}
 
 	async getRecordFile(input: GetRecordFileRequest) {
-		return withCommonWrapper(
-			() => this._workerAdapter.getRecordFile(input),
-			"getRecordFile",
-		);
+		return this.call((worker) => worker.getRecordFile(input), "getRecordFile");
 	}
 
 	async getRecordAudio(input: GetRecordAudioRequest) {
-		return withCommonWrapper(
-			() => this._workerAdapter.getRecordAudio(input),
+		return this.call(
+			(worker) => worker.getRecordAudio(input),
 			"getRecordAudio",
 		);
 	}
 
 	async getStatistic(input: GetStatisticRequest) {
-		return withCommonWrapper(
-			() => this._workerAdapter.getStatistic(input),
-			"getStatistic",
-		);
+		return this.call((worker) => worker.getStatistic(input), "getStatistic");
 	}
 
 	async searchMessages(input: SearchMessagesRequest) {
-		return withCommonWrapper(
-			() => this._workerAdapter.searchMessages(input),
+		return this.call(
+			(worker) => worker.searchMessages(input),
 			"searchMessages",
 		);
 	}
@@ -240,19 +286,21 @@ export default class IosBackupAdapter implements DataAdapter {
 	async getMessageSearchIndexStatus(
 		input: GetMessageSearchIndexStatusRequest,
 	): GetMessageSearchIndexStatusResponse {
-		return withCommonWrapper<Awaited<GetMessageSearchIndexStatusResponse>>(
-			() => this._workerAdapter.getMessageSearchIndexStatus(input),
+		return this.call<Awaited<GetMessageSearchIndexStatusResponse>>(
+			(worker) => worker.getMessageSearchIndexStatus(input),
 			"getMessageSearchIndexStatus",
 		);
 	}
 }
 
-async function withCommonWrapper<T>(
-	fn: () => Promise<T>,
-	context: string,
-): Promise<T> {
-	return fn().catch((error) => {
-		console.error(`[IosBackupAdapter Error] ${context}:`, error);
-		throw error;
+// Terminating a Worker does not reject its outstanding Comlink calls by itself.
+function withAbort<T>(task: Promise<T>, signal: AbortSignal): Promise<T> {
+	return new Promise((resolve, reject) => {
+		const abort = () => reject(signal.reason);
+		if (signal.aborted) abort();
+		else signal.addEventListener("abort", abort, { once: true });
+		void task
+			.then(resolve, reject)
+			.finally(() => signal.removeEventListener("abort", abort));
 	});
 }

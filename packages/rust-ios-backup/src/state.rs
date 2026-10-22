@@ -98,16 +98,17 @@ impl BackupState {
             .map_err(|error| BackupError::context("备份状态不可用", error))
     }
 
-    pub(crate) fn begin_directory_load(&self) -> Result<u64, BackupError> {
+    // End the current session and return the generation for a subsequent load.
+    pub(crate) fn unload_directory(&self) -> Result<u64, BackupError> {
         let mut session = self.lock()?;
         session.files.clear();
         session.files = Arc::new(Registry::default());
         session.generation += 1;
+        session.loaded = None;
+        session.backup = None;
         if let Some(search) = session.search.take() {
             search.cancel()?;
         }
-        session.loaded = None;
-        session.backup = None;
         Ok(session.generation)
     }
 
@@ -152,10 +153,10 @@ impl BackupState {
         session.files.clear();
         session.files = Arc::new(Registry::default());
         session.generation += 1;
+        session.loaded = None;
         if let Some(search) = session.search.take() {
             search.cancel()?;
         }
-        session.loaded = None;
         Ok((backup, session.generation))
     }
 
@@ -193,10 +194,10 @@ impl BackupState {
         session.files.clear();
         session.files = Arc::new(Registry::default());
         session.generation += 1;
+        session.loaded = None;
         if let Some(search) = session.search.take() {
             search.cancel()?;
         }
-        session.loaded = None;
         Ok(())
     }
 }

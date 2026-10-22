@@ -48,7 +48,6 @@ function NoteRecordDefault({
 		(item) => item["@_htmlid"] === "WeNoteHtmlFile",
 	);
 
-	// TODO: 新的获取笔记内容的方法，而不是拿 ObjectURL 再 fetch
 	const NoteDocumentQueryOptions = {
 		enabled: false,
 		...RecordFileQueryOptions({
@@ -83,7 +82,7 @@ function NoteRecordDefault({
 		return (
 			<NoteDocument
 				message={message as OpenMessageType<NoteOpenMessageEntity>}
-				docUrl={noteDocumentFile.src}
+				docUri={noteDocumentFile.uri}
 				noteEntity={noteContent}
 			/>
 		);

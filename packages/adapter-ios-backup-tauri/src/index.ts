@@ -38,10 +38,9 @@ import type {
 	SearchChatsRequest,
 	SearchChatsResponse,
 } from "@repo/types/adapter";
-import { convertFileSrc } from "@tauri-apps/api/core";
 import { getUnixTime, parseISO } from "date-fns";
-import { createFileUrl } from "./file";
 import { invoke } from "./invoke";
+import { MediaFiles } from "./media-files";
 import { restoreChat, restoreChats } from "./restoreChats";
 import { restoreMessages } from "./restoreMessages";
 
@@ -49,26 +48,60 @@ export default class IosBackupTauriAdapter implements DataAdapter {
 	private _directory: string | undefined;
 	private _directoryLoaded = false;
 	private _accountId: string | undefined;
+	private readonly _mediaFiles = new MediaFiles();
+	private _generation = 0;
+
+	private checkCurrent(generation: number) {
+		if (generation !== this._generation)
+			throw new DOMException("Backup loading was cancelled", "AbortError");
+	}
 
 	async _loadDirectory(directory: string, password?: string): Promise<void> {
+		const generation = ++this._generation;
 		this._directoryLoaded = false;
-		this._directory = directory;
+		this._directory = undefined;
 		this._accountId = undefined;
+		await this._mediaFiles.clear();
+		this.checkCurrent(generation);
 		await invoke("load_backup_directory", { directory, password });
+		this.checkCurrent(generation);
+		this._directory = directory;
 		this._directoryLoaded = true;
 	}
 
 	async _loadAccountDatabase(account: Pick<AccountType, "id">) {
+		const generation = ++this._generation;
 		this._accountId = undefined;
+		await this._mediaFiles.clear();
+		this.checkCurrent(generation);
 		await invoke("load_account_database", {
 			accountId: account.id,
 		});
+		this.checkCurrent(generation);
 		this._accountId = account.id;
 	}
 
 	async _unloadAccountDatabase() {
-		await invoke("unload_account_database");
+		++this._generation;
 		this._accountId = undefined;
+		await Promise.all([
+			this._mediaFiles.clear(),
+			invoke("unload_account_database"),
+		]);
+	}
+
+	async _unloadDirectory() {
+		++this._generation;
+		this._directory = undefined;
+		this._directoryLoaded = false;
+		this._accountId = undefined;
+		// Dispatch closure immediately, even if releasing an individual file fails.
+		const results = await Promise.allSettled([
+			this._mediaFiles.clear(),
+			invoke("unload_backup_directory"),
+		]);
+		for (const result of results)
+			if (result.status === "rejected") throw result.reason;
 	}
 
 	async init() {
@@ -187,12 +220,12 @@ export default class IosBackupTauriAdapter implements DataAdapter {
 	async resolveMessageFile(
 		input: ResolveMessageFileRequest,
 	): ResolveMessageFileResponse {
-		const { data } = await invoke("resolve_message_file", { request: input });
-		return { data: { src: convertFileSrc(data.src) } };
+		if (!this._directoryLoaded) throw new Error("Directory not loaded");
+		return { data: { src: await this._mediaFiles.resolve(input) } };
 	}
 
 	async releaseMessageFile(input: ReleaseMessageFileRequest) {
-		await invoke("release_message_file", { request: input });
+		await this._mediaFiles.release(input.referenceId);
 		return { data: undefined };
 	}
 
@@ -223,9 +256,7 @@ export default class IosBackupTauriAdapter implements DataAdapter {
 	): GetMessageAttachResponse {
 		const { data } = await invoke("get_message_attach", { request: input });
 		if (!data) return { data: undefined };
-		return {
-			data: { src: await createFileUrl(data.src, input.type) },
-		};
+		return { data };
 	}
 
 	getRecordImage(input: GetRecordImageRequest): GetRecordImageResponse {
@@ -239,7 +270,7 @@ export default class IosBackupTauriAdapter implements DataAdapter {
 	async getRecordFile(input: GetRecordFileRequest): GetRecordFileResponse {
 		const { data } = await invoke("get_record_file", { request: input });
 		if (!data) return { data: undefined };
-		return { data: { src: await createFileUrl(data.src) } };
+		return { data };
 	}
 
 	async getRecordAudio(input: GetRecordAudioRequest): GetRecordAudioResponse {

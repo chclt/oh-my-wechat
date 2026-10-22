@@ -6,25 +6,42 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import parse, { DOMNode, domToReact, Element } from "html-react-parser";
 import NoteRecord from "@/components/note-record/note-record";
+import { getDataAdapter } from "@/lib/data-adapter";
 import { cn } from "@/lib/utils";
 
 interface NoteDocumentProps extends React.HTMLAttributes<HTMLElement> {
-	docUrl: string;
+	docUri: string;
 	noteEntity: NoteEntity;
 	message: OpenMessageType<NoteOpenMessageEntity>;
 }
 
 export default function NoteDocument({
-	docUrl,
+	docUri,
 	noteEntity,
 	message,
 	className,
 	...props
 }: NoteDocumentProps) {
 	const { data: docContent } = useQuery({
-		queryKey: ["note-message-html", docUrl],
-		queryFn: () => {
-			return fetch(docUrl).then((res) => res.text());
+		queryKey: ["note-message-html", docUri],
+		queryFn: async ({ signal }) => {
+			const adapter = getDataAdapter();
+			const referenceId = crypto.randomUUID();
+			try {
+				const {
+					data: { src },
+				} = await adapter.resolveMessageFile({
+					uri: docUri,
+					referenceId,
+					raw: true,
+				});
+				const response = await fetch(src, { signal });
+				if (!response.ok)
+					throw new Error(`Cannot read note: ${response.status}`);
+				return await response.text();
+			} finally {
+				await adapter.releaseMessageFile({ referenceId }).catch(() => {});
+			}
 		},
 	});
 

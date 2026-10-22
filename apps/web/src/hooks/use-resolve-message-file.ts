@@ -27,12 +27,16 @@ export function useResolveMessageFile(uri?: string) {
 	useEffect(() => {
 		if (!uri) return;
 		const referenceId = crypto.randomUUID();
+		let active = true;
 
 		resolveMessageFile({ uri, referenceId }).catch((error) => {
+			// Releasing an unfinished request can cancel it after this effect ends.
+			if (!active) return;
 			console.error(`[useResolveMessageFile] Failed to resolve ${uri}:`, error);
 		});
 
 		return () => {
+			active = false;
 			releaseMessageFile({ referenceId }).catch(() => {});
 		};
 	}, [uri]);

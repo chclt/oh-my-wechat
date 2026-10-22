@@ -14,6 +14,7 @@
 		"windows": [
 			{
 				"label": "main",
+				"create": false,
 				"title": "Oh My WeChat",
 				"width": 1200,
 				"height": 800,
@@ -23,8 +24,8 @@
 		],
 		"security": {
 			"assetProtocol": {
-				"enable": true,
-				"scope": ["$TEMP/oh-my-wechat-media-*/**"]
+				"enable": false,
+				"scope": []
 			}
 		}
 	},

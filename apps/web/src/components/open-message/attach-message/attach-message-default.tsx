@@ -1,9 +1,10 @@
-import { useQuery } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useMutation } from "@tanstack/react-query";
 import { useAccount } from "@/components/account-provider.tsx";
 import FileTypeIcon from "@/components/filetype-icon";
 import { LoaderIcon } from "@/components/icon";
 import FileSizeFormatter from "@/components/ui/file-size-formatter";
+import { getDataAdapter } from "@/lib/data-adapter";
+import { downloadMessageFile } from "@/lib/download-message-file";
 import { MessageAttachQueryOptions } from "@/lib/fetchers";
 import queryClient from "@/lib/query-client";
 import { cn, decodeUnicodeReferences } from "@/lib/utils";
@@ -15,43 +16,37 @@ export function AttachMessageDefault({
 }: AttachMessageProps) {
 	const { accountId } = useAccount();
 
-	const AttachmentQueryOptions = {
-		enabled: false,
-		...MessageAttachQueryOptions({
-			account: { id: accountId },
-			chat: { id: message.chat_id },
-			message,
-		}),
-	};
 	const {
-		data: attachmentFile,
-		isPending: isAttachmentFilePending,
-		isLoading: isAttachmentFileLoading,
-	} = useQuery(AttachmentQueryOptions);
-	const isAttachmentNotExists =
-		!isAttachmentFilePending && !attachmentFile ? true : undefined;
-	const handleDownloadAttachment = () => {
-		queryClient
-			.ensureQueryData(AttachmentQueryOptions)
-			.then((attachmentFile) => {
-				if (!attachmentFile) return;
-
-				const downlaodLink = document.createElement("a");
-				downlaodLink.href = attachmentFile.src;
-				downlaodLink.download = decodeUnicodeReferences(
-					message.message_entity.msg.appmsg.title,
-				);
-				downlaodLink.click();
+		mutate: download,
+		data,
+		isPending,
+		isError,
+		isSuccess,
+	} = useMutation({
+		mutationFn: async () => {
+			const adapter = getDataAdapter();
+			const attachment = await queryClient.fetchQuery({
+				...MessageAttachQueryOptions({
+					account: { id: accountId },
+					chat: { id: message.chat_id },
+					message,
+				}),
+				staleTime: 0,
 			});
-	};
-
-	useEffect(() => {
-		return () => {
-			if (attachmentFile) {
-				URL.revokeObjectURL(attachmentFile.src);
-			}
-		};
+			if (!attachment) return null;
+			await downloadMessageFile(
+				adapter,
+				attachment.uri,
+				decodeUnicodeReferences(message.message_entity.msg.appmsg.title),
+			);
+			return attachment;
+		},
 	});
+	const failure = isError
+		? "附件读取或解密失败，点击重试"
+		: isSuccess && data === null
+			? "没找到对应文件，点击重试"
+			: undefined;
 
 	return (
 		<button
@@ -62,8 +57,10 @@ export function AttachMessageDefault({
 				"max-w-80 py-2.5 pr-2 pl-4 flex items-start bg-white space-x-2.5 rounded-xl cursor-pointer",
 			)}
 			{...props}
+			disabled={isPending}
+			aria-busy={isPending}
 			onClick={() => {
-				handleDownloadAttachment();
+				if (!isPending) download();
 			}}
 		>
 			<span>
@@ -80,17 +77,17 @@ export function AttachMessageDefault({
 								: message.message_entity.msg.appmsg.appattach.totallen
 						}
 					/>
-					{isAttachmentFileLoading ? (
+					{isPending ? (
 						<span className="ms-2 inline size-4 relative">
 							<LoaderIcon
-								aria-label="加载中"
+								aria-label="正在准备附件"
 								className="absolute inset-0.5 size-3 text-muted-foreground/80 animate-spin"
 							/>
 						</span>
 					) : (
-						isAttachmentNotExists && (
-							<span className="ms-2 text-destructive-foreground">
-								没找到对应文件
+						failure && (
+							<span role="alert" className="ms-2 text-destructive-foreground">
+								{failure}
 							</span>
 						)
 					)}

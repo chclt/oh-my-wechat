@@ -16,8 +16,13 @@ import {
 	type UseMutationResult,
 } from "@tanstack/react-query";
 import { useRef } from "react";
-import { setDataAdapter } from "@/lib/data-adapter";
+import { clearDataAdapter, setDataAdapter } from "@/lib/data-adapter";
+import type { FileDownloads } from "@/lib/download-message-file";
 import { isTauri } from "@/lib/platform";
+import {
+	createBrowserDownloads,
+	createDesktopDownloads,
+} from "./file-downloads";
 
 interface UseBackupAdapterOptions {
 	onDirectoryLoaded: () => Promise<void>;
@@ -28,6 +33,7 @@ function useAdapterMutations<
 	TDirectory extends FileSystemDirectoryHandle | FileList | string,
 >(
 	adapter: DataAdapter,
+	createDownloads: () => FileDownloads,
 	directoryOptions: UseMutationOptions<
 		void,
 		Error,
@@ -38,9 +44,15 @@ function useAdapterMutations<
 ) {
 	const loadDirectoryMutation = useMutation({
 		...directoryOptions,
-		onMutate: () => setDataAdapter(adapter),
+		onMutate: () => setDataAdapter(adapter, createDownloads),
 		onSuccess: onDirectoryLoaded,
-		onError: onDirectoryError,
+		onError: async (error) => {
+			try {
+				await clearDataAdapter(adapter);
+			} finally {
+				onDirectoryError(error);
+			}
+		},
 	});
 	const loadAccountDatabaseMutation = useMutation(accountOptions);
 
@@ -66,6 +78,7 @@ function useBrowserBackupAdapter(options: UseBackupAdapterOptions) {
 	const adapter = adapterRef.current;
 	const mutations = useAdapterMutations(
 		adapter,
+		createBrowserDownloads,
 		LoadDirectoryMutationOptions(adapter),
 		LoadAccountDatabaseMutationOptions(adapter),
 		options,
@@ -81,6 +94,7 @@ function useTauriBackupAdapter(options: UseBackupAdapterOptions) {
 	const adapter = adapterRef.current;
 	const mutations = useAdapterMutations(
 		adapter,
+		createDesktopDownloads,
 		LoadTauriDirectoryMutationOptions(adapter),
 		LoadTauriAccountDatabaseMutationOptions(adapter),
 		options,

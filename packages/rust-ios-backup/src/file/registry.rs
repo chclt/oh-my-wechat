@@ -1,4 +1,4 @@
-use super::ResolvedFile;
+use super::{directory, ResolvedFile};
 use crate::errors::BackupError;
 use std::{
     collections::HashMap,
@@ -24,8 +24,6 @@ impl Entry {
 struct Resources {
     entries: HashMap<String, Arc<Entry>>,
     references: HashMap<String, (String, Arc<Entry>)>,
-    attachments: Vec<Arc<ResolvedFile>>,
-    directory: Option<tempfile::TempDir>,
     closed: bool,
 }
 
@@ -61,6 +59,16 @@ impl Registry {
         Ok(entry)
     }
 
+    // A URL grants access only while its acquisition is still in this registry.
+    pub(super) fn resolved(&self, reference_id: &str) -> Option<Arc<ResolvedFile>> {
+        let resources = self.resources.lock().unwrap();
+        if resources.closed {
+            return None;
+        }
+        let (_, entry) = resources.references.get(reference_id)?;
+        entry.result.get()?.as_ref().ok().cloned()
+    }
+
     pub(crate) fn release(&self, reference_id: &str) {
         let mut resources = self.resources.lock().unwrap();
         let Some((uri, entry)) = resources.references.remove(reference_id) else {
@@ -87,33 +95,17 @@ impl Registry {
         }
     }
 
-    pub(super) fn retain_attachment(&self, file: Arc<ResolvedFile>) -> Result<(), BackupError> {
-        let mut resources = self.resources.lock().unwrap();
+    pub(super) fn directory(
+        &self,
+        store: &directory::Store,
+        relative_path: &str,
+    ) -> Result<directory::FileDirectory, BackupError> {
+        let resources = self.resources.lock().unwrap();
         if resources.closed {
             return Err(BackupError::new("AbortError", "File session was closed"));
         }
-        resources.attachments.push(file);
-        Ok(())
-    }
-
-    pub(super) fn directory(&self) -> Result<tempfile::TempDir, BackupError> {
-        let mut resources = self.resources.lock().unwrap();
-        if resources.closed {
-            return Err(BackupError::new("AbortError", "File session was closed"));
-        }
-        if resources.directory.is_none() {
-            resources.directory = Some(
-                tempfile::Builder::new()
-                    .prefix("oh-my-wechat-media-")
-                    .tempdir()
-                    .map_err(|error| {
-                        BackupError::context("Cannot create media directory", error)
-                    })?,
-            );
-        }
-        tempfile::Builder::new()
-            .prefix("file-")
-            .tempdir_in(resources.directory.as_ref().unwrap().path())
+        store
+            .file(relative_path)
             .map_err(|error| BackupError::context("Cannot create media file directory", error))
     }
 
@@ -121,7 +113,7 @@ impl Registry {
         !self.resources.lock().unwrap().closed
     }
 
-    pub(crate) fn close(&self) {
+    pub(crate) fn clear(&self) {
         let mut resources = self.resources.lock().unwrap();
         resources.closed = true;
         for entry in resources.entries.values() {
@@ -129,12 +121,5 @@ impl Registry {
         }
         resources.references.clear();
         resources.entries.clear();
-    }
-
-    pub(crate) fn clear(&self) {
-        self.close();
-        let mut resources = self.resources.lock().unwrap();
-        resources.attachments.clear();
-        resources.directory.take();
     }
 }

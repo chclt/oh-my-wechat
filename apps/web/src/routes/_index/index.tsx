@@ -8,11 +8,15 @@ import {
 } from "@/components/central-icon.tsx";
 import ExternalLink from "@/components/external-link.tsx";
 import Image from "@/components/image.tsx";
+import { clearDataAdapter } from "@/lib/data-adapter";
 import { isTauri } from "@/lib/platform";
 import Configurer from "./-components/Configurer";
 import ConfigurerErrorFallback from "./-components/ConfigurerErrorFallback";
 
 export const Route = createFileRoute("/_index/")({
+	beforeLoad: async ({ preload }) => {
+		if (!preload) await clearDataAdapter();
+	},
 	component: RouteComponent,
 });
 

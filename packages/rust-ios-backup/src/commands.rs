@@ -1,5 +1,5 @@
 use crate::{account::AccountList, BackupState};
-use crate::{backup::LoadedBackup, errors::BackupError, file::FileSource};
+use crate::{backup::LoadedBackup, errors::BackupError};
 use std::path::PathBuf;
 use tauri_plugin_dialog::DialogExt;
 
@@ -32,25 +32,62 @@ pub(crate) async fn show_directory_picker<R: tauri::Runtime>(
     .map_err(|error| BackupError::context("打开目录选择器失败", error))?
 }
 
+// Begin synchronously at IPC dispatch so a later close cancels even a queued load.
+pub(crate) fn load_backup_directory<R: tauri::Runtime>(invoke: tauri::ipc::Invoke<R>) {
+    use tauri::{
+        ipc::{CommandArg, CommandItem, Invoke, InvokeError},
+        Manager,
+    };
+    let Invoke {
+        message,
+        resolver,
+        acl,
+    } = invoke;
+    let pending = (|| {
+        let directory = PathBuf::from_command(CommandItem {
+            plugin: None,
+            name: "load_backup_directory",
+            key: "directory",
+            message: &message,
+            acl: &acl,
+        })?;
+        let password = Option::<String>::from_command(CommandItem {
+            plugin: None,
+            name: "load_backup_directory",
+            key: "password",
+            message: &message,
+            acl: &acl,
+        })?;
+        let state = message
+            .webview_ref()
+            .app_handle()
+            .state::<BackupState>()
+            .inner()
+            .clone();
+        let generation = state.unload_directory()?;
+        Ok::<_, InvokeError>((state, generation, directory, password))
+    })();
+    match pending {
+        Ok((state, generation, directory, password)) => resolver.respond_async(async move {
+            tauri::async_runtime::spawn_blocking(move || {
+                state.check_current(generation)?;
+                let backup =
+                    LoadedBackup::open(directory, password, || state.check_current(generation))?;
+                state.finish_directory_load(generation, backup)
+            })
+            .await
+            .map_err(|error| BackupError::context("加载备份目录失败", error))?
+            .map_err(InvokeError::from)
+        }),
+        Err(error) => resolver.invoke_error(error),
+    }
+}
+
 #[tauri::command]
-pub(crate) async fn load_backup_directory<R: tauri::Runtime>(
-    app: tauri::AppHandle<R>,
+pub(crate) fn unload_backup_directory(
     state: tauri::State<'_, BackupState>,
-    directory: PathBuf,
-    password: Option<String>,
 ) -> Result<(), BackupError> {
-    use tauri::Manager;
-    let generation = state.begin_directory_load()?;
-    let state = state.inner().clone();
-    tauri::async_runtime::spawn_blocking(move || {
-        let backup = LoadedBackup::open(directory, password, || state.check_current(generation))?;
-        app.asset_protocol_scope()
-            .allow_directory(&backup.directory, true)
-            .map_err(|error| BackupError::context("Cannot expose backup files", error))?;
-        state.finish_directory_load(generation, backup)
-    })
-    .await
-    .map_err(|error| BackupError::context("加载备份目录失败", error))?
+    state.unload_directory().map(|_| ())
 }
 
 #[tauri::command]
@@ -204,22 +241,49 @@ pub(crate) async fn get_greeting_message_list(
     .map_err(|error| BackupError::context("读取验证消息失败", error))?
 }
 
-#[tauri::command]
-pub(crate) async fn load_account_database(
-    state: tauri::State<'_, BackupState>,
-    account_id: String,
-) -> Result<(), BackupError> {
-    let (backup, generation) = state.begin_account_load()?;
-    let state = state.inner().clone();
-    tauri::async_runtime::spawn_blocking(move || {
-        let databases =
-            crate::account::database::load_account_databases(&backup, &account_id, || {
-                state.check_current(generation)
-            })?;
-        state.finish_account_load(generation, databases)
-    })
-    .await
-    .map_err(|error| BackupError::context("加载账号数据库失败", error))?
+pub(crate) fn load_account_database<R: tauri::Runtime>(invoke: tauri::ipc::Invoke<R>) {
+    use tauri::{
+        ipc::{CommandArg, CommandItem, Invoke, InvokeError},
+        Manager,
+    };
+    let Invoke {
+        message,
+        resolver,
+        acl,
+    } = invoke;
+    let pending = (|| {
+        let account_id = String::from_command(CommandItem {
+            plugin: None,
+            name: "load_account_database",
+            key: "accountId",
+            message: &message,
+            acl: &acl,
+        })?;
+        let state = message
+            .webview_ref()
+            .app_handle()
+            .state::<BackupState>()
+            .inner()
+            .clone();
+        let (backup, generation) = state.begin_account_load()?;
+        Ok::<_, InvokeError>((state, backup, generation, account_id))
+    })();
+    match pending {
+        Ok((state, backup, generation, account_id)) => resolver.respond_async(async move {
+            tauri::async_runtime::spawn_blocking(move || {
+                state.check_current(generation)?;
+                let databases =
+                    crate::account::database::load_account_databases(&backup, &account_id, || {
+                        state.check_current(generation)
+                    })?;
+                state.finish_account_load(generation, databases)
+            })
+            .await
+            .map_err(|error| BackupError::context("加载账号数据库失败", error))?
+            .map_err(InvokeError::from)
+        }),
+        Err(error) => resolver.invoke_error(error),
+    }
 }
 
 #[tauri::command]
@@ -284,17 +348,25 @@ pub(crate) fn resolve_message_file<R: tauri::Runtime>(invoke: tauri::ipc::Invoke
         })?;
         let app = message.webview_ref().app_handle();
         let (backup, registry) = app.state::<BackupState>().files()?;
-        crate::file::resolve(backup, registry, request.uri, request.reference_id)
-            .map_err(InvokeError::from)
+        let reference_id = request.reference_id.clone();
+        crate::file::resolve(
+            app,
+            backup,
+            registry,
+            request.uri,
+            request.reference_id,
+            request.raw,
+        )
+        .map(|pending| (pending, reference_id))
+        .map_err(InvokeError::from)
     })();
     match pending {
-        Ok(pending) => resolver.respond_async(async move {
+        Ok((pending, reference_id)) => resolver.respond_async(async move {
             let file = pending.await?;
-            Ok::<_, InvokeError>(crate::media::Response {
-                data: FileSource {
-                    src: file.path.clone(),
-                },
-            })
+            let source = tauri::async_runtime::spawn_blocking(move || file.source(&reference_id))
+                .await
+                .map_err(|error| BackupError::context("Cannot inspect resolved media", error))??;
+            Ok::<_, InvokeError>(crate::media::Response { data: source })
         }),
         Err(error) => resolver.invoke_error(error),
     }
@@ -312,9 +384,9 @@ pub(crate) fn release_message_file(
 pub(crate) async fn get_message_attach(
     state: tauri::State<'_, BackupState>,
     request: crate::media::AttachRequest,
-) -> Result<crate::media::Response<Option<FileSource>>, BackupError> {
-    let (backup, registry) = state.files()?;
-    crate::media::attach(backup, registry, request).await
+) -> Result<crate::media::Response<Option<crate::media::MediaFile>>, BackupError> {
+    let (backup, _) = state.files()?;
+    crate::media::attach(backup, request).await
 }
 
 #[tauri::command]
@@ -354,7 +426,7 @@ pub(crate) async fn get_record_audio(
 pub(crate) async fn get_record_file(
     state: tauri::State<'_, BackupState>,
     request: crate::media::record::RecordFileRequest,
-) -> Result<crate::media::Response<Option<FileSource>>, BackupError> {
-    let (backup, registry) = state.files()?;
-    crate::media::record::file(backup, registry, request).await
+) -> Result<crate::media::Response<Option<crate::media::MediaFile>>, BackupError> {
+    let (backup, _) = state.files()?;
+    crate::media::record::file(backup, request).await
 }
