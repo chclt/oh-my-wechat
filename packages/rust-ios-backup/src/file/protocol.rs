@@ -20,14 +20,18 @@ pub(crate) fn handle<R: Runtime>(
         .get_webview_window(context.webview_label())
         .and_then(|webview| webview.url().ok())
         .map(|url| {
-            format!(
-                "{}://{}{}",
-                url.scheme(),
-                url.host_str().unwrap_or("localhost"),
-                url.port()
-                    .map(|port| format!(":{port}"))
-                    .unwrap_or_default()
-            )
+            if cfg!(windows) && !matches!(url.scheme(), "http" | "https") {
+                format!("http://{}.localhost", url.scheme())
+            } else {
+                format!(
+                    "{}://{}{}",
+                    url.scheme(),
+                    url.host_str().unwrap_or("localhost"),
+                    url.port()
+                        .map(|port| format!(":{port}"))
+                        .unwrap_or_default()
+                )
+            }
         })
         .unwrap_or_else(|| "null".to_owned());
     tauri::async_runtime::spawn_blocking(move || {

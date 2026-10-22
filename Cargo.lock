@@ -2670,6 +2670,8 @@ dependencies = [
  "tauri-plugin-dialog",
  "tauri-plugin-opener",
  "tempfile",
+ "webview2-com",
+ "windows-core",
 ]
 
 [[package]]

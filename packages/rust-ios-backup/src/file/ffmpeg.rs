@@ -6,7 +6,11 @@ use std::{
 pub(super) fn executable() -> Result<PathBuf, BackupError> {
     let executable = std::env::current_exe()
         .map_err(|error| BackupError::context("Cannot locate FFmpeg", error))?;
-    Ok(executable.with_file_name("ffmpeg"))
+    Ok(executable.with_file_name(if cfg!(windows) {
+        "ffmpeg.exe"
+    } else {
+        "ffmpeg"
+    }))
 }
 
 pub(super) fn run(
@@ -22,6 +26,11 @@ pub(super) fn run(
         .stdin(Stdio::null())
         .stdout(Stdio::null())
         .stderr(Stdio::piped());
+    #[cfg(windows)]
+    {
+        use std::os::windows::process::CommandExt;
+        command.creation_flags(0x08000000);
+    }
     let output = command
         .output()
         .map_err(|error| BackupError::context("Cannot start FFmpeg", error))?;
