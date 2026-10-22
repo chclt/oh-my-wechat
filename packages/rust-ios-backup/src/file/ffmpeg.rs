@@ -3,7 +3,20 @@ use std::{
     path::{Path, PathBuf},
     process::{Command, Stdio},
 };
-pub(super) fn executable() -> Result<PathBuf, BackupError> {
+#[cfg(target_os = "linux")]
+pub(super) fn executable<R: tauri::Runtime>(
+    app: &tauri::AppHandle<R>,
+) -> Result<PathBuf, BackupError> {
+    use tauri::Manager;
+    app.path()
+        .resolve("binaries/ffmpeg", tauri::path::BaseDirectory::Resource)
+        .map_err(|error| BackupError::context("Cannot locate FFmpeg", error))
+}
+
+#[cfg(not(target_os = "linux"))]
+pub(super) fn executable<R: tauri::Runtime>(
+    _app: &tauri::AppHandle<R>,
+) -> Result<PathBuf, BackupError> {
     let executable = std::env::current_exe()
         .map_err(|error| BackupError::context("Cannot locate FFmpeg", error))?;
     Ok(executable.with_file_name(if cfg!(windows) {

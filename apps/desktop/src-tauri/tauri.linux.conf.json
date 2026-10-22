@@ -1,0 +1,18 @@
+{
+	"bundle": {
+		"linux": {
+			"deb": {
+				"depends": ["gstreamer1.0-libav"]
+			},
+			"appimage": {
+				"bundleMediaFramework": true
+			}
+		},
+		"externalBin": [],
+		"resources": [
+			"binaries/ffmpeg",
+			"binaries/ffmpeg.LICENSE",
+			"binaries/ffmpeg.build.json"
+		]
+	}
+}

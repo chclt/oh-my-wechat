@@ -31,7 +31,12 @@ export class MediaFiles {
 			}).then(async ({ data }) => {
 				try {
 					controller.signal.throwIfAborted();
-					return raw
+					const needsBlob =
+						raw ||
+						(import.meta.env.TAURI_ENV_PLATFORM === "linux" &&
+							(data.mimeType.startsWith("audio/") ||
+								data.mimeType.startsWith("video/")));
+					return needsBlob
 						? await createFileUrl(data.src, data.mimeType, controller.signal)
 						: convertFileSrc(data.src, "backup-file");
 				} finally {
