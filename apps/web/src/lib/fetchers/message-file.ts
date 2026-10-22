@@ -3,7 +3,7 @@ import {
 	ResolveMessageFileRequest,
 } from "@repo/types/adapter";
 import { mutationOptions } from "@tanstack/react-query";
-import { getDataAdapter } from "../data-adapter";
+import { getDataAdapter, hasDataAdapter } from "../data-adapter";
 
 export function ResolveMessageFileMutationOptions() {
 	return mutationOptions({
@@ -17,6 +17,8 @@ export function ReleaseMessageFileMutationOptions() {
 	return mutationOptions({
 		mutationKey: ["releaseMessageFile"],
 		mutationFn: async (requestData: ReleaseMessageFileRequest) =>
-			getDataAdapter().releaseMessageFile(requestData),
+			hasDataAdapter()
+				? getDataAdapter().releaseMessageFile(requestData)
+				: { data: undefined },
 	});
 }

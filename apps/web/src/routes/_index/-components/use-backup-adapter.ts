@@ -5,7 +5,7 @@ import {
 } from "@repo/adapter-ios-backup/queryOptions";
 import { useMutation } from "@tanstack/react-query";
 import { useRef } from "react";
-import { setDataAdapter } from "@/lib/data-adapter";
+import { clearDataAdapter, setDataAdapter } from "@/lib/data-adapter";
 
 interface UseBackupAdapterOptions {
 	onDirectoryLoaded: () => Promise<void>;
@@ -26,7 +26,13 @@ export function useBackupAdapter({
 		...LoadDirectoryMutationOptions(adapter),
 		onMutate: () => setDataAdapter(adapter),
 		onSuccess: onDirectoryLoaded,
-		onError: onDirectoryError,
+		onError: async (error) => {
+			try {
+				await clearDataAdapter(adapter);
+			} finally {
+				onDirectoryError(error);
+			}
+		},
 	});
 	const loadAccountDatabaseMutation = useMutation(
 		LoadAccountDatabaseMutationOptions(adapter),

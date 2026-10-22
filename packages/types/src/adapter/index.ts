@@ -279,7 +279,10 @@ export type GetMessageSearchIndexStatusResponse = Promise<
 >;
 
 export interface DataAdapter {
-	init: () => void;
+	init: () => Promise<void>;
+
+	/** Close the backup and release its resources; the adapter may be opened again. */
+	_unloadDirectory: () => Promise<void>;
 
 	getAccountList: (...requestData: any[]) => GetAccountListResponse;
 

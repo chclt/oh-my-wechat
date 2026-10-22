@@ -266,16 +266,21 @@ export const adapterWorker: AdapterWorkerType = {
 
 	_unloadDirectory: async () => {
 		const cleanup = adapterWorker._unloadAccountDatabase();
-		_store.encryption?.dispose();
-		_store.manifestExecutor?.close();
+		const encryption = _store.encryption;
+		const manifest = _store.manifestExecutor;
 		_store.encryption = undefined;
 		_store.manifestExecutor = undefined;
 		_store.accountList = undefined;
 		_store.directory = undefined;
 		_store.databases = {};
 		_store.wcdbDicts = {};
-		FileController.clearFileRegistry();
-		await cleanup;
+		const results = await Promise.allSettled([
+			cleanup,
+			Promise.resolve().then(() => encryption?.dispose()),
+			Promise.resolve().then(() => manifest?.close()),
+		]);
+		for (const result of results)
+			if (result.status === "rejected") throw result.reason;
 	},
 
 	_loadAccountDatabase: async (account: AccountType) => {
@@ -365,14 +370,18 @@ export const adapterWorker: AdapterWorkerType = {
 	_unloadAccountDatabase: async () => {
 		accountLoad?.abort();
 		accountLoad = undefined;
+		FileController.clearFileRegistry();
 		const searchSession = _store.messageSearchIndex;
 		const executors = _store.accountDatabaseExecutors ?? [];
 		_store.messageSearchIndex = undefined;
 		_store.accountDatabaseExecutors = [];
 		_store.account = undefined;
 		_store.databases = { manifest: _store.databases?.manifest };
-		await searchSession?.dispose();
-		for (const executor of executors) executor.close();
+		try {
+			await searchSession?.dispose();
+		} finally {
+			for (const executor of executors) executor.close();
+		}
 	},
 
 	_getStoreItem: (storeKey) => {

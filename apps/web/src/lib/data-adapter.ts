@@ -12,11 +12,34 @@ const getDataAdapter = () => {
 	return dataAdapter;
 };
 
-const setDataAdapter = (newAdapter: DataAdapter) => {
-	if (dataAdapter === newAdapter) return;
+// Serialize replacement/close so an old adapter cannot unload a newer backup.
+let transition: Promise<void> = Promise.resolve();
 
-	queryClient.removeQueries();
-	dataAdapter = newAdapter;
+const setDataAdapter = (newAdapter: DataAdapter) => {
+	const next = transition.then(async () => {
+		const previous = dataAdapter;
+		if (previous === newAdapter) return;
+		dataAdapter = undefined;
+		await queryClient.cancelQueries();
+		queryClient.removeQueries();
+		await previous?._unloadDirectory();
+		dataAdapter = newAdapter;
+	});
+	transition = next.catch(() => {});
+	return next;
 };
 
-export { getDataAdapter, hasDataAdapter, setDataAdapter };
+const clearDataAdapter = (expected?: DataAdapter) => {
+	const next = transition.then(async () => {
+		if (expected && dataAdapter !== expected) return;
+		const previous = dataAdapter;
+		dataAdapter = undefined;
+		await queryClient.cancelQueries();
+		queryClient.removeQueries();
+		await previous?._unloadDirectory();
+	});
+	transition = next.catch(() => {});
+	return next;
+};
+
+export { getDataAdapter, hasDataAdapter, setDataAdapter, clearDataAdapter };

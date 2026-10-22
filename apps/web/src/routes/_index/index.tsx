@@ -8,10 +8,14 @@ import {
 } from "@/components/central-icon.tsx";
 import Image from "@/components/image.tsx";
 import Link from "@/components/link.tsx";
+import { clearDataAdapter } from "@/lib/data-adapter";
 import Configurer from "./-components/Configurer";
 import ConfigurerErrorFallback from "./-components/ConfigurerErrorFallback";
 
 export const Route = createFileRoute("/_index/")({
+	beforeLoad: async ({ preload }) => {
+		if (!preload) await clearDataAdapter();
+	},
 	component: RouteComponent,
 });
 
