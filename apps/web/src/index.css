@@ -141,6 +141,10 @@
 	.root {
 		isolation: isolate;
 	}
+
+	:root[data-platform="tauri"] {
+		font-size: 14px;
+	}
 }
 
 @layer components {

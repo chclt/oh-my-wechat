@@ -1,95 +1,73 @@
 import { Field, RadioGroup } from "@base-ui/react";
 import { useToggle } from "@mantine/hooks";
-import IosBackupAdapter from "@repo/adapter-ios-backup";
-import {
-	LoadAccountDatabaseMutationOptions,
-	LoadDirectoryMutationOptions,
-} from "@repo/adapter-ios-backup/queryOptions";
+import { showDirectoryPicker as showNativeDirectoryPicker } from "@repo/adapter-ios-backup-tauri/utils";
 import type { AccountType } from "@repo/types";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import type React from "react";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { ChevronRightSmallLine } from "@/components/central-icon.tsx";
-// import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group.tsx";
 import { LoaderIcon } from "@/components/icon.tsx";
 import Image from "@/components/image.tsx";
-import { Button, buttonVariants } from "@/components/ui/button.tsx";
+import { Button } from "@/components/ui/button.tsx";
 import { RadioGroupItem } from "@/components/ui/radio-group";
-import { setDataAdapter } from "@/lib/data-adapter.ts";
 import { AccountListSuspenseQueryOptions } from "@/lib/fetchers/account";
 import queryClient from "@/lib/query-client";
-import { cn } from "@/lib/utils.ts";
+import { OpenBackupButton } from "./OpenBackupButton";
+import { useBackupAdapter } from "./use-backup-adapter";
 
 export default function Configurer(
 	props: React.HTMLAttributes<HTMLDivElement>,
 ) {
 	const navigate = useNavigate();
 
-	const adapterRef = useRef<IosBackupAdapter | null>(null);
-
-	function getAdapter() {
-		if (adapterRef.current === null) {
-			adapterRef.current = new IosBackupAdapter();
-		}
-		return adapterRef.current;
-	}
-
 	const [step, toggleStep] = useToggle<
 		"SELECT_DIRECTORY" | "ENTER_PASSWORD" | "SELECT_ACCOUNT"
 	>(["SELECT_DIRECTORY", "ENTER_PASSWORD", "SELECT_ACCOUNT"]);
 	const [password, setPassword] = useState("");
+	const [directoryPickerError, setDirectoryPickerError] =
+		useState<Error | null>(null);
+
+	const { target, loadDirectoryMutation, loadAccountDatabaseMutation } =
+		useBackupAdapter({
+			onDirectoryLoaded: async () => {
+				const accounts = await queryClient.fetchQuery({
+					...AccountListSuspenseQueryOptions(),
+					staleTime: 0,
+				});
+				switch (accounts.length) {
+					case 0:
+						toggleStep("SELECT_DIRECTORY");
+						break;
+					case 1:
+						handleAccountSelect(accounts[0]);
+						break;
+					default:
+						toggleStep("SELECT_ACCOUNT");
+						break;
+				}
+			},
+			onDirectoryError: (error) => {
+				if (error.name === "BackupPasswordRequiredError") {
+					toggleStep("ENTER_PASSWORD");
+				}
+			},
+		});
 
 	const {
-		mutateAsync: loadDirectory,
-		variables: loadDirectoryVariables,
 		error: loadDirectoryError,
 		isPending: isLoadingDirectory,
 		isSuccess: isLoadDirectorySuccess,
-	} = useMutation({
-		...LoadDirectoryMutationOptions(getAdapter()),
-		onSuccess: async () => {
-			const accounts = await queryClient.fetchQuery({
-				...AccountListSuspenseQueryOptions(),
-				staleTime: 0,
-			});
-			switch (accounts.length) {
-				case 0:
-					toggleStep("SELECT_DIRECTORY");
-					break;
-				case 1:
-					handleAccountSelect(accounts[0]);
-					break;
-				default:
-					toggleStep("SELECT_ACCOUNT");
-					break;
-			}
-		},
-		onError: (error) => {
-			if (error.name === "BackupPasswordRequiredError") {
-				toggleStep("ENTER_PASSWORD");
-			}
-		},
-	});
+	} = loadDirectoryMutation;
 
 	const {
 		mutate: loadAccountDatabase,
 		error: loadAccountDatabaseError,
 		isPending: isLoadingAccountDatabase,
 		isSuccess: isLoadAccountDatabaseSuccess,
-	} = useMutation(LoadAccountDatabaseMutationOptions(getAdapter()));
+	} = loadAccountDatabaseMutation;
 
-	const handleDirectorySelect = async (
-		directoryHandle: FileSystemDirectoryHandle | FileList,
-		password?: string,
-	) => {
-		setDataAdapter(getAdapter());
-		try {
-			await loadDirectory({ directory: directoryHandle, password });
-		} catch {
-			// Mutation errors are displayed in the current step.
-		}
-	};
+	const directoryError = directoryPickerError ?? loadDirectoryError;
 
 	const { data: accountList = [] } = useQuery({
 		...AccountListSuspenseQueryOptions(),
@@ -120,75 +98,80 @@ export default function Configurer(
 		<main {...props}>
 			{step === "SELECT_DIRECTORY" && (
 				<div className="grid auto-rows-auto justify-items-center gap-3">
-					{isFSAEnabled && (
-						<Button
-							variant="outline"
-							className="h-12 py-3 ps-6 pe-4 inline-flex text-base rounded-xl [&:not(:disabled)]:border-foreground [&>svg]:size-6"
-							disabled={isLoadingDirectory}
-							onClick={async () => {
-								const directoryHandle = await window.showDirectoryPicker();
-								if ((await directoryHandle.requestPermission()) === "granted") {
-									await handleDirectorySelect(directoryHandle);
-								}
-							}}
-						>
-							选择 iTunes 备份
-							{isLoadingDirectory ? (
-								<LoaderIcon className="scale-90 opacity-75 animate-spin" />
-							) : (
-								<ChevronRightSmallLine />
+					{target === "web" ? (
+						<>
+							{isFSAEnabled && (
+								<OpenBackupButton
+									label="选择 iTunes 备份"
+									loading={isLoadingDirectory}
+									onClick={async () => {
+										const directoryHandle = await window.showDirectoryPicker();
+										if (
+											(await directoryHandle.requestPermission()) === "granted"
+										) {
+											loadDirectoryMutation.mutate({
+												directory: directoryHandle,
+											});
+										}
+									}}
+								/>
 							)}
-						</Button>
+							{!isFSAEnabled && (
+								<label className={"relative"}>
+									<input
+										type={"file"}
+										// @ts-ignore
+										webkitdirectory=""
+										className={"peer absolute pointer-events-none opacity-0"}
+										disabled={
+											!isWorkerEnabled ||
+											isLoadingDirectory ||
+											isLoadDirectorySuccess
+										}
+										onChange={(event) => {
+											if (event.target.files && event.target.files.length > 0) {
+												loadDirectoryMutation.mutate(
+													{ directory: event.target.files },
+													{
+														onSettled: () => {
+															event.target.files = null;
+														},
+													},
+												);
+											} else {
+												event.target.files = null;
+											}
+										}}
+									/>
+									<OpenBackupButton
+										render={<div />}
+										nativeButton={false}
+										label="打开 iTunes 备份"
+										loading={isLoadingDirectory || isLoadDirectorySuccess}
+									/>
+								</label>
+							)}
+						</>
+					) : (
+						<OpenBackupButton
+							label="打开本地备份"
+							loading={isLoadingDirectory}
+							onClick={() => {
+								setDirectoryPickerError(null);
+								showNativeDirectoryPicker()
+									.then((directory) => {
+										if (directory !== null)
+											loadDirectoryMutation.mutate({ directory });
+									})
+									.catch(setDirectoryPickerError);
+							}}
+						/>
 					)}
 
-					{!isFSAEnabled && (
-						<label className={"relative"}>
-							<input
-								type={"file"}
-								// @ts-ignore
-								webkitdirectory=""
-								className={"peer absolute pointer-events-none opacity-0"}
-								disabled={
-									!isWorkerEnabled ||
-									isLoadingDirectory ||
-									isLoadDirectorySuccess
-								}
-								onChange={(event) => {
-									if (event.target.files && event.target.files.length > 0) {
-										// setIsLoadingDirectory(true)
-										handleDirectorySelect(event.target.files).then(() => {
-											event.target.files = null;
-										});
-									} else {
-										// setIsLoadingDirectory(false)
-										event.target.files = null;
-									}
-								}}
-							/>
-							<div
-								className={cn(
-									buttonVariants({
-										variant: "outline",
-										size: "default",
-										className:
-											"h-12 py-3 ps-6 pe-3.5 inline-flex text-base rounded-xl [&:not(:disabled)]:border-foreground",
-									}),
-								)}
-							>
-								打开 iTunes 备份
-								{isLoadingDirectory || isLoadDirectorySuccess ? (
-									<LoaderIcon className="scale-90 opacity-75 animate-spin" />
-								) : (
-									<ChevronRightSmallLine className={"size-6"} />
-								)}
-							</div>
-						</label>
-					)}
-
-					{loadDirectoryError &&
-						loadDirectoryError.name !== "BackupPasswordRequiredError" && (
+					{directoryError &&
+						directoryError.name !== "BackupPasswordRequiredError" && (
 							<p role="alert" className="text-sm text-destructive">
-								{loadDirectoryError.message}
+								{directoryError.message}
 							</p>
 						)}
 				</div>
@@ -197,18 +180,13 @@ export default function Configurer(
 			{step === "ENTER_PASSWORD" && (
 				<form
 					className="justify-self-stretch grid auto-rows-auto gap-4"
-					onSubmit={async (event) => {
+					onSubmit={(event) => {
 						event.preventDefault();
-						if (
-							loadDirectoryVariables &&
-							!isLoadingDirectory &&
-							!isLoadDirectorySuccess
-						) {
-							await handleDirectorySelect(
-								loadDirectoryVariables.directory,
-								password,
-							);
-						}
+						if (!loadDirectoryMutation.isError) return;
+						loadDirectoryMutation.mutate({
+							...loadDirectoryMutation.variables,
+							password,
+						});
 					}}
 				>
 					<Field.Root

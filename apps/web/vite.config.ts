@@ -7,9 +7,23 @@ import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 
+const tauriDebug = process.env.TAURI_ENV_DEBUG === "true";
+// Keep mode="tauri" for adapter selection; NODE_ENV controls Vite/React dev code.
+if (tauriDebug) process.env.NODE_ENV = "development";
+
 // https://vitejs.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
+	envPrefix: ["VITE_", "TAURI_ENV_"],
+	worker: { format: "es" },
 	plugins: [
+		{
+			name: "html-platform",
+			transformIndexHtml: {
+				order: "pre",
+				handler: (html) =>
+					html.replace("%APP_PLATFORM%", mode === "tauri" ? "tauri" : "web"),
+			},
+		},
 		typesPresets(),
 		adapterIosBackupVitePresets(),
 		devtools({
@@ -37,6 +51,8 @@ export default defineConfig({
 		},
 	},
 	build: {
+		minify: tauriDebug ? false : undefined,
+		sourcemap: tauriDebug,
 		rollupOptions: {
 			output: {
 				manualChunks: (id) => {
@@ -49,4 +65,4 @@ export default defineConfig({
 			},
 		},
 	},
-});
+}));

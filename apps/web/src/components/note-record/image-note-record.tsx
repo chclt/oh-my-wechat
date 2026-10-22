@@ -4,10 +4,9 @@ import {
 	OpenMessageType,
 } from "@repo/types";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { useResolveMessageFile } from "@/hooks/use-resolve-message-file.ts";
+import AutoResolutionFallbackImage from "@/components/auto-resolution-fallback-image.tsx";
 import { RecordImageQueryOptions } from "@/lib/fetchers/record.ts";
 import { Route } from "@/routes/$accountId/route.tsx";
-import Image from "../image.tsx";
 
 interface ImageNoteRecordProps extends React.HTMLAttributes<HTMLElement> {
 	message: OpenMessageType<NoteOpenMessageEntity>;
@@ -31,16 +30,11 @@ export default function ImageNoteRecord({
 		}),
 	);
 
-	const selectedImage = image.regular ?? image.thumbnail;
-	const { src: imageSrc } = useResolveMessageFile(selectedImage?.uri);
-
 	return (
 		<>
 			{Object.keys(image).length ? (
-				<Image
-					src={imageSrc}
-					width={selectedImage?.width}
-					height={selectedImage?.height}
+				<AutoResolutionFallbackImage
+					image={image}
 					alt="image"
 					className={className}
 					{...props}

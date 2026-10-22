@@ -1,0 +1,19 @@
+[package]
+name = "oh-my-wechat-desktop"
+version = "0.0.0"
+description = "Oh My WeChat desktop application"
+edition = "2021"
+publish = false
+
+[[bin]]
+name = "oh-my-wechat"
+path = "src/main.rs"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+rust-ios-backup = { path = "../../../packages/rust-ios-backup" }
+tauri = { version = "2", features = ["protocol-asset"] }
+tauri-plugin-dialog = "2"
+tauri-plugin-opener = "2"

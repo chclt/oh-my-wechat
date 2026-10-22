@@ -11,6 +11,9 @@
 			"default": "./src/vite/index.mjs"
 		}
 	},
+	"scripts": {
+		"test": "vitest run"
+	},
 	"dependencies": {
 		"@bufbuild/protobuf": "catalog:",
 		"@ffmpeg/core": "^0.12.10",

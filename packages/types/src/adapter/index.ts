@@ -1,5 +1,6 @@
 import {
 	AccountType,
+	AttachNoteRecordType,
 	AudioNoteRecordType,
 	ChatType,
 	ContactType,
@@ -207,7 +208,7 @@ export interface GetRecordFileRequest {
 	account: Pick<AccountType, "id">;
 	chat: Pick<ChatType, "id">;
 	message: Pick<MessageType, "local_id">;
-	record: Pick<MessageRecordBaseType, "@_dataid">;
+	record: Pick<AttachNoteRecordType, "@_dataid" | "datafmt">;
 }
 
 export type GetRecordFileResponse = Promise<

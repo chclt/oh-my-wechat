@@ -1,10 +1,7 @@
 import { Dialog } from "@base-ui/react";
 import type { MessageType, NoteEntity, OpenMessageType } from "@repo/types";
-import {
-	MessageRecordBaseType,
-	NoteMessageRecordType,
-	NoteOpenMessageEntity,
-} from "@repo/types";
+import { NoteMessageRecordType, NoteOpenMessageEntity } from "@repo/types";
+import type { GetRecordFileRequest } from "@repo/types/adapter";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
 import { Suspense, useMemo, useState } from "react";
@@ -58,10 +55,8 @@ function NoteRecordDefault({
 			account: { id: accountId },
 			chat: { id: message.chat_id },
 			message,
-			record: noteHtmlFile as unknown as Pick<
-				MessageRecordBaseType,
-				"@_dataid"
-			>, // FIXME
+			// 笔记 HTML 条目提供 dataid 和 datafmt，但 NoteRecordType 尚未单独描述它。
+			record: noteHtmlFile as GetRecordFileRequest["record"],
 			// type: "text/html",
 		}),
 	};

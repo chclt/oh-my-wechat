@@ -1,0 +1,42 @@
+[package]
+name = "rust-ios-backup"
+version = "0.0.0"
+description = "iOS backup backend and Tauri commands for Oh My WeChat"
+edition = "2021"
+publish = false
+
+[dependencies]
+aes = { version = "0.8", features = ["zeroize"] }
+aes-kw = "0.2"
+cbc = { version = "0.1", features = ["zeroize"] }
+pbkdf2 = "0.12"
+sha1 = "0.10"
+sha2 = "0.10"
+zeroize = "1"
+plist = "1"
+prost = { version = "0.14", default-features = false, features = [
+	"std",
+	"derive",
+] }
+rusqlite = { version = "0.40", features = ["bundled", "serialize"] }
+md5 = "0.8"
+quick-xml = "0.42"
+regex = "1"
+ryu-js = "1"
+serde_json = "1"
+icu_casemap = "2.3"
+icu_locale_core = { version = "2.3", features = ["serde"] }
+icu_normalizer = { version = "2.3", default-features = false, features = [
+	"compiled_data",
+] }
+serde = { version = "1", features = ["derive"] }
+tauri = { version = "2", default-features = false, features = [
+	"protocol-asset",
+] }
+tauri-plugin-dialog = "2"
+silk-rs = "0.2.0"
+tokio = { version = "1.53.1", features = ["sync"] }
+tempfile = "3"
+
+[dev-dependencies]
+base64 = "0.22"

@@ -1,5 +1,5 @@
 import { Buffer } from "buffer";
-import type { AccountType, UserType } from "@repo/types";
+import type { AccountType } from "@repo/types";
 import {
 	DataAdapter,
 	DataAdapterResponse,
@@ -230,15 +230,14 @@ export const adapterWorker: AdapterWorkerType = {
 				"Documents/MMappedKV/mmsetting.archive.%",
 				encryption,
 			);
-			const accounts: UserType[] = [];
+			const accounts: AccountType[] = [];
 			for (const row of mmsettingFiles) {
 				load.signal.throwIfAborted();
 				if (/mmsetting\.archive\.[^.]+$/.test(row.filename)) {
-					accounts.push(
-						parseUserFromMmsetting(
-							new Uint8Array(await row.file.arrayBuffer()),
-						),
+					const account = parseUserFromMmsetting(
+						new Uint8Array(await row.file.arrayBuffer()),
 					);
+					accounts.push(account);
 				}
 			}
 			if (!accounts.length)
@@ -279,7 +278,7 @@ export const adapterWorker: AdapterWorkerType = {
 		await cleanup;
 	},
 
-	_loadAccountDatabase: async (account: UserType) => {
+	_loadAccountDatabase: async (account: AccountType) => {
 		const storeDirectory = adapterWorker._getStoreItem("directory");
 		const storeDatabase = adapterWorker._getStoreItem("databases");
 		const encryption = _store.encryption;
