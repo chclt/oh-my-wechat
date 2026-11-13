@@ -5,9 +5,10 @@ import {
 	GetMessageVideoRequest,
 	GetMessageVoiceRequest,
 } from "@repo/types/adapter";
-import type { UseQueryOptions } from "@tanstack/react-query";
+import { mutationOptions, type UseQueryOptions } from "@tanstack/react-query";
 import { omit } from "es-toolkit";
 import { getDataAdapter } from "../data-adapter.ts";
+import { downloadMessageFile } from "../download-message-file";
 
 export function MessageImageQueryOptions(
 	requestData: GetMessageImageRequest,
@@ -62,19 +63,22 @@ export function MessageVoiceQueryOptions(
 	};
 }
 
-export function MessageAttachQueryOptions(
+export function MessageAttachDownloadMutationOptions(
 	requestData: GetMessageAttachRequest,
+	filename: string,
 ) {
-	return {
-		queryKey: [
+	return mutationOptions({
+		mutationKey: [
 			`account: ${requestData.account.id}`,
 			`chat: ${requestData.chat.id}`,
 			`message: ${requestData.message.local_id}`,
-			"attach",
+			"download-attachment",
 		],
-		queryFn: () =>
-			getDataAdapter()
-				.getMessageAttach(requestData)
-				.then((res) => res.data ?? null),
-	};
+		mutationFn: async () => {
+			const adapter = getDataAdapter();
+			const { data } = await adapter.getMessageAttach(requestData);
+			if (data) await downloadMessageFile(adapter, data.uri, filename);
+			return data ?? null;
+		},
+	});
 }

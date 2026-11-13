@@ -1,6 +1,5 @@
 import {
 	AttachNoteRecordType,
-	FileInfo,
 	NoteOpenMessageEntity,
 	OpenMessageType,
 } from "@repo/types";
@@ -8,8 +7,7 @@ import { useMutation } from "@tanstack/react-query";
 import FileTypeIcon from "@/components/filetype-icon.tsx";
 import { LoaderIcon } from "@/components/icon";
 import FileSizeFormatter from "@/components/ui/file-size-formatter.tsx";
-import { getDataAdapter } from "@/lib/data-adapter.ts";
-import { downloadMessageFile } from "@/lib/download-message-file";
+import { RecordFileDownloadMutationOptions } from "@/lib/fetchers/record";
 import { cn } from "@/lib/utils.ts";
 import { Route } from "@/routes/$accountId/route.tsx";
 
@@ -32,21 +30,17 @@ export default function AttachNoteRecord({
 		isPending,
 		isError,
 		isSuccess,
-	} = useMutation<FileInfo | null>({
-		mutationKey: ["attach", message.chat_id, message.id],
-		mutationFn: async () => {
-			const adapter = getDataAdapter();
-			const { data } = await adapter.getRecordFile({
+	} = useMutation(
+		RecordFileDownloadMutationOptions(
+			{
 				account: { id: accountId },
 				chat: { id: message.chat_id },
 				message,
 				record: recordEntity,
-			});
-			if (data)
-				await downloadMessageFile(adapter, data.uri, recordEntity.datatitle);
-			return data ?? null;
-		},
-	});
+			},
+			recordEntity.datatitle,
+		),
+	);
 
 	const failure = isError
 		? "附件读取或解密失败，点击重试"

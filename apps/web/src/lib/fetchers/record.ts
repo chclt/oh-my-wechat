@@ -4,8 +4,9 @@ import {
 	GetRecordImageRequest,
 	GetRecordVideoRequest,
 } from "@repo/types/adapter";
-import { queryOptions } from "@tanstack/react-query";
+import { mutationOptions, queryOptions } from "@tanstack/react-query";
 import { getDataAdapter } from "../data-adapter";
+import { downloadMessageFile } from "../download-message-file";
 
 export function RecordImageQueryOptions(requestData: GetRecordImageRequest) {
 	return {
@@ -37,6 +38,27 @@ export function RecordVideoQueryOptions(requestData: GetRecordVideoRequest) {
 				.getRecordVideo(requestData)
 				.then((res) => res.data ?? null),
 	};
+}
+
+export function RecordFileDownloadMutationOptions(
+	requestData: GetRecordFileRequest,
+	filename: string,
+) {
+	return mutationOptions({
+		mutationKey: [
+			`account: ${requestData.account.id}`,
+			`chat: ${requestData.chat.id}`,
+			`message: ${requestData.message.local_id}`,
+			`record: ${requestData.record["@_dataid"]}`,
+			"download-record-file",
+		],
+		mutationFn: async () => {
+			const adapter = getDataAdapter();
+			const { data } = await adapter.getRecordFile(requestData);
+			if (data) await downloadMessageFile(adapter, data.uri, filename);
+			return data ?? null;
+		},
+	});
 }
 
 export function RecordFileQueryOptions(

@@ -3,10 +3,7 @@ import { useAccount } from "@/components/account-provider.tsx";
 import FileTypeIcon from "@/components/filetype-icon";
 import { LoaderIcon } from "@/components/icon";
 import FileSizeFormatter from "@/components/ui/file-size-formatter";
-import { getDataAdapter } from "@/lib/data-adapter";
-import { downloadMessageFile } from "@/lib/download-message-file";
-import { MessageAttachQueryOptions } from "@/lib/fetchers";
-import queryClient from "@/lib/query-client";
+import { MessageAttachDownloadMutationOptions } from "@/lib/fetchers";
 import { cn, decodeUnicodeReferences } from "@/lib/utils";
 import { AttachMessageProps } from "./types";
 
@@ -22,26 +19,16 @@ export function AttachMessageDefault({
 		isPending,
 		isError,
 		isSuccess,
-	} = useMutation({
-		mutationFn: async () => {
-			const adapter = getDataAdapter();
-			const attachment = await queryClient.fetchQuery({
-				...MessageAttachQueryOptions({
-					account: { id: accountId },
-					chat: { id: message.chat_id },
-					message,
-				}),
-				staleTime: 0,
-			});
-			if (!attachment) return null;
-			await downloadMessageFile(
-				adapter,
-				attachment.uri,
-				decodeUnicodeReferences(message.message_entity.msg.appmsg.title),
-			);
-			return attachment;
-		},
-	});
+	} = useMutation(
+		MessageAttachDownloadMutationOptions(
+			{
+				account: { id: accountId },
+				chat: { id: message.chat_id },
+				message,
+			},
+			decodeUnicodeReferences(message.message_entity.msg.appmsg.title),
+		),
+	);
 	const failure = isError
 		? "附件读取或解密失败，点击重试"
 		: isSuccess && data === null
