@@ -31,9 +31,6 @@ import type { AdapterWorkerType } from "./worker.ts";
 import AdapterWorker from "./worker.ts?worker";
 
 export default class IosBackupAdapter implements DataAdapter {
-	private _directory: FileSystemDirectoryHandle | FileList | undefined;
-	private _directoryLoaded = false;
-
 	private _worker: Worker | undefined;
 	private _proxy: Comlink.Remote<AdapterWorkerType> | undefined;
 	private _generation = 0;
@@ -78,8 +75,6 @@ export default class IosBackupAdapter implements DataAdapter {
 			);
 			if (generation !== this._generation)
 				throw new DOMException("Backup loading was cancelled", "AbortError");
-			this._directory = directoryHandle;
-			this._directoryLoaded = true;
 		} catch (error) {
 			if (this._proxy === proxy)
 				await this._unloadDirectory().catch(console.error);
@@ -110,8 +105,6 @@ export default class IosBackupAdapter implements DataAdapter {
 		const proxy = this._proxy;
 		this._worker = undefined;
 		this._proxy = undefined;
-		this._directory = undefined;
-		this._directoryLoaded = false;
 		try {
 			await proxy?._unloadDirectory();
 		} finally {
@@ -121,14 +114,6 @@ export default class IosBackupAdapter implements DataAdapter {
 				worker?.terminate();
 			}
 		}
-	}
-
-	async init() {
-		if (!this._directory) {
-			throw new Error("Directory not loaded");
-		}
-
-		if (!this._directoryLoaded) await this._loadDirectory(this._directory);
 	}
 
 	async getAccountList() {

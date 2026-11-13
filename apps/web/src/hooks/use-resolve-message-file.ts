@@ -1,50 +1,47 @@
-import { useMutation } from "@tanstack/react-query";
-import { useEffect } from "react";
-import {
-	ReleaseMessageFileMutationOptions,
-	ResolveMessageFileMutationOptions,
-} from "@/lib/fetchers/message-file";
+import { useEffect, useState } from "react";
+import { getDataAdapter } from "@/lib/data-adapter";
 
-/**
- * 按需解析某个文件 uri 对应的真实 src（懒加载）。
- *
- * 挂载或 uri 变更时向适配器请求解析，卸载或切换 uri 前请求释放，
- * 由适配器内部引用计数决定何时真正回收底层资源。
- */
+interface ResolvedFile {
+	uri: string;
+	src?: string;
+	error: Error | null;
+}
+
+/** 获取和释放使用同一个适配器；引用随 effect 的生命周期结束。 */
 export function useResolveMessageFile(uri?: string) {
-	const {
-		mutateAsync: resolveMessageFile,
-		data,
-		variables,
-		error,
-		isPending,
-		isIdle,
-	} = useMutation(ResolveMessageFileMutationOptions());
-	const { mutateAsync: releaseMessageFile } = useMutation(
-		ReleaseMessageFileMutationOptions(),
-	);
+	const [result, setResult] = useState<ResolvedFile>();
 
 	useEffect(() => {
+		setResult(undefined);
 		if (!uri) return;
+		const adapter = getDataAdapter();
 		const referenceId = crypto.randomUUID();
 		let active = true;
 
-		resolveMessageFile({ uri, referenceId }).catch((error) => {
-			// Releasing an unfinished request can cancel it after this effect ends.
-			if (!active) return;
-			console.error(`[useResolveMessageFile] Failed to resolve ${uri}:`, error);
-		});
+		adapter.resolveMessageFile({ uri, referenceId }).then(
+			({ data: { src } }) => {
+				if (active) setResult({ uri, src, error: null });
+			},
+			(error: Error) => {
+				if (!active) return;
+				setResult({ uri, error });
+				console.error(
+					`[useResolveMessageFile] Failed to resolve ${uri}:`,
+					error,
+				);
+			},
+		);
 
 		return () => {
 			active = false;
-			releaseMessageFile({ referenceId }).catch(() => {});
+			void adapter.releaseMessageFile({ referenceId }).catch(() => {});
 		};
 	}, [uri]);
 
-	const isCurrent = variables?.uri === uri;
+	const current = result?.uri === uri ? result : undefined;
 	return {
-		src: isCurrent ? data?.data.src : undefined,
-		error: isCurrent ? error : null,
-		isPending: Boolean(uri) && (!isCurrent || isPending || isIdle),
+		src: current?.src,
+		error: current?.error ?? null,
+		isPending: Boolean(uri) && !current,
 	};
 }

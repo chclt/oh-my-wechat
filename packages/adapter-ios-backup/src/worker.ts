@@ -61,10 +61,7 @@ interface AdapterWorkerStore {
 	accountDatabaseExecutors: DatabaseExecutor[];
 }
 
-export interface AdapterWorkerType extends Record<
-	keyof Omit<DataAdapter, "init">,
-	Function
-> {
+export interface AdapterWorkerType extends Record<keyof DataAdapter, Function> {
 	_loadDirectory: (
 		directory: FileSystemDirectoryHandle | FileList,
 		password?: string,
