@@ -61,31 +61,6 @@ export function RecordFileDownloadMutationOptions(
 	});
 }
 
-export function RecordFileQueryOptions(
-	requestData: Omit<GetRecordFileRequest, "record"> & {
-		record: GetRecordFileRequest["record"] | undefined;
-	},
-) {
-	const { record } = requestData;
-	return {
-		queryKey: [
-			`account: ${requestData.account.id}`,
-			`chat: ${requestData.chat.id}`,
-			`message: ${requestData.message.local_id}`,
-			`record: ${record?.["@_dataid"]}`,
-			"record-file",
-		],
-		queryFn: async () => {
-			if (!record) return null;
-			const { data } = await getDataAdapter().getRecordFile({
-				...requestData,
-				record,
-			});
-			return data ?? null;
-		},
-	};
-}
-
 export function RecordAudioQueryOptions(requestData: GetRecordAudioRequest) {
 	return {
 		queryKey: [
@@ -102,17 +77,35 @@ export function RecordAudioQueryOptions(requestData: GetRecordAudioRequest) {
 	};
 }
 
-export function NoteDocumentQueryOptions(docUri: string) {
+export function NoteDocumentQueryOptions(
+	requestData: Omit<GetRecordFileRequest, "record"> & {
+		record: GetRecordFileRequest["record"] | undefined;
+	},
+) {
+	const { record } = requestData;
 	return queryOptions({
-		queryKey: ["note-message-html", docUri],
+		queryKey: [
+			`account: ${requestData.account.id}`,
+			`chat: ${requestData.chat.id}`,
+			`message: ${requestData.message.local_id}`,
+			`record: ${record?.["@_dataid"]}`,
+			"note-document",
+		],
 		queryFn: async ({ signal }) => {
+			if (!record) return null;
 			const adapter = getDataAdapter();
+			const { data: file } = await adapter.getRecordFile({
+				...requestData,
+				record,
+			});
+			if (!file) return null;
+			signal.throwIfAborted();
 			const referenceId = crypto.randomUUID();
 			try {
 				const {
 					data: { src },
 				} = await adapter.resolveMessageFile({
-					uri: docUri,
+					uri: file.uri,
 					referenceId,
 					raw: true,
 				});

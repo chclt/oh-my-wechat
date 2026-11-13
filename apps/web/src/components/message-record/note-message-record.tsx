@@ -4,8 +4,8 @@ import { NoteMessageRecordType, NoteOpenMessageEntity } from "@repo/types";
 import type { HtmlNoteRecordType } from "@repo/types";
 import { useQuery } from "@tanstack/react-query";
 import type React from "react";
-import { Suspense, useMemo, useState } from "react";
-import { RecordFileQueryOptions } from "@/lib/fetchers/record.ts";
+import { useState } from "react";
+import { NoteDocumentQueryOptions } from "@/lib/fetchers/record.ts";
 import queryClient from "@/lib/query-client";
 import { cn, decodeUnicodeReferences } from "@/lib/utils.ts";
 import { Route } from "@/routes/$accountId/route.tsx";
@@ -48,9 +48,9 @@ function NoteRecordDefault({
 		(item): item is HtmlNoteRecordType => item["@_htmlid"] === "WeNoteHtmlFile",
 	);
 
-	const NoteDocumentQueryOptions = {
+	const noteDocumentOptions = {
 		enabled: false,
-		...RecordFileQueryOptions({
+		...NoteDocumentQueryOptions({
 			account: { id: accountId },
 			chat: { id: message.chat_id },
 			message,
@@ -58,33 +58,29 @@ function NoteRecordDefault({
 		}),
 	};
 	const {
-		data: noteDocumentFile,
-		isPending: isNoteDocumentPending,
-		isLoading: isNoteDocumentLoading,
-	} = useQuery(NoteDocumentQueryOptions);
-	const isNoteDocumentNotExists =
-		!isNoteDocumentPending && !noteDocumentFile ? true : undefined;
+		data: docContent,
+		isFetching,
+		isError,
+		isSuccess,
+	} = useQuery(noteDocumentOptions);
+	const failure = isError
+		? "笔记读取失败，点击重试"
+		: isSuccess && docContent === null
+			? "没有找到文件"
+			: undefined;
 	const [isNoteDocumentDialogOpen, setIsNoteDocumentDialogOpen] =
 		useState(false);
-	const handleOpenNoteDocument = () =>
+	const handleOpenNoteDocument = () => {
+		if (isFetching) return;
 		queryClient
-			.ensureQueryData(NoteDocumentQueryOptions)
-			.then((noteDocumentFile) => {
-				if (noteDocumentFile) {
-					setIsNoteDocumentDialogOpen(true);
-				}
+			.ensureQueryData(noteDocumentOptions)
+			.then((content) => {
+				if (content !== null) setIsNoteDocumentDialogOpen(true);
+			})
+			.catch(() => {
+				// 查询错误由卡片展示，再次点击时重试。
 			});
-
-	const renderNoteDocument = useMemo(() => {
-		if (!noteDocumentFile) return null;
-		return (
-			<NoteDocument
-				message={message as OpenMessageType<NoteOpenMessageEntity>}
-				docUri={noteDocumentFile.uri}
-				noteEntity={noteContent}
-			/>
-		);
-	}, [noteDocumentFile]);
+	};
 
 	return (
 		<Dialog.Root
@@ -123,7 +119,7 @@ function NoteRecordDefault({
 						<span>笔记</span>
 					</div>
 
-					{isNoteDocumentLoading ? (
+					{isFetching ? (
 						<div className="float-end size-5 relative">
 							<LoaderIcon
 								aria-label="加载中"
@@ -131,16 +127,25 @@ function NoteRecordDefault({
 							/>
 						</div>
 					) : (
-						isNoteDocumentNotExists && (
-							<div className="float-end text-destructive-foreground/60">
-								没有找到文件
+						failure && (
+							<div
+								role="alert"
+								className="float-end text-destructive-foreground/60"
+							>
+								{failure}
 							</div>
 						)
 					)}
 				</div>
 			</Dialog.Trigger>
 			<NoteDocumentDialogContent>
-				<Suspense>{renderNoteDocument}</Suspense>
+				{docContent != null && (
+					<NoteDocument
+						message={message as OpenMessageType<NoteOpenMessageEntity>}
+						docContent={docContent}
+						noteEntity={noteContent}
+					/>
+				)}
 			</NoteDocumentDialogContent>
 		</Dialog.Root>
 	);

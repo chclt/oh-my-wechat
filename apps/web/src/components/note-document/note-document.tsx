@@ -4,27 +4,23 @@ import {
 	NoteRecordType,
 	OpenMessageType,
 } from "@repo/types";
-import { useQuery } from "@tanstack/react-query";
 import parse, { DOMNode, domToReact, Element } from "html-react-parser";
 import NoteRecord from "@/components/note-record/note-record";
-import { NoteDocumentQueryOptions } from "@/lib/fetchers/record";
 import { cn } from "@/lib/utils";
 
 interface NoteDocumentProps extends React.HTMLAttributes<HTMLElement> {
-	docUri: string;
+	docContent: string;
 	noteEntity: NoteEntity;
 	message: OpenMessageType<NoteOpenMessageEntity>;
 }
 
 export default function NoteDocument({
-	docUri,
+	docContent,
 	noteEntity,
 	message,
 	className,
 	...props
 }: NoteDocumentProps) {
-	const { data: docContent } = useQuery(NoteDocumentQueryOptions(docUri));
-
 	const parsedDocContent = docContent
 		? parse(cleanNoteDocumentHtml(docContent), {
 				replace: (domNode) => {
