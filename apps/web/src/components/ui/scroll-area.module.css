@@ -17,10 +17,10 @@
 	.Scrollbar {
 		@apply flex;
 		&[data-orientation="vertical"] {
-			@apply w-1 md:w-[7px];
+			@apply w-1 md:w-[6px];
 		}
 		&[data-orientation="horizontal"] {
-			@apply h-1 md:h-[7px];
+			@apply h-1 md:h-[6px];
 		}
 		@apply rounded-full m-0.5 pointer-events-none;
 		@apply transition-opacity opacity-0;
@@ -39,12 +39,12 @@
 		}
 
 		&[data-orientation="vertical"]::before {
-			@apply h-full w-5;
+			@apply h-full w-[18px];
 			inset-inline-end: -0.125rem;
 		}
 
 		&[data-orientation="horizontal"]::before {
-			@apply h-5 w-full left-0 right-0 -bottom-2;
+			@apply h-[18px] w-full left-0 right-0 -bottom-2;
 			inset-block-end: -0.125rem;
 		}
 	}

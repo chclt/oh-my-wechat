@@ -21,6 +21,7 @@ function RouteComponent() {
 	return (
 		<ResizablePanelGroup
 			orientation="horizontal"
+			resizeTargetMinimumSize={{ fine: 4, coarse: 4 }}
 			className="min-h-screen max-h-screen items-stretch"
 		>
 			<ResizablePanel

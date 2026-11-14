@@ -63,10 +63,8 @@ export default function ContactGroupList({
 							setScrollTarget(node);
 						}
 					}}
-					className={cn(
-						"size-full",
-						"[&_[data-slot='scroll-area-scrollbar']]:z-30 [&_[data-slot='scroll-area-scrollbar']]:top-16!",
-					)}
+					className="size-full"
+					classNames={{ scrollBar: "top-16! z-30 before:w-[12px]" }}
 				>
 					<header className="sticky z-30 top-0 h-16 px-5 ps-2.5 flex items-center texture border-b border-muted">
 						<Button
@@ -98,7 +96,7 @@ export default function ContactGroupList({
 					<AlphabetNavigator
 						scrollSpySelector={`#${reactId} + [data-alphabet="root"] [data-alphabet]`}
 						scrollTarget={scrollTarget}
-						className="z-20 absolute my-auto top-0 bottom-0 end-1.5"
+						className="z-20 absolute my-auto top-0 bottom-0 end-[12px]"
 					/>
 				)}
 			</section>
